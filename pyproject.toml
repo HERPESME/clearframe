@@ -1,0 +1,22 @@
+[project]
+name = "clearframe"
+version = "0.1.0"
+description = "Autonomous rights-clearance pipeline for film & TV (Gemini + Parallel)"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = ["pydantic>=2.7", "jinja2>=3.1", "httpx>=0.27"]
+
+[project.optional-dependencies]
+cloud = ["google-adk>=1.0", "google-genai>=1.0"]
+dev = ["pytest>=8", "pytest-asyncio>=0.23"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/clearframe"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
