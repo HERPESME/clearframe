@@ -1,0 +1,24 @@
+"""Coordinator spreadsheet / generic NLE marker CSV."""
+
+import csv
+import io
+
+from clearframe.exporters.edl import MarkerEntry
+from clearframe.timecode import seconds_to_tc
+
+
+def render_csv(entries: list[MarkerEntry], fps: float) -> str:
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(["timecode_in", "timecode_out", "label", "category", "risk_band"])
+    for e in entries:
+        writer.writerow(
+            [
+                seconds_to_tc(e.start_s, fps=fps),
+                seconds_to_tc(e.end_s, fps=fps),
+                e.label,
+                e.category.value,
+                e.band.value,
+            ]
+        )
+    return buf.getvalue()
