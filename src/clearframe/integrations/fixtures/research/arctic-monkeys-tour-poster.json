@@ -1,0 +1,23 @@
+{
+  "content": {
+    "owner": "Domino Recording Co. (band artwork) / original poster designer (design copyright)",
+    "owner_confidence": "medium",
+    "licensing_contact": "licensing@dominomusic.com",
+    "licensing_posture": "standard",
+    "litigation_history": [],
+    "estimated_license_cost_band": "$500-$5k (set-dressing artwork license)"
+  },
+  "basis": [
+    {
+      "field": "owner",
+      "citations": [
+        {
+          "url": "https://www.dominomusic.com/artists/arctic-monkeys",
+          "excerpts": ["Arctic Monkeys are signed to Domino Recording Company, which manages official band imagery."]
+        }
+      ],
+      "reasoning": "Label controls official merchandising artwork; tour poster design copyright may additionally vest in the commissioned designer.",
+      "confidence": "medium"
+    }
+  ]
+}

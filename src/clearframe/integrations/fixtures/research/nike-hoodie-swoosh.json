@@ -1,0 +1,37 @@
+{
+  "content": {
+    "owner": "Nike, Inc.",
+    "owner_confidence": "high",
+    "licensing_contact": "https://www.nike.com/help (brand protection / entertainment marketing)",
+    "licensing_posture": "litigious",
+    "litigation_history": [
+      "Aggressive trademark enforcement program; hundreds of USPTO oppositions filed",
+      "Nike v. MSCHF (2021) — rapid federal enforcement over unauthorized product depiction"
+    ],
+    "estimated_license_cost_band": "No paid clearance program; permission typically denied — blur or wardrobe change recommended"
+  },
+  "basis": [
+    {
+      "field": "owner",
+      "citations": [
+        {
+          "url": "https://about.nike.com/",
+          "excerpts": ["Nike, Inc. owns the Swoosh design mark and related trade dress."]
+        }
+      ],
+      "reasoning": "Swoosh is a registered mark of Nike, Inc.; ownership undisputed.",
+      "confidence": "high"
+    },
+    {
+      "field": "litigation_history",
+      "citations": [
+        {
+          "url": "https://www.reuters.com/legal/nike-mschf-satan-shoes-settlement-2021-04-08/",
+          "excerpts": ["Nike obtained a temporary restraining order within days of the product's release."]
+        }
+      ],
+      "reasoning": "Recent high-profile action demonstrates fast, aggressive enforcement posture.",
+      "confidence": "high"
+    }
+  ]
+}

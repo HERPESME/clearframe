@@ -72,3 +72,12 @@ async def test_fixture_client_missing_file_is_incomplete(tmp_path):
     (tmp_path / "research").mkdir()
     r = await FixtureParallelClient(tmp_path).research(make_element("Unknown Mural"), "Demo")
     assert r.status == "incomplete"
+
+
+async def test_real_fixture_dir_loads_weeknd():
+    fixtures = Path("src/clearframe/integrations/fixtures")
+    el = make_element("Blinding Lights - The Weeknd", id="e1")
+    r = await FixtureParallelClient(fixtures).research(el, "Golden Hour")
+    assert r.status == "complete"
+    assert r.licensing_posture == LicensingPosture.LITIGIOUS
+    assert r.basis, "basis citations must be present"

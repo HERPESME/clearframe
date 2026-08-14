@@ -1,0 +1,23 @@
+{
+  "content": {
+    "owner": null,
+    "owner_confidence": "low",
+    "licensing_contact": null,
+    "licensing_posture": "unknown",
+    "litigation_history": [],
+    "estimated_license_cost_band": null
+  },
+  "basis": [
+    {
+      "field": "owner",
+      "citations": [
+        {
+          "url": "https://www.copyright.gov/title17/92chap1.html",
+          "excerpts": ["Pictorial, graphic, and sculptural works fixed in a tangible medium are protected by copyright."]
+        }
+      ],
+      "reasoning": "Murals are copyright-protected works (and may carry VARA moral rights); no signature or registry match could be located for this specific mural, so the artist could not be identified from open-web sources.",
+      "confidence": "low"
+    }
+  ]
+}

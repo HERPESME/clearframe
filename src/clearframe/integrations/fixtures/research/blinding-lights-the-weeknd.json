@@ -1,0 +1,37 @@
+{
+  "content": {
+    "owner": "The Weeknd XO, Inc. / Universal Music Group (master); Universal Music Publishing Group (composition)",
+    "owner_confidence": "high",
+    "licensing_contact": "sync@umusic.com",
+    "licensing_posture": "litigious",
+    "litigation_history": [
+      "Multiple sync infringement claims filed by UMG against productions 2019-2024",
+      "UMG routinely issues takedowns and pursues statutory damages for uncleared sync use"
+    ],
+    "estimated_license_cost_band": "$50k-$250k (major-label hit, sync + master)"
+  },
+  "basis": [
+    {
+      "field": "owner",
+      "citations": [
+        {
+          "url": "https://www.umusicpub.com/",
+          "excerpts": ["Universal Music Publishing Group administers the composition catalog for The Weeknd."]
+        }
+      ],
+      "reasoning": "Publisher catalog listing confirms UMPG administration of the composition; master recording released under XO/Republic (UMG).",
+      "confidence": "high"
+    },
+    {
+      "field": "licensing_posture",
+      "citations": [
+        {
+          "url": "https://www.billboard.com/pro/music-sync-licensing-lawsuits/",
+          "excerpts": ["Major labels have stepped up enforcement against unlicensed sync usage in film and streaming content."]
+        }
+      ],
+      "reasoning": "Documented pattern of aggressive sync enforcement by UMG.",
+      "confidence": "high"
+    }
+  ]
+}

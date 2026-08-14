@@ -1,0 +1,34 @@
+{
+  "content": {
+    "owner": "The Coca-Cola Company",
+    "owner_confidence": "high",
+    "licensing_contact": "https://www.coca-colacompany.com/contact-us (brand & media licensing)",
+    "licensing_posture": "standard",
+    "litigation_history": [],
+    "estimated_license_cost_band": "$0 (product placement agreement) - $15k"
+  },
+  "basis": [
+    {
+      "field": "owner",
+      "citations": [
+        {
+          "url": "https://www.coca-colacompany.com/about-us",
+          "excerpts": ["The Coca-Cola Company owns and licenses the Coca-Cola trademarks worldwide."]
+        }
+      ],
+      "reasoning": "Trademark ownership is publicly registered and undisputed.",
+      "confidence": "high"
+    },
+    {
+      "field": "licensing_posture",
+      "citations": [
+        {
+          "url": "https://www.uspto.gov/trademarks",
+          "excerpts": ["Registered marks include the Coca-Cola script and contour bottle trade dress."]
+        }
+      ],
+      "reasoning": "Company maintains an active product-placement program and typically cooperates with productions; incidental depiction disputes are rare.",
+      "confidence": "medium"
+    }
+  ]
+}
