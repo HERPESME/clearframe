@@ -1,0 +1,53 @@
+{
+  "elements": [
+    {
+      "id": "e1",
+      "label": "Blinding Lights - The Weeknd",
+      "element_type": "MUSIC",
+      "description": "Song clearly audible playing from a character's phone speaker; characters react to it.",
+      "time_ranges": [{"start_s": 12.0, "end_s": 24.0}],
+      "prominence": {"screen_time_s": 12.0, "frame_coverage": 0.0, "centrality": 1.0, "plot_integral": true}
+    },
+    {
+      "id": "e2",
+      "label": "Coca-Cola can",
+      "element_type": "LOGO",
+      "description": "Red soda can with visible Coca-Cola script logo on the kitchen table.",
+      "time_ranges": [{"start_s": 5.0, "end_s": 11.0}],
+      "prominence": {"screen_time_s": 6.0, "frame_coverage": 0.08, "centrality": 0.6, "plot_integral": false}
+    },
+    {
+      "id": "e3",
+      "label": "Nike hoodie swoosh",
+      "element_type": "LOGO",
+      "description": "Swoosh logo on the lead actor's hoodie, visible in two scenes.",
+      "time_ranges": [{"start_s": 8.0, "end_s": 18.0}, {"start_s": 40.0, "end_s": 45.0}],
+      "prominence": {"screen_time_s": 15.0, "frame_coverage": 0.12, "centrality": 0.7, "plot_integral": false}
+    },
+    {
+      "id": "e4",
+      "label": "Arctic Monkeys tour poster",
+      "element_type": "ARTWORK",
+      "description": "Framed 2023 tour poster on the bedroom wall behind the actors.",
+      "time_ranges": [{"start_s": 20.0, "end_s": 25.0}],
+      "prominence": {"screen_time_s": 5.0, "frame_coverage": 0.2, "centrality": 0.6, "plot_integral": false}
+    },
+    {
+      "id": "e5",
+      "label": "Street mural (unknown artist)",
+      "element_type": "ARTWORK",
+      "description": "Large colorful mural forming the backdrop of the walking shot; artist signature not legible.",
+      "time_ranges": [{"start_s": 30.0, "end_s": 36.0}],
+      "prominence": {"screen_time_s": 6.0, "frame_coverage": 0.3, "centrality": 0.5, "plot_integral": false}
+    },
+    {
+      "id": "e6",
+      "label": "Background passerby face",
+      "element_type": "FACE",
+      "description": "Unidentified pedestrian briefly visible and recognizable in the background, out of focus.",
+      "time_ranges": [{"start_s": 47.0, "end_s": 48.2}],
+      "prominence": {"screen_time_s": 1.2, "frame_coverage": 0.03, "centrality": 0.2, "plot_integral": false}
+    }
+  ],
+  "unscanned_ranges": []
+}
