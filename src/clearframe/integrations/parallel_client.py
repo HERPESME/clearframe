@@ -123,7 +123,10 @@ def _incomplete(element_id: str) -> ResearchResult:
 
 class ParallelClient(Protocol):
     async def research(
-        self, element: TriagedElement, production_title: str
+        self,
+        element: TriagedElement,
+        production_title: str,
+        processor: str | None = None,
     ) -> ResearchResult: ...
 
 
@@ -132,7 +135,10 @@ class FixtureParallelClient:
         self.fixtures_dir = Path(fixtures_dir)
 
     async def research(
-        self, element: TriagedElement, production_title: str
+        self,
+        element: TriagedElement,
+        production_title: str,
+        processor: str | None = None,
     ) -> ResearchResult:
         path = self.fixtures_dir / "research" / f"{slug(element.label)}.json"
         if not path.exists():
@@ -160,18 +166,24 @@ class LiveParallelClient:
         self._headers = {"x-api-key": api_key, "Content-Type": "application/json"}
 
     async def research(
-        self, element: TriagedElement, production_title: str
+        self,
+        element: TriagedElement,
+        production_title: str,
+        processor: str | None = None,
     ) -> ResearchResult:
         for attempt in range(self.attempts):
             try:
-                return await self._research_once(element, production_title)
+                return await self._research_once(element, production_title, processor)
             except (httpx.HTTPError, KeyError, ValueError):
                 if attempt + 1 < self.attempts:
                     await asyncio.sleep(self.backoff_s)
         return _incomplete(element.id)
 
     async def _research_once(
-        self, element: TriagedElement, production_title: str
+        self,
+        element: TriagedElement,
+        production_title: str,
+        processor: str | None = None,
     ) -> ResearchResult:
         async with httpx.AsyncClient(timeout=60.0) as client:
             created = await client.post(
@@ -179,7 +191,7 @@ class LiveParallelClient:
                 headers=self._headers,
                 json={
                     "input": build_research_input(element, production_title),
-                    "processor": self.processor,
+                    "processor": processor or self.processor,
                     "task_spec": {
                         "output_schema": {
                             "type": "json",

@@ -82,7 +82,7 @@ async def test_live_client_retries_transient_errors(monkeypatch):
     client = LiveParallelClient(api_key="k", backoff_s=0.0)
     calls = {"n": 0}
 
-    async def flaky(element, production_title):
+    async def flaky(element, production_title, processor=None):
         calls["n"] += 1
         if calls["n"] == 1:
             raise httpx.ConnectError("transient")
@@ -100,7 +100,7 @@ async def test_live_client_gives_incomplete_after_all_attempts(monkeypatch):
 
     client = LiveParallelClient(api_key="k", backoff_s=0.0)
 
-    async def always_fail(element, production_title):
+    async def always_fail(element, production_title, processor=None):
         raise httpx.ConnectError("down")
 
     monkeypatch.setattr(client, "_research_once", always_fail)

@@ -1,14 +1,16 @@
-"""Stage 3: concurrent rights research fan-out — one Parallel task per element.
+"""Stage 3: planned, capped, concurrent rights-research fan-out.
 
-A spend cap (`max_research`) bounds the fan-out on long footage: budget goes to
-the most prominent elements first; the overflow surfaces honestly as
-RESEARCH_INCOMPLETE instead of being silently dropped.
+The Budget Planner assigns each element a Parallel processor tier with a
+recorded rationale; a spend cap (`max_research`) bounds the fan-out on long
+footage (budget to the most prominent elements first). Overflow surfaces
+honestly as RESEARCH_INCOMPLETE instead of being silently dropped.
 """
 
 import asyncio
 
 from clearframe.integrations.parallel_client import _incomplete
 from clearframe.pipeline import PipelineContext
+from clearframe.planner import plan_research
 
 
 class ResearchStage:
@@ -18,20 +20,45 @@ class ResearchStage:
         self.max_research = max_research
 
     async def run(self, ctx: PipelineContext) -> None:
+        elements = ctx.state.elements
+        plan = plan_research(elements)
+        ctx.state.research_plan = plan
+        ctx.emit(
+            {
+                "type": "research_planned",
+                "total_est_cost_usd": round(sum(p.est_cost_usd for p in plan.values()), 2),
+            }
+        )
+
         ranked = sorted(
-            ctx.state.elements,
-            key=lambda el: el.prominence.screen_time_s,
-            reverse=True,
+            elements, key=lambda el: el.prominence.screen_time_s, reverse=True
         )
         funded = ranked[: self.max_research]
         skipped = ranked[self.max_research :]
 
-        results = await asyncio.gather(
-            *(
-                ctx.parallel.research(el, ctx.state.production.title)
-                for el in funded
+        async def _one(el):
+            ctx.emit(
+                {
+                    "type": "research_start",
+                    "element_id": el.id,
+                    "label": el.label,
+                    "processor": plan[el.id].processor,
+                }
             )
-        )
+            result = await ctx.parallel.research(
+                el, ctx.state.production.title, processor=plan[el.id].processor
+            )
+            ctx.emit(
+                {
+                    "type": "research_done",
+                    "element_id": el.id,
+                    "status": result.status,
+                    "owner": result.owner,
+                }
+            )
+            return result
+
+        results = await asyncio.gather(*(_one(el) for el in funded))
         research = {el.id: res for el, res in zip(funded, results)}
         for el in skipped:
             research[el.id] = _incomplete(el.id)
