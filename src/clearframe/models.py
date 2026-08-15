@@ -126,6 +126,34 @@ class Decision(BaseModel):
     note: str
 
 
+class Precedent(BaseModel):
+    case_name: str
+    citation: str
+    holding: str
+    relevance: str
+
+
+class Brief(BaseModel):
+    side: Literal["counsel", "advocate"]
+    argument: str
+    precedents: list[Precedent]
+
+
+class CourtOpinion(BaseModel):
+    element_id: str
+    holding: Literal["clear_required", "defensible", "escalate"]
+    confidence: Literal["low", "medium", "high"]
+    reasoning: str
+    briefs: list[Brief]
+
+
+class ResearchPlan(BaseModel):
+    element_id: str
+    processor: Literal["lite", "base", "pro", "ultra"]
+    rationale: str
+    est_cost_usd: float
+
+
 class AuditEvent(BaseModel):
     at: str
     actor: str
@@ -153,3 +181,5 @@ class ProductionState(BaseModel):
     decisions: dict[str, Decision] = Field(default_factory=dict)
     unscanned_ranges: list[TimeRange] = Field(default_factory=list)
     audit_log: list[AuditEvent] = Field(default_factory=list)
+    court: dict[str, CourtOpinion] = Field(default_factory=dict)
+    research_plan: dict[str, ResearchPlan] = Field(default_factory=dict)
