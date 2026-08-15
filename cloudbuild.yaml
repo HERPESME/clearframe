@@ -1,0 +1,63 @@
+# ClearFrame CI/CD — build once, deploy webapp + MCP to Cloud Run (scale-to-zero).
+# Runs on every push to main via a Cloud Build GitHub trigger, or manually:
+#   gcloud builds submit --config cloudbuild.yaml .
+steps:
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/clearframe/app:$BUILD_ID
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/clearframe/app:latest
+      - .
+
+  - id: push
+    name: gcr.io/cloud-builders/docker
+    args: [push, --all-tags, "${_REGION}-docker.pkg.dev/$PROJECT_ID/clearframe/app"]
+
+  - id: deploy-webapp
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - clearframe
+      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/clearframe/app:$BUILD_ID
+      - --region=${_REGION}
+      - --allow-unauthenticated
+      - --min-instances=0
+      - --max-instances=2
+      - --cpu=1
+      - --memory=512Mi
+      - --concurrency=80
+      - --set-env-vars=CLEARFRAME_MODE=demo
+      - --command=python
+      - --args=-m,clearframe,serve,--host,0.0.0.0,--port,8080,--out,/tmp/out
+
+  - id: deploy-mcp
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - clearframe-mcp
+      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/clearframe/app:$BUILD_ID
+      - --region=${_REGION}
+      - --allow-unauthenticated
+      - --min-instances=0
+      - --max-instances=1
+      - --cpu=1
+      - --memory=512Mi
+      - --set-env-vars=CLEARFRAME_MODE=demo
+      - --command=python
+      - --args=-m,clearframe.mcp,--transport,http,--port,8080,--out,/tmp/out
+
+substitutions:
+  _REGION: us-central1
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/clearframe/app:latest
+
+options:
+  logging: CLOUD_LOGGING_ONLY

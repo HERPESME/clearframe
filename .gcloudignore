@@ -1,0 +1,13 @@
+.git/
+.venv/
+webapp/node_modules/
+webapp/src/
+out/
+docs/
+tests/
+scripts/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.env
+.claude/
