@@ -74,6 +74,40 @@ async def test_fixture_client_missing_file_is_incomplete(tmp_path):
     assert r.status == "incomplete"
 
 
+async def test_live_client_retries_transient_errors(monkeypatch):
+    import httpx
+
+    from clearframe.integrations.parallel_client import LiveParallelClient
+
+    client = LiveParallelClient(api_key="k", backoff_s=0.0)
+    calls = {"n": 0}
+
+    async def flaky(element, production_title):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise httpx.ConnectError("transient")
+        return "ok"
+
+    monkeypatch.setattr(client, "_research_once", flaky)
+    result = await client.research(make_element("X"), "Demo")
+    assert result == "ok" and calls["n"] == 2
+
+
+async def test_live_client_gives_incomplete_after_all_attempts(monkeypatch):
+    import httpx
+
+    from clearframe.integrations.parallel_client import LiveParallelClient
+
+    client = LiveParallelClient(api_key="k", backoff_s=0.0)
+
+    async def always_fail(element, production_title):
+        raise httpx.ConnectError("down")
+
+    monkeypatch.setattr(client, "_research_once", always_fail)
+    result = await client.research(make_element("X", id="e7"), "Demo")
+    assert result.status == "incomplete" and result.element_id == "e7"
+
+
 async def test_real_fixture_dir_loads_weeknd():
     fixtures = Path("src/clearframe/integrations/fixtures")
     el = make_element("Blinding Lights - The Weeknd", id="e1")

@@ -46,14 +46,24 @@ class Pipeline:
         return ctx.state
 
 
-def build_demo_pipeline() -> list[Stage]:
+def build_demo_pipeline(max_research: int | None = None) -> list[Stage]:
+    import os
+
     from clearframe.stages.remediation import RemediationStage
     from clearframe.stages.research import ResearchStage
     from clearframe.stages.risk import RiskStage
     from clearframe.stages.scan import ScanStage
     from clearframe.stages.triage_stage import TriageStage
 
-    return [ScanStage(), TriageStage(), ResearchStage(), RiskStage(), RemediationStage()]
+    if max_research is None:
+        max_research = int(os.environ.get("CLEARFRAME_MAX_RESEARCH", "25"))
+    return [
+        ScanStage(),
+        TriageStage(),
+        ResearchStage(max_research=max_research),
+        RiskStage(),
+        RemediationStage(),
+    ]
 
 
 def build_context(cfg, production: Production, out_root: Path) -> PipelineContext:

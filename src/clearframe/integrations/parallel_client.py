@@ -148,55 +148,67 @@ class LiveParallelClient:
         processor: str = "pro",
         poll_interval_s: float = 10.0,
         timeout_s: float = 600.0,
+        attempts: int = 2,
+        backoff_s: float = 2.0,
     ):
         self.base_url = base_url.rstrip("/")
         self.processor = processor
         self.poll_interval_s = poll_interval_s
         self.timeout_s = timeout_s
+        self.attempts = attempts
+        self.backoff_s = backoff_s
         self._headers = {"x-api-key": api_key, "Content-Type": "application/json"}
 
     async def research(
         self, element: TriagedElement, production_title: str
     ) -> ResearchResult:
-        try:
-            async with httpx.AsyncClient(timeout=60.0) as client:
-                created = await client.post(
-                    f"{self.base_url}/v1/tasks/runs",
-                    headers=self._headers,
-                    json={
-                        "input": build_research_input(element, production_title),
-                        "processor": self.processor,
-                        "task_spec": {
-                            "output_schema": {
-                                "type": "json",
-                                "json_schema": RESEARCH_OUTPUT_SCHEMA,
-                            }
-                        },
-                    },
-                )
-                created.raise_for_status()
-                run_id = created.json()["run_id"]
+        for attempt in range(self.attempts):
+            try:
+                return await self._research_once(element, production_title)
+            except (httpx.HTTPError, KeyError, ValueError):
+                if attempt + 1 < self.attempts:
+                    await asyncio.sleep(self.backoff_s)
+        return _incomplete(element.id)
 
-                waited = 0.0
-                while waited < self.timeout_s:
-                    status_resp = await client.get(
-                        f"{self.base_url}/v1/tasks/runs/{run_id}", headers=self._headers
+    async def _research_once(
+        self, element: TriagedElement, production_title: str
+    ) -> ResearchResult:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            created = await client.post(
+                f"{self.base_url}/v1/tasks/runs",
+                headers=self._headers,
+                json={
+                    "input": build_research_input(element, production_title),
+                    "processor": self.processor,
+                    "task_spec": {
+                        "output_schema": {
+                            "type": "json",
+                            "json_schema": RESEARCH_OUTPUT_SCHEMA,
+                        }
+                    },
+                },
+            )
+            created.raise_for_status()
+            run_id = created.json()["run_id"]
+
+            waited = 0.0
+            while waited < self.timeout_s:
+                status_resp = await client.get(
+                    f"{self.base_url}/v1/tasks/runs/{run_id}", headers=self._headers
+                )
+                status_resp.raise_for_status()
+                status = status_resp.json().get("status")
+                if status == "completed":
+                    result = await client.get(
+                        f"{self.base_url}/v1/tasks/runs/{run_id}/result",
+                        headers=self._headers,
                     )
-                    status_resp.raise_for_status()
-                    status = status_resp.json().get("status")
-                    if status == "completed":
-                        result = await client.get(
-                            f"{self.base_url}/v1/tasks/runs/{run_id}/result",
-                            headers=self._headers,
-                        )
-                        result.raise_for_status()
-                        return parse_task_output(
-                            element.id, result.json().get("output") or {}
-                        )
-                    if status in {"failed", "cancelled"}:
-                        return _incomplete(element.id)
-                    await asyncio.sleep(self.poll_interval_s)
-                    waited += self.poll_interval_s
-        except (httpx.HTTPError, KeyError, ValueError):
-            pass
+                    result.raise_for_status()
+                    return parse_task_output(
+                        element.id, result.json().get("output") or {}
+                    )
+                if status in {"failed", "cancelled"}:
+                    return _incomplete(element.id)
+                await asyncio.sleep(self.poll_interval_s)
+                waited += self.poll_interval_s
         return _incomplete(element.id)

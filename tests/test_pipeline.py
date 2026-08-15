@@ -13,6 +13,18 @@ async def test_demo_pipeline_end_to_end(tmp_path):
     assert state.stage_status["review"] == "awaiting"
 
 
+async def test_research_cap_marks_overflow_incomplete(tmp_path):
+    ctx = demo_context(tmp_path)
+    state = await Pipeline(build_demo_pipeline(max_research=2)).run(ctx)
+    complete = [r for r in state.research.values() if r.status == "complete"]
+    incomplete = [r for r in state.research.values() if r.status == "incomplete"]
+    assert len(state.research) == 6
+    assert len(complete) == 2 and len(incomplete) == 4
+    # budget goes to the most prominent elements (screen time desc)
+    researched_ids = {r.element_id for r in complete}
+    assert "e3" in researched_ids and "e1" in researched_ids  # 15s hoodie, 12s song
+
+
 async def test_pipeline_resumes_skipping_complete_stages(tmp_path):
     ctx = demo_context(tmp_path)
     p = Pipeline(build_demo_pipeline())
