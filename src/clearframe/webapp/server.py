@@ -1,12 +1,13 @@
 """Clearance review web app: API over production state with server-side role gating."""
 
 import asyncio
+import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
 
 from fastapi import FastAPI, Header, HTTPException
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -38,6 +39,25 @@ class DecisionRequest(BaseModel):
     note: str = ""
 
 
+class DemoRunRequest(BaseModel):
+    pace_s: float = 0.0
+
+
+class _PacedStage:
+    """Wraps a stage with presentation pacing so fixture-speed demo runs are
+    watchable in Mission Control. Pacing only — the work is the real pipeline."""
+
+    def __init__(self, stage, pace_s: float):
+        self._stage = stage
+        self.name = stage.name
+        self._pace_s = pace_s
+
+    async def run(self, ctx) -> None:
+        await asyncio.sleep(self._pace_s)
+        await self._stage.run(ctx)
+        await asyncio.sleep(self._pace_s)
+
+
 def create_app(out_root: Path) -> FastAPI:
     out_root = Path(out_root)
     store = LocalJsonStore(out_root / "state")
@@ -46,6 +66,7 @@ def create_app(out_root: Path) -> FastAPI:
     # concurrent decision posts (threadpool) and dossier generation could
     # silently clobber each other's saves.
     state_lock = asyncio.Lock()
+    event_queues: dict[str, asyncio.Queue] = {}
 
     def _load(pid: str):
         try:
@@ -67,8 +88,29 @@ def create_app(out_root: Path) -> FastAPI:
             )
         return out
 
+    async def _run_paced_demo(pace_s: float) -> None:
+        queue = event_queues["demo"]
+        ctx = demo_context(out_root)
+        ctx.store = store
+        ctx.listener = queue.put_nowait
+        stages = [_PacedStage(s, pace_s) for s in build_demo_pipeline()]
+        try:
+            await Pipeline(stages).run(ctx)
+        finally:
+            queue.put_nowait({"type": "run_complete"})
+
     @app.post("/api/productions/demo")
-    async def create_demo():
+    async def create_demo(body: DemoRunRequest | None = None):
+        pace_s = body.pace_s if body else 0.0
+        if pace_s > 0:
+            # Mission Control mode: fresh paced run in the background, events
+            # streamed over /events. Restarts the demo production from scratch.
+            state_path = store.root / "demo.json"
+            if state_path.exists():
+                state_path.unlink()
+            event_queues["demo"] = asyncio.Queue()
+            asyncio.create_task(_run_paced_demo(pace_s))
+            return {"status": "running"}
         try:
             state = store.load("demo")
         except FileNotFoundError:
@@ -76,6 +118,22 @@ def create_app(out_root: Path) -> FastAPI:
             ctx.store = store
             state = await Pipeline(build_demo_pipeline()).run(ctx)
         return JSONResponse(state.model_dump(mode="json"))
+
+    @app.get("/api/productions/{pid}/events")
+    async def stream_events(pid: str):
+        queue = event_queues.get(pid)
+        if queue is None:
+            raise HTTPException(status_code=404, detail="No active run for this production")
+
+        async def gen():
+            while True:
+                event = await queue.get()
+                yield f"data: {json.dumps(event)}\n\n"
+                if event.get("type") == "run_complete":
+                    event_queues.pop(pid, None)
+                    break
+
+        return StreamingResponse(gen(), media_type="text/event-stream")
 
     @app.get("/api/productions/{pid}")
     def get_production(pid: str):

@@ -43,11 +43,14 @@ class Pipeline:
     async def run(self, ctx: PipelineContext) -> ProductionState:
         for stage in self.stages:
             if ctx.state.stage_status.get(stage.name) == "complete":
+                ctx.emit({"type": "stage_skipped", "stage": stage.name})
                 continue
+            ctx.emit({"type": "stage_start", "stage": stage.name})
             ctx.state.stage_status[stage.name] = "running"
             await stage.run(ctx)
             ctx.state.stage_status[stage.name] = "complete"
             ctx.store.save(ctx.state)
+            ctx.emit({"type": "stage_complete", "stage": stage.name})
         if all(ctx.state.stage_status.get(s) == "complete" for s in ANALYSIS_STAGES):
             ctx.state.stage_status.setdefault("review", "awaiting")
             ctx.store.save(ctx.state)
