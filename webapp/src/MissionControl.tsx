@@ -13,6 +13,7 @@ interface AgentCard {
 }
 
 const INITIAL_AGENTS: AgentCard[] = [
+  { key: "script", name: "Script Reader", role: "Gemini · pre-production", status: "idle", line: "Standing by" },
   { key: "scan", name: "Scene Scanner", role: "Gemini · video analysis", status: "idle", line: "Standing by" },
   { key: "audit", name: "E&O Auditor", role: "Gemini · second-pass review", status: "idle", line: "Standing by" },
   { key: "triage", name: "Triage", role: "deterministic rules", status: "idle", line: "Standing by" },
@@ -54,7 +55,11 @@ export function MissionControl({ onComplete }: { onComplete: () => void }) {
       const e: PipelineEvent = JSON.parse(msg.data);
       switch (e.type) {
         case "stage_start":
-          if (e.stage === "scan") {
+          if (e.stage === "script") {
+            patch("script", { status: "active", line: "Reading the screenplay…" });
+          } else if (e.stage === "drift") {
+            patch("triage", { status: "active", line: "Comparing script vs screen…" });
+          } else if (e.stage === "scan") {
             patch("scan", { status: "active", line: "Watching footage…" });
           } else if (e.stage === "research") {
             patch("planner", { status: "active", line: "Allocating research budget…" });
@@ -64,6 +69,31 @@ export function MissionControl({ onComplete }: { onComplete: () => void }) {
           } else {
             patch(e.stage!, { status: "active", line: "Working…" });
           }
+          break;
+        case "script_mentions":
+          patch("script", {
+            status: "done",
+            line: e.count
+              ? `${e.count} clearables flagged in the script`
+              : "No script provided",
+          });
+          break;
+        case "drift_computed":
+          patch("triage", {
+            status: "done",
+            line: `${(e as { unscripted?: number }).unscripted ?? 0} on-screen elements were never scripted`,
+          });
+          break;
+        case "candidates_found":
+          setResearchRows((rows) => [
+            ...rows,
+            {
+              id: `cand-${e.element_id}`,
+              text: `↳ ${e.count} candidate owners enumerated (FindAll)`,
+              chip: "LEADS",
+              chipClass: "tier",
+            },
+          ]);
           break;
         case "scan_found":
           patch("scan", { line: `${e.count} clearable elements found` });

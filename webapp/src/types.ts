@@ -72,6 +72,35 @@ export interface Precedent {
   citation: string;
   holding: string;
   relevance: string;
+  quote: string;
+  source_url: string;
+}
+
+export interface ScriptDrift {
+  unscripted_element_ids: string[];
+  scripted_not_seen: string[];
+}
+
+export interface CandidateEntity {
+  name: string;
+  kind: string;
+  url: string;
+  note: string;
+}
+
+export interface ClearanceWatch {
+  element_id: string;
+  monitor_id: string;
+  query: string;
+  frequency: string;
+}
+
+export interface WatchAlert {
+  element_id: string;
+  monitor_id: string;
+  at: string;
+  summary: string;
+  source_url: string;
 }
 
 export interface CourtBrief {
@@ -127,4 +156,8 @@ export interface ProductionState {
   unscanned_ranges: TimeRange[];
   court: Record<string, CourtOpinion>;
   research_plan: Record<string, ResearchPlan>;
+  drift: ScriptDrift | null;
+  candidates: Record<string, CandidateEntity[]>;
+  watches: Record<string, ClearanceWatch>;
+  alerts: WatchAlert[];
 }

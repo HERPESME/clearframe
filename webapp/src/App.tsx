@@ -125,8 +125,21 @@ export default function App() {
     );
   }
 
-  const { production, elements, research, risk, remediation, decisions, court, research_plan } =
-    state;
+  const {
+    production,
+    elements,
+    research,
+    risk,
+    remediation,
+    decisions,
+    court,
+    research_plan,
+    drift,
+    candidates,
+    watches,
+    alerts,
+  } = state;
+  const unscriptedIds = new Set(drift?.unscripted_element_ids ?? []);
   const sorted = [...elements].sort((a, b) => risk[b.id].score - risk[a.id].score);
   const pending = elements.filter((el) => !decisions[el.id]);
   const bandCounts = Object.fromEntries(
@@ -185,6 +198,19 @@ export default function App() {
 
       {error && <div className="error-banner">{error}</div>}
 
+      {(alerts ?? []).length > 0 && (
+        <div className="alert-banner">
+          ⚠ Standing watch alert — review reopened.{" "}
+          {alerts.map((a, i) => (
+            <span key={i}>
+              <strong>{elements.find((el) => el.id === a.element_id)?.label}</strong>:{" "}
+              {a.summary}{" "}
+              {a.source_url && <a href={a.source_url}>[source]</a>}
+            </span>
+          ))}
+        </div>
+      )}
+
       <div className="summary">
         {BANDS.map((b) =>
           bandCounts[b] > 0 ? (
@@ -202,6 +228,16 @@ export default function App() {
         <span className="chip">
           <span className="n">{pending.length}</span> awaiting decision
         </span>
+        {drift && drift.unscripted_element_ids.length > 0 && (
+          <span className="chip HIGH">
+            <span className="n">{drift.unscripted_element_ids.length}</span> not in script
+          </span>
+        )}
+        {Object.keys(watches ?? {}).length > 0 && (
+          <span className="chip">
+            <span className="n">{Object.keys(watches).length}</span> standing watches
+          </span>
+        )}
       </div>
 
       <main className="cards">
@@ -215,6 +251,8 @@ export default function App() {
             decision={decisions[el.id]}
             court={court?.[el.id]}
             plan={research_plan?.[el.id]}
+            unscripted={unscriptedIds.has(el.id)}
+            candidates={candidates?.[el.id] ?? []}
             fps={production.fps}
             role={role}
             onDecide={onDecide}

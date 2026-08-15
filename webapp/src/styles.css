@@ -727,6 +727,39 @@ button {
   color: var(--ink);
 }
 
+.badge.unscripted {
+  background: transparent;
+  color: var(--high);
+  border: 1px dashed var(--high);
+  font-weight: 700;
+  cursor: help;
+}
+
+.alert-banner {
+  max-width: 980px;
+  margin: 14px auto 0;
+  border: 1px solid var(--high);
+  border-left: 4px solid var(--high);
+  border-radius: 3px;
+  padding: 10px 16px;
+  font-size: 13.5px;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--high) 8%, var(--panel));
+}
+
+.alert-banner a {
+  color: var(--high);
+}
+
+.pull-quote {
+  margin: 4px 0 4px 14px;
+  font-style: italic;
+  color: var(--ink);
+  border-left: 2px solid var(--amber);
+  padding-left: 10px;
+  font-size: 12.5px;
+}
+
 .plan-chip {
   font-family: var(--mono);
   font-size: 10px;

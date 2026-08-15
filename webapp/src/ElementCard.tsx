@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type {
   Action,
+  CandidateEntity,
   CourtOpinion,
   Decision,
   Element,
@@ -42,6 +43,8 @@ interface Props {
   decision: Decision | undefined;
   court: CourtOpinion | undefined;
   plan: ResearchPlan | undefined;
+  unscripted: boolean;
+  candidates: CandidateEntity[];
   fps: number;
   role: Role;
   onDecide: (elementId: string, action: Action, note: string) => Promise<void>;
@@ -57,6 +60,8 @@ export function ElementCard({
   decision,
   court,
   plan,
+  unscripted,
+  candidates,
   fps,
   role,
   onDecide,
@@ -92,6 +97,14 @@ export function ElementCard({
           {risk.band} · {risk.score}
         </span>
         {risk.de_minimis && <span className="badge dim">DE MINIMIS</span>}
+        {unscripted && (
+          <span
+            className="badge unscripted"
+            title="This element appears on screen but was never in the shooting script — nobody budgeted clearance for it."
+          >
+            NOT IN SCRIPT
+          </span>
+        )}
         {plan && (
           <span className="plan-chip" title={plan.rationale}>
             research: {plan.processor} · ${plan.est_cost_usd.toFixed(2)}
@@ -139,10 +152,24 @@ export function ElementCard({
             ))}
           </>
         ) : (
-          <div className="incomplete">
-            RESEARCH INCOMPLETE — rights holder not established from open-web sources.
-            Manual investigation required.
-          </div>
+          <>
+            <div className="incomplete">
+              RESEARCH INCOMPLETE — rights holder not established from open-web sources.
+              Manual investigation required.
+            </div>
+            {candidates.length > 0 && (
+              <div style={{ marginTop: 8 }}>
+                <div className="sec-title">Possible rights holders — FindAll leads</div>
+                {candidates.map((c, i) => (
+                  <div className="citation" key={i}>
+                    <a href={c.url}>{c.name}</a>{" "}
+                    <span className="conf">{c.kind}</span>
+                    <div>{c.note}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -165,6 +192,12 @@ export function ElementCard({
                 {b.precedents.map((p, j) => (
                   <div className="precedent" key={j}>
                     · <em>{p.case_name}</em>, {p.citation} — {p.holding}
+                    {p.quote && (
+                      <div className="pull-quote">
+                        “{p.quote}”{" "}
+                        {p.source_url && <a href={p.source_url}>[source]</a>}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
