@@ -13,8 +13,11 @@ pass() { printf '  \033[32mPASS\033[0m %s\n' "$1"; }
 fail() { printf '  \033[31mFAIL\033[0m %s\n' "$1"; FAILURES=$((FAILURES + 1)); }
 check() { if [ "$1" -eq 0 ]; then pass "$2"; else fail "$2"; fi }
 
-cleanup() { pkill -f "clearframe serve --out $OUT" 2>/dev/null || true; }
+cleanup() { pkill -f "clearframe serve" 2>/dev/null || true; }
 trap cleanup EXIT
+# ensure no stale server from a previous run holds the port
+pkill -f "clearframe serve" 2>/dev/null || true
+sleep 1
 
 echo "━━ 1. Test suite"
 $PY -m pytest -q > /tmp/clearframe-smoke-pytest.log 2>&1

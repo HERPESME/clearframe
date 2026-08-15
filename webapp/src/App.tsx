@@ -10,6 +10,7 @@ const BANDS: RiskBand[] = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
 export default function App() {
   const [state, setState] = useState<ProductionState | null>(null);
   const [mission, setMission] = useState(false);
+  const [mode, setMode] = useState<"demo" | "live">("demo");
   const [loading, setLoading] = useState(true);
   const [role, setRoleState] = useState<Role>("legal");
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -18,6 +19,7 @@ export default function App() {
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
+    api.meta().then((m) => setMode(m.mode)).catch(() => {});
     // ?autorun starts a fresh paced pipeline run on load — used for demo
     // recordings so Mission Control opens without a click.
     if (new URLSearchParams(window.location.search).has("autorun")) {
@@ -110,6 +112,11 @@ export default function App() {
     return (
       <div className="hero">
         <div className="slate">ClearFrame · automated clearance department</div>
+        {mode === "demo" && (
+          <div className="mode-chip" title="Replays recorded Gemini/Parallel responses through the identical pipeline code path — live mode swaps only the two API clients.">
+            DEMO MODE · recorded fixtures, identical code path
+          </div>
+        )}
         <h1>
           Every frame, <em>cleared.</em>
         </h1>
@@ -157,6 +164,14 @@ export default function App() {
         <span className="brand">
           CLEAR<b>FRAME</b>
         </span>
+        {mode === "demo" && (
+          <span
+            className="mode-chip"
+            title="Recorded fixtures replayed through the identical pipeline code path."
+          >
+            DEMO
+          </span>
+        )}
         <span className="prod-title">“{production.title}”</span>
         <span className="prod-meta">
           {production.duration_s.toFixed(0)}s · {production.fps}fps · {elements.length}{" "}

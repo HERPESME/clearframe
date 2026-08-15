@@ -61,6 +61,25 @@ class _AutoApproveDossierStage:
         await self._inner.run(ctx)
 
 
+async def run_pipeline_adk(ctx: PipelineContext, out_dir: Path, auto_approve: bool = False):
+    """Execute the full pipeline through the ADK Runner (CLI `--adk` path)."""
+    from google.adk.runners import Runner
+    from google.adk.sessions import InMemorySessionService
+    from google.genai import types
+
+    agent = build_clearframe_agent(ctx, out_dir=out_dir, auto_approve=auto_approve)
+    svc = InMemorySessionService()
+    await svc.create_session(app_name="clearframe", user_id="cli", session_id="run")
+    runner = Runner(agent=agent, app_name="clearframe", session_service=svc)
+    async for _ in runner.run_async(
+        user_id="cli",
+        session_id="run",
+        new_message=types.Content(role="user", parts=[types.Part(text="run")]),
+    ):
+        pass
+    return ctx.state
+
+
 def build_clearframe_agent(
     ctx: PipelineContext, out_dir: Path, auto_approve: bool = False
 ) -> SequentialAgent:

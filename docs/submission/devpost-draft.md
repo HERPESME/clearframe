@@ -23,9 +23,9 @@ ClearFrame is the clearance department, automated — with a human lawyer still 
 
 ## How we built it
 
-- **Google Cloud:** Gemini on Vertex AI (video understanding with structured output), Agent Development Kit — the pipeline runs as a deterministic ADK `SequentialAgent` of six custom agents, deployable to Agent Engine — Cloud Run for the review app.
-- **Parallel:** the Task API (`pro` processor) with a schema-driven output spec; async task runs with polling/webhooks; Basis citations stored verbatim and surfaced in the UI and dossier as the audit trail.
-- **Engineering:** framework-free deterministic core (Pydantic v2), fixture-backed demo mode that replays recorded API responses through the identical code path (judges can run everything with zero credentials), 51 tests, FastAPI + React.
+- **Google Cloud:** Gemini on Vertex AI (video understanding with structured output and explicit safety settings), Agent Development Kit — the eight-stage pipeline runs as a deterministic ADK `SequentialAgent` of nine stage agents (`clearframe run --demo --adk --auto-approve` executes it under the real ADK Runner) — Cloud Run hosts the review app and the MCP server with scale-to-zero CI/CD via Cloud Build.
+- **Parallel:** the Task API with schema-driven output specs and per-finding processor-tier allocation (lite→ultra, chosen by a Budget Planner with recorded rationale); async task polling with bounded retries; FindAll candidate enumeration for unidentifiable owners; Monitor-based standing watches whose webhook reopens review; Basis citations stored verbatim and surfaced in the UI and dossier as the audit trail.
+- **Engineering:** framework-free deterministic core (Pydantic v2), fixture-backed demo mode that replays recorded API responses through the identical code path (judges can run everything with zero credentials), 90 tests plus a full-transport smoke script, FastAPI + React.
 
 ## Challenges we ran into
 

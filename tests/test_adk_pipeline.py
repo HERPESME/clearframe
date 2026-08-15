@@ -28,3 +28,20 @@ async def test_adk_sequential_pipeline_produces_dossier(tmp_path):
     assert (tmp_path / "out" / "dossier.html").exists()
     session = await svc.get_session(app_name="clearframe", user_id="u", session_id="s")
     assert session.state.get("clearframe:dossier") == "complete"
+
+
+def test_cli_adk_flag_runs_pipeline(tmp_path, capsys):
+    from clearframe.cli import main
+
+    rc = main(["run", "--demo", "--adk", "--auto-approve", "--out", str(tmp_path)])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "ADK SequentialAgent" in out and "CRITICAL" in out
+    assert (tmp_path / "dossier.html").exists()
+
+
+def test_cli_adk_without_auto_approve_exits_2(tmp_path, capsys):
+    from clearframe.cli import main
+
+    rc = main(["run", "--demo", "--adk", "--out", str(tmp_path)])
+    assert rc == 2

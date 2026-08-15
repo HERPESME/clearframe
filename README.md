@@ -32,7 +32,7 @@ outputs: dossier.html (E&O-ready report w/ court opinions + audit trail) · doss
 
 Every contested finding (MEDIUM risk and up) is argued by two opposing agents: **Studio Counsel** briefs why the use is a risk; the **Fair Use Advocate** briefs the strongest good-faith defense — de minimis, *Rogers v. Grimaldi* expressive-work protection, fair use. Both cite real case law (*Ringgold v. BET*, *Sandoval v. New Line*, *Caterpillar v. Disney*, *Falkner v. GM*, VARA, §504(c)). A **Judge** weighs the briefs against practical cost and issues a ruling: `CLEAR REQUIRED`, `DEFENSIBLE`, or `ESCALATE`. Opinions attach reasoning to the dossier — they never alter the deterministic risk score, and the human still makes the call.
 
-- The pipeline runs both as a plain orchestrator and as a **Google ADK `SequentialAgent`** (`src/clearframe/adk/agents.py`) deployable to Agent Engine.
+- The pipeline runs both as a plain orchestrator and as a **Google ADK `SequentialAgent`** (`src/clearframe/adk/agents.py`) — try it: `python -m clearframe run --demo --adk --auto-approve --out out` executes the full run under the real ADK Runner.
 - Every research finding carries Parallel's **Basis** output — citations, per-field reasoning, calibrated confidence — because a legal document without provenance is worthless.
 - Risk scores are pure code (`src/clearframe/scoring.py`): reproducible from stored inputs, never an LLM guess.
 
@@ -71,7 +71,7 @@ Clearance isn't an event; it's a subscription. ClearFrame covers the whole lifec
 - **Script pre-scan** (pre-production): Gemini reads the screenplay and flags clearables before a frame is shot.
 - **Script-vs-screen drift**: elements on camera that were never scripted get a `NOT IN SCRIPT` flag — the set-dressing surprises nobody budgeted clearance for.
 - **FindAll leads**: when deep research can't identify an owner (the unsigned mural), a recall-first Parallel FindAll pass enumerates candidate rights holders — registries, the building's owner, archives — instead of leaving a dead end.
-- **Standing watch** (post-delivery): after the dossier, Parallel Monitors watch each risky finding — new lawsuits, filings, policy changes by the rights holder. A webhook alert **reopens review automatically** and lands in the audit trail. Your dossier can't silently rot.
+- **Standing watch** (post-delivery): after the dossier, a watch is registered per risky finding — new lawsuits, filings, policy changes by the rights holder (Parallel Monitors in live mode; deterministic stand-ins in demo mode). A webhook alert **reopens review automatically** and lands in the audit trail. Your dossier can't silently rot.
 
 Run everything yourself: `./scripts/smoke.sh` verifies the full lifecycle across every transport (CLI, web, SSE, webhook, MCP stdio) in one command.
 

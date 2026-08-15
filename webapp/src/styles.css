@@ -727,6 +727,18 @@ button {
   color: var(--ink);
 }
 
+.mode-chip {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--amber);
+  border: 1px dashed var(--amber);
+  border-radius: 2px;
+  padding: 2px 8px;
+  cursor: help;
+  align-self: center;
+}
+
 .badge.unscripted {
   background: transparent;
   color: var(--high);

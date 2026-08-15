@@ -10,7 +10,7 @@ Run every check; report pass/fail with evidence. Rules source: hackathon brief +
 ## Automated checks
 
 1. **Fresh clone**: clone the GitHub repo (not the local dir) into a temp dir; `pip install -e ".[dev]"`; `pytest` (expect green with skips); `python -m clearframe run --demo --out out --auto-approve`; verify all 5 artifacts exist.
-2. **Serve check**: `python -m clearframe serve` from the fresh clone; confirm the SPA loads (committed dist present) and `POST /api/productions/demo` returns 6 elements.
+2. **Serve check**: `python -m clearframe serve` from the fresh clone; confirm the SPA loads (committed dist present) and `POST /api/productions/demo` returns 7 elements.
 3. **License visibility**: `gh api repos/<owner>/<repo> --jq .license.spdx_id` must return `MIT` (this is what populates the About sidebar — a rules requirement).
 4. **Partner runtime use**: confirm `LiveParallelClient` is reachable from the default pipeline path (grep `build_context` wiring) — the rules require the partner service *called in code*, not just named.
 5. **Docker**: `docker build .` succeeds (daemon must be running).

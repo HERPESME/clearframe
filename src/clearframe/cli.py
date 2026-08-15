@@ -120,6 +120,20 @@ def _cmd_run(args) -> int:
         ctx = build_context(cfg, production, out_dir)
     else:
         ctx = demo_context(out_dir)
+
+    if args.adk:
+        if not args.auto_approve:
+            print("--adk requires --auto-approve (the ADK run includes the dossier stage).")
+            return 2
+        try:
+            from clearframe.adk.agents import run_pipeline_adk
+        except ImportError:
+            print('The ADK runner needs the cloud extra: pip install -e ".[cloud]"')
+            return 2
+        state = asyncio.run(run_pipeline_adk(ctx, out_dir, auto_approve=True))
+        _print_summary(state)
+        print(f"\nPipeline executed as an ADK SequentialAgent. Artifacts in {out_dir}/.")
+        return 0
     return asyncio.run(_run(ctx, out_dir, args.auto_approve))
 
 
@@ -155,6 +169,12 @@ def main(argv: list[str] | None = None) -> int:
         "--auto-approve",
         action="store_true",
         help="Apply demo review decisions and generate the dossier",
+    )
+    run.add_argument(
+        "--adk",
+        action="store_true",
+        help="Execute the pipeline through the Google ADK SequentialAgent runner "
+        "(requires the cloud extra and --auto-approve)",
     )
     run.set_defaults(func=_cmd_run)
 

@@ -29,7 +29,7 @@ Keep the song clearly audible; keep logos in focus for a few seconds each. (The 
 
 **0:50–1:45 — Mission Control + the Court (the star section)**
 - Open `http://localhost:8000/?autorun` → Mission Control plays live: agents lighting up, researcher rows landing with owners, the Court issuing rulings.
-> "Watch the department work. A second Gemini agent audits the first — and catches a background TV broadcast the first pass missed. A Budget Planner decides how much research each finding deserves and buys the right Parallel processor tier — five cents for the famous swoosh, three dollars of deep research for the unidentified mural. Then, for every contested finding, court convenes: a Studio Counsel agent argues the risk, a Fair Use Advocate argues the defense — both citing real case law through Parallel research — and a Judge rules."
+> "Watch the department work. A second Gemini agent audits the first — and catches a background TV broadcast the first pass missed. A Budget Planner decides how much research each finding deserves and buys the right Parallel processor tier — five cents for the famous swoosh, three dollars of deep research for the unidentified mural. Then, for every contested finding, court convenes: a Studio Counsel agent argues the risk, a Fair Use Advocate argues the defense — both briefing real case law with verbatim passages — and a Judge rules."
 - Enter review; click the CRITICAL music lane → card scrolls into view; expand the Counsel brief showing *Ringgold* and §504(c).
 > "This isn't a chatbot guess. Every research field carries citations and calibrated confidence, and every ruling shows both sides' briefs. For the mural nobody could identify — it says so honestly, and escalates."
 
@@ -47,7 +47,7 @@ Keep the song clearly audible; keep logos in focus for a few seconds each. (The 
 - The amber alert banner appears live: *review reopened*.
 
 **2:20–2:50 — Architecture + impact (diagram card)**
-> "Under the hood: a deterministic six-stage agent pipeline built with Google's Agent Development Kit, Gemini on Vertex AI for video understanding, and Parallel's Task API for rights research, deployed on Cloud Run. Deterministic scoring — no LLM guessing on risk. For studios, this turns weeks of manual review into hours. For indie filmmakers, it's the difference between getting distribution and not."
+> "Under the hood: a deterministic eight-stage agent pipeline built with Google's Agent Development Kit, Gemini on Vertex AI for video understanding, and Parallel's Task API for rights research, deployed on Cloud Run with scale-to-zero CI/CD. Deterministic scoring — no LLM guessing on risk. Clearance coordinators bill days per cut; ClearFrame delivers the evidence pass in minutes, and for indie filmmakers it's the difference between getting distribution and not."
 
 **2:50–3:00 — Close**
 > "ClearFrame. Every frame, cleared. — And yes, we noticed our own demo scene needs clearance. That's the point."

@@ -33,6 +33,7 @@ export class ApiError extends Error {
 }
 
 export const api = {
+  meta: () => request<{ mode: "demo" | "live"; version: string }>("/api/meta"),
   listProductions: () =>
     request<{ id: string; title: string; stage_status: Record<string, string> }[]>(
       "/api/productions",

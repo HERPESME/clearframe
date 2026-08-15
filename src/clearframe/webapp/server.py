@@ -96,6 +96,17 @@ def create_app(out_root: Path) -> FastAPI:
         except FileNotFoundError:
             raise HTTPException(status_code=404, detail=f"Unknown production: {pid}")
 
+    @app.get("/api/meta")
+    def meta():
+        import os
+
+        import clearframe
+
+        return {
+            "mode": "live" if os.environ.get("CLEARFRAME_MODE") == "live" else "demo",
+            "version": clearframe.__version__,
+        }
+
     @app.get("/api/productions")
     def list_productions():
         out = []
