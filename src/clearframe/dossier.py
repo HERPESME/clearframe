@@ -3,6 +3,7 @@
 from pydantic import BaseModel
 
 from clearframe.models import (
+    AuditEvent,
     Decision,
     Production,
     ProductionState,
@@ -41,6 +42,7 @@ class ClearanceDossier(BaseModel):
     entries: list[DossierEntry]
     summary: dict[str, int]
     unscanned_ranges: list[TimeRange]
+    audit: list[AuditEvent] = []
     disclaimer: str = DISCLAIMER
 
 
@@ -71,6 +73,7 @@ def build_dossier(state: ProductionState, generated_at: str) -> ClearanceDossier
         entries=entries,
         summary=summary,
         unscanned_ranges=state.unscanned_ranges,
+        audit=state.audit_log,
     )
 
 

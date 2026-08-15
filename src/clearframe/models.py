@@ -126,6 +126,14 @@ class Decision(BaseModel):
     note: str
 
 
+class AuditEvent(BaseModel):
+    at: str
+    actor: str
+    role: str
+    event: str
+    detail: str
+
+
 class Production(BaseModel):
     id: str
     title: str
@@ -144,3 +152,4 @@ class ProductionState(BaseModel):
     remediation: dict[str, list[RemediationOption]] = Field(default_factory=dict)
     decisions: dict[str, Decision] = Field(default_factory=dict)
     unscanned_ranges: list[TimeRange] = Field(default_factory=list)
+    audit_log: list[AuditEvent] = Field(default_factory=list)

@@ -105,6 +105,16 @@ _TEMPLATE = Template(
   {% endif %}
 </div>
 {% endfor %}
+
+{% if audit %}
+<h3 style="font-size:15px; text-transform:uppercase; letter-spacing:1px;">Audit trail</h3>
+<table class="summary">
+<tr><th>When</th><th>Actor</th><th>Role</th><th>Event</th><th>Detail</th></tr>
+{% for a in audit %}
+<tr><td>{{ a.at }}</td><td>{{ a.actor }}</td><td>{{ a.role }}</td><td>{{ a.event }}</td><td>{{ a.detail }}</td></tr>
+{% endfor %}
+</table>
+{% endif %}
 </body>
 </html>
 """
@@ -117,4 +127,5 @@ def render_dossier_html(d: ClearanceDossier) -> str:
         band_hex=BAND_HEX,
         tc=lambda s: seconds_to_tc(s, fps=d.production.fps),
         incomplete=research_is_incomplete,
+        audit=d.audit,
     )

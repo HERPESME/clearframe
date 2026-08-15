@@ -11,9 +11,14 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from clearframe.dossier import pending_ids
-from clearframe.models import Decision
 from clearframe.pipeline import Pipeline, build_demo_pipeline, demo_context
-from clearframe.stages.dossier import DossierStage, ReviewPendingError
+from clearframe.review import (
+    RoleNotPermittedError,
+    UnknownElementError,
+    generate_dossier_async,
+    record_decision,
+)
+from clearframe.stages.dossier import ReviewPendingError
 from clearframe.store import LocalJsonStore
 
 ARTIFACT_WHITELIST = (
@@ -23,8 +28,6 @@ ARTIFACT_WHITELIST = (
     "markers.csv",
     "cue_sheet.csv",
 )
-
-DECIDER_ROLES = {"legal", "producer"}
 
 DIST_DIR = Path(__file__).resolve().parents[3] / "webapp" / "dist"
 
@@ -84,46 +87,39 @@ def create_app(out_root: Path) -> FastAPI:
         body: DecisionRequest,
         x_clearframe_role: str = Header(default="editor"),
     ):
-        role = x_clearframe_role.lower()
-        if role not in DECIDER_ROLES:
-            raise HTTPException(
-                status_code=403,
-                detail=f"Role '{role}' cannot record decisions (requires legal or producer).",
-            )
         async with state_lock:
-            state = _load(pid)
-            if not any(el.id == body.element_id for el in state.elements):
-                raise HTTPException(
-                    status_code=404, detail=f"Unknown element: {body.element_id}"
+            try:
+                state = record_decision(
+                    store,
+                    pid,
+                    body.element_id,
+                    body.action,
+                    body.note,
+                    role=x_clearframe_role,
+                    reviewer=x_clearframe_role.lower(),
+                    at=datetime.now(timezone.utc).isoformat(),
                 )
-            state.decisions[body.element_id] = Decision(
-                element_id=body.element_id,
-                action=body.action,
-                reviewer=role,
-                role=role,
-                note=body.note,
-            )
-            if state.stage_status.get("review") == "complete":
-                # A revised decision invalidates the generated dossier.
-                state.stage_status["review"] = "awaiting"
-            store.save(state)
+            except RoleNotPermittedError as exc:
+                raise HTTPException(status_code=403, detail=str(exc))
+            except UnknownElementError as exc:
+                raise HTTPException(status_code=404, detail=str(exc))
+            except FileNotFoundError:
+                raise HTTPException(status_code=404, detail=f"Unknown production: {pid}")
             return {"ok": True, "pending": pending_ids(state)}
 
     @app.post("/api/productions/{pid}/dossier")
     async def generate_dossier(pid: str):
         async with state_lock:
-            state = _load(pid)
-            ctx = demo_context(out_root)
-            ctx.store = store
-            ctx.state = state
-            stage = DossierStage(
-                out_dir=out_root, generated_at=datetime.now(timezone.utc).isoformat()
-            )
             try:
-                await stage.run(ctx)
+                await generate_dossier_async(
+                    store, out_root, pid, at=datetime.now(timezone.utc).isoformat()
+                )
             except ReviewPendingError:
-                raise HTTPException(status_code=409, detail={"pending": pending_ids(state)})
-            store.save(state)
+                raise HTTPException(
+                    status_code=409, detail={"pending": pending_ids(_load(pid))}
+                )
+            except FileNotFoundError:
+                raise HTTPException(status_code=404, detail=f"Unknown production: {pid}")
         artifacts = [n for n in ARTIFACT_WHITELIST if (out_root / n).exists()]
         return {"artifacts": artifacts}
 
