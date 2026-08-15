@@ -10,6 +10,7 @@ def test_cli_demo_auto_approve(tmp_path, capsys):
     assert (tmp_path / "markers.edl").exists()
     assert (tmp_path / "markers.csv").exists()
     assert (tmp_path / "dossier.json").exists()
+    assert (tmp_path / "cue_sheet.csv").exists()
 
 
 def test_cli_demo_without_approve_reports_pending(tmp_path, capsys):

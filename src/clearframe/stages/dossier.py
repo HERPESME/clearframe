@@ -5,8 +5,10 @@ from pathlib import Path
 
 from clearframe.dossier import build_dossier
 from clearframe.exporters.csv_markers import render_csv
+from clearframe.exporters.cue_sheet import render_cue_sheet
 from clearframe.exporters.dossier_html import render_dossier_html
 from clearframe.exporters.edl import elements_to_markers, render_edl
+from clearframe.models import ClearanceCategory
 from clearframe.pipeline import PipelineContext
 
 
@@ -40,4 +42,12 @@ class DossierStage:
             render_edl(f"ClearFrame Risk Markers - {ctx.state.production.title}", markers, fps)
         )
         (self.out_dir / "markers.csv").write_text(render_csv(markers, fps))
+        if any(
+            el.category == ClearanceCategory.MUSIC_SYNC for el in ctx.state.elements
+        ):
+            (self.out_dir / "cue_sheet.csv").write_text(
+                render_cue_sheet(
+                    ctx.state.production, ctx.state.elements, ctx.state.research
+                )
+            )
         ctx.state.stage_status["review"] = "complete"
