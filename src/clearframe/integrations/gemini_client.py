@@ -11,7 +11,7 @@ from typing import Protocol
 
 from pydantic import BaseModel, ValidationError
 
-from clearframe.models import DetectedElement, TimeRange
+from clearframe.models import DetectedElement, ScriptMention, TimeRange
 
 SCAN_PROMPT = (
     "You are a film clearance coordinator reviewing raw footage frame by frame. "
@@ -26,6 +26,37 @@ SCAN_PROMPT = (
     "and whether it is integral to the plot. Report ranges you could not analyze "
     "as unscanned_ranges. Be exhaustive: missing an element creates legal risk."
 )
+
+SCRIPT_PROMPT = (
+    "You are a script clearance reader. Read this screenplay text and list every "
+    "element that will require legal clearance when filmed: brand names/logos, "
+    "real songs, artwork/posters, real businesses or locations, and readable "
+    "media. For each: a short label, its type (LOGO, ARTWORK, MUSIC, LOCATION, "
+    "TEXT), and the scene heading it appears under. Return JSON: "
+    '{"mentions": [{"label", "element_type", "scene"}]}.'
+)
+
+SCRIPT_RESPONSE_SCHEMA: dict = {
+    "type": "object",
+    "properties": {
+        "mentions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "label": {"type": "string"},
+                    "element_type": {
+                        "type": "string",
+                        "enum": ["LOGO", "ARTWORK", "MUSIC", "FACE", "TATTOO", "LOCATION", "TEXT"],
+                    },
+                    "scene": {"type": "string"},
+                },
+                "required": ["label", "element_type", "scene"],
+            },
+        }
+    },
+    "required": ["mentions"],
+}
 
 AUDIT_PROMPT_TEMPLATE = (
     "You are the studio's E&O clearance AUDITOR, reviewing another coordinator's "
@@ -117,12 +148,24 @@ def parse_scan_payload(payload: dict) -> ScanResult:
     return ScanResult(detections=detections, unscanned_ranges=unscanned)
 
 
+def parse_script_payload(payload: dict) -> list[ScriptMention]:
+    mentions: list[ScriptMention] = []
+    for entry in payload.get("mentions") or []:
+        try:
+            mentions.append(ScriptMention.model_validate(entry))
+        except ValidationError:
+            continue
+    return mentions
+
+
 class GeminiClient(Protocol):
     async def scan(self, footage_uri: str, duration_s: float) -> ScanResult: ...
 
     async def audit_scan(
         self, footage_uri: str, duration_s: float, found_labels: list[str]
     ) -> ScanResult: ...
+
+    async def scan_script(self, text: str) -> list[ScriptMention]: ...
 
 
 class FixtureGeminiClient:
@@ -140,3 +183,9 @@ class FixtureGeminiClient:
         if not path.exists():
             return ScanResult(detections=[], unscanned_ranges=[])
         return parse_scan_payload(json.loads(path.read_text()))
+
+    async def scan_script(self, text: str) -> list[ScriptMention]:
+        path = self.fixtures_dir / "script_scan.json"
+        if not path.exists():
+            return []
+        return parse_script_payload(json.loads(path.read_text()))

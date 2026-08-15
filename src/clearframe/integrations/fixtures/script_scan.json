@@ -1,0 +1,7 @@
+{
+  "mentions": [
+    {"label": "Coca-Cola can", "element_type": "LOGO", "scene": "INT. MAYA'S KITCHEN — MORNING"},
+    {"label": "Blinding Lights - The Weeknd", "element_type": "MUSIC", "scene": "INT. MAYA'S KITCHEN — MORNING"},
+    {"label": "Arctic Monkeys tour poster", "element_type": "ARTWORK", "scene": "INT. MAYA'S BEDROOM — CONTINUOUS"}
+  ]
+}

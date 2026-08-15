@@ -13,8 +13,9 @@ async def test_pipeline_emits_stage_and_agent_events(tmp_path):
     ctx.listener = events.append
     await Pipeline(build_demo_pipeline()).run(ctx)
     types = [e["type"] for e in events]
-    assert types.count("stage_start") == 6
-    assert types.count("stage_complete") == 6
+    assert types.count("stage_start") == 8
+    assert types.count("stage_complete") == 8
+    assert "script_mentions" in types and "drift_computed" in types
     assert "scan_found" in types and "audit_found" in types
     assert "research_planned" in types
     assert types.count("research_start") == 7

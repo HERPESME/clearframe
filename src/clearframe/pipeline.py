@@ -12,7 +12,16 @@ from clearframe.store import LocalJsonStore
 
 FIXTURES_DIR = Path(__file__).parent / "integrations" / "fixtures"
 
-ANALYSIS_STAGES = ("scan", "triage", "research", "risk", "remediation", "court")
+ANALYSIS_STAGES = (
+    "script",
+    "scan",
+    "triage",
+    "drift",
+    "research",
+    "risk",
+    "remediation",
+    "court",
+)
 
 
 @dataclass
@@ -67,12 +76,16 @@ def build_demo_pipeline(max_research: int | None = None) -> list[Stage]:
     from clearframe.stages.triage_stage import TriageStage
 
     from clearframe.stages.court import CourtStage
+    from clearframe.stages.drift_stage import DriftStage
+    from clearframe.stages.script import ScriptStage
 
     if max_research is None:
         max_research = int(os.environ.get("CLEARFRAME_MAX_RESEARCH", "25"))
     return [
+        ScriptStage(),
         ScanStage(),
         TriageStage(),
+        DriftStage(),
         ResearchStage(max_research=max_research),
         RiskStage(),
         RemediationStage(),
@@ -114,6 +127,7 @@ def demo_context(out_root: Path) -> PipelineContext:
         title="Golden Hour",
         footage_uri="demo://salted-scene",
         duration_s=62.0,
+        script_uri="demo://golden-hour-script",
     )
     return PipelineContext(
         state=ProductionState(production=production),

@@ -119,6 +119,18 @@ class LiveGeminiClient:
     async def scan(self, footage_uri: str, duration_s: float) -> ScanResult:
         return await self._scan_with_prompt(footage_uri, SCAN_PROMPT)
 
+    async def scan_script(self, text: str):
+        from clearframe.integrations.gemini_client import (
+            SCRIPT_PROMPT,
+            parse_script_payload,
+        )
+
+        def _run():
+            raw = self._generate([SCRIPT_PROMPT + "\n\nSCREENPLAY:\n" + text])
+            return parse_script_payload(json.loads(raw))
+
+        return await asyncio.to_thread(_run)
+
     async def _scan_with_prompt(self, footage_uri: str, prompt: str) -> ScanResult:
         video = _video_part(footage_uri)
         base_contents = [video, prompt]
