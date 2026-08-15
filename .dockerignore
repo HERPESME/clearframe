@@ -1,0 +1,9 @@
+.venv/
+.git/
+out/
+webapp/node_modules/
+webapp/src/
+docs/
+tests/
+__pycache__/
+*.egg-info/
