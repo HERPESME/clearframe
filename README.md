@@ -44,6 +44,27 @@ python -m clearframe serve --out out --port 8000
 
 Demo mode replays recorded Gemini/Parallel responses through the identical pipeline code path. `pytest` runs the whole suite.
 
+## MCP server
+
+The whole clearance department is also an **MCP server** — any MCP client (Gemini Enterprise, Claude, IDEs) can drive it as tools:
+
+```bash
+python -m clearframe.mcp --out out   # stdio transport
+# tools: run_clearance · get_status · list_findings · get_finding · record_decision · generate_dossier
+```
+
+Role gating and the append-only audit trail apply identically across all three transports (CLI, web app, MCP) — one shared review service owns the rules. See [docs/deploy.md](docs/deploy.md) for client registration.
+
+## Guardrails
+
+- **Deterministic risk scoring** — pure code, reproducible from stored inputs; no LLM in the scoring path.
+- **Server-side role gating** — only `legal`/`producer` record decisions, enforced in the review service, not the UI.
+- **Append-only audit trail** — every decision (including revisions) and dossier generation is logged and printed in the dossier.
+- **Research spend cap** — `CLEARFRAME_MAX_RESEARCH` (default 25) bounds the Parallel fan-out; overflow surfaces as RESEARCH INCOMPLETE, never silently dropped.
+- **Gemini safety settings** — explicit `BLOCK_ONLY_HIGH` thresholds on the scan config.
+- **Honest failure states** — unidentifiable rights holders escalate; unscanned footage ranges are listed in the report as not covered.
+- **Stale-dossier protection** — revising any decision reopens review so an outdated report can't circulate.
+
 ## Live mode (Vertex AI Gemini + Parallel Task API)
 
 ```bash

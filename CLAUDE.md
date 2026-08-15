@@ -25,14 +25,16 @@ DONE:
 - ADK native multi-agent pipeline (guide Phase 4) — built and tested.
 - Gemini multimodal video analysis with timestamps (Phase 2) — coded; live quality NOT yet validated.
 - Partner integration via Parallel Task API REST (Phase 3) — fixture-proven; live NOT yet called.
-- Cloud Run collateral: Dockerfile + docs/deploy.md incl. Secret Manager commands (Phase 5) — written, not deployed; Docker build unverified.
+- **clearframe-mcp server** (roadmap prong B): pipeline as 6 MCP tools, `python -m clearframe.mcp`, mcp SDK v2, fully tested in-process.
+- **Guardrails**: Gemini safety settings (BLOCK_ONLY_HIGH ×4), research spend cap (`CLEARFRAME_MAX_RESEARCH`), Parallel retry+backoff, append-only audit trail (in dossier too), shared `review.py` service (webapp+MCP use identical rules).
+- Cloud Run collateral: Dockerfile + docs/deploy.md incl. Secret Manager + MCP registration (Phase 5) — written, not deployed; Docker build unverified.
+- `deploy` extra: `google-cloud-aiplatform[agent_engines,adk]>=1.101.0` (dry-run resolved clean against google-adk 2.7).
 
 NOT DONE (blocked on credentials/user):
 - GCP project + $100 credit form + Parallel API key (Phase 1/3 forms).
 - First live Gemini scan + prompt tuning; first live Parallel research run.
-- Agent Engine deployment (guide recommends `pip install "google-cloud-aiplatform[agent_engines,adk]>=1.101.0"` — add to `cloud` extra when deploying).
-- Cloud Run deploy + Secret Manager provisioning.
-- Gemini safety settings on the live client (small code task — add `safety_settings` to `GenerateContentConfig` in `gemini_live.py` when touching it).
+- Parallel **managed MCP server** as research transport (roadmap prong A — needs real auth to verify).
+- Agent Engine deployment, Cloud Run deploy, Secret Manager provisioning.
 
 NOT USED (deliberate — out of scope for clearance): Imagen, Lyria, TTS, Live API streaming, BigQuery RAG, MCP Database Toolbox. Possible stretch if time allows: script-clearance pre-scan (parse screenplay PDF for flaggable items before the shoot — real industry workflow, uses guide's document processing).
 

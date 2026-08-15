@@ -50,7 +50,43 @@ CLEARFRAME_MODE=live GOOGLE_CLOUD_PROJECT=$PROJECT PARALLEL_API_KEY=$KEY \
   --title "Golden Hour" --duration-s 62 --out out
 ```
 
+## MCP server
+
+ClearFrame ships as an MCP server (`clearframe-mcp`) exposing the pipeline as
+tools: `run_clearance`, `get_status`, `list_findings`, `get_finding`,
+`record_decision`, `generate_dossier`.
+
+Register with any MCP client over stdio, e.g. Claude Code:
+
+```bash
+claude mcp add clearframe -- python -m clearframe.mcp --out out
+```
+
+or in a client's JSON config:
+
+```json
+{
+  "mcpServers": {
+    "clearframe": {
+      "command": "python",
+      "args": ["-m", "clearframe.mcp", "--out", "out"],
+      "env": {"CLEARFRAME_MODE": "demo"}
+    }
+  }
+}
+```
+
+Live mode works the same way with `GOOGLE_CLOUD_PROJECT`/`PARALLEL_API_KEY` in
+the `env` block. Role gating and the audit trail apply identically to MCP calls
+(decisions are recorded as `mcp:<role>`).
+
 ## Agent Engine (managed agent runtime)
+
+Install the deploy extra first (the guide-pinned bundle):
+
+```bash
+pip install -e ".[deploy]"
+```
 
 The pipeline is exposed as an ADK `SequentialAgent` via
 `clearframe.adk.agents.build_clearframe_agent`. To deploy on Vertex AI Agent
