@@ -19,3 +19,12 @@ def test_cli_demo_without_approve_reports_pending(tmp_path, capsys):
     out = capsys.readouterr().out
     assert "review" in out.lower()
     assert not (tmp_path / "dossier.html").exists()
+
+
+def test_cli_second_run_resumes_persisted_state(tmp_path, capsys):
+    main(["run", "--demo", "--out", str(tmp_path)])
+    capsys.readouterr()
+    rc = main(["run", "--demo", "--out", str(tmp_path)])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "Resuming production 'demo'" in out

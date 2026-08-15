@@ -31,7 +31,25 @@ def _print_summary(state) -> None:
         print(f"{el.label[:32]:<32} {risk.band.value:<9} {risk.score:>5}  {owner:<38} {action}")
 
 
+def _try_resume(ctx: PipelineContext) -> None:
+    """Reuse persisted state from a previous run of the same production/footage.
+
+    Live-mode stages (Gemini scan, Parallel research) are expensive; a crash
+    mid-pipeline should not force a full re-run.
+    """
+    try:
+        existing = ctx.store.load(ctx.state.production.id)
+    except FileNotFoundError:
+        return
+    if existing.production.footage_uri == ctx.state.production.footage_uri:
+        done = [s for s, v in existing.stage_status.items() if v == "complete"]
+        if done:
+            print(f"Resuming production '{existing.production.id}' (completed: {', '.join(done)})")
+        ctx.state = existing
+
+
 async def _run(ctx: PipelineContext, out_dir: Path, auto_approve: bool) -> int:
+    _try_resume(ctx)
     state = await Pipeline(build_demo_pipeline()).run(ctx)
 
     if auto_approve:
