@@ -98,7 +98,9 @@ _TEMPLATE = Template(
     {% for b in e.court.briefs %}
       <div class="citation"><strong>{{ 'Studio Counsel' if b.side == 'counsel' else 'Fair Use Advocate' }}:</strong> {{ b.argument }}
       {% for p in b.precedents %}
-        <div>· <em>{{ p.case_name }}</em>, {{ p.citation }} — {{ p.holding }} <span style="color:#777">({{ p.relevance }})</span></div>
+        <div>· <em>{{ p.case_name }}</em>, {{ p.citation }} — {{ p.holding }} <span style="color:#777">({{ p.relevance }})</span>
+        {% if p.quote %}<div style="margin: 3px 0 3px 14px; font-style: italic; color: #555;">“{{ p.quote }}”{% if p.source_url %} <a href="{{ p.source_url }}">[source]</a>{% endif %}</div>{% endif %}
+        </div>
       {% endfor %}
       </div>
     {% endfor %}

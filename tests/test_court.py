@@ -52,6 +52,7 @@ async def test_dossier_html_renders_court_opinions(tmp_path):
     state.decisions = auto_decisions(state)
     html = render_dossier_html(build_dossier(state, generated_at="2026-08-15T12:00:00Z"))
     assert "Ringgold" in html and "Clearance Court" in html
+    assert "de minimis doctrine is inapplicable" in html  # extracted precedent quote
 
 
 async def test_mcp_get_finding_exposes_opinion(tmp_path):
