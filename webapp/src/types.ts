@@ -67,6 +67,49 @@ export interface Decision {
   note: string;
 }
 
+export interface Precedent {
+  case_name: string;
+  citation: string;
+  holding: string;
+  relevance: string;
+}
+
+export interface CourtBrief {
+  side: "counsel" | "advocate";
+  argument: string;
+  precedents: Precedent[];
+}
+
+export type CourtHolding = "clear_required" | "defensible" | "escalate";
+
+export interface CourtOpinion {
+  element_id: string;
+  holding: CourtHolding;
+  confidence: string;
+  reasoning: string;
+  briefs: CourtBrief[];
+}
+
+export interface ResearchPlan {
+  element_id: string;
+  processor: "lite" | "base" | "pro" | "ultra";
+  rationale: string;
+  est_cost_usd: number;
+}
+
+export interface PipelineEvent {
+  type: string;
+  stage?: string;
+  element_id?: string;
+  label?: string;
+  processor?: string;
+  status?: string;
+  owner?: string | null;
+  holding?: CourtHolding;
+  count?: number;
+  total_est_cost_usd?: number;
+}
+
 export interface ProductionState {
   production: {
     id: string;
@@ -82,4 +125,6 @@ export interface ProductionState {
   remediation: Record<string, RemediationOption[]>;
   decisions: Record<string, Decision>;
   unscanned_ranges: TimeRange[];
+  court: Record<string, CourtOpinion>;
+  research_plan: Record<string, ResearchPlan>;
 }

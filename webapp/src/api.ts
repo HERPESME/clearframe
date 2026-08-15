@@ -38,6 +38,12 @@ export const api = {
       "/api/productions",
     ),
   createDemo: () => request<ProductionState>("/api/productions/demo", { method: "POST" }),
+  startPacedDemo: (paceS: number) =>
+    request<{ status: string }>("/api/productions/demo", {
+      method: "POST",
+      body: JSON.stringify({ pace_s: paceS }),
+    }),
+  eventsUrl: (pid: string) => `/api/productions/${pid}/events`,
   getProduction: (id: string) => request<ProductionState>(`/api/productions/${id}`),
   recordDecision: (pid: string, elementId: string, action: Action, note: string) =>
     request<{ ok: boolean; pending: string[] }>(`/api/productions/${pid}/decisions`, {

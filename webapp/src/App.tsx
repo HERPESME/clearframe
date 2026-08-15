@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, ApiError, setRole } from "./api";
 import { ElementCard } from "./ElementCard";
+import { MissionControl } from "./MissionControl";
 import { Timeline } from "./Timeline";
 import type { Action, ProductionState, RiskBand, Role } from "./types";
 
@@ -8,6 +9,7 @@ const BANDS: RiskBand[] = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
 
 export default function App() {
   const [state, setState] = useState<ProductionState | null>(null);
+  const [mission, setMission] = useState(false);
   const [loading, setLoading] = useState(true);
   const [role, setRoleState] = useState<Role>("legal");
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -16,6 +18,13 @@ export default function App() {
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
+    // ?autorun starts a fresh paced pipeline run on load — used for demo
+    // recordings so Mission Control opens without a click.
+    if (new URLSearchParams(window.location.search).has("autorun")) {
+      setLoading(false);
+      loadDemo();
+      return;
+    }
     api
       .listProductions()
       .then(async (list) => {
@@ -23,6 +32,7 @@ export default function App() {
       })
       .catch(() => setError("Could not reach the ClearFrame API. Is the server running?"))
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const changeRole = (r: Role) => {
@@ -31,14 +41,23 @@ export default function App() {
   };
 
   const loadDemo = async () => {
-    setLoading(true);
     setError(null);
     try {
-      setState(await api.createDemo());
+      await api.startPacedDemo(0.45);
+      setState(null);
+      setArtifacts([]);
+      setMission(true);
     } catch {
-      setError("Demo production could not be created.");
-    } finally {
-      setLoading(false);
+      setError("Demo production could not be started.");
+    }
+  };
+
+  const enterReview = async () => {
+    try {
+      setState(await api.getProduction("demo"));
+      setMission(false);
+    } catch {
+      setError("Could not load the finished production.");
     }
   };
 
@@ -83,6 +102,10 @@ export default function App() {
     );
   }
 
+  if (mission) {
+    return <MissionControl onComplete={enterReview} />;
+  }
+
   if (!state) {
     return (
       <div className="hero">
@@ -95,14 +118,15 @@ export default function App() {
           Parallel researches who owns it. You make the call — with evidence attached.
         </p>
         <button className="generate" onClick={loadDemo}>
-          Load demo production
+          Run the clearance pipeline
         </button>
         {error && <div className="error-banner">{error}</div>}
       </div>
     );
   }
 
-  const { production, elements, research, risk, remediation, decisions } = state;
+  const { production, elements, research, risk, remediation, decisions, court, research_plan } =
+    state;
   const sorted = [...elements].sort((a, b) => risk[b.id].score - risk[a.id].score);
   const pending = elements.filter((el) => !decisions[el.id]);
   const bandCounts = Object.fromEntries(
@@ -140,6 +164,14 @@ export default function App() {
         <span className="role-hint">
           {role === "editor" ? "read-only" : "can record decisions"}
         </span>
+        <button
+          className="roles"
+          style={{ padding: "5px 12px", background: "transparent", color: "var(--muted)" }}
+          onClick={loadDemo}
+          title="Run the pipeline again from scratch"
+        >
+          Re-run
+        </button>
       </header>
 
       <Timeline
@@ -181,6 +213,8 @@ export default function App() {
             risk={risk[el.id]}
             options={remediation[el.id] ?? []}
             decision={decisions[el.id]}
+            court={court?.[el.id]}
+            plan={research_plan?.[el.id]}
             fps={production.fps}
             role={role}
             onDecide={onDecide}

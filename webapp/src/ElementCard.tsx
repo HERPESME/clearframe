@@ -1,6 +1,22 @@
 import { useState } from "react";
-import type { Action, Decision, Element, RemediationOption, Research, Risk, Role } from "./types";
+import type {
+  Action,
+  CourtOpinion,
+  Decision,
+  Element,
+  RemediationOption,
+  Research,
+  ResearchPlan,
+  Risk,
+  Role,
+} from "./types";
 import { tc } from "./timecode";
+
+const HOLDING_TEXT = {
+  clear_required: "CLEAR REQUIRED",
+  defensible: "DEFENSIBLE",
+  escalate: "ESCALATE",
+} as const;
 
 const ACTION_LABEL: Record<Action, string> = {
   approve_risk: "Approve risk",
@@ -24,6 +40,8 @@ interface Props {
   risk: Risk;
   options: RemediationOption[];
   decision: Decision | undefined;
+  court: CourtOpinion | undefined;
+  plan: ResearchPlan | undefined;
   fps: number;
   role: Role;
   onDecide: (elementId: string, action: Action, note: string) => Promise<void>;
@@ -37,6 +55,8 @@ export function ElementCard({
   risk,
   options,
   decision,
+  court,
+  plan,
   fps,
   role,
   onDecide,
@@ -72,6 +92,11 @@ export function ElementCard({
           {risk.band} · {risk.score}
         </span>
         {risk.de_minimis && <span className="badge dim">DE MINIMIS</span>}
+        {plan && (
+          <span className="plan-chip" title={plan.rationale}>
+            research: {plan.processor} · ${plan.est_cost_usd.toFixed(2)}
+          </span>
+        )}
       </div>
       <div className="tc-line">
         {element.time_ranges
@@ -120,6 +145,33 @@ export function ElementCard({
           </div>
         )}
       </div>
+
+      {court && (
+        <div className="sec">
+          <div className="sec-title">Clearance court</div>
+          <div className={`court-ruling ${court.holding}`}>
+            <span className="holding">{HOLDING_TEXT[court.holding]}</span>{" "}
+            <span style={{ color: "var(--muted)" }}>({court.confidence} confidence)</span>{" "}
+            — {court.reasoning}
+          </div>
+          {court.briefs.map((b, i) => (
+            <details className="option" key={i}>
+              <summary>
+                <b>{b.side === "counsel" ? "Studio Counsel" : "Fair Use Advocate"}</b> —
+                read the brief
+              </summary>
+              <div className="brief">
+                {b.argument}
+                {b.precedents.map((p, j) => (
+                  <div className="precedent" key={j}>
+                    · <em>{p.case_name}</em>, {p.citation} — {p.holding}
+                  </div>
+                ))}
+              </div>
+            </details>
+          ))}
+        </div>
+      )}
 
       <div className="sec">
         <div className="sec-title">Remediation options</div>
