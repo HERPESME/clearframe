@@ -53,11 +53,33 @@ async def _run(ctx: PipelineContext, out_dir: Path, auto_approve: bool) -> int:
     state = await Pipeline(build_demo_pipeline()).run(ctx)
 
     if auto_approve:
+        from clearframe.dossier import build_dossier
+        from clearframe.exporters.dossier_html import render_dossier_html
+        from clearframe.models import AuditEvent
+        from clearframe.review import create_watches
+
+        at = datetime.now(timezone.utc).isoformat()
         state.decisions = auto_decisions(state)
-        stage = DossierStage(
-            out_dir=out_dir, generated_at=datetime.now(timezone.utc).isoformat()
-        )
+        for decision in state.decisions.values():
+            state.audit_log.append(
+                AuditEvent(
+                    at=at,
+                    actor=decision.reviewer,
+                    role=decision.role,
+                    event="decision",
+                    detail=f"{decision.element_id}:{decision.action}",
+                )
+            )
+        stage = DossierStage(out_dir=out_dir, generated_at=at)
         await stage.run(ctx)
+        state.audit_log.append(
+            AuditEvent(at=at, actor="system", role="system", event="dossier_generated", detail="")
+        )
+        await create_watches(ctx, state, at)
+        # regenerate the dossier HTML so its audit-trail section includes this run
+        (out_dir / "dossier.html").write_text(
+            render_dossier_html(build_dossier(state, generated_at=at))
+        )
         ctx.store.save(state)
         _print_summary(state)
         print(f"\nArtifacts written to {out_dir}/:")

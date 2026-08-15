@@ -62,6 +62,17 @@ python -m clearframe.mcp --out out   # stdio transport
 
 Role gating and the append-only audit trail apply identically across all three transports (CLI, web app, MCP) — one shared review service owns the rules. See [docs/deploy.md](docs/deploy.md) for client registration.
 
+## Living clearance — the dossier that refuses to go stale
+
+Clearance isn't an event; it's a subscription. ClearFrame covers the whole lifecycle:
+
+- **Script pre-scan** (pre-production): Gemini reads the screenplay and flags clearables before a frame is shot.
+- **Script-vs-screen drift**: elements on camera that were never scripted get a `NOT IN SCRIPT` flag — the set-dressing surprises nobody budgeted clearance for.
+- **FindAll leads**: when deep research can't identify an owner (the unsigned mural), a recall-first Parallel FindAll pass enumerates candidate rights holders — registries, the building's owner, archives — instead of leaving a dead end.
+- **Standing watch** (post-delivery): after the dossier, Parallel Monitors watch each risky finding — new lawsuits, filings, policy changes by the rights holder. A webhook alert **reopens review automatically** and lands in the audit trail. Your dossier can't silently rot.
+
+Run everything yourself: `./scripts/smoke.sh` verifies the full lifecycle across every transport (CLI, web, SSE, webhook, MCP stdio) in one command.
+
 ## Guardrails
 
 - **Deterministic risk scoring** — pure code, reproducible from stored inputs; no LLM in the scoring path.

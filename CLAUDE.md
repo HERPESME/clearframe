@@ -22,6 +22,7 @@ Deterministic 6-stage pipeline: **scan** (Gemini video, Vertex) → **triage** (
 ## Status vs hackathon resources guide (updated 2026-08-15)
 
 DONE:
+- **Phase 5 (Aug 15, "Living Clearance")**: script pre-scan + script-vs-screen drift (stages `script`/`drift`, 8 stages total), FindAll candidate enumeration for incomplete IP research, **standing clearance watch** (Parallel Monitors created post-dossier; webhook `/api/webhooks/parallel-monitor` reopens review + audit), court precedent quotes w/ source links, `scripts/smoke.sh` (full-transport smoke test — keep it green). Parallel surface now: Task+processors, FindAll, Monitor (+Search/Extract documented for live court, keys-day).
 - **Phase 4 (Aug 15)**: Clearance Court (adversarial counsel/advocate/judge agents with real case-law fixtures — Ringgold, Sandoval, Rogers, Caterpillar, Falkner, VARA, §504(c); live = 3 Gemini persona calls, keys-day validation), E&O Auditor second scan pass (demo scene now **7 elements**), Budget Planner (Parallel processor tiers + rationale + est cost), Mission Control (SSE event stream + live agent roster UI; `?autorun` URL flag for demo recordings; paced demo runs via `POST /api/productions/demo {"pace_s": …}`).
 - ADK native multi-agent pipeline (guide Phase 4) — built and tested.
 - Gemini multimodal video analysis with timestamps (Phase 2) — coded; live quality NOT yet validated.

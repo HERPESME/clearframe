@@ -94,7 +94,7 @@ def _watch_query(element, research, opinion) -> str | None:
     return None
 
 
-async def _create_watches(ctx, state: ProductionState, at: str) -> None:
+async def create_watches(ctx, state: ProductionState, at: str) -> None:
     for el in state.elements:
         if el.id in state.watches:
             continue
@@ -136,7 +136,7 @@ async def generate_dossier_async(
     state.audit_log.append(
         AuditEvent(at=at, actor="system", role="system", event="dossier_generated", detail="")
     )
-    await _create_watches(ctx, state, at)
+    await create_watches(ctx, state, at)
     store.save(state)
     return [p.name for p in sorted(out_root.iterdir()) if p.is_file()]
 

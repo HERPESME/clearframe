@@ -41,6 +41,11 @@ Keep the song clearly audible; keep logos in focus for a few seconds each. (The 
 > "Every decision is logged, and out comes the artifact this industry actually runs on: the E&O clearance report — plus timeline markers that drop straight into DaVinci Resolve, and the ASCAP cue sheet for the music."
 - Show markers.edl imported in Resolve (Timeline → Import → Timeline Markers from EDL) with colored risk markers on the timeline.
 
+**(insert at ~2:10, 15s) — The kicker: living clearance**
+- Fire the mock monitor webhook (curl or a button) while on the review screen.
+> "And clearance doesn't end at delivery. ClearFrame leaves standing watches on every risky finding through Parallel's monitors — three weeks later, when the rights holder files a new lawsuit, your dossier reopens itself."
+- The amber alert banner appears live: *review reopened*.
+
 **2:20–2:50 — Architecture + impact (diagram card)**
 > "Under the hood: a deterministic six-stage agent pipeline built with Google's Agent Development Kit, Gemini on Vertex AI for video understanding, and Parallel's Task API for rights research, deployed on Cloud Run. Deterministic scoring — no LLM guessing on risk. For studios, this turns weeks of manual review into hours. For indie filmmakers, it's the difference between getting distribution and not."
 
