@@ -1,0 +1,39 @@
+{
+  "briefs": [
+    {
+      "side": "counsel",
+      "argument": "This is a 12-second, plot-integral use of a major-label hit — characters react to the song, making it a featured sync use. Unlicensed sync and master use exposes the production to statutory damages of up to $150,000 per work for willful infringement, and both the composition (UMPG) and the master (XO/Republic) are implicated as separate works. There is no realistic de-minimis position: courts reject de-minimis where the copyrighted work is deliberately featured and recognizable. Distribution without a license is uninsurable.",
+      "precedents": [
+        {
+          "case_name": "17 U.S.C. § 504(c) (statutory damages)",
+          "citation": "17 U.S.C. § 504(c)",
+          "holding": "Statutory damages up to $150,000 per work for willful infringement, without proof of actual harm.",
+          "relevance": "Two works (composition + master) are in play; willfulness is easy to show for a knowing sync use."
+        },
+        {
+          "case_name": "Ringgold v. Black Entertainment Television",
+          "citation": "126 F.3d 70 (2d Cir. 1997)",
+          "holding": "Recognizable, deliberately included copyrighted work in a TV scene was not de minimis and infringed.",
+          "relevance": "A deliberately featured, recognizable work defeats a de-minimis defense."
+        }
+      ]
+    },
+    {
+      "side": "advocate",
+      "argument": "The use is diegetic — the song plays from a character's phone within the story world, not as underscore. But candor requires conceding: diegetic use is still a use requiring sync and master licenses; the doctrine offers no exemption for source music, and the 12-second duration with on-screen character reaction makes the work a focal element. The defense has no precedent to stand on at this prominence.",
+      "precedents": [
+        {
+          "case_name": "Sandoval v. New Line Cinema",
+          "citation": "147 F.3d 215 (2d Cir. 1998)",
+          "holding": "Fleeting, out-of-focus, unidentifiable background use of copyrighted works was de minimis.",
+          "relevance": "Cited for contrast: this use is the opposite — clear, extended, and plot-integral."
+        }
+      ]
+    }
+  ],
+  "opinion": {
+    "holding": "clear_required",
+    "confidence": "high",
+    "reasoning": "Featured diegetic use of a recognizable hit song for 12 seconds with character interaction. Ringgold forecloses de minimis for deliberately featured works; § 504(c) exposure covers two separate copyrights. License both sync and master before any distribution, or cut/replace the cue."
+  }
+}

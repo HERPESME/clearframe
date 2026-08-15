@@ -1,0 +1,39 @@
+{
+  "briefs": [
+    {
+      "side": "counsel",
+      "argument": "The mural fills 30% of frame for six seconds as the walking shot's backdrop — it is the shot's visual subject, not incident. Murals are fully copyright-protected pictorial works, and street artists have repeatedly and successfully enforced against commercial exploitation of their work in media. Because deep research could not identify the artist, the production faces the worst posture: a live copyright with an untraceable owner. E&O underwriters treat unidentifiable rights holders as uninsurable exposure, and VARA adds moral-rights complications no release can cure retroactively.",
+      "precedents": [
+        {
+          "case_name": "Falkner v. General Motors LLC",
+          "citation": "393 F. Supp. 3d 927 (C.D. Cal. 2018)",
+          "holding": "A muralist's copyright claim over commercial photography featuring his mural survived summary judgment.",
+          "relevance": "Street art is enforceable copyright; prominent commercial use of murals draws real claims."
+        },
+        {
+          "case_name": "Visual Artists Rights Act",
+          "citation": "17 U.S.C. § 106A",
+          "holding": "Authors of works of visual art hold attribution and integrity rights independent of copyright ownership.",
+          "relevance": "Even a later license from a building owner would not extinguish the artist's own rights."
+        }
+      ]
+    },
+    {
+      "side": "advocate",
+      "argument": "The mural is public street context in a walking shot — filming the world as it exists. If the shot were brief or the mural incidental, Sandoval-style observability arguments would apply. But at 30% coverage for six seconds the work's expression is plainly conveyed, and candor requires acknowledging that the de-minimis position is weak on these facts. The stronger practical defense is mitigation: reframe, shorten, or defocus the shot.",
+      "precedents": [
+        {
+          "case_name": "Sandoval v. New Line Cinema",
+          "citation": "147 F.3d 215 (2d Cir. 1998)",
+          "holding": "Fleeting, unidentifiable background use is de minimis.",
+          "relevance": "Would control only if the shot were recut to make the mural incidental."
+        }
+      ]
+    }
+  ],
+  "opinion": {
+    "holding": "escalate",
+    "confidence": "high",
+    "reasoning": "Prominent use of an enforceable copyrighted work whose owner cannot be identified is the single worst clearance posture — no license is even possible yet. Escalate: commission a human investigation to identify the artist (local arts orgs, street-art registries, the building owner), and prepare the fallback of recutting the shot to Sandoval territory."
+  }
+}

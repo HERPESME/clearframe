@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 from clearframe.models import (
     AuditEvent,
+    CourtOpinion,
     Decision,
     Production,
     ProductionState,
@@ -34,6 +35,7 @@ class DossierEntry(BaseModel):
     risk: RiskAssessment
     options: list[RemediationOption]
     decision: Decision | None
+    court: CourtOpinion | None = None
 
 
 class ClearanceDossier(BaseModel):
@@ -54,6 +56,7 @@ def build_dossier(state: ProductionState, generated_at: str) -> ClearanceDossier
             risk=state.risk[el.id],
             options=state.remediation.get(el.id, []),
             decision=state.decisions.get(el.id),
+            court=state.court.get(el.id),
         )
         for el in state.elements
     ]

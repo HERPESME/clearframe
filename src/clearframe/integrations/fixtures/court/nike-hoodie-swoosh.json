@@ -1,0 +1,39 @@
+{
+  "briefs": [
+    {
+      "side": "counsel",
+      "argument": "The Swoosh appears for 15 seconds across two scenes on the lead actor at 12% frame coverage — this is prominence, not incident. Nike operates one of the most aggressive trademark enforcement programs in existence and moved for a TRO within days in the MSCHF matter. Even where a defense ultimately prevails, Nike's demonstrated willingness to litigate makes the expected cost of a dispute far exceed the cost of a wardrobe blur. Prominent, repeated display on a protagonist also edges toward implied endorsement, weakening the expressive-use defense.",
+      "precedents": [
+        {
+          "case_name": "Nike, Inc. v. MSCHF Product Studio, Inc.",
+          "citation": "No. 21-cv-1679 (E.D.N.Y. 2021)",
+          "holding": "Nike obtained rapid injunctive relief against unauthorized use of its marks on modified products.",
+          "relevance": "Demonstrates enforcement speed and appetite, which drives practical risk regardless of the merits."
+        }
+      ]
+    },
+    {
+      "side": "advocate",
+      "argument": "Trademarks appearing in expressive works enjoy robust First Amendment protection: under Rogers, use of a mark in an expressive work is actionable only if it has no artistic relevance or explicitly misleads about sponsorship. A character wearing ordinary branded streetwear is realistic set dressing with artistic relevance and no sponsorship claim. Courts have repeatedly refused to let trademark owners control depictions of their products in film.",
+      "precedents": [
+        {
+          "case_name": "Rogers v. Grimaldi",
+          "citation": "875 F.2d 994 (2d Cir. 1989)",
+          "holding": "Trademark use in expressive works is protected unless artistically irrelevant or explicitly misleading.",
+          "relevance": "Wardrobe depiction in a narrative film sits squarely inside the Rogers safe harbor."
+        },
+        {
+          "case_name": "Caterpillar Inc. v. Walt Disney Co.",
+          "citation": "287 F. Supp. 2d 913 (C.D. Ill. 2003)",
+          "holding": "Court refused to enjoin depiction of Caterpillar bulldozers as villainous machinery in a film.",
+          "relevance": "Mere depiction of branded products in a film, even unflattering, is not infringement."
+        }
+      ]
+    }
+  ],
+  "opinion": {
+    "holding": "escalate",
+    "confidence": "medium",
+    "reasoning": "The Rogers defense is legally strong for wardrobe depiction, but prominence (15s, lead actor, two scenes) plus Nike's documented enforcement posture makes the practical calculus close: an $800/shot blur is cheaper than answering Nike's first letter. Escalate to counsel with a recommendation to blur or change wardrobe unless the depiction carries deliberate artistic weight."
+  }
+}

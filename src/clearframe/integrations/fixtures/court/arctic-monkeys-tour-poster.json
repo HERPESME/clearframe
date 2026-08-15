@@ -1,0 +1,33 @@
+{
+  "briefs": [
+    {
+      "side": "counsel",
+      "argument": "Ringgold is directly on point and fatal: a copyrighted poster visible in the background of a scene for a comparable duration (26.75 seconds aggregate in Ringgold; 5 continuous seconds at 20% frame coverage here, in focus) was held infringing, with the Second Circuit explicitly rejecting a de-minimis defense where the work is recognizable and its expressive content is conveyed. The poster is framed, lit, and identifiable — its expressive value is being used as set decoration without license.",
+      "precedents": [
+        {
+          "case_name": "Ringgold v. Black Entertainment Television",
+          "citation": "126 F.3d 70 (2d Cir. 1997)",
+          "holding": "A poster of a copyrighted artwork visible in a TV scene background was infringing; de minimis rejected.",
+          "relevance": "Nearly identical fact pattern: decorative poster, background of a dramatic scene, recognizable."
+        }
+      ]
+    },
+    {
+      "side": "advocate",
+      "argument": "Sandoval shows the line: where background works are fleeting, obscured, or unidentifiable, the use is de minimis. At five seconds with actors in the foreground pulling focus, an average observer's ability to discern the poster's protected expression is genuinely contestable — the observability analysis, not raw duration, controls. A licensing conversation at the $500–$5k band is nonetheless cheap certainty.",
+      "precedents": [
+        {
+          "case_name": "Sandoval v. New Line Cinema",
+          "citation": "147 F.3d 215 (2d Cir. 1998)",
+          "holding": "Background photographs that were fleeting and out of focus were de minimis and non-infringing.",
+          "relevance": "The counter-anchor: if the poster reads as unidentifiable set dressing, no infringement."
+        }
+      ]
+    }
+  ],
+  "opinion": {
+    "holding": "clear_required",
+    "confidence": "medium",
+    "reasoning": "This sits between Ringgold and Sandoval, but closer to Ringgold: the poster is in focus, framed as decor, and identifiable at 20% coverage. With a $500–$5k license band and a cooperative rights holder, clearing is cheap relative to the litigation-anchored downside. License it, or reframe/soften focus so Sandoval controls."
+  }
+}

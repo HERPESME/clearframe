@@ -1,0 +1,39 @@
+{
+  "briefs": [
+    {
+      "side": "counsel",
+      "argument": "The can sits on the kitchen table for six seconds at 60% centrality — visible enough to read the script mark. While depiction alone is rarely actionable, the conservative path for E&O purposes is either a product-placement agreement (often free — Coca-Cola actively places product) or a two-second art-department swap to a greeked can.",
+      "precedents": [
+        {
+          "case_name": "Ringgold v. Black Entertainment Television",
+          "citation": "126 F.3d 70 (2d Cir. 1997)",
+          "holding": "Deliberate set-dressing with protected material can be actionable where recognizable.",
+          "relevance": "Cited by analogy for deliberate set-dressing, though trademark (not copyright) governs here."
+        }
+      ]
+    },
+    {
+      "side": "advocate",
+      "argument": "An ordinary soda can on a kitchen table is precisely the realistic incidental depiction courts protect in expressive works. There is no plot role, no disparagement, and no suggestion of sponsorship — under Rogers and Caterpillar, trademark owners cannot control truthful depictions of their products existing in the world. Productions depict branded consumer goods constantly without licenses.",
+      "precedents": [
+        {
+          "case_name": "Rogers v. Grimaldi",
+          "citation": "875 F.2d 994 (2d Cir. 1989)",
+          "holding": "Trademark use in expressive works is protected absent artistic irrelevance or explicit misleading.",
+          "relevance": "Incidental prop depiction has artistic relevance (realism) and implies no sponsorship."
+        },
+        {
+          "case_name": "Caterpillar Inc. v. Walt Disney Co.",
+          "citation": "287 F. Supp. 2d 913 (C.D. Ill. 2003)",
+          "holding": "Depiction of branded products in film, without more, is not trademark infringement.",
+          "relevance": "Directly on point for a background consumer product."
+        }
+      ]
+    }
+  ],
+  "opinion": {
+    "holding": "defensible",
+    "confidence": "medium",
+    "reasoning": "Incidental background depiction of a consumer product in an expressive work is well protected (Rogers; Caterpillar) and Coca-Cola's enforcement posture toward film depiction is cooperative. Defensible as-is; a free placement agreement would convert the residual risk to zero if the producer prefers."
+  }
+}

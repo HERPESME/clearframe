@@ -89,6 +89,22 @@ _TEMPLATE = Template(
     {% endif %}
   </div>
 
+  {% if e.court %}
+  <div class="section">
+    <h4>Clearance Court opinion</h4>
+    <div><strong>Ruling:</strong>
+      <span class="chip" style="background: {{ {'clear_required': '#c0392b', 'escalate': '#e67e22', 'defensible': '#27ae60'}[e.court.holding] }}">{{ e.court.holding|replace('_',' ')|upper }}</span>
+      ({{ e.court.confidence }} confidence) — {{ e.court.reasoning }}</div>
+    {% for b in e.court.briefs %}
+      <div class="citation"><strong>{{ 'Studio Counsel' if b.side == 'counsel' else 'Fair Use Advocate' }}:</strong> {{ b.argument }}
+      {% for p in b.precedents %}
+        <div>· <em>{{ p.case_name }}</em>, {{ p.citation }} — {{ p.holding }} <span style="color:#777">({{ p.relevance }})</span></div>
+      {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
   <div class="section">
     <h4>Remediation options</h4>
     {% for o in e.options %}

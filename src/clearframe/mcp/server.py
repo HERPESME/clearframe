@@ -148,6 +148,7 @@ def build_server(out_root: Path) -> MCPServer:
             raise ValueError(f"Unknown element: {element_id}")
         research = state.research.get(element_id)
         decision = state.decisions.get(element_id)
+        opinion = state.court.get(element_id)
         return {
             "element": element.model_dump(mode="json"),
             "research": research.model_dump(mode="json") if research else None,
@@ -155,6 +156,7 @@ def build_server(out_root: Path) -> MCPServer:
             "remediation": [
                 o.model_dump(mode="json") for o in state.remediation.get(element_id, [])
             ],
+            "court": opinion.model_dump(mode="json") if opinion else None,
             "decision": decision.model_dump(mode="json") if decision else None,
         }
 

@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Protocol
 
+from clearframe.integrations.court_client import CourtClient, FixtureCourtClient
 from clearframe.integrations.gemini_client import FixtureGeminiClient, GeminiClient
 from clearframe.integrations.parallel_client import FixtureParallelClient, ParallelClient
 from clearframe.models import Production, ProductionState
@@ -11,7 +12,7 @@ from clearframe.store import LocalJsonStore
 
 FIXTURES_DIR = Path(__file__).parent / "integrations" / "fixtures"
 
-ANALYSIS_STAGES = ("scan", "triage", "research", "risk", "remediation")
+ANALYSIS_STAGES = ("scan", "triage", "research", "risk", "remediation", "court")
 
 
 @dataclass
@@ -20,6 +21,7 @@ class PipelineContext:
     gemini: GeminiClient
     parallel: ParallelClient
     store: LocalJsonStore
+    court: "CourtClient | None" = None
     listener: "Callable[[dict], None] | None" = None
 
     def emit(self, event: dict) -> None:
@@ -61,6 +63,8 @@ def build_demo_pipeline(max_research: int | None = None) -> list[Stage]:
     from clearframe.stages.scan import ScanStage
     from clearframe.stages.triage_stage import TriageStage
 
+    from clearframe.stages.court import CourtStage
+
     if max_research is None:
         max_research = int(os.environ.get("CLEARFRAME_MAX_RESEARCH", "25"))
     return [
@@ -69,6 +73,7 @@ def build_demo_pipeline(max_research: int | None = None) -> list[Stage]:
         ResearchStage(max_research=max_research),
         RiskStage(),
         RemediationStage(),
+        CourtStage(),
     ]
 
 
@@ -78,18 +83,25 @@ def build_context(cfg, production: Production, out_root: Path) -> PipelineContex
         from clearframe.integrations.gemini_live import LiveGeminiClient
         from clearframe.integrations.parallel_client import LiveParallelClient
 
+        from clearframe.integrations.court_client import LiveCourtClient
+
         gemini: GeminiClient = LiveGeminiClient(
             project=cfg.project, location=cfg.location, model=cfg.gemini_model
         )
         parallel: ParallelClient = LiveParallelClient(api_key=cfg.parallel_api_key)
+        court: CourtClient = LiveCourtClient(
+            project=cfg.project, location=cfg.location, model=cfg.gemini_model
+        )
     else:
         gemini = FixtureGeminiClient(FIXTURES_DIR)
         parallel = FixtureParallelClient(FIXTURES_DIR)
+        court = FixtureCourtClient(FIXTURES_DIR)
     return PipelineContext(
         state=ProductionState(production=production),
         gemini=gemini,
         parallel=parallel,
         store=LocalJsonStore(Path(out_root) / "state"),
+        court=court,
     )
 
 
@@ -105,4 +117,5 @@ def demo_context(out_root: Path) -> PipelineContext:
         gemini=FixtureGeminiClient(FIXTURES_DIR),
         parallel=FixtureParallelClient(FIXTURES_DIR),
         store=LocalJsonStore(Path(out_root) / "state"),
+        court=FixtureCourtClient(FIXTURES_DIR),
     )
