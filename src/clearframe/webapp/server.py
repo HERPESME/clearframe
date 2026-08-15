@@ -31,7 +31,22 @@ ARTIFACT_WHITELIST = (
     "cue_sheet.csv",
 )
 
-DIST_DIR = Path(__file__).resolve().parents[3] / "webapp" / "dist"
+def _find_dist_dir() -> Path | None:
+    """Locate the built SPA: env override, container/cwd layout, or repo layout."""
+    import os
+
+    candidates = []
+    if os.environ.get("CLEARFRAME_DIST_DIR"):
+        candidates.append(Path(os.environ["CLEARFRAME_DIST_DIR"]))
+    candidates.append(Path.cwd() / "webapp" / "dist")
+    candidates.append(Path(__file__).resolve().parents[3] / "webapp" / "dist")
+    for c in candidates:
+        if (c / "index.html").exists():
+            return c
+    return None
+
+
+DIST_DIR = _find_dist_dir()
 
 
 class DecisionRequest(BaseModel):
@@ -214,7 +229,7 @@ def create_app(out_root: Path) -> FastAPI:
         media = "text/html" if name.endswith(".html") else "text/plain"
         return FileResponse(out_root / name, media_type=media)
 
-    if DIST_DIR.exists():
+    if DIST_DIR is not None:
         app.mount("/", StaticFiles(directory=DIST_DIR, html=True), name="ui")
     else:
 
