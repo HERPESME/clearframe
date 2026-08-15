@@ -3,6 +3,8 @@ from types import SimpleNamespace
 
 import pytest
 
+pytest.importorskip("google.genai", reason="live client tests need the cloud extra")
+
 from clearframe.integrations.gemini_live import LiveGeminiClient, ScanFailedError
 
 VALID_PAYLOAD = {
