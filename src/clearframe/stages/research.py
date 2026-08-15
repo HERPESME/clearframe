@@ -9,6 +9,7 @@ honestly as RESEARCH_INCOMPLETE instead of being silently dropped.
 import asyncio
 
 from clearframe.integrations.parallel_client import _incomplete
+from clearframe.models import ClearanceCategory
 from clearframe.pipeline import PipelineContext
 from clearframe.planner import plan_research
 
@@ -63,3 +64,26 @@ class ResearchStage:
         for el in skipped:
             research[el.id] = _incomplete(el.id)
         ctx.state.research = research
+
+        # FindAll enumeration: when deep research can't identify an owner of an
+        # IP-bearing element, enumerate candidate rights holders (recall-first)
+        # instead of leaving a dead end.
+        enumerable = {
+            ClearanceCategory.COPYRIGHT_ART,
+            ClearanceCategory.TRADEMARK,
+            ClearanceCategory.MUSIC_SYNC,
+        }
+        for el in elements:
+            if research[el.id].status != "incomplete" or el.category not in enumerable:
+                continue
+            candidates = await ctx.parallel.find_all(el, ctx.state.production.title)
+            if candidates:
+                ctx.state.candidates[el.id] = candidates
+                ctx.emit(
+                    {
+                        "type": "candidates_found",
+                        "element_id": el.id,
+                        "label": el.label,
+                        "count": len(candidates),
+                    }
+                )

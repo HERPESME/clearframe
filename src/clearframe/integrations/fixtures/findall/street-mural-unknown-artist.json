@@ -1,0 +1,22 @@
+{
+  "candidates": [
+    {
+      "name": "Precita Eyes Muralists Association",
+      "kind": "mural arts registry",
+      "url": "https://www.precitaeyes.org/",
+      "note": "Registers and documents community murals in the area; maintains artist attribution records and can identify unsigned works."
+    },
+    {
+      "name": "Building owner of record (county assessor parcel lookup)",
+      "kind": "property owner",
+      "url": "https://sfassessor.org/",
+      "note": "The wall's owner often commissioned the mural or holds the artist agreement; assessor records identify who to ask."
+    },
+    {
+      "name": "Local street-art documentation project (Mural Registry / street-art map)",
+      "kind": "crowdsourced archive",
+      "url": "https://www.muralregistry.example/",
+      "note": "Geotagged mural databases frequently attribute works that carry no visible signature."
+    }
+  ]
+}

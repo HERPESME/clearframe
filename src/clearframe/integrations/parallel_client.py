@@ -14,6 +14,8 @@ import httpx
 
 from clearframe.models import (
     BasisCitation,
+    CandidateEntity,
+    ClearanceWatch,
     LicensingPosture,
     ResearchResult,
     TriagedElement,
@@ -129,6 +131,14 @@ class ParallelClient(Protocol):
         processor: str | None = None,
     ) -> ResearchResult: ...
 
+    async def find_all(
+        self, element: TriagedElement, production_title: str
+    ) -> list[CandidateEntity]: ...
+
+    async def create_monitor(
+        self, element_id: str, query: str, frequency: str, webhook_url: str
+    ) -> ClearanceWatch | None: ...
+
 
 class FixtureParallelClient:
     def __init__(self, fixtures_dir: Path):
@@ -144,6 +154,25 @@ class FixtureParallelClient:
         if not path.exists():
             return _incomplete(element.id)
         return parse_task_output(element.id, json.loads(path.read_text()))
+
+    async def find_all(
+        self, element: TriagedElement, production_title: str
+    ) -> list[CandidateEntity]:
+        path = self.fixtures_dir / "findall" / f"{slug(element.label)}.json"
+        if not path.exists():
+            return []
+        payload = json.loads(path.read_text())
+        return [CandidateEntity.model_validate(c) for c in payload.get("candidates", [])]
+
+    async def create_monitor(
+        self, element_id: str, query: str, frequency: str, webhook_url: str
+    ) -> ClearanceWatch | None:
+        return ClearanceWatch(
+            element_id=element_id,
+            monitor_id=f"mon-{element_id}",
+            query=query,
+            frequency=frequency,
+        )
 
 
 class LiveParallelClient:
@@ -224,3 +253,64 @@ class LiveParallelClient:
                 await asyncio.sleep(self.poll_interval_s)
                 waited += self.poll_interval_s
         return _incomplete(element.id)
+
+    async def find_all(
+        self, element: TriagedElement, production_title: str
+    ) -> list[CandidateEntity]:
+        # TODO(keys-day): verify FindAll beta endpoint/shape against docs.parallel.ai
+        # (client.beta.findall.entity_search in the parallel-web SDK).
+        try:
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                resp = await client.post(
+                    f"{self.base_url}/v1beta/findall/entity_search",
+                    headers=self._headers,
+                    json={
+                        "entity_type": "rights_holder",
+                        "objective": (
+                            f"Find every plausible rights holder, registry, or "
+                            f"attribution source for '{element.label}' "
+                            f"({element.category.value}) appearing in the film "
+                            f"'{production_title}'."
+                        ),
+                        "match_limit": 10,
+                    },
+                )
+                resp.raise_for_status()
+                return [
+                    CandidateEntity(
+                        name=m.get("name", ""),
+                        kind=m.get("entity_type", "candidate"),
+                        url=m.get("url", ""),
+                        note=m.get("description", ""),
+                    )
+                    for m in resp.json().get("matches", [])
+                ]
+        except (httpx.HTTPError, KeyError, ValueError):
+            return []
+
+    async def create_monitor(
+        self, element_id: str, query: str, frequency: str, webhook_url: str
+    ) -> ClearanceWatch | None:
+        # TODO(keys-day): verify Monitor beta endpoint/shape against docs.parallel.ai
+        # (client.monitor.create in the parallel-web SDK).
+        try:
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                resp = await client.post(
+                    f"{self.base_url}/v1beta/monitors",
+                    headers=self._headers,
+                    json={
+                        "type": "web_change",
+                        "frequency": frequency,
+                        "settings": {"query": query},
+                        "webhook": {"url": webhook_url},
+                    },
+                )
+                resp.raise_for_status()
+                return ClearanceWatch(
+                    element_id=element_id,
+                    monitor_id=resp.json().get("monitor_id", f"mon-{element_id}"),
+                    query=query,
+                    frequency=frequency,
+                )
+        except (httpx.HTTPError, KeyError, ValueError):
+            return None
