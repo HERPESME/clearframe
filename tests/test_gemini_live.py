@@ -94,3 +94,11 @@ async def test_local_path_missing_file_raises(tmp_path):
     client, _ = make_client([SimpleNamespace(text=json.dumps(VALID_PAYLOAD))])
     with pytest.raises(FileNotFoundError):
         await client.scan(str(tmp_path / "missing.mp4"), 10.0)
+
+
+async def test_scan_config_includes_safety_settings():
+    client, fake = make_client([SimpleNamespace(text=json.dumps(VALID_PAYLOAD))])
+    await client.scan("gs://bucket/scene.mp4", 62.0)
+    config = fake.models.calls[0]["config"]
+    assert len(config.safety_settings) == 4
+    assert all(str(s.threshold).endswith("BLOCK_ONLY_HIGH") for s in config.safety_settings)

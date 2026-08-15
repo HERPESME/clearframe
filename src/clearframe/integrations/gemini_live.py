@@ -61,18 +61,36 @@ class LiveGeminiClient:
             self._client = self._client_factory()
         return self._client
 
-    def _generate(self, contents) -> str:
-        from_config = None
+    @staticmethod
+    def _scan_config():
+        """Structured-output config with explicit safety settings.
+
+        Footage analysis must not refuse on mild depicted content (a fight
+        scene is normal dailies) but blocks extreme outputs — BLOCK_ONLY_HIGH
+        across the four harm categories.
+        """
         try:
             from google.genai import types as genai_types
-
-            from_config = genai_types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=SCAN_RESPONSE_SCHEMA,
-            )
         except ImportError:
             # Test fakes don't need a real config object.
-            from_config = {"response_mime_type": "application/json"}
+            return {"response_mime_type": "application/json"}
+        categories = (
+            "HARM_CATEGORY_HATE_SPEECH",
+            "HARM_CATEGORY_DANGEROUS_CONTENT",
+            "HARM_CATEGORY_HARASSMENT",
+            "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+        )
+        return genai_types.GenerateContentConfig(
+            response_mime_type="application/json",
+            response_schema=SCAN_RESPONSE_SCHEMA,
+            safety_settings=[
+                genai_types.SafetySetting(category=c, threshold="BLOCK_ONLY_HIGH")
+                for c in categories
+            ],
+        )
+
+    def _generate(self, contents) -> str:
+        from_config = self._scan_config()
 
         client = self._client_or_create()
         models_to_try = [self.model, self.fallback_model]
