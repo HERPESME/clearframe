@@ -69,3 +69,21 @@ def test_artifact_name_whitelist(client):
 
 def test_unknown_production_404(client):
     assert client.get("/api/productions/nope").status_code == 404
+
+
+def test_decision_after_dossier_reopens_review(client):
+    state = _create_demo(client)
+    for el in state["elements"]:
+        client.post(
+            "/api/productions/demo/decisions",
+            json={"element_id": el["id"], "action": "license", "note": ""},
+            headers={"X-ClearFrame-Role": "legal"},
+        )
+    assert client.post("/api/productions/demo/dossier").status_code == 200
+    client.post(
+        "/api/productions/demo/decisions",
+        json={"element_id": "e1", "action": "escalate", "note": "second thoughts"},
+        headers={"X-ClearFrame-Role": "legal"},
+    )
+    refreshed = client.get("/api/productions/demo").json()
+    assert refreshed["stage_status"]["review"] == "awaiting"

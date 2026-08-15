@@ -103,6 +103,9 @@ def create_app(out_root: Path) -> FastAPI:
                 role=role,
                 note=body.note,
             )
+            if state.stage_status.get("review") == "complete":
+                # A revised decision invalidates the generated dossier.
+                state.stage_status["review"] = "awaiting"
             store.save(state)
             return {"ok": True, "pending": pending_ids(state)}
 
