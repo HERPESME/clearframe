@@ -1,0 +1,23 @@
+{
+  "content": {
+    "owner": "Local broadcast affiliate (KXBC-7) / parent station group",
+    "owner_confidence": "medium",
+    "licensing_contact": "clips@kxbc7.example (station clip licensing desk)",
+    "licensing_posture": "standard",
+    "litigation_history": [],
+    "estimated_license_cost_band": "$500-$3k (news clip license) or replace with cleared stock broadcast"
+  },
+  "basis": [
+    {
+      "field": "owner",
+      "citations": [
+        {
+          "url": "https://www.copyright.gov/circs/circ45.pdf",
+          "excerpts": ["Broadcast programming, including news, is protected by copyright from the moment of fixation."]
+        }
+      ],
+      "reasoning": "Broadcast footage on an in-scene TV is a copyrighted audiovisual work owned by the originating station; standard practice is a clip license or replacement with cleared content.",
+      "confidence": "medium"
+    }
+  ]
+}

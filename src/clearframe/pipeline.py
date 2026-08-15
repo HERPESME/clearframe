@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol
+from typing import Callable, Protocol
 
 from clearframe.integrations.gemini_client import FixtureGeminiClient, GeminiClient
 from clearframe.integrations.parallel_client import FixtureParallelClient, ParallelClient
@@ -20,6 +20,12 @@ class PipelineContext:
     gemini: GeminiClient
     parallel: ParallelClient
     store: LocalJsonStore
+    listener: "Callable[[dict], None] | None" = None
+
+    def emit(self, event: dict) -> None:
+        """Publish a pipeline progress event (Mission Control); no-op unheard."""
+        if self.listener is not None:
+            self.listener(event)
 
 
 class Stage(Protocol):

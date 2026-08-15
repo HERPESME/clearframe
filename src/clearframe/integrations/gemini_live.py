@@ -108,9 +108,20 @@ class LiveGeminiClient:
                 raise
         raise ScanFailedError(f"No usable Gemini model: {last_error}")
 
+    async def audit_scan(
+        self, footage_uri: str, duration_s: float, found_labels: list[str]
+    ) -> ScanResult:
+        from clearframe.integrations.gemini_client import AUDIT_PROMPT_TEMPLATE
+
+        prompt = AUDIT_PROMPT_TEMPLATE.format(found=", ".join(found_labels) or "nothing")
+        return await self._scan_with_prompt(footage_uri, prompt)
+
     async def scan(self, footage_uri: str, duration_s: float) -> ScanResult:
+        return await self._scan_with_prompt(footage_uri, SCAN_PROMPT)
+
+    async def _scan_with_prompt(self, footage_uri: str, prompt: str) -> ScanResult:
         video = _video_part(footage_uri)
-        base_contents = [video, SCAN_PROMPT]
+        base_contents = [video, prompt]
 
         def attempt(contents) -> tuple[ScanResult | None, str]:
             text = self._generate(contents)
@@ -125,7 +136,7 @@ class LiveGeminiClient:
 
         retry_contents = [
             video,
-            SCAN_PROMPT
+            prompt
             + "\n\nYour previous response could not be parsed as valid JSON matching "
             f"the schema. Parser error: {error}. Respond again with ONLY the JSON object.",
         ]

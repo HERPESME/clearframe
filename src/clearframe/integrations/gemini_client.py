@@ -27,6 +27,16 @@ SCAN_PROMPT = (
     "as unscanned_ranges. Be exhaustive: missing an element creates legal risk."
 )
 
+AUDIT_PROMPT_TEMPLATE = (
+    "You are the studio's E&O clearance AUDITOR, reviewing another coordinator's "
+    "work on this footage. The first pass found these elements: {found}. "
+    "Watch the footage again and report ONLY clearable elements the first pass "
+    "MISSED — background screens playing copyrighted content, reflections, "
+    "quiet audio, partially visible artwork, signage, tattoos, or faces they "
+    "overlooked. Use the same JSON format. If nothing was missed, return an "
+    "empty elements list. Do not repeat elements already found."
+)
+
 SCAN_RESPONSE_SCHEMA: dict = {
     "type": "object",
     "properties": {
@@ -110,6 +120,10 @@ def parse_scan_payload(payload: dict) -> ScanResult:
 class GeminiClient(Protocol):
     async def scan(self, footage_uri: str, duration_s: float) -> ScanResult: ...
 
+    async def audit_scan(
+        self, footage_uri: str, duration_s: float, found_labels: list[str]
+    ) -> ScanResult: ...
+
 
 class FixtureGeminiClient:
     def __init__(self, fixtures_dir: Path):
@@ -118,3 +132,11 @@ class FixtureGeminiClient:
     async def scan(self, footage_uri: str, duration_s: float) -> ScanResult:
         payload = json.loads((self.fixtures_dir / "demo_scene.json").read_text())
         return parse_scan_payload(payload)
+
+    async def audit_scan(
+        self, footage_uri: str, duration_s: float, found_labels: list[str]
+    ) -> ScanResult:
+        path = self.fixtures_dir / "demo_scene_audit.json"
+        if not path.exists():
+            return ScanResult(detections=[], unscanned_ranges=[])
+        return parse_scan_payload(json.loads(path.read_text()))
