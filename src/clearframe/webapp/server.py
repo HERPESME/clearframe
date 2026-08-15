@@ -18,6 +18,7 @@ from clearframe.review import (
     UnknownElementError,
     generate_dossier_async,
     record_decision,
+    record_watch_alert,
 )
 from clearframe.stages.dossier import ReviewPendingError
 from clearframe.store import LocalJsonStore
@@ -41,6 +42,12 @@ class DecisionRequest(BaseModel):
 
 class DemoRunRequest(BaseModel):
     pace_s: float = 0.0
+
+
+class MonitorAlertRequest(BaseModel):
+    monitor_id: str
+    summary: str
+    source_url: str = ""
 
 
 class _PacedStage:
@@ -180,6 +187,24 @@ def create_app(out_root: Path) -> FastAPI:
                 raise HTTPException(status_code=404, detail=f"Unknown production: {pid}")
         artifacts = [n for n in ARTIFACT_WHITELIST if (out_root / n).exists()]
         return {"artifacts": artifacts}
+
+    @app.post("/api/webhooks/parallel-monitor")
+    async def monitor_webhook(body: MonitorAlertRequest):
+        # Parallel Monitor webhook: an outside-world change on a watched finding
+        # reopens review so the dossier can't go silently stale.
+        async with state_lock:
+            for path in sorted(store.root.glob("*.json")):
+                reopened = record_watch_alert(
+                    store,
+                    path.stem,
+                    body.monitor_id,
+                    body.summary,
+                    body.source_url,
+                    at=datetime.now(timezone.utc).isoformat(),
+                )
+                if reopened is not None:
+                    return {"reopened_element": reopened, "production_id": path.stem}
+        raise HTTPException(status_code=404, detail=f"No watch for monitor {body.monitor_id}")
 
     @app.get("/api/productions/{pid}/artifacts/{name}")
     def get_artifact(pid: str, name: str):

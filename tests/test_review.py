@@ -55,7 +55,9 @@ async def test_generate_dossier_service(tmp_path):
         record_decision(store, "demo", el.id, "license", "", role="legal", reviewer="x", at=AT)
     artifacts = await generate_dossier_async(store, tmp_path, "demo", at=AT)
     assert "dossier.html" in artifacts
-    assert store.load("demo").audit_log[-1].event == "dossier_generated"
+    events = [a.event for a in store.load("demo").audit_log]
+    assert "dossier_generated" in events
+    assert "watch_created" in events  # standing watches follow the dossier
 
 
 async def test_dossier_html_includes_audit_trail(tmp_path):

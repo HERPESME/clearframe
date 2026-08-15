@@ -68,12 +68,64 @@ def record_decision(
     return state
 
 
+WATCH_WEBHOOK_PATH = "/api/webhooks/parallel-monitor"
+
+_IP_CATEGORIES = {"COPYRIGHT_ART", "TRADEMARK", "MUSIC_SYNC"}
+
+
+def _watch_query(element, research, opinion) -> str | None:
+    """What the standing watch should look for — or None if no watch is needed."""
+    if research is not None and research.status == "incomplete":
+        if element.category.value in _IP_CATEGORIES:
+            return (
+                f"Identification or attribution of '{element.label}': new registry "
+                "entries, press, or databases naming the artist/owner."
+            )
+        return None
+    holding = opinion.holding if opinion else None
+    litigious = research is not None and research.licensing_posture.value == "litigious"
+    if holding in {"clear_required", "escalate"} or litigious:
+        owner = research.owner if research else "the rights holder"
+        return (
+            f"New litigation, trademark/copyright filings, enforcement actions, or "
+            f"licensing-policy changes by {owner} affecting film/TV depiction of "
+            f"'{element.label}'."
+        )
+    return None
+
+
+async def _create_watches(ctx, state: ProductionState, at: str) -> None:
+    for el in state.elements:
+        if el.id in state.watches:
+            continue
+        query = _watch_query(el, state.research.get(el.id), state.court.get(el.id))
+        if query is None:
+            continue
+        watch = await ctx.parallel.create_monitor(
+            el.id, query, frequency="weekly", webhook_url=WATCH_WEBHOOK_PATH
+        )
+        if watch is None:
+            continue
+        state.watches[el.id] = watch
+        state.audit_log.append(
+            AuditEvent(
+                at=at,
+                actor="system",
+                role="system",
+                event="watch_created",
+                detail=f"{el.id}:{watch.monitor_id}",
+            )
+        )
+
+
 async def generate_dossier_async(
     store: LocalJsonStore, out_root: Path, production_id: str, *, at: str
 ) -> list[str]:
     """Run the dossier stage over reviewed state; returns artifact names.
 
     Raises ReviewPendingError (from DossierStage) when decisions are missing.
+    After the dossier, standing clearance watches (Parallel monitors) are
+    created for findings whose risk can change after delivery.
     """
     out_root = Path(out_root)
     state = store.load(production_id)
@@ -84,8 +136,52 @@ async def generate_dossier_async(
     state.audit_log.append(
         AuditEvent(at=at, actor="system", role="system", event="dossier_generated", detail="")
     )
+    await _create_watches(ctx, state, at)
     store.save(state)
     return [p.name for p in sorted(out_root.iterdir()) if p.is_file()]
+
+
+def record_watch_alert(
+    store: LocalJsonStore,
+    production_id: str,
+    monitor_id: str,
+    summary: str,
+    source_url: str,
+    *,
+    at: str,
+) -> str | None:
+    """Apply an incoming monitor alert: reopen review for the watched element.
+
+    Returns the reopened element id, or None if no watch matches."""
+    state = store.load(production_id)
+    match = next(
+        (w for w in state.watches.values() if w.monitor_id == monitor_id), None
+    )
+    if match is None:
+        return None
+    from clearframe.models import WatchAlert
+
+    state.alerts.append(
+        WatchAlert(
+            element_id=match.element_id,
+            monitor_id=monitor_id,
+            at=at,
+            summary=summary,
+            source_url=source_url,
+        )
+    )
+    state.stage_status["review"] = "awaiting"
+    state.audit_log.append(
+        AuditEvent(
+            at=at,
+            actor="parallel-monitor",
+            role="system",
+            event="watch_alert",
+            detail=f"{match.element_id}: {summary}",
+        )
+    )
+    store.save(state)
+    return match.element_id
 
 
 def generate_dossier_for(
