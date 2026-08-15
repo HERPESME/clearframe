@@ -4,7 +4,13 @@ version = "0.1.0"
 description = "Autonomous rights-clearance pipeline for film & TV (Gemini + Parallel)"
 requires-python = ">=3.11"
 license = { text = "MIT" }
-dependencies = ["pydantic>=2.7", "jinja2>=3.1", "httpx>=0.27"]
+dependencies = [
+    "pydantic>=2.7",
+    "jinja2>=3.1",
+    "httpx>=0.27",
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+]
 
 [project.optional-dependencies]
 cloud = ["google-adk>=1.0", "google-genai>=1.0"]
