@@ -10,18 +10,25 @@ Built for the Google Cloud **Agentic Cinema** hackathon, **Parallel** partner tr
 
 ![ClearFrame review UI](docs/images/review-ui.png)
 
-## How it works
+## How it works — an agent team, not a prompt
 
 ```
-footage ──▶ 1 SCAN (Gemini video, Vertex AI) ──▶ 2 TRIAGE (rules + dedupe)
-        ──▶ 3 RIGHTS RESEARCH (Parallel Task API deep research, concurrent fan-out)
-        ──▶ 4 RISK SCORE (deterministic, reproducible rubric)
-        ──▶ 5 REMEDIATION (license drafts / blur / reshoot / de-minimis memo)
-        ──▶ [human review — role-gated web app] ──▶ 6 DOSSIER
+footage ─▶ SCENE SCANNER (Gemini video) ─▶ E&O AUDITOR (2nd Gemini pass: "what did they miss?")
+        ─▶ TRIAGE (rules + dedupe) ─▶ BUDGET PLANNER (allocates Parallel processor tiers + rationale)
+        ─▶ RIGHTS RESEARCHERS (Parallel Task API fan-out, citations + confidence)
+        ─▶ RISK ENGINE (deterministic, reproducible rubric) ─▶ REMEDIATION DRAFTER
+        ─▶ THE CLEARANCE COURT ⚖  (Studio Counsel vs Fair Use Advocate vs Judge)
+        ─▶ [human review — role-gated web app] ─▶ DOSSIER
 
-outputs: dossier.html (E&O-ready report) · dossier.json · markers.edl (Resolve)
-         markers.csv · cue_sheet.csv (ASCAP/BMI)
+outputs: dossier.html (E&O-ready report w/ court opinions + audit trail) · dossier.json
+         markers.edl (Resolve) · markers.csv · cue_sheet.csv (ASCAP/BMI)
 ```
+
+![Mission Control](docs/images/mission-control.png)
+
+### The Clearance Court
+
+Every contested finding (MEDIUM risk and up) is argued by two opposing agents: **Studio Counsel** briefs why the use is a risk; the **Fair Use Advocate** briefs the strongest good-faith defense — de minimis, *Rogers v. Grimaldi* expressive-work protection, fair use. Both cite real case law (*Ringgold v. BET*, *Sandoval v. New Line*, *Caterpillar v. Disney*, *Falkner v. GM*, VARA, §504(c)). A **Judge** weighs the briefs against practical cost and issues a ruling: `CLEAR REQUIRED`, `DEFENSIBLE`, or `ESCALATE`. Opinions attach reasoning to the dossier — they never alter the deterministic risk score, and the human still makes the call.
 
 - The pipeline runs both as a plain orchestrator and as a **Google ADK `SequentialAgent`** (`src/clearframe/adk/agents.py`) deployable to Agent Engine.
 - Every research finding carries Parallel's **Basis** output — citations, per-field reasoning, calibrated confidence — because a legal document without provenance is worthless.

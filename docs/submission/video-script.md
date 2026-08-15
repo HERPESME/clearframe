@@ -27,12 +27,11 @@ Keep the song clearly audible; keep logos in focus for a few seconds each. (The 
 - Terminal: `python -m clearframe run --live --footage scene.mp4 ...` kicking off.
 > "Gemini watches the footage the way a clearance coordinator would — and finds every clearable element: the song on the phone, the swoosh on the hoodie, the mural, even the passerby's face. Six findings, timestamped, with prominence measured."
 
-**0:50–1:40 — The research (review UI, the star section)**
-- Open the review UI. Pan the clearance timeline lanes.
-- Click the CRITICAL music lane → card scrolls into view.
-> "Then a fleet of research agents goes to work through Parallel's Task API — deep web research, one agent per finding. This isn't a chatbot guess: every field comes back with citations, excerpts, and calibrated confidence. Who owns the song. How litigious they are. What a license costs. The evidence trail a lawyer can actually rely on."
-- Hover a citation; open the license email draft.
-> "ClearFrame even drafts the outreach email — and for the mural it couldn't identify, it says so honestly and escalates."
+**0:50–1:45 — Mission Control + the Court (the star section)**
+- Open `http://localhost:8000/?autorun` → Mission Control plays live: agents lighting up, researcher rows landing with owners, the Court issuing rulings.
+> "Watch the department work. A second Gemini agent audits the first — and catches a background TV broadcast the first pass missed. A Budget Planner decides how much research each finding deserves and buys the right Parallel processor tier — five cents for the famous swoosh, three dollars of deep research for the unidentified mural. Then, for every contested finding, court convenes: a Studio Counsel agent argues the risk, a Fair Use Advocate argues the defense — both citing real case law through Parallel research — and a Judge rules."
+- Enter review; click the CRITICAL music lane → card scrolls into view; expand the Counsel brief showing *Ringgold* and §504(c).
+> "This isn't a chatbot guess. Every research field carries citations and calibrated confidence, and every ruling shows both sides' briefs. For the mural nobody could identify — it says so honestly, and escalates."
 
 **1:40–2:20 — The human + the dossier**
 - Switch role to Editor → decision buttons disable. Switch back to Legal.

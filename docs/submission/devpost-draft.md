@@ -13,11 +13,13 @@ In 2011 Warner Bros. was sued over Mike Tyson's face tattoo in *The Hangover Par
 ClearFrame is the clearance department, automated — with a human lawyer still making every call:
 
 1. **Scan** — Gemini (video-native, on Vertex AI) watches raw footage and detects every clearable element with timestamps and prominence measurements (screen time, frame coverage, centrality, plot relevance).
-2. **Triage** — deterministic rules map each element to its legal category: trademark, copyright artwork, music sync, right of publicity, location.
-3. **Research** — a concurrent fan-out of agents calls the **Parallel Task API**: one deep-research task per element, returning owner, licensing contact, enforcement history, and cost band — every field with Parallel's Basis output: citations, excerpts, reasoning, calibrated confidence. Provenance is what makes an AI-generated legal document usable.
-4. **Score** — a reproducible, pure-code risk rubric (prominence × category weight × rights-holder posture, with de-minimis heuristics). No LLM guessing on risk.
-5. **Remediate** — drafts the license outreach email, estimates VFX blur cost, flags reshoots, writes de-minimis memos.
-6. **Review & deliver** — a role-gated review app (legal/producer decide; editors read) where every decision is logged; then it emits the artifacts the industry actually runs on: the **E&O clearance report**, **timeline markers that import into DaVinci Resolve**, and the **ASCAP/BMI cue sheet**.
+2. **Audit** — a second Gemini agent adversarially reviews the first scan ("what did the coordinator miss?") and catches overlooked elements — agents auditing agents.
+3. **Triage** — deterministic rules map each element to its legal category: trademark, copyright artwork, music sync, right of publicity, location.
+4. **Plan & research** — a Budget Planner allocates a **Parallel processor tier per finding with recorded rationale** (lite for a famous swoosh, ultra for an unidentified mural), then a concurrent fan-out of researcher agents calls the **Parallel Task API** — every field returned with Basis citations, excerpts, and calibrated confidence. Provenance is what makes an AI-generated legal document usable.
+5. **Score** — a reproducible, pure-code risk rubric (prominence × category weight × rights-holder posture, with de-minimis heuristics). No LLM guessing on risk.
+6. **Remediate** — drafts the license outreach email, estimates VFX blur cost, flags reshoots, writes de-minimis memos.
+7. **The Clearance Court** — for every contested finding, two opposing agents argue: Studio Counsel briefs the risk, a Fair Use Advocate briefs the defense (de minimis, *Rogers v. Grimaldi*, fair use), both citing real precedent (*Ringgold*, *Sandoval*, *Caterpillar v. Disney*, VARA); a Judge issues a practical ruling. Opinions attach reasoning — they never override the deterministic score.
+8. **Review & deliver** — a role-gated review app (legal/producer decide; editors read) where every decision is logged; then it emits the artifacts the industry actually runs on: the **E&O clearance report**, **timeline markers that import into DaVinci Resolve**, and the **ASCAP/BMI cue sheet**.
 
 ## How we built it
 
