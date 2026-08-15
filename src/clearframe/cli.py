@@ -2,11 +2,20 @@
 
 import argparse
 import asyncio
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
+from clearframe.config import ClearFrameConfig, validate_live
 from clearframe.dossier import auto_decisions
-from clearframe.pipeline import Pipeline, build_demo_pipeline, demo_context
+from clearframe.models import Production
+from clearframe.pipeline import (
+    Pipeline,
+    PipelineContext,
+    build_context,
+    build_demo_pipeline,
+    demo_context,
+)
 from clearframe.stages.dossier import DossierStage
 
 
@@ -22,8 +31,7 @@ def _print_summary(state) -> None:
         print(f"{el.label[:32]:<32} {risk.band.value:<9} {risk.score:>5}  {owner:<38} {action}")
 
 
-async def _run_demo(out_dir: Path, auto_approve: bool) -> int:
-    ctx = demo_context(out_dir)
+async def _run(ctx: PipelineContext, out_dir: Path, auto_approve: bool) -> int:
     state = await Pipeline(build_demo_pipeline()).run(ctx)
 
     if auto_approve:
@@ -35,34 +43,86 @@ async def _run_demo(out_dir: Path, auto_approve: bool) -> int:
         ctx.store.save(state)
         _print_summary(state)
         print(f"\nArtifacts written to {out_dir}/:")
-        for name in ("dossier.html", "dossier.json", "markers.edl", "markers.csv"):
+        for name in sorted(p.name for p in out_dir.iterdir() if p.is_file()):
             print(f"  - {name}")
     else:
         _print_summary(state)
         print(
             "\nPipeline paused: awaiting human review. "
-            "Re-run with --auto-approve to apply demo decisions and generate the dossier."
+            "Open the review UI (python -m clearframe serve) or re-run with "
+            "--auto-approve to apply demo decisions and generate the dossier."
         )
+    return 0
+
+
+def _cmd_run(args) -> int:
+    out_dir: Path = args.out
+    if args.live:
+        cfg = ClearFrameConfig.from_env(os.environ)
+        cfg = cfg.model_copy(update={"mode": "live"})
+        missing = validate_live(cfg)
+        if missing:
+            print(
+                "Live mode needs credentials. Missing environment variables: "
+                + ", ".join(missing)
+            )
+            return 2
+        if not args.footage:
+            print("Live mode requires --footage <path or gs:// URI>.")
+            return 2
+        production = Production(
+            id=args.production_id,
+            title=args.title,
+            footage_uri=args.footage,
+            duration_s=args.duration_s,
+        )
+        ctx = build_context(cfg, production, out_dir)
+    else:
+        ctx = demo_context(out_dir)
+    return asyncio.run(_run(ctx, out_dir, args.auto_approve))
+
+
+def _cmd_serve(args) -> int:
+    import uvicorn
+
+    from clearframe.webapp.server import create_app
+
+    app = create_app(out_root=args.out)
+    uvicorn.run(app, host=args.host, port=args.port)
     return 0
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="clearframe")
     sub = parser.add_subparsers(dest="command", required=True)
+
     run = sub.add_parser("run", help="Run the clearance pipeline")
-    run.add_argument("--demo", action="store_true", help="Use recorded fixtures (no credentials)")
+    mode = run.add_mutually_exclusive_group()
+    mode.add_argument(
+        "--demo", action="store_true", help="Use recorded fixtures (no credentials)"
+    )
+    mode.add_argument(
+        "--live", action="store_true", help="Use Vertex Gemini + Parallel Task API"
+    )
+    run.add_argument("--footage", help="Footage path or gs:// URI (live mode)")
+    run.add_argument("--title", default="Untitled Production")
+    run.add_argument("--production-id", default="prod-1")
+    run.add_argument("--duration-s", type=float, default=0.0)
     run.add_argument("--out", type=Path, default=Path("out"), help="Output directory")
     run.add_argument(
         "--auto-approve",
         action="store_true",
         help="Apply demo review decisions and generate the dossier",
     )
-    args = parser.parse_args(argv)
+    run.set_defaults(func=_cmd_run)
 
-    if not args.demo:
-        print(
-            "Live mode arrives in Phase 2 (Vertex Gemini + Parallel API). "
-            "Use --demo for the fixture-backed pipeline."
-        )
-        return 2
-    return asyncio.run(_run_demo(args.out, args.auto_approve))
+    serve = sub.add_parser("serve", help="Serve the clearance review web app")
+    serve.add_argument("--out", type=Path, default=Path("out"))
+    serve.add_argument("--host", default="127.0.0.1")
+    serve.add_argument("--port", type=int, default=8000)
+    serve.set_defaults(func=_cmd_serve)
+
+    args = parser.parse_args(argv)
+    if args.command == "run" and not (args.demo or args.live):
+        args.demo = True
+    return args.func(args)

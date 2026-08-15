@@ -56,6 +56,27 @@ def build_demo_pipeline() -> list[Stage]:
     return [ScanStage(), TriageStage(), ResearchStage(), RiskStage(), RemediationStage()]
 
 
+def build_context(cfg, production: Production, out_root: Path) -> PipelineContext:
+    """Build a PipelineContext from a ClearFrameConfig (demo fixtures or live clients)."""
+    if cfg.mode == "live":
+        from clearframe.integrations.gemini_live import LiveGeminiClient
+        from clearframe.integrations.parallel_client import LiveParallelClient
+
+        gemini: GeminiClient = LiveGeminiClient(
+            project=cfg.project, location=cfg.location, model=cfg.gemini_model
+        )
+        parallel: ParallelClient = LiveParallelClient(api_key=cfg.parallel_api_key)
+    else:
+        gemini = FixtureGeminiClient(FIXTURES_DIR)
+        parallel = FixtureParallelClient(FIXTURES_DIR)
+    return PipelineContext(
+        state=ProductionState(production=production),
+        gemini=gemini,
+        parallel=parallel,
+        store=LocalJsonStore(Path(out_root) / "state"),
+    )
+
+
 def demo_context(out_root: Path) -> PipelineContext:
     production = Production(
         id="demo",
