@@ -131,6 +131,41 @@ class Precedent(BaseModel):
     citation: str
     holding: str
     relevance: str
+    quote: str = ""
+    source_url: str = ""
+
+
+class ScriptMention(BaseModel):
+    label: str
+    element_type: ElementType
+    scene: str
+
+
+class ScriptDrift(BaseModel):
+    unscripted_element_ids: list[str]
+    scripted_not_seen: list[str]
+
+
+class CandidateEntity(BaseModel):
+    name: str
+    kind: str
+    url: str
+    note: str
+
+
+class ClearanceWatch(BaseModel):
+    element_id: str
+    monitor_id: str
+    query: str
+    frequency: str
+
+
+class WatchAlert(BaseModel):
+    element_id: str
+    monitor_id: str
+    at: str
+    summary: str
+    source_url: str
 
 
 class Brief(BaseModel):
@@ -168,6 +203,7 @@ class Production(BaseModel):
     footage_uri: str
     fps: float = 24.0
     duration_s: float
+    script_uri: str | None = None
 
 
 class ProductionState(BaseModel):
@@ -183,3 +219,8 @@ class ProductionState(BaseModel):
     audit_log: list[AuditEvent] = Field(default_factory=list)
     court: dict[str, CourtOpinion] = Field(default_factory=dict)
     research_plan: dict[str, ResearchPlan] = Field(default_factory=dict)
+    script_mentions: list[ScriptMention] = Field(default_factory=list)
+    drift: ScriptDrift | None = None
+    candidates: dict[str, list[CandidateEntity]] = Field(default_factory=dict)
+    watches: dict[str, ClearanceWatch] = Field(default_factory=dict)
+    alerts: list[WatchAlert] = Field(default_factory=list)
