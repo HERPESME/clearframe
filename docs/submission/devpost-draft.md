@@ -47,6 +47,6 @@ Firestore + Pub/Sub event-driven research at scale, IAP-backed roles, per-territ
 
 ## Links
 
-- Hosted project: `<Cloud Run URL>`
+- Hosted project: https://clearframe-220710110855.us-central1.run.app (+ MCP: https://clearframe-mcp-220710110855.us-central1.run.app/mcp)
 - Repo: `<GitHub URL>` (MIT license)
 - Video: `<YouTube URL>`

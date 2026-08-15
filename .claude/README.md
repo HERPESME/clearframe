@@ -13,6 +13,8 @@ submission). Read it first.
   Parallel APIs once credentials exist, including the detection-tuning loop.
 - **submission-preflight** — Devpost readiness audit (fresh clone, license
   visibility, rules compliance, link checks).
+- **deploy-cloud** — Cloud Run deploy runbook (webapp + MCP, scale-to-zero),
+  Cloud Build CI/CD, live-mode secret wiring, rollback and cost notes.
 
 ## Agents (`.claude/agents/`)
 

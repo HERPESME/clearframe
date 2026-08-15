@@ -40,10 +40,18 @@ Headless Chrome works on this machine:
 
 Read the PNG to check the design (dark screening-room theme, risk-colored timeline lanes).
 
-## Tests
+## MCP server
 
 ```bash
-.venv/bin/pytest -q          # full suite; must be green before any commit
+.venv/bin/python -m clearframe.mcp --out out                          # stdio (local clients)
+.venv/bin/python -m clearframe.mcp --transport http --port 8080 --out out  # streamable HTTP at /mcp
 ```
 
-Cloud-dependent tests auto-skip without the `cloud` extra. Live mode needs env vars — see the live-validate skill.
+## Tests + smoke
+
+```bash
+.venv/bin/pytest -q     # full suite; must be green before any commit
+./scripts/smoke.sh      # every transport end-to-end: CLI, web, SSE, webhook, MCP
+```
+
+Cloud-dependent tests auto-skip without the `cloud` extra. Live mode needs env vars — see the live-validate skill. Deployment — see the deploy-cloud skill.

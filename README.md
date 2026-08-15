@@ -8,6 +8,8 @@ ClearFrame automates the department: **Gemini** watches raw footage and detects 
 
 Built for the Google Cloud **Agentic Cinema** hackathon, **Parallel** partner track.
 
+**🌐 Live demo (Cloud Run, demo mode):** [clearframe-220710110855.us-central1.run.app](https://clearframe-220710110855.us-central1.run.app) · **MCP endpoint:** `https://clearframe-mcp-220710110855.us-central1.run.app/mcp` (streamable HTTP)
+
 ![ClearFrame review UI](docs/images/review-ui.png)
 
 ## How it works — an agent team, not a prompt
@@ -92,6 +94,25 @@ python -m clearframe run --live --footage gs://bucket/scene.mp4 --title "Golden 
 ```
 
 See [docs/deploy.md](docs/deploy.md) for Cloud Run and Agent Engine deployment.
+
+## Deployment (Cloud Run, scale-to-zero)
+
+One image, two services, `min-instances=0` — compute cost is $0 with no traffic. `cloudbuild.yaml` builds and deploys both on every push to `main` (Cloud Build CI/CD):
+
+```bash
+gcloud builds submit --config cloudbuild.yaml .   # manual deploy
+```
+
+| Service | What | Demo-mode state |
+| --- | --- | --- |
+| `clearframe` | review webapp + API | `/tmp/out` (ephemeral — resets at scale-to-zero, by design for demo) |
+| `clearframe-mcp` | MCP server, streamable HTTP at `/mcp`, stateless | same |
+
+Connect an MCP client to the deployed server:
+
+```bash
+claude mcp add --transport http clearframe https://clearframe-mcp-220710110855.us-central1.run.app/mcp
+```
 
 ## Repository map
 
