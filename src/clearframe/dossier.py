@@ -12,7 +12,13 @@ from clearframe.models import (
     RiskBand,
     TimeRange,
     TriagedElement,
+    research_is_incomplete,
 )
+
+
+def pending_ids(state: ProductionState) -> list[str]:
+    """Elements that still lack a review decision."""
+    return [el.id for el in state.elements if el.id not in state.decisions]
 
 DISCLAIMER = (
     "This clearance report is automated decision support generated from AI video "
@@ -55,7 +61,7 @@ def build_dossier(state: ProductionState, generated_at: str) -> ClearanceDossier
     for e in entries:
         summary[e.risk.band.value] += 1
     summary["incomplete_research"] = sum(
-        1 for e in entries if e.research is None or e.research.status == "incomplete"
+        1 for e in entries if research_is_incomplete(e.research)
     )
     summary["pending_decisions"] = sum(1 for e in entries if e.decision is None)
 
@@ -74,7 +80,7 @@ def auto_decisions(state: ProductionState) -> dict[str, Decision]:
     for el in state.elements:
         research = state.research.get(el.id)
         risk = state.risk[el.id]
-        if research is None or research.status == "incomplete":
+        if research_is_incomplete(research):
             action, note = "escalate", "Rights holder could not be identified; escalate to counsel."
         elif risk.band == RiskBand.LOW:
             action, note = "approve_risk", "Low risk accepted per de-minimis/low-prominence policy."

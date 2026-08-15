@@ -1,5 +1,6 @@
 """Clearance review web app: API over production state with server-side role gating."""
 
+import asyncio
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
@@ -9,7 +10,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from clearframe.dossier import auto_decisions  # noqa: F401  (used by demo tooling)
+from clearframe.dossier import pending_ids
 from clearframe.models import Decision
 from clearframe.pipeline import Pipeline, build_demo_pipeline, demo_context
 from clearframe.stages.dossier import DossierStage, ReviewPendingError
@@ -38,6 +39,10 @@ def create_app(out_root: Path) -> FastAPI:
     out_root = Path(out_root)
     store = LocalJsonStore(out_root / "state")
     app = FastAPI(title="ClearFrame Review")
+    # Serializes every load-modify-save of production state; without it,
+    # concurrent decision posts (threadpool) and dossier generation could
+    # silently clobber each other's saves.
+    state_lock = asyncio.Lock()
 
     def _load(pid: str):
         try:
@@ -74,7 +79,7 @@ def create_app(out_root: Path) -> FastAPI:
         return JSONResponse(_load(pid).model_dump(mode="json"))
 
     @app.post("/api/productions/{pid}/decisions")
-    def post_decision(
+    async def post_decision(
         pid: str,
         body: DecisionRequest,
         x_clearframe_role: str = Header(default="editor"),
@@ -85,34 +90,37 @@ def create_app(out_root: Path) -> FastAPI:
                 status_code=403,
                 detail=f"Role '{role}' cannot record decisions (requires legal or producer).",
             )
-        state = _load(pid)
-        if not any(el.id == body.element_id for el in state.elements):
-            raise HTTPException(status_code=404, detail=f"Unknown element: {body.element_id}")
-        state.decisions[body.element_id] = Decision(
-            element_id=body.element_id,
-            action=body.action,
-            reviewer=role,
-            role=role,
-            note=body.note,
-        )
-        store.save(state)
-        return {"ok": True, "pending": [el.id for el in state.elements if el.id not in state.decisions]}
+        async with state_lock:
+            state = _load(pid)
+            if not any(el.id == body.element_id for el in state.elements):
+                raise HTTPException(
+                    status_code=404, detail=f"Unknown element: {body.element_id}"
+                )
+            state.decisions[body.element_id] = Decision(
+                element_id=body.element_id,
+                action=body.action,
+                reviewer=role,
+                role=role,
+                note=body.note,
+            )
+            store.save(state)
+            return {"ok": True, "pending": pending_ids(state)}
 
     @app.post("/api/productions/{pid}/dossier")
     async def generate_dossier(pid: str):
-        state = _load(pid)
-        ctx = demo_context(out_root)
-        ctx.store = store
-        ctx.state = state
-        stage = DossierStage(
-            out_dir=out_root, generated_at=datetime.now(timezone.utc).isoformat()
-        )
-        try:
-            await stage.run(ctx)
-        except ReviewPendingError:
-            pending = [el.id for el in state.elements if el.id not in state.decisions]
-            raise HTTPException(status_code=409, detail={"pending": pending})
-        store.save(state)
+        async with state_lock:
+            state = _load(pid)
+            ctx = demo_context(out_root)
+            ctx.store = store
+            ctx.state = state
+            stage = DossierStage(
+                out_dir=out_root, generated_at=datetime.now(timezone.utc).isoformat()
+            )
+            try:
+                await stage.run(ctx)
+            except ReviewPendingError:
+                raise HTTPException(status_code=409, detail={"pending": pending_ids(state)})
+            store.save(state)
         artifacts = [n for n in ARTIFACT_WHITELIST if (out_root / n).exists()]
         return {"artifacts": artifacts}
 

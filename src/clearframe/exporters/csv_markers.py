@@ -3,6 +3,7 @@
 import csv
 import io
 
+from clearframe.exporters import safe_cell
 from clearframe.exporters.edl import MarkerEntry
 from clearframe.timecode import seconds_to_tc
 
@@ -16,7 +17,7 @@ def render_csv(entries: list[MarkerEntry], fps: float) -> str:
             [
                 seconds_to_tc(e.start_s, fps=fps),
                 seconds_to_tc(e.end_s, fps=fps),
-                e.label,
+                safe_cell(e.label),
                 e.category.value,
                 e.band.value,
             ]

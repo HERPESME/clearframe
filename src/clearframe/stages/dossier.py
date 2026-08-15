@@ -3,7 +3,7 @@
 from datetime import datetime, timezone
 from pathlib import Path
 
-from clearframe.dossier import build_dossier
+from clearframe.dossier import build_dossier, pending_ids
 from clearframe.exporters.csv_markers import render_csv
 from clearframe.exporters.cue_sheet import render_cue_sheet
 from clearframe.exporters.dossier_html import render_dossier_html
@@ -24,7 +24,7 @@ class DossierStage:
         self.generated_at = generated_at
 
     async def run(self, ctx: PipelineContext) -> None:
-        missing = [el.id for el in ctx.state.elements if el.id not in ctx.state.decisions]
+        missing = pending_ids(ctx.state)
         if missing:
             raise ReviewPendingError(
                 f"Elements awaiting review decision: {', '.join(missing)}"

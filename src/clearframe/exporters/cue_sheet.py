@@ -3,6 +3,7 @@
 import csv
 import io
 
+from clearframe.exporters import safe_cell
 from clearframe.models import (
     ClearanceCategory,
     Production,
@@ -41,8 +42,8 @@ def render_cue_sheet(
             writer.writerow(
                 [
                     cue_number,
-                    el.label,
-                    owner,
+                    safe_cell(el.label),
+                    safe_cell(owner),
                     usage,
                     seconds_to_tc(r.start_s, fps=production.fps),
                     seconds_to_tc(r.end_s, fps=production.fps),

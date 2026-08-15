@@ -3,6 +3,7 @@
 from jinja2 import Template
 
 from clearframe.dossier import ClearanceDossier
+from clearframe.models import research_is_incomplete
 from clearframe.timecode import seconds_to_tc
 
 BAND_HEX = {"CRITICAL": "#c0392b", "HIGH": "#e67e22", "MEDIUM": "#2980b9", "LOW": "#27ae60"}
@@ -67,7 +68,7 @@ _TEMPLATE = Template(
 
   <div class="section">
     <h4>Rights research</h4>
-    {% if e.research and e.research.status == 'complete' %}
+    {% if not incomplete(e.research) %}
       <div><strong>Owner:</strong> {{ e.research.owner }} ({{ e.research.owner_confidence }} confidence)
         · <strong>Posture:</strong> {{ e.research.licensing_posture.value }}
         {% if e.research.licensing_contact %} · <strong>Contact:</strong> {{ e.research.licensing_contact }}{% endif %}
@@ -115,4 +116,5 @@ def render_dossier_html(d: ClearanceDossier) -> str:
         d=d,
         band_hex=BAND_HEX,
         tc=lambda s: seconds_to_tc(s, fps=d.production.fps),
+        incomplete=research_is_incomplete,
     )

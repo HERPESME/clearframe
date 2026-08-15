@@ -7,6 +7,7 @@ from clearframe.models import (
     RiskAssessment,
     RiskBand,
     TriagedElement,
+    research_is_incomplete,
 )
 
 CATEGORY_WEIGHT: dict[ClearanceCategory, float] = {
@@ -46,7 +47,7 @@ def score_element(element: TriagedElement, research: ResearchResult | None) -> R
     )
     weight = CATEGORY_WEIGHT[element.category]
 
-    if research is None or research.status == "incomplete":
+    if research_is_incomplete(research):
         posture = LicensingPosture.UNKNOWN
     else:
         posture = research.licensing_posture

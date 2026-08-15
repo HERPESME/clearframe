@@ -93,6 +93,15 @@ class ResearchResult(BaseModel):
     basis: list[BasisCitation]
     status: Literal["complete", "incomplete"]
 
+    @property
+    def is_incomplete(self) -> bool:
+        return self.status == "incomplete"
+
+
+def research_is_incomplete(research: "ResearchResult | None") -> bool:
+    """Shared predicate: no research at all counts as incomplete."""
+    return research is None or research.is_incomplete
+
 
 class RiskAssessment(BaseModel):
     element_id: str
