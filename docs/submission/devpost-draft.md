@@ -24,13 +24,14 @@ ClearFrame is the clearance department, automated — with a human lawyer still 
 ## How we built it
 
 - **Google Cloud:** Gemini on Vertex AI (video understanding with structured output and explicit safety settings), Agent Development Kit — the eight-stage pipeline runs as a deterministic ADK `SequentialAgent` of nine stage agents (`clearframe run --demo --adk --auto-approve` executes it under the real ADK Runner) — Cloud Run hosts the review app and the MCP server with scale-to-zero CI/CD via Cloud Build.
-- **Parallel:** the Task API with schema-driven output specs and per-finding processor-tier allocation (lite→ultra, chosen by a Budget Planner with recorded rationale); async task polling with bounded retries; FindAll candidate enumeration for unidentifiable owners; Monitor-based standing watches whose webhook reopens review; Basis citations stored verbatim and surfaced in the UI and dossier as the audit trail.
+- **Parallel:** the Task API with schema-driven output specs and per-finding processor-tier allocation (lite→ultra, chosen by a Budget Planner with recorded rationale); async task polling with bounded retries; run-based FindAll candidate enumeration for unidentifiable owners (matched candidates ranked first, capped for reviewability); standing watches that create Parallel Monitors when the key includes that beta and fall back to local stand-ins otherwise, with a webhook that reopens review; Basis citations stored verbatim and surfaced in the UI and dossier as the audit trail. All of it exercised against the live API.
 - **Engineering:** framework-free deterministic core (Pydantic v2), fixture-backed demo mode that replays recorded API responses through the identical code path (judges can run everything with zero credentials), 90 tests plus a full-transport smoke script, FastAPI + React.
 
 ## Challenges we ran into
 
 - Making an AI output *legally credible*: the answer was calibrated confidence + citations per field (Parallel's Basis), deterministic scoring, and honest "RESEARCH INCOMPLETE" states instead of hallucinated owners.
 - Judging prominence from video (a 1-second background logo ≠ a 12-second plot-integral song) — solved by having Gemini measure screen time, coverage, and centrality, and doing the risk math in code.
+- Building against APIs before having keys: we coded live clients from docs with fixture twins sharing one parser, then validated on keys-day — the Task API worked unchanged; FindAll needed a rewrite to its real run-based flow; the Monitors beta turned out to be gated for our key, so live mode degrades honestly to local stand-in watches instead of pretending.
 
 ## Accomplishments we're proud of
 

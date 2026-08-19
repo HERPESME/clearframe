@@ -1,22 +1,43 @@
 {
   "candidates": [
     {
+      "candidate_id": "c-precita",
       "name": "Precita Eyes Muralists Association",
-      "kind": "mural arts registry",
       "url": "https://www.precitaeyes.org/",
-      "note": "Registers and documents community murals in the area; maintains artist attribution records and can identify unsigned works."
+      "description": "Registers and documents community murals in the area; maintains artist attribution records and can identify unsigned works.",
+      "match_status": "matched",
+      "output": {
+        "kind": {
+          "value": "mural arts registry",
+          "is_matched": true
+        }
+      }
     },
     {
+      "candidate_id": "c-assessor",
       "name": "Building owner of record (county assessor parcel lookup)",
-      "kind": "property owner",
       "url": "https://sfassessor.org/",
-      "note": "The wall's owner often commissioned the mural or holds the artist agreement; assessor records identify who to ask."
+      "description": "The wall's owner often commissioned the mural or holds the artist agreement; assessor records identify who to ask.",
+      "match_status": "matched",
+      "output": {
+        "kind": {
+          "value": "property owner",
+          "is_matched": true
+        }
+      }
     },
     {
+      "candidate_id": "c-registry",
       "name": "Local street-art documentation project (Mural Registry / street-art map)",
-      "kind": "crowdsourced archive",
       "url": "https://www.muralregistry.example/",
-      "note": "Geotagged mural databases frequently attribute works that carry no visible signature."
+      "description": "Geotagged mural databases frequently attribute works that carry no visible signature.",
+      "match_status": "matched",
+      "output": {
+        "kind": {
+          "value": "crowdsourced archive",
+          "is_matched": true
+        }
+      }
     }
   ]
 }

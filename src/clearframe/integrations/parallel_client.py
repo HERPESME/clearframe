@@ -109,6 +109,38 @@ def parse_task_output(element_id: str, output: dict) -> ResearchResult:
     )
 
 
+def parse_findall_result(payload: dict, limit: int | None = None) -> list[CandidateEntity]:
+    """Map a FindAll run result (v1beta/findall/runs/{id}/result) to candidates.
+
+    Each candidate's entity kind comes from the "kind" match condition we attach
+    to every run; candidates without that enrichment fall back to match_status.
+    Live runs return dozens of *generated* (unvetted) candidates beyond the
+    matched ones — matched rank first and `limit` caps the total so leads stay
+    reviewable.
+    """
+    raw = payload.get("candidates") or []
+    ordered = [c for c in raw if c.get("match_status") == "matched"] + [
+        c for c in raw if c.get("match_status") != "matched"
+    ]
+    if limit is not None:
+        ordered = ordered[:limit]
+    candidates: list[CandidateEntity] = []
+    for c in ordered:
+        output = c.get("output") or {}
+        kind = (output.get("kind") or {}).get("value") or c.get("match_status") or "candidate"
+        if kind in {"generated", "unmatched"}:
+            kind = "candidate"
+        candidates.append(
+            CandidateEntity(
+                name=c.get("name", ""),
+                kind=kind,
+                url=c.get("url", ""),
+                note=c.get("description", ""),
+            )
+        )
+    return candidates
+
+
 def _incomplete(element_id: str) -> ResearchResult:
     return ResearchResult(
         element_id=element_id,
@@ -161,8 +193,7 @@ class FixtureParallelClient:
         path = self.fixtures_dir / "findall" / f"{slug(element.label)}.json"
         if not path.exists():
             return []
-        payload = json.loads(path.read_text())
-        return [CandidateEntity.model_validate(c) for c in payload.get("candidates", [])]
+        return parse_findall_result(json.loads(path.read_text()))
 
     async def create_monitor(
         self, element_id: str, query: str, frequency: str, webhook_url: str
@@ -257,42 +288,69 @@ class LiveParallelClient:
     async def find_all(
         self, element: TriagedElement, production_title: str
     ) -> list[CandidateEntity]:
-        # TODO(keys-day): verify FindAll beta endpoint/shape against docs.parallel.ai
-        # (client.beta.findall.entity_search in the parallel-web SDK).
+        # FindAll is run-based (live-verified 2026-08-19): create a run, poll
+        # status.status until completed, then fetch /result for candidates.
         try:
             async with httpx.AsyncClient(timeout=120.0) as client:
-                resp = await client.post(
-                    f"{self.base_url}/v1beta/findall/entity_search",
+                created = await client.post(
+                    f"{self.base_url}/v1beta/findall/runs",
                     headers=self._headers,
                     json={
-                        "entity_type": "rights_holder",
                         "objective": (
                             f"Find every plausible rights holder, registry, or "
                             f"attribution source for '{element.label}' "
                             f"({element.category.value}) appearing in the film "
                             f"'{production_title}'."
                         ),
+                        "entity_type": "organizations or people",
+                        "match_conditions": [
+                            {
+                                "name": "kind",
+                                "description": (
+                                    "What kind of entity this is with respect to the "
+                                    "element (e.g. artist, rights holder, registry, "
+                                    "property owner, archive, licensing agency)."
+                                ),
+                            }
+                        ],
+                        "generator": "base",
                         "match_limit": 10,
                     },
                 )
-                resp.raise_for_status()
-                return [
-                    CandidateEntity(
-                        name=m.get("name", ""),
-                        kind=m.get("entity_type", "candidate"),
-                        url=m.get("url", ""),
-                        note=m.get("description", ""),
+                created.raise_for_status()
+                findall_id = created.json()["findall_id"]
+
+                waited = 0.0
+                while waited < self.timeout_s:
+                    status_resp = await client.get(
+                        f"{self.base_url}/v1beta/findall/runs/{findall_id}",
+                        headers=self._headers,
                     )
-                    for m in resp.json().get("matches", [])
-                ]
+                    status_resp.raise_for_status()
+                    status = (status_resp.json().get("status") or {}).get("status")
+                    if status == "completed":
+                        result = await client.get(
+                            f"{self.base_url}/v1beta/findall/runs/{findall_id}/result",
+                            headers=self._headers,
+                        )
+                        result.raise_for_status()
+                        return parse_findall_result(result.json(), limit=10)
+                    if status in {"failed", "cancelled"}:
+                        return []
+                    await asyncio.sleep(self.poll_interval_s)
+                    waited += self.poll_interval_s
+                return []
         except (httpx.HTTPError, KeyError, ValueError):
             return []
 
     async def create_monitor(
         self, element_id: str, query: str, frequency: str, webhook_url: str
     ) -> ClearanceWatch | None:
-        # TODO(keys-day): verify Monitor beta endpoint/shape against docs.parallel.ai
-        # (client.monitor.create in the parallel-web SDK).
+        # Monitors are a gated beta product (live-checked 2026-08-19: this key
+        # gets 401 "Product(s) unavailable to provided credential"). When the
+        # remote monitor can't be created, fall back to a local standing watch —
+        # the webhook receiver and reopen-review flow work identically; only the
+        # external change-detection trigger is missing.
         try:
             async with httpx.AsyncClient(timeout=60.0) as client:
                 resp = await client.post(
@@ -313,4 +371,9 @@ class LiveParallelClient:
                     frequency=frequency,
                 )
         except (httpx.HTTPError, KeyError, ValueError):
-            return None
+            return ClearanceWatch(
+                element_id=element_id,
+                monitor_id=f"local-{element_id}",
+                query=query,
+                frequency=frequency,
+            )

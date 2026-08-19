@@ -3,5 +3,6 @@ webapp/node_modules/
 *.egg-info/
 .venv/
 out/
+out-live/
 .pytest_cache/
 .env

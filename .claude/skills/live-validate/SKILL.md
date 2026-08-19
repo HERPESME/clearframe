@@ -5,6 +5,14 @@ description: Validate ClearFrame live mode against real Vertex Gemini and Parall
 
 # Live-mode validation runbook
 
+> **Status 2026-08-19 — first live validation DONE.** Facts a future session needs:
+> - Credentials: local `.env` (gitignored) has the real values; Secret Manager holds `parallel-api-key` (Cloud Run default SA has accessor). Load env with `set -a && source .env && set +a` — nothing auto-loads `.env`.
+> - **Gemini**: `gemini-3-pro-preview` returns 404 in this project/region — the coded fallback to `gemini-2.5-pro` fires and works. First live scan (Sintel trailer, 52s, inline bytes) returned 9 high-quality detections incl. a 1s tattoo; parser unchanged.
+> - **Parallel Task API**: live-verified exactly as coded (`POST /v1/tasks/runs`, poll, `/result`, `x-api-key`). `parse_task_output` needed zero changes; real Basis citations returned.
+> - **FindAll**: original guess was wrong (404). Real flow: `POST /v1beta/findall/runs` (objective, entity_type, match_conditions incl. our `kind` condition, generator, match_limit) → poll `status.status` → `GET .../result` → `candidates[]`. Shared parser `parse_findall_result`; fixture uses the genuine result shape.
+> - **Monitors**: gated beta — this key gets 401 `Product(s) unavailable to provided credential`. Live client falls back to local stand-in watches (`local-{el}`); webhook/reopen flow identical.
+> - Public Cloud Run stays **demo mode** deliberately (unauthenticated URL + live keys = open spend). Live runs happen locally or behind auth.
+
 Prereqs from the user: GCP project ID (Vertex AI API enabled, billing on) and a Parallel API key. Never commit keys; use env vars or `.env` (gitignored).
 
 ```bash

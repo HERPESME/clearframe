@@ -50,14 +50,18 @@ The Cloud Build service account needs `roles/run.admin` + `roles/iam.serviceAcco
 
 ## Flipping to live mode (when API keys exist)
 
+> **Done on 2026-08-19**: secret `parallel-api-key` exists in Secret Manager and the
+> Cloud Run default SA (220710110855-compute@) already has `secretAccessor`. The
+> public services deliberately REMAIN in demo mode — an unauthenticated URL with
+> live keys is open spend for anyone who finds it. Flip only behind auth (IAP) or
+> for a supervised demo window, using the command below; flip back afterwards with
+> `--set-env-vars CLEARFRAME_MODE=demo --clear-secrets`.
+
 ```bash
-printf '%s' "$PARALLEL_API_KEY" | gcloud secrets create parallel-api-key --data-file=-
 gcloud run services update clearframe --region us-central1 \
   --set-env-vars CLEARFRAME_MODE=live,GOOGLE_CLOUD_PROJECT=<PROJECT_ID>,GOOGLE_CLOUD_LOCATION=us-central1 \
   --set-secrets PARALLEL_API_KEY=parallel-api-key:latest
 ```
-
-(Requires `secretmanager.googleapis.com` enabled and the Run service account granted secret access.)
 
 ## Costs / rollback
 

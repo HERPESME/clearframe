@@ -19,25 +19,26 @@ Deterministic 6-stage pipeline: **scan** (Gemini video, Vertex) → **triage** (
 - Risk scores must stay reproducible from stored inputs. CSV text cells go through `exporters.safe_cell`.
 - Timestamps come from callers/CLI, never inside builders.
 
-## Status vs hackathon resources guide (updated 2026-08-15)
+## Status vs hackathon resources guide (updated 2026-08-19)
 
 DONE:
+- **Live validation (Aug 19)**: Google credits + Parallel API key arrived. Key lives in local `.env` (gitignored; load with `set -a && source .env && set +a`) and Secret Manager `parallel-api-key` (Cloud Run SA has accessor). **Live-proven**: Parallel Task API research (parser unchanged, real Basis citations), live Gemini video scan on Vertex (9 detections on Sintel trailer incl. 1s tattoo; `gemini-3-pro-preview` 404s here → coded fallback to `gemini-2.5-pro` works), E&O auditor second pass catches extra elements on real footage. **Fixed on keys-day**: FindAll rewritten to real run-based API (`POST /v1beta/findall/runs` → poll → `/result`, shared `parse_findall_result`, fixture in genuine API shape); Monitors beta is 401-gated for this key → live falls back to local stand-in watches (`local-{el}`), webhook flow identical. Public Cloud Run stays demo mode deliberately (unauth URL + live keys = open spend). 95 tests.
 - **Phase 6 (Aug 15, cloud)**: deployed to **Cloud Run** (project configured via `gcloud config`, region us-central1, demo mode, `min-instances=0` scale-to-zero, `/tmp/out` ephemeral state): services `clearframe` (webapp) + `clearframe-mcp` (streamable HTTP at `/mcp`, stateless). One image in Artifact Registry repo `clearframe`; `cloudbuild.yaml` builds+deploys both. See `.claude/skills/deploy-cloud`. Live-mode flip = env vars + Secret Manager (keys pending). No credentials/personal data are committed — project id lives only in local gcloud config.
 - **Phase 5 (Aug 15, "Living Clearance")**: script pre-scan + script-vs-screen drift (stages `script`/`drift`, 8 stages total), FindAll candidate enumeration for incomplete IP research, **standing clearance watch** (Parallel Monitors created post-dossier; webhook `/api/webhooks/parallel-monitor` reopens review + audit), court precedent quotes w/ source links, `scripts/smoke.sh` (full-transport smoke test — keep it green). Parallel surface now: Task+processors, FindAll, Monitor (+Search/Extract documented for live court, keys-day).
 - **Phase 4 (Aug 15)**: Clearance Court (adversarial counsel/advocate/judge agents with real case-law fixtures — Ringgold, Sandoval, Rogers, Caterpillar, Falkner, VARA, §504(c); live = 3 Gemini persona calls, keys-day validation), E&O Auditor second scan pass (demo scene now **7 elements**), Budget Planner (Parallel processor tiers + rationale + est cost), Mission Control (SSE event stream + live agent roster UI; `?autorun` URL flag for demo recordings; paced demo runs via `POST /api/productions/demo {"pace_s": …}`).
-- ADK native multi-agent pipeline (guide Phase 4) — built and tested.
-- Gemini multimodal video analysis with timestamps (Phase 2) — coded; live quality NOT yet validated.
-- Partner integration via Parallel Task API REST (Phase 3) — fixture-proven; live NOT yet called.
+- ADK native multi-agent pipeline (guide Phase 4) — built and tested; user-reachable via `--adk`.
+- Gemini multimodal video analysis with timestamps (Phase 2) — **live-validated Aug 19** (real detections, sane prominence, fallback model chain proven).
+- Partner integration via Parallel Task API REST (Phase 3) — **live-called Aug 19**, parser unchanged, real Basis citations.
 - **clearframe-mcp server** (roadmap prong B): pipeline as 6 MCP tools, `python -m clearframe.mcp`, mcp SDK v2, fully tested in-process.
 - **Guardrails**: Gemini safety settings (BLOCK_ONLY_HIGH ×4), research spend cap (`CLEARFRAME_MAX_RESEARCH`), Parallel retry+backoff, append-only audit trail (in dossier too), shared `review.py` service (webapp+MCP use identical rules).
 - Cloud Run collateral: Dockerfile + docs/deploy.md incl. Secret Manager + MCP registration (Phase 5) — written, not deployed; Docker build unverified.
 - `deploy` extra: `google-cloud-aiplatform[agent_engines,adk]>=1.101.0` (dry-run resolved clean against google-adk 2.7).
 
-NOT DONE (blocked on credentials/user):
-- GCP project + $100 credit form + Parallel API key (Phase 1/3 forms).
-- First live Gemini scan + prompt tuning; first live Parallel research run.
-- Parallel **managed MCP server** as research transport (roadmap prong A — needs real auth to verify).
-- Agent Engine deployment, Cloud Run deploy, Secret Manager provisioning.
+NOT DONE:
+- Parallel **managed MCP server** as research transport (roadmap prong A — key works now, transport unbuilt).
+- Parallel Monitors live (beta gated for this key — 401 product-unavailable; local stand-in fallback shipped instead).
+- Agent Engine deployment (Cloud Run is the live surface; Agent Engine optional stretch).
+- User-side: salted demo scene shoot, 3-min video, deadline verification on Devpost (Sep 7 vs Sep 10 conflict), repo flip to public, Devpost form.
 
 NOT USED (deliberate — out of scope for clearance): Imagen, Lyria, TTS, Live API streaming, BigQuery RAG, MCP Database Toolbox. Possible stretch if time allows: script-clearance pre-scan (parse screenplay PDF for flaggable items before the shoot — real industry workflow, uses guide's document processing).
 
