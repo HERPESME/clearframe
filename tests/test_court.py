@@ -69,3 +69,54 @@ async def test_mcp_get_finding_exposes_opinion(tmp_path):
     )
     detail = json.loads(result.content[0].text)
     assert detail["court"]["holding"] == "clear_required"
+
+
+async def test_live_court_falls_back_when_primary_model_404s(tmp_path):
+    # Live-observed 2026-08-19: gemini-3-pro-preview 404s in some projects; the
+    # court must fall back to the fallback model instead of silently returning
+    # no opinion for every contested finding.
+    import json as jsonlib
+
+    from clearframe.integrations.court_client import LiveCourtClient
+
+    state = await _ran_state(tmp_path)
+    el = next(e for e in state.elements if e.id == "e1")
+    case = CourtCase(
+        element=el,
+        research=state.research["e1"],
+        risk=state.risk["e1"],
+        production=state.production,
+    )
+
+    calls = []
+
+    class _Resp:
+        def __init__(self, text):
+            self.text = text
+
+    class _Models:
+        def generate_content(self, model, contents, config):
+            calls.append(model)
+            if model == "gemini-3-pro-preview":
+                raise RuntimeError("404 NOT_FOUND: Publisher model not found")
+            payload = (
+                {"argument": "a", "precedents": []}
+                if "precedents" in jsonlib.dumps(getattr(config, "response_schema", {}))
+                or (isinstance(config, dict))
+                else {}
+            )
+            if "JUDGE" in contents[0] or "judge" in contents[0].lower():
+                payload = {"holding": "defensible", "confidence": "medium", "reasoning": "r"}
+            return _Resp(jsonlib.dumps(payload))
+
+    class _Client:
+        models = _Models()
+
+    client = LiveCourtClient(
+        project="p", location="us-central1", model="gemini-3-pro-preview",
+        client_factory=lambda: _Client(),
+    )
+    opinion = await client.try_case(case)
+    assert opinion is not None
+    assert opinion.holding == "defensible"
+    assert "gemini-2.5-pro" in calls

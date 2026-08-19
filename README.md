@@ -89,9 +89,12 @@ Run everything yourself: `./scripts/smoke.sh` verifies the full lifecycle across
 
 ```bash
 pip install -e ".[dev,cloud]"
-export CLEARFRAME_MODE=live GOOGLE_CLOUD_PROJECT=<project> PARALLEL_API_KEY=<key>
-python -m clearframe run --live --footage gs://bucket/scene.mp4 --title "Golden Hour" --duration-s 62 --out out
+cp .env.example .env   # fill in project + key, then load it:
+set -a && source .env && set +a
+python -m clearframe run --live --footage scene.mp4 --title "Golden Hour" --duration-s 62 --out out
 ```
+
+Footage can be a local mp4 (<20MB, sent inline) or a `gs://` URI. `gemini-3-pro-preview` is tried first and the client falls back to `gemini-2.5-pro` automatically where the preview model isn't available.
 
 See [docs/deploy.md](docs/deploy.md) for Cloud Run and Agent Engine deployment.
 

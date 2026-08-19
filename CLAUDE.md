@@ -35,7 +35,7 @@ DONE:
 - `deploy` extra: `google-cloud-aiplatform[agent_engines,adk]>=1.101.0` (dry-run resolved clean against google-adk 2.7).
 
 NOT DONE:
-- Parallel **managed MCP server** as research transport (roadmap prong A — key works now, transport unbuilt).
+- Parallel **managed MCP server** as research transport (roadmap prong A). Verified reachable Aug 19: `https://task-mcp.parallel.ai/mcp` authenticates with our key (`x-api-key` header) and handshakes (tools `createDeepResearch`, `createTaskGroup`). Deliberately NOT adopted as the research transport: our direct Task API integration is live-proven and strictly richer (custom output schemas, processor tiers, FindAll) — the MCP tools expose only generic research. Decision stands unless judges weight managed adapters heavily.
 - Parallel Monitors live (beta gated for this key — 401 product-unavailable; local stand-in fallback shipped instead).
 - Agent Engine deployment (Cloud Run is the live surface; Agent Engine optional stretch).
 - User-side: salted demo scene shoot, 3-min video, deadline verification on Devpost (Sep 7 vs Sep 10 conflict), repo flip to public, Devpost form.

@@ -68,3 +68,29 @@ async def test_dossier_html_includes_audit_trail(tmp_path):
     await generate_dossier_async(store, tmp_path, "demo", at=AT)
     html = (tmp_path / "dossier.html").read_text()
     assert "Audit trail" in html
+
+
+def test_dossier_ctx_uses_live_parallel_client_in_live_env(tmp_path, monkeypatch):
+    # A live deployment must create watches through the live Parallel client,
+    # not silently through fixtures (live-observed gap, 2026-08-19).
+    from clearframe.integrations.parallel_client import (
+        FixtureParallelClient,
+        LiveParallelClient,
+    )
+    from clearframe.models import Production, ProductionState
+    from clearframe.review import _dossier_ctx
+
+    state = ProductionState(
+        production=Production(
+            id="p1", title="T", footage_uri="f.mp4", duration_s=10.0
+        )
+    )
+    monkeypatch.setenv("CLEARFRAME_MODE", "live")
+    monkeypatch.setenv("GOOGLE_CLOUD_PROJECT", "proj")
+    monkeypatch.setenv("PARALLEL_API_KEY", "k")
+    ctx = _dossier_ctx(tmp_path, state)
+    assert isinstance(ctx.parallel, LiveParallelClient)
+
+    monkeypatch.setenv("CLEARFRAME_MODE", "demo")
+    ctx = _dossier_ctx(tmp_path, state)
+    assert isinstance(ctx.parallel, FixtureParallelClient)

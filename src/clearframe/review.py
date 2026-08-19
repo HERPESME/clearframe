@@ -7,12 +7,24 @@ the clock.
 """
 
 import asyncio
+import os
 from pathlib import Path
 
+from clearframe.config import ClearFrameConfig
 from clearframe.models import AuditEvent, Decision, ProductionState
-from clearframe.pipeline import demo_context
+from clearframe.pipeline import build_context, demo_context
 from clearframe.stages.dossier import DossierStage
 from clearframe.store import LocalJsonStore
+
+
+def _dossier_ctx(out_root: Path, state: ProductionState):
+    """Context for dossier-time work (watch creation): live clients when the
+    environment is configured live, fixtures otherwise — a live deployment
+    must not silently create fixture watches."""
+    cfg = ClearFrameConfig.from_env(os.environ)
+    if cfg.mode == "live" and cfg.parallel_api_key:
+        return build_context(cfg, state.production, out_root)
+    return demo_context(out_root)
 
 DECIDER_ROLES = {"legal", "producer"}
 
@@ -129,7 +141,7 @@ async def generate_dossier_async(
     """
     out_root = Path(out_root)
     state = store.load(production_id)
-    ctx = demo_context(out_root)
+    ctx = _dossier_ctx(out_root, state)
     ctx.store = store
     ctx.state = state
     await DossierStage(out_dir=out_root, generated_at=at).run(ctx)

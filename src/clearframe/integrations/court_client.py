@@ -132,13 +132,22 @@ RULING_SCHEMA: dict = {
 
 
 class LiveCourtClient:
-    """Gemini-persona court. TODO(keys-day): enrich briefs with Parallel
-    precedent research tasks before adjudication."""
+    """Gemini-persona court. Same primary→fallback model chain as the scan
+    client — gemini-3-pro-preview 404s in some projects (live-observed
+    2026-08-19) and the court must not silently lose every case over it."""
 
-    def __init__(self, project: str, location: str, model: str, client_factory=None):
+    def __init__(
+        self,
+        project: str,
+        location: str,
+        model: str,
+        fallback_model: str = "gemini-2.5-pro",
+        client_factory=None,
+    ):
         self.project = project
         self.location = location
         self.model = model
+        self.fallback_model = fallback_model
         self._client_factory = client_factory
         self._client = None
 
@@ -163,10 +172,20 @@ class LiveCourtClient:
             )
         except ImportError:
             config = {"response_mime_type": "application/json"}
-        resp = self._client_or_create().models.generate_content(
-            model=self.model, contents=[prompt], config=config
-        )
-        return json.loads(resp.text or "{}")
+        client = self._client_or_create()
+        last_error: Exception | None = None
+        for model in (self.model, self.fallback_model):
+            try:
+                resp = client.models.generate_content(
+                    model=model, contents=[prompt], config=config
+                )
+                return json.loads(resp.text or "{}")
+            except Exception as exc:
+                if "not found" in str(exc).lower() or "404" in str(exc):
+                    last_error = exc
+                    continue
+                raise
+        raise RuntimeError(f"No usable Gemini model for court: {last_error}")
 
     async def try_case(self, case: CourtCase) -> CourtOpinion | None:
         import asyncio
@@ -215,5 +234,12 @@ class LiveCourtClient:
 
         try:
             return await asyncio.to_thread(_run)
-        except Exception:
-            return None  # court is best-effort; a failed case never blocks the pipeline
+        except Exception as exc:
+            # Court is best-effort; a failed case never blocks the pipeline —
+            # but say so, or a systemic failure looks like "no contested cases".
+            import logging
+
+            logging.getLogger("clearframe.court").warning(
+                "court case for %s failed: %s", el.id, exc
+            )
+            return None
