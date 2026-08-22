@@ -1,8 +1,32 @@
 import { useRef, useState } from "react";
 import { api, ApiError } from "./api";
 
-const TERRITORIES = ["US", "GB", "DE", "FR", "JP", "IN"];
-const MEDIA = ["THEATRICAL", "STREAMING", "BROADCAST", "HOME_VIDEO"];
+// Must match data/jurisdictions.json — a territory offered here that the
+// backend has no rules for silently falls back to the neutral band.
+const TERRITORIES = [
+  "US", "GB", "DE", "FR", "JP", "IN", "CA", "AU", "BR", "KR", "ES", "IT",
+];
+const MEDIA = ["THEATRICAL", "STREAMING", "BROADCAST", "HOME_VIDEO", "FESTIVAL"];
+
+// What kind of work this is. Rogers v. Grimaldi protects expressive works and
+// not advertising, so this is the single largest input to trademark risk.
+const USE_CONTEXTS = [
+  ["EXPRESSIVE", "Film / TV / skit"],
+  ["SPONSORED", "Sponsored content"],
+  ["ADVERTISING", "Advertisement"],
+  ["NEWS", "News / reportage"],
+  ["EDUCATIONAL", "Education / commentary"],
+];
+
+// Where it will be published. Drives what the PLATFORM does, which is not what
+// a court would do — automated matching does not evaluate fair use.
+const PLATFORMS = [
+  ["none", "Theatrical / festival / broadcast"],
+  ["youtube", "YouTube"],
+  ["tiktok", "TikTok"],
+  ["instagram", "Instagram / Meta"],
+  ["twitch", "Twitch"],
+];
 
 /**
  * Upload footage to clear, and the rights ledger to clear it against.
@@ -21,6 +45,9 @@ export function Uploader({
   const [title, setTitle] = useState("Untitled Production");
   const [territories, setTerritories] = useState<string[]>(["US", "DE", "FR"]);
   const [distribution, setDistribution] = useState<string[]>(["THEATRICAL", "STREAMING"]);
+  const [useContext, setUseContext] = useState("EXPRESSIVE");
+  const [platform, setPlatform] = useState("none");
+  const [sponsors, setSponsors] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ledgerNote, setLedgerNote] = useState<string | null>(null);
@@ -43,6 +70,9 @@ export function Uploader({
         title,
         territories: territories.join(","),
         distribution: distribution.join(","),
+        use_context: useContext,
+        sponsors,
+        platform,
       });
       onStarted(r.production_id);
     } catch (e) {
@@ -97,6 +127,45 @@ export function Uploader({
             </button>
           ))}
         </div>
+        <div className="up-row">
+          <span className="up-label">This is a</span>
+          {USE_CONTEXTS.map(([value, label]) => (
+            <button
+              key={value}
+              className={`up-chip ${useContext === value ? "on" : ""}`}
+              onClick={() => setUseContext(value)}
+              title="Rogers v. Grimaldi protects expressive works, not advertising. An advert is scored and researched harder because permission, not posture, is the open question."
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <div className="up-row">
+          <span className="up-label">Publishing to</span>
+          {PLATFORMS.map(([value, label]) => (
+            <button
+              key={value}
+              className={`up-chip ${platform === value ? "on" : ""}`}
+              onClick={() => setPlatform(value)}
+              title="Automated content matching does not evaluate fair use, so a finding with a strong legal defence can still be claimed on upload."
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <div className="up-row">
+          <span className="up-label">Sponsors</span>
+          <input
+            className="up-text"
+            value={sponsors}
+            onChange={(e) => setSponsors(e.target.value)}
+            placeholder="Brands paying for this, comma separated — e.g. Coca-Cola, Nike"
+            title="Their own marks are treated as authorised; a competitor's mark in shot is flagged as a contract exposure."
+          />
+        </div>
+
         <div className="up-row">
           <span className="up-label">Media</span>
           {MEDIA.map((m) => (

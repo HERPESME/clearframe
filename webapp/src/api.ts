@@ -68,7 +68,14 @@ export const api = {
     }),
   uploadFootage: (
     file: File,
-    opts: { title: string; territories: string; distribution: string },
+    opts: {
+      title: string;
+      territories: string;
+      distribution: string;
+      use_context: string;
+      sponsors: string;
+      platform: string;
+    },
   ) => {
     const form = new FormData();
     form.append("file", file);
@@ -76,6 +83,9 @@ export const api = {
     form.append("production_id", "upload");
     form.append("territories", opts.territories);
     form.append("distribution", opts.distribution);
+    form.append("use_context", opts.use_context);
+    form.append("sponsors", opts.sponsors);
+    form.append("platform", opts.platform);
     return upload<{ production_id: string; status: string }>("/api/productions", form);
   },
   uploadLicences: (file: File, replace: boolean) => {
