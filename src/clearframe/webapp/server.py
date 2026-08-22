@@ -18,6 +18,7 @@ from clearframe.licensing import assign_ids, parse_licence_csv, parse_licence_js
 from clearframe.media import probe_duration_s
 from clearframe.models import Production
 from clearframe.pipeline import (
+    ANALYSIS_STAGES,
     Pipeline,
     build_context,
     build_demo_pipeline,
@@ -161,17 +162,32 @@ def create_app(out_root: Path) -> FastAPI:
 
     @app.get("/api/productions")
     def list_productions():
+        """Newest first, each flagged with whether its run is still going.
+
+        The client restores the first row on load. When this returned store
+        order, "demo" sorted ahead of a user's upload — so refreshing the page
+        mid-analysis appeared to lose the production entirely. It was never
+        lost: the pipeline runs server-side and every stage persists. The
+        client was simply handed the wrong one.
+        """
         out = []
         for pid in store.production_ids():
             state = store.load(pid)
+            path = store.root / f"{pid}.json"
+            done = all(
+                state.stage_status.get(stage) == "complete"
+                for stage in ANALYSIS_STAGES
+            )
             out.append(
                 {
                     "id": state.production.id,
                     "title": state.production.title,
                     "stage_status": state.stage_status,
+                    "updated_at": path.stat().st_mtime if path.exists() else 0.0,
+                    "running": not done,
                 }
             )
-        return out
+        return sorted(out, key=lambda r: r["updated_at"], reverse=True)
 
     async def _run_paced_demo(pace_s: float, declared: dict | None = None) -> None:
         queue = event_queues["demo"]

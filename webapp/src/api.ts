@@ -1,4 +1,10 @@
-import type { Action, LicenceGrant, ProductionState, Role } from "./types";
+import type {
+  Action,
+  LicenceGrant,
+  ProductionState,
+  ProductionSummary,
+  Role,
+} from "./types";
 
 let currentRole: Role = "legal";
 
@@ -49,10 +55,7 @@ async function upload<T>(path: string, form: FormData): Promise<T> {
 
 export const api = {
   meta: () => request<{ mode: "demo" | "live"; version: string }>("/api/meta"),
-  listProductions: () =>
-    request<{ id: string; title: string; stage_status: Record<string, string> }[]>(
-      "/api/productions",
-    ),
+  listProductions: () => request<ProductionSummary[]>("/api/productions"),
   createDemo: () => request<ProductionState>("/api/productions/demo", { method: "POST" }),
   startPacedDemo: (paceS: number) =>
     request<{ status: string }>("/api/productions/demo", {

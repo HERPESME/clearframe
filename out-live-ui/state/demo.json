@@ -11,11 +11,9 @@
       "DE",
       "FR"
     ],
-    "use_context": "ADVERTISING",
-    "sponsors": [
-      "Pepsi"
-    ],
-    "platform": "youtube",
+    "use_context": "EXPRESSIVE",
+    "sponsors": [],
+    "platform": "none",
     "distribution": [
       "THEATRICAL",
       "STREAMING"
@@ -457,8 +455,8 @@
         {
           "field": "clearance_route",
           "url": "",
-          "excerpt": "Right of publicity — cleared by consent, not by ownership research; commercial appropriation is the core of the tort",
-          "reasoning": "An unnamed individual has no discoverable rights holder. Research cannot produce the instrument this needs. In a commercial context this is not advisory: the right of publicity is a tort of COMMERCIAL appropriation, so an advert is the one place the claim is at its strongest. Required action: A signed personal release is MANDATORY before this can run commercially. Blur otherwise — a crowd notice does not cover advertising use.",
+          "excerpt": "Right of publicity — cleared by consent, not by ownership research",
+          "reasoning": "An unnamed individual has no discoverable rights holder. Research cannot produce the instrument this needs. Required action: Obtain a personal release, or blur. If shot in a public place under a crowd notice, file the notice against this finding.",
           "confidence": "high"
         }
       ],
@@ -474,6 +472,25 @@
       "estimated_license_cost_band": null,
       "basis": [],
       "status": "incomplete"
+    },
+    "e2": {
+      "element_id": "e2",
+      "owner": "The Coca-Cola Company",
+      "owner_confidence": "high",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [
+        {
+          "field": "owner",
+          "url": "",
+          "excerpt": "The Coca-Cola Company",
+          "reasoning": "Resolved from the local rights knowledge base.",
+          "confidence": "high"
+        }
+      ],
+      "status": "complete"
     },
     "e3": {
       "element_id": "e3",
@@ -529,32 +546,6 @@
           "excerpt": "Major labels have stepped up enforcement against unlicensed sync usage in film and streaming content.",
           "reasoning": "Documented pattern of aggressive sync enforcement by UMG.",
           "confidence": "high"
-        }
-      ],
-      "status": "complete"
-    },
-    "e2": {
-      "element_id": "e2",
-      "owner": "The Coca-Cola Company",
-      "owner_confidence": "high",
-      "licensing_contact": "https://www.coca-colacompany.com/contact-us (brand & media licensing)",
-      "licensing_posture": "standard",
-      "litigation_history": [],
-      "estimated_license_cost_band": "$0 (product placement agreement) - $15k",
-      "basis": [
-        {
-          "field": "owner",
-          "url": "https://www.coca-colacompany.com/about-us",
-          "excerpt": "The Coca-Cola Company owns and licenses the Coca-Cola trademarks worldwide.",
-          "reasoning": "Trademark ownership is publicly registered and undisputed.",
-          "confidence": "high"
-        },
-        {
-          "field": "licensing_posture",
-          "url": "https://www.uspto.gov/trademarks",
-          "excerpt": "Registered marks include the Coca-Cola script and contour bottle trade dress.",
-          "reasoning": "Company maintains an active product-placement program and typically cooperates with productions; incidental depiction disputes are rare.",
-          "confidence": "medium"
         }
       ],
       "status": "complete"
@@ -634,98 +625,98 @@
     },
     "e2": {
       "element_id": "e2",
-      "score": 30,
+      "score": 22,
       "band": "MEDIUM",
       "factors": {
         "screen_time_norm": 0.6,
         "prominence_score": 0.384,
         "category_weight": 0.8,
         "posture_factor": 0.7,
-        "use_context_factor": 1.4,
+        "use_context_factor": 1.0,
         "depiction_factor": 1.0
       },
       "de_minimis": false
     },
     "e3": {
       "element_id": "e3",
-      "score": 65,
+      "score": 46,
       "band": "HIGH",
       "factors": {
         "screen_time_norm": 1.0,
         "prominence_score": 0.576,
         "category_weight": 0.8,
         "posture_factor": 1.0,
-        "use_context_factor": 1.4,
+        "use_context_factor": 1.0,
         "depiction_factor": 1.0
       },
       "de_minimis": false
     },
     "e4": {
       "element_id": "e4",
-      "score": 34,
+      "score": 24,
       "band": "MEDIUM",
       "factors": {
         "screen_time_norm": 0.5,
         "prominence_score": 0.38,
         "category_weight": 0.9,
         "posture_factor": 0.7,
-        "use_context_factor": 1.4,
+        "use_context_factor": 1.0,
         "depiction_factor": 1.0
       },
       "de_minimis": false
     },
     "e5": {
       "element_id": "e5",
-      "score": 38,
+      "score": 27,
       "band": "MEDIUM",
       "factors": {
         "screen_time_norm": 0.6,
         "prominence_score": 0.43,
         "category_weight": 0.9,
         "posture_factor": 0.7,
-        "use_context_factor": 1.4,
+        "use_context_factor": 1.0,
         "depiction_factor": 1.0
       },
       "de_minimis": false
     },
     "e6": {
       "element_id": "e6",
-      "score": 9,
+      "score": 6,
       "band": "LOW",
       "factors": {
         "screen_time_norm": 0.12,
         "prominence_score": 0.097,
         "category_weight": 0.9,
         "posture_factor": 0.7,
-        "use_context_factor": 1.4,
+        "use_context_factor": 1.0,
         "depiction_factor": 1.0
       },
       "de_minimis": true
     },
     "e8": {
       "element_id": "e8",
-      "score": 21,
-      "band": "MEDIUM",
+      "score": 15,
+      "band": "LOW",
       "factors": {
         "screen_time_norm": 0.4,
         "prominence_score": 0.267,
         "category_weight": 0.8,
         "posture_factor": 0.7,
-        "use_context_factor": 1.4,
+        "use_context_factor": 1.0,
         "depiction_factor": 1.0
       },
       "de_minimis": false
     },
     "e7": {
       "element_id": "e7",
-      "score": 17,
+      "score": 12,
       "band": "LOW",
       "factors": {
         "screen_time_norm": 0.3,
         "prominence_score": 0.198,
         "category_weight": 0.9,
         "posture_factor": 0.7,
-        "use_context_factor": 1.4,
+        "use_context_factor": 1.0,
         "depiction_factor": 1.0
       },
       "de_minimis": false
@@ -747,12 +738,6 @@
       }
     ],
     "e2": [
-      {
-        "kind": "license",
-        "summary": "License from The Coca-Cola Company",
-        "detail": "To: https://www.coca-colacompany.com/contact-us (brand & media licensing)\nSubject: License request — \"Coca-Cola can\" appearing in \"Golden Hour\"\n\nDear rights holder,\n\nWe are producing \"Golden Hour\", an independent film currently in post-production.\nYour property \"Coca-Cola can\" appears in our footage at timecode 01:00:05:00-01:00:11:00\n(Red soda can with visible Coca-Cola script logo on the kitchen table.). We would like to license this use for worldwide distribution across\nall media, in perpetuity.\n\nResearch indicates a typical license range of $0 (product placement agreement) - $15k. Could you confirm\navailability, terms, and your quote for this use?\n\nWe are happy to provide the relevant footage excerpt for review.\n\nKind regards,\n\"Golden Hour\" clearance team\n",
-        "est_cost_band": "$0 (product placement agreement) - $15k"
-      },
       {
         "kind": "blur",
         "summary": "VFX blur / digital replacement in post",
@@ -835,7 +820,15 @@
   },
   "decisions": {},
   "unscanned_ranges": [],
-  "audit_log": [],
+  "audit_log": [
+    {
+      "at": "2026-08-22T20:41:07.062862+00:00",
+      "actor": "system",
+      "role": "system",
+      "event": "freshness_checked",
+      "detail": "5 holders checked, 10 enforcement signals"
+    }
+  ],
   "court": {
     "e1": {
       "element_id": "e1",
@@ -1063,12 +1056,6 @@
       "rationale": "Music rights split across composition and master with publisher chains; needs deep research.",
       "est_cost_usd": 0.1
     },
-    "e2": {
-      "element_id": "e2",
-      "processor": "lite",
-      "rationale": "Famous mark: ownership is trivial; only posture/contact needs confirming.",
-      "est_cost_usd": 0.005
-    },
     "e5": {
       "element_id": "e5",
       "processor": "ultra",
@@ -1209,43 +1196,121 @@
       {
         "element_id": "e1",
         "owner": "The Weeknd XO, Inc. / Universal Music Group (master); Universal Music Publishing Group (composition)",
-        "title": "Majors escalate sync enforcement against unlicensed film use",
-        "url": "https://www.billboard.com/pro/music-sync-licensing-lawsuits/",
-        "excerpt": "Universal Music Group has filed suit against several production companies over uncleared synchronisation of recordings, seeking statutory damages under 17 U.S.C. 504(c).",
+        "title": "Weeknd, XO, Max Martin and Universal was sued in 2019 ...",
+        "url": "https://www.reddit.com/r/TheWeeknd/comments/1qqwle4/weeknd_xo_max_martin_and_universal_was_sued_in",
+        "excerpt": "Weeknd, XO, Max Martin and Universal was sued in 2019 ...\nWeeknd, XO, Max Martin and Universal was sued in 2019 over the song 'A Lonely Night' claims of copyright infringement from song titled \" I Need",
         "material": true
       },
       {
         "element_id": "e1",
         "owner": "The Weeknd XO, Inc. / Universal Music Group (master); Universal Music Publishing Group (composition)",
-        "title": "Universal Music Publishing Group — sync licensing",
-        "url": "https://www.umusicpub.com/",
-        "excerpt": "UMPG administers the composition catalogue and processes synchronisation requests for film and television through its licensing desk.",
-        "material": false
+        "title": "The Weeknd Hit With Copyright Lawsuit Over “The Hills”",
+        "url": "https://www.hollywoodreporter.com/business/business-news/weeknd-hit-copyright-lawsuit-hills-847364/",
+        "excerpt": "Dec 9, 2015 — A film financier based in the United Kingdom has filed a copyright infringement lawsuit over The Weeknd's hit song, “The Hills,” alleging that",
+        "material": true
+      },
+      {
+        "element_id": "e1",
+        "owner": "The Weeknd XO, Inc. / Universal Music Group (master); Universal Music Publishing Group (composition)",
+        "title": "The Weeknd Sued for Copyright Infringement Over 'The Hills'",
+        "url": "https://www.yahoo.com/entertainment/weeknd-sued-copyright-infringement-over-hills-210309675.html",
+        "excerpt": "Dec 9, 2015 — Weeknd's hit song \"The Hills\" infringes on the copyright to composer Tom Raybould's track \"Revolution\" movie \"The Machine.\"",
+        "material": true
       }
     ],
     "e3": [
       {
         "element_id": "e3",
         "owner": "Nike, Inc.",
-        "title": "Can You Use the Nike Logo Legally? Trademark Guide",
-        "url": "https://www.trademarkia.com/news/fashion/nike-logo-trademark-legal-use",
-        "excerpt": "Not without risk - trademark law helps safeguard against consumer confusion and protects brand identity. Under the Lanham Act, which governs U.S. trademark law, unauthorised commercial use of the Swoosh invites an infringement claim.",
+        "title": "NIKE Files Trademark Infringement Lawsuit Against BAPE",
+        "url": "http://afslaw.com/perspectives/fashion-counsel/full-court-press-nike-files-trademark-infringement-lawsuit-against",
+        "excerpt": "Fashion Counsel Will Tariffs Ever Go Out of Style? Tariffs and Trade Agreement Negotiations Show No Signs of Slowing Down August 10, 2026 Angela M. Santos , Lucas A. Rock , Tanya Secor\n\nFashion Counsel Crossing the Line: _Chrome Hearts v. Nordstrom_ and the Boundaries of Design Mark Protection August 5, 2026 Anthony V. Lupo\\* , R. Erica Roque , Emily P. Caylor , Kendall K. Murphy\n\n## Sub footer\n\nBack to Top",
         "material": true
       },
       {
         "element_id": "e3",
         "owner": "Nike, Inc.",
-        "title": "Nike trademark enforcement record",
-        "url": "https://www.tramatm.com/en/trademark-hall-of-fame/nike",
-        "excerpt": "Nike alleged trademark infringement, claiming that the design copied the iconic Swoosh logo and other elements associated with Nike's Dunk sneakers, and moved swiftly for injunctive relief.",
+        "title": "Jacobus Rentmeester v. Nike, Inc.",
+        "url": "https://www.law360.com/cases/55d5ae58033b6e79ac0003f2/articles",
+        "excerpt": "Nike's 'Jumpman' Logo Doesn't Infringe IP, 9th Circ. Says. A split Ninth Circuit panel on Tuesday rejected a copyright lawsuit against Nike Inc. over the",
         "material": true
       },
       {
         "element_id": "e3",
         "owner": "Nike, Inc.",
-        "title": "Nike unveils autumn brand campaign",
-        "url": "https://news.example/nike-brand-campaign-2026",
-        "excerpt": "The company announced a new global marketing push centred on running, with campaign films launching across streaming platforms this quarter.",
+        "title": "Nike Takes Stand Against Customization Art for IP Enforcement",
+        "url": "https://www.klemchuk.com/ideate/customization-art-and-ip-enforcement-nike",
+        "excerpt": "Aug 24, 2021 — Nike has begun to track down customers and companies and accusing them of infringement of its trademarks and copyrights for their customization",
+        "material": true
+      }
+    ],
+    "e2": [
+      {
+        "element_id": "e2",
+        "owner": "The Coca-Cola Company",
+        "title": "Coca-Cola Co. v. Koke Co. of America Case Brief Summary - YouTube",
+        "url": "https://www.youtube.com/watch?v=4RNScYNecIg",
+        "excerpt": "May 13, 2023 · ... sued Koke in district court for trademark infringement and sought to ... Although the nineteen twenty Supreme Court case of Coca Cola Company",
+        "material": true
+      },
+      {
+        "element_id": "e2",
+        "owner": "The Coca-Cola Company",
+        "title": "Coca-Cola Lawsuit: Comprehensive Overview of Recent Legal ...",
+        "url": "https://lawgud.com/lawsuit/coca-cola-lawsuit-comprehensive-overview-of-recent-legal-actions",
+        "excerpt": "Coca-Cola Lawsuit: Comprehensive Overview of Recent Legal ...\nA nationwide class action lawsuit filed in 2025 claims that Coca-Cola falsely advertises its Sprite and Fanta products as made with “100% Natural Flavors.”",
+        "material": true
+      },
+      {
+        "element_id": "e2",
+        "owner": "The Coca-Cola Company",
+        "title": "The Coca-Cola Company (KO) Latest Press Releases & Corporate News - Yahoo Finance",
+        "url": "https://finance.yahoo.com/quote/KO/press-releases",
+        "excerpt": "com/news/coca-cola-beverages-florida-promotes-120000414.html \"Coca-Cola Beverages Florida Promotes Sales Veteran to Territory General Manager\")\n  \n  Business Wire _•_ 22 days ago\n* [Arca Continental Coca-Cola Southwest Beverages Awarded 2024 Candler Cup](https://finance.yahoo.com/news/arca-continental-coca-cola-southwest-151400705.html \"Arca Continental Coca-Cola Southwest Beverages Awarded 2024 Candler Cup\")\n  \n  [### Arca Continental Coca-Cola Southwest Beverages Awarded 2024 Candler Cup](https://finance.yahoo.com/news/arca-continental-coca-cola-southwest-151400705.html \"Arca Continental Coc",
+        "material": false
+      }
+    ],
+    "e4": [
+      {
+        "element_id": "e4",
+        "owner": "Domino Recording Co. (band artwork) / original poster designer (design copyright)",
+        "title": "Jessie J facing copyright infringement lawsuit over Domino",
+        "url": "https://www.theguardian.com/music/2012/jun/27/jessie-j-copyright-domino",
+        "excerpt": "Jun 27, 2012 — With Domino, they claim, Jessie J and her co-songwriters \"willfully infringed\" on Bright Red Chords' copyright, selling \"millions of copies of",
+        "material": true
+      },
+      {
+        "element_id": "e4",
+        "owner": "Domino Recording Co. (band artwork) / original poster designer (design copyright)",
+        "title": "R U Mine Arctic Monkeys Spotify Poster Print Music Poster Etsy",
+        "url": "https://sentidos.biz/blog-it/are-u-mine-arctic-monkeys.html",
+        "excerpt": "A single from Arctic Monkeys originally released in early 2012 for Record Store Day in the UK. \"R.\n\n  \n### Off the Radar Arctic Monkeys R U Mine? (Video)\n\nAlbum AM. \"R U Mine?\" is the second track from British indie-rock band Arctic Monkeys' fifth studio album, \"AM\", which was released in September 2013. \"R U Mine?\" was written by lead vocalist and rhythm guitarist Alex Turner and bassist and backing vocalist of the Arctic Monkeys, and produced by Ross Orton.\n\n  \n### Buy \"R U Mine?\" Arctic Monkeys Microsoft Store\n\nWarning: Contains flashing imagesArctic Monkeys perform R U Mine at Glastonbury",
+        "material": false
+      }
+    ],
+    "e7": [
+      {
+        "element_id": "e7",
+        "owner": "Local broadcast affiliate (KXBC-7) / parent station group",
+        "title": "FOX TELEVISION STATIONS INC TWENTIETH CENTURY FOX FILM ...",
+        "url": "https://caselaw.findlaw.com/court/us-9th-circuit/1853536.html",
+        "excerpt": "Mar 21, 2017 · This lawsuit pits a group of broadcast stations and copyright holders (collectively, “Fox”) against an entity now known as FilmOn X (“FilmOn”).",
+        "material": true
+      },
+      {
+        "element_id": "e7",
+        "owner": "Local broadcast affiliate (KXBC-7) / parent station group",
+        "title": "News Background Breaking News Broadcast Backdrop Stock ... Shutterstock · MotionView https://www.shutterstock.com · Feb 20, 2025",
+        "url": "https://www.shutterstock.com/video/clip-3728953213-news-background-breaking-broadcast-backdrop-seamless-loop",
+        "excerpt": "A video of a breaking news live broadcast.",
+        "material": false
+      },
+      {
+        "element_id": "e7",
+        "owner": "Local broadcast affiliate (KXBC-7) / parent station group",
+        "title": "News Background Video Stock Video Footage for Free Download",
+        "url": "https://www.vecteezy.com/free-videos/news-background-video",
+        "excerpt": "Submit\n\nWe couldn't save your feedback. Please try again later.\n\nThank you for your feedback!\n\nWe appreciate you helping us improve search.\n\nClose\n\nAmazing Logo Template Mega Bundle\n\nFree Download for Pro Subscribers!\n\n**Amazing Logo Template Mega Bundle** View & Download\n\nAvailable For:\n\n2 Days 11 Hours 2 Mins 24 Secs",
         "material": false
       }
     ]
@@ -1393,21 +1458,21 @@
       {
         "element_id": "e8",
         "territory": "US",
-        "band": "MEDIUM",
+        "band": "LOW",
         "rationale": "TRADEMARK exposure does not vary by panorama rule; United States tracks the baseline band.",
         "authority": ""
       },
       {
         "element_id": "e8",
         "territory": "DE",
-        "band": "MEDIUM",
+        "band": "LOW",
         "rationale": "TRADEMARK exposure does not vary by panorama rule; Germany tracks the baseline band.",
         "authority": ""
       },
       {
         "element_id": "e8",
         "territory": "FR",
-        "band": "MEDIUM",
+        "band": "LOW",
         "rationale": "TRADEMARK exposure does not vary by panorama rule; France tracks the baseline band.",
         "authority": ""
       }
@@ -1525,11 +1590,12 @@
       ]
     }
   ],
+  "audio_checked": true,
   "routes": {
     "e1": {
       "element_id": "e1",
       "tier": "DEEP",
-      "rationale": "This is advertising use, which carries no expressive-work shield — Rogers v. Grimaldi protects films, not adverts, and every brand-owner win in the record is an advert (Falkner v. GM, Mercedes v. the Detroit muralists, Revok v. H&M). Knowing the posture is not enough; you need an actual licence, so you need the contact and the cost band. Recording identified by acoustic fingerprint, so the remaining unknowns are posture and the two licensing contacts (composition and master) — a search answers both in seconds.",
+      "rationale": "Escalated to deep research: provisional exposure is 70, at or above the HIGH band. Recording identified by acoustic fingerprint, so the remaining unknowns are posture and the two licensing contacts (composition and master) — a search answers both in seconds. A finding this prominent needs a licensing contact, a cost band and citations an underwriter can follow — which only a deep run produces.",
       "basis": "",
       "disposition": "Clear BOTH the synchronisation licence from the publisher and the master-use licence from the label. One without the other is the most common music clearance failure.",
       "owner": null,
@@ -1540,20 +1606,20 @@
     },
     "e2": {
       "element_id": "e2",
-      "tier": "DEEP",
-      "rationale": "This is advertising use, which carries no expressive-work shield — Rogers v. Grimaldi protects films, not adverts, and every brand-owner win in the record is an advert (Falkner v. GM, Mercedes v. the Detroit muralists, Revok v. H&M). Knowing the posture is not enough; you need an actual licence, so you need the contact and the cost band. Ownership resolved locally (The Coca-Cola Company); a live search establishes current licensing posture and the contact route. Posture is the variable a static table cannot know, and for trademark it is the variable that decides risk — brand owners sue over unflattering depiction, not presence.",
+      "tier": "SEARCH",
+      "rationale": "Ownership resolved locally (The Coca-Cola Company); a live search establishes current licensing posture and the contact route. Posture is the variable a static table cannot know, and for trademark it is the variable that decides risk — brand owners sue over unflattering depiction, not presence.",
       "basis": "",
       "disposition": "Confirm posture, then approach The Coca-Cola Company if depiction is unflattering.",
       "owner": "The Coca-Cola Company",
       "posture": null,
       "est_cost_usd": 0.005,
-      "est_latency_s": 180.0,
+      "est_latency_s": 2.0,
       "enumerate_candidates": false
     },
     "e3": {
       "element_id": "e3",
       "tier": "DEEP",
-      "rationale": "This is advertising use, which carries no expressive-work shield — Rogers v. Grimaldi protects films, not adverts, and every brand-owner win in the record is an advert (Falkner v. GM, Mercedes v. the Detroit muralists, Revok v. H&M). Knowing the posture is not enough; you need an actual licence, so you need the contact and the cost band. Ownership resolved locally (Nike, Inc.); a live search establishes current licensing posture and the contact route. Posture is the variable a static table cannot know, and for trademark it is the variable that decides risk — brand owners sue over unflattering depiction, not presence.",
+      "rationale": "Escalated to deep research: provisional exposure is 46, at or above the HIGH band. Ownership resolved locally (Nike, Inc.); a live search establishes current licensing posture and the contact route. Posture is the variable a static table cannot know, and for trademark it is the variable that decides risk — brand owners sue over unflattering depiction, not presence. A finding this prominent needs a licensing contact, a cost band and citations an underwriter can follow — which only a deep run produces.",
       "basis": "",
       "disposition": "Confirm posture, then approach Nike, Inc. if depiction is unflattering.",
       "owner": "Nike, Inc.",
@@ -1589,9 +1655,9 @@
     "e6": {
       "element_id": "e6",
       "tier": "STATUTE",
-      "rationale": "An unnamed individual has no discoverable rights holder. Research cannot produce the instrument this needs. In a commercial context this is not advisory: the right of publicity is a tort of COMMERCIAL appropriation, so an advert is the one place the claim is at its strongest.",
-      "basis": "Right of publicity — cleared by consent, not by ownership research; commercial appropriation is the core of the tort",
-      "disposition": "A signed personal release is MANDATORY before this can run commercially. Blur otherwise — a crowd notice does not cover advertising use.",
+      "rationale": "An unnamed individual has no discoverable rights holder. Research cannot produce the instrument this needs.",
+      "basis": "Right of publicity — cleared by consent, not by ownership research",
+      "disposition": "Obtain a personal release, or blur. If shot in a public place under a crowd notice, file the notice against this finding.",
       "owner": null,
       "posture": null,
       "est_cost_usd": 0.0,
@@ -1623,95 +1689,86 @@
       "enumerate_candidates": false
     }
   },
-  "sponsor_conflicts": [
-    {
-      "element_id": "e2",
-      "label": "Coca-Cola can",
-      "detected_owner": "The Coca-Cola Company",
-      "conflicts_with": "Pepsi",
-      "sector": "beverage",
-      "note": "'Coca-Cola can' (The Coca-Cola Company) is a beverage competitor of sponsor Pepsi (PepsiCo, Inc.). Category exclusivity is standard in sponsorship contracts, so this may breach the deal even though the depiction itself is lawful. Check the exclusivity clause before delivery."
-    }
-  ],
+  "sponsor_conflicts": [],
   "platform_outcomes": [
     {
-      "element_id": "e1",
-      "platform": "YouTube",
-      "action": "CLAIM_LIKELY",
-      "confidence": "near-certain",
-      "detected_by": "AUDIO_FINGERPRINT",
-      "consequence": "A commercially released recording matched by acoustic fingerprint. YouTube matches this automatically on upload, so a claim is near-certain. Fair use is no defence here: the matching system does not evaluate it, and disputing a claim is a manual process most creators lose by default.",
-      "remedy": "Mute or replace the audio at 00:12–00:24 before publishing, or licence the recording. Editing after a claim lands does not reverse it.",
-      "revenue_impact": "Monetisation for the whole video is diverted to Republic Records."
-    },
-    {
       "element_id": "e6",
-      "platform": "YouTube",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
       "action": "PRIVACY_COMPLAINT",
       "confidence": "possible",
       "detected_by": "HUMAN_REPORT",
       "consequence": "An identifiable person can complain personally, through a route separate from copyright. In the EU and UK this is also personal data under GDPR, and in India under the DPDP Act — a different regime with a different remedy from the US right of publicity.",
-      "remedy": "Obtain a release, or blur the face at 00:47–00:48. Route if challenged: Privacy complaint process; the subject must file personally, and YouTube may require the uploader to blur or remove.",
+      "remedy": "Obtain a release, or blur the face at 00:47–00:48. Route if challenged: None — releases are checked at delivery.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "e1",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "unlikely",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform (theatrical, festival, broadcast delivery) runs no automated audio matching, so this surfaces only if a rights holder notices. That makes it less likely and more serious when it lands — there is no takedown to react to.",
+      "remedy": "Clear the recording, or replace the cue at 00:12–00:24.",
       "revenue_impact": ""
     },
     {
       "element_id": "e2",
-      "platform": "YouTube",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
       "action": "MANUAL_COMPLAINT",
       "confidence": "possible",
       "detected_by": "HUMAN_REPORT",
-      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on YouTube can become a takedown and a strike rather than a revenue share.",
-      "remedy": "Clear it, blur it, or reframe the shot at 00:05–00:11. Route if challenged: Separate trademark complaint form, reviewed by a human; distinct from the copyright process and does not create a copyright strike.",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:05–00:11. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
       "revenue_impact": ""
     },
     {
       "element_id": "e3",
-      "platform": "YouTube",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
       "action": "MANUAL_COMPLAINT",
       "confidence": "possible",
       "detected_by": "HUMAN_REPORT",
-      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on YouTube can become a takedown and a strike rather than a revenue share.",
-      "remedy": "Clear it, blur it, or reframe the shot at 00:08–00:45. Route if challenged: Separate trademark complaint form, reviewed by a human; distinct from the copyright process and does not create a copyright strike.",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:08–00:45. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
       "revenue_impact": ""
     },
     {
       "element_id": "e4",
-      "platform": "YouTube",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
       "action": "MANUAL_COMPLAINT",
       "confidence": "possible",
       "detected_by": "HUMAN_REPORT",
-      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on YouTube can become a takedown and a strike rather than a revenue share.",
-      "remedy": "Clear it, blur it, or reframe the shot at 00:20–00:25. Route if challenged: Separate trademark complaint form, reviewed by a human; distinct from the copyright process and does not create a copyright strike.",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:20–00:25. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
       "revenue_impact": ""
     },
     {
       "element_id": "e5",
-      "platform": "YouTube",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
       "action": "MANUAL_COMPLAINT",
       "confidence": "possible",
       "detected_by": "HUMAN_REPORT",
-      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on YouTube can become a takedown and a strike rather than a revenue share.",
-      "remedy": "Clear it, blur it, or reframe the shot at 00:30–00:36. Route if challenged: Separate trademark complaint form, reviewed by a human; distinct from the copyright process and does not create a copyright strike.",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:30–00:36. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
       "revenue_impact": ""
     },
     {
       "element_id": "e8",
-      "platform": "YouTube",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
       "action": "MANUAL_COMPLAINT",
       "confidence": "possible",
       "detected_by": "HUMAN_REPORT",
-      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on YouTube can become a takedown and a strike rather than a revenue share.",
-      "remedy": "Clear it, blur it, or reframe the shot at 00:26–00:30. Route if challenged: Separate trademark complaint form, reviewed by a human; distinct from the copyright process and does not create a copyright strike.",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:26–00:30. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
       "revenue_impact": ""
     },
     {
       "element_id": "e7",
-      "platform": "YouTube",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
       "action": "MANUAL_COMPLAINT",
       "confidence": "possible",
       "detected_by": "HUMAN_REPORT",
-      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on YouTube can become a takedown and a strike rather than a revenue share.",
-      "remedy": "Clear it, blur it, or reframe the shot at 00:50–00:53. Route if challenged: Separate trademark complaint form, reviewed by a human; distinct from the copyright process and does not create a copyright strike.",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:50–00:53. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
       "revenue_impact": ""
     }
   ],
@@ -2483,7 +2540,7 @@
         "xmax": 0.46
       },
       "at_s": 10.0,
-      "provisional_score": 65,
+      "provisional_score": 46,
       "provisional_band": "HIGH",
       "identity": "CORROBORATED",
       "depiction": "NEUTRAL",
@@ -2531,29 +2588,29 @@
         "xmax": 0.78
       },
       "at_s": 33.0,
-      "provisional_score": 54,
-      "provisional_band": "HIGH",
+      "provisional_score": 39,
+      "provisional_band": "MEDIUM",
       "identity": "SINGLE_SOURCE",
       "depiction": null,
       "territory": [
         {
           "element_id": "e5",
           "territory": "US",
-          "band": "HIGH",
+          "band": "MEDIUM",
           "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
           "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
         },
         {
           "element_id": "e5",
           "territory": "DE",
-          "band": "MEDIUM",
+          "band": "LOW",
           "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
           "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
         },
         {
           "element_id": "e5",
           "territory": "FR",
-          "band": "CRITICAL",
+          "band": "HIGH",
           "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
           "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
         }
@@ -2579,29 +2636,29 @@
         "xmax": 0.86
       },
       "at_s": 22.0,
-      "provisional_score": 48,
-      "provisional_band": "HIGH",
+      "provisional_score": 34,
+      "provisional_band": "MEDIUM",
       "identity": "SINGLE_SOURCE",
       "depiction": null,
       "territory": [
         {
           "element_id": "e4",
           "territory": "US",
-          "band": "HIGH",
+          "band": "MEDIUM",
           "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
           "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
         },
         {
           "element_id": "e4",
           "territory": "DE",
-          "band": "MEDIUM",
+          "band": "LOW",
           "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
           "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
         },
         {
           "element_id": "e4",
           "territory": "FR",
-          "band": "CRITICAL",
+          "band": "HIGH",
           "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
           "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
         }
@@ -2627,7 +2684,7 @@
         "xmax": 0.55
       },
       "at_s": 6.0,
-      "provisional_score": 43,
+      "provisional_score": 31,
       "provisional_band": "MEDIUM",
       "identity": "CORROBORATED",
       "depiction": "NEUTRAL",
@@ -2654,7 +2711,7 @@
           "authority": ""
         }
       ],
-      "route_tier": "DEEP",
+      "route_tier": "SEARCH",
       "disposition": "Confirm posture, then approach The Coca-Cola Company if depiction is unflattering.",
       "awaiting_research": true
     },
@@ -2675,7 +2732,7 @@
         "xmax": 0.72
       },
       "at_s": 27.0,
-      "provisional_score": 30,
+      "provisional_score": 21,
       "provisional_band": "MEDIUM",
       "identity": "CONFLICTED",
       "depiction": "NEUTRAL",
@@ -2718,15 +2775,15 @@
       ],
       "bbox": null,
       "at_s": null,
-      "provisional_score": 25,
-      "provisional_band": "MEDIUM",
+      "provisional_score": 18,
+      "provisional_band": "LOW",
       "identity": "SINGLE_SOURCE",
       "depiction": null,
       "territory": [
         {
           "element_id": "e7",
           "territory": "US",
-          "band": "MEDIUM",
+          "band": "LOW",
           "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
           "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
         },
@@ -2740,7 +2797,7 @@
         {
           "element_id": "e7",
           "territory": "FR",
-          "band": "HIGH",
+          "band": "MEDIUM",
           "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
           "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
         }
@@ -2761,7 +2818,7 @@
       ],
       "bbox": null,
       "at_s": null,
-      "provisional_score": 12,
+      "provisional_score": 9,
       "provisional_band": "LOW",
       "identity": "SINGLE_SOURCE",
       "depiction": "NEUTRAL",
@@ -2789,7 +2846,7 @@
         }
       ],
       "route_tier": "STATUTE",
-      "disposition": "A signed personal release is MANDATORY before this can run commercially. Blur otherwise — a crowd notice does not cover advertising use.",
+      "disposition": "Obtain a personal release, or blur. If shot in a public place under a crowd notice, file the notice against this finding.",
       "awaiting_research": false
     }
   ],
