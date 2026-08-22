@@ -4,14 +4,18 @@ from pydantic import BaseModel
 
 from clearframe.models import (
     AuditEvent,
+    Corroboration,
     CourtOpinion,
     Decision,
+    FreshnessSignal,
+    IdentityVerdict,
     Production,
     ProductionState,
     RemediationOption,
     ResearchResult,
     RiskAssessment,
     RiskBand,
+    TerritoryRisk,
     TimeRange,
     TriagedElement,
     research_is_incomplete,
@@ -36,6 +40,9 @@ class DossierEntry(BaseModel):
     options: list[RemediationOption]
     decision: Decision | None
     court: CourtOpinion | None = None
+    corroboration: Corroboration | None = None
+    freshness: list[FreshnessSignal] = []
+    territory: list[TerritoryRisk] = []
 
 
 class ClearanceDossier(BaseModel):
@@ -45,6 +52,7 @@ class ClearanceDossier(BaseModel):
     summary: dict[str, int]
     unscanned_ranges: list[TimeRange]
     audit: list[AuditEvent] = []
+    territories: list[str] = []
     disclaimer: str = DISCLAIMER
 
 
@@ -57,6 +65,9 @@ def build_dossier(state: ProductionState, generated_at: str) -> ClearanceDossier
             options=state.remediation.get(el.id, []),
             decision=state.decisions.get(el.id),
             court=state.court.get(el.id),
+            corroboration=state.corroboration.get(el.id),
+            freshness=state.freshness.get(el.id, []),
+            territory=state.territory_risk.get(el.id, []),
         )
         for el in state.elements
     ]
@@ -69,6 +80,21 @@ def build_dossier(state: ProductionState, generated_at: str) -> ClearanceDossier
         1 for e in entries if research_is_incomplete(e.research)
     )
     summary["pending_decisions"] = sum(1 for e in entries if e.decision is None)
+    summary["identity_conflicts"] = sum(
+        1
+        for e in entries
+        if e.corroboration is not None
+        and e.corroboration.verdict is IdentityVerdict.CONFLICTED
+    )
+    summary["identity_corroborated"] = sum(
+        1
+        for e in entries
+        if e.corroboration is not None
+        and e.corroboration.verdict is IdentityVerdict.CORROBORATED
+    )
+    summary["material_freshness_signals"] = sum(
+        1 for e in entries for s in e.freshness if s.material
+    )
 
     return ClearanceDossier(
         production=state.production,
@@ -77,6 +103,7 @@ def build_dossier(state: ProductionState, generated_at: str) -> ClearanceDossier
         summary=summary,
         unscanned_ranges=state.unscanned_ranges,
         audit=state.audit_log,
+        territories=state.territories,
     )
 
 
@@ -86,7 +113,13 @@ def auto_decisions(state: ProductionState) -> dict[str, Decision]:
     for el in state.elements:
         research = state.research.get(el.id)
         risk = state.risk[el.id]
-        if research_is_incomplete(research):
+        corroboration = state.corroboration.get(el.id)
+        if corroboration is not None and corroboration.verdict is IdentityVerdict.CONFLICTED:
+            action, note = (
+                "escalate",
+                "Detectors disagree on what this element is; identity must be resolved before clearance.",
+            )
+        elif research_is_incomplete(research):
             action, note = "escalate", "Rights holder could not be identified; escalate to counsel."
         elif risk.band == RiskBand.LOW:
             action, note = "approve_risk", "Low risk accepted per de-minimis/low-prominence policy."

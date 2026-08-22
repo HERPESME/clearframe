@@ -23,6 +23,9 @@ async def test_tools_are_registered(server):
         "get_status",
         "list_findings",
         "get_finding",
+        "verify_identities",
+        "territory_report",
+        "check_freshness",
         "record_decision",
         "generate_dossier",
     }

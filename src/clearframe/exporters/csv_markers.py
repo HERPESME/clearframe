@@ -11,7 +11,9 @@ from clearframe.timecode import seconds_to_tc
 def render_csv(entries: list[MarkerEntry], fps: float) -> str:
     buf = io.StringIO()
     writer = csv.writer(buf)
-    writer.writerow(["timecode_in", "timecode_out", "label", "category", "risk_band"])
+    writer.writerow(
+        ["timecode_in", "timecode_out", "label", "category", "risk_band", "identity"]
+    )
     for e in entries:
         writer.writerow(
             [
@@ -20,6 +22,7 @@ def render_csv(entries: list[MarkerEntry], fps: float) -> str:
                 safe_cell(e.label),
                 e.category.value,
                 e.band.value,
+                e.identity,
             ]
         )
     return buf.getvalue()

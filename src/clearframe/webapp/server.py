@@ -19,6 +19,7 @@ from clearframe.review import (
     generate_dossier_async,
     record_decision,
     record_watch_alert,
+    refresh_freshness,
 )
 from clearframe.stages.dossier import ReviewPendingError
 from clearframe.store import LocalJsonStore
@@ -197,6 +198,30 @@ def create_app(out_root: Path) -> FastAPI:
             except FileNotFoundError:
                 raise HTTPException(status_code=404, detail=f"Unknown production: {pid}")
             return {"ok": True, "pending": pending_ids(state)}
+
+    @app.post("/api/productions/{pid}/freshness")
+    async def check_freshness(pid: str):
+        """Live Parallel Search pass over every identified rights holder.
+
+        Deep research is a snapshot from pipeline time; this is the real-time
+        check a reviewer runs before signing off. Priced per request, so it is
+        affordable to call on demand from the review screen.
+        """
+        async with state_lock:
+            try:
+                state, checked = await refresh_freshness(
+                    store, out_root, pid, at=datetime.now(timezone.utc).isoformat()
+                )
+            except FileNotFoundError:
+                raise HTTPException(status_code=404, detail=f"Unknown production: {pid}")
+        material = sum(
+            1 for sigs in state.freshness.values() for s in sigs if s.material
+        )
+        return {
+            "checked": checked,
+            "holders": len(state.freshness),
+            "material_signals": material,
+        }
 
     @app.post("/api/productions/{pid}/dossier")
     async def generate_dossier(pid: str):

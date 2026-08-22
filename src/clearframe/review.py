@@ -201,3 +201,43 @@ def generate_dossier_for(
 ) -> list[str]:
     """Sync wrapper for non-async callers (CLI, sync tests)."""
     return asyncio.run(generate_dossier_async(store, out_root, production_id, at=at))
+
+
+async def refresh_freshness(
+    store: LocalJsonStore, out_root: Path, production_id: str, *, at: str
+) -> tuple[ProductionState, int]:
+    """Re-run the live Parallel Search pass over identified rights holders.
+
+    Deep research is a snapshot taken when the pipeline ran; this is the live
+    check a reviewer makes before signing off. Uses the same client selection
+    as dossier-time work, so a live deployment really calls Parallel and a demo
+    deployment replays fixtures through the identical parser.
+    """
+    from clearframe.stages.freshness import FreshnessStage
+
+    out_root = Path(out_root)
+    state = store.load(production_id)
+    ctx = _dossier_ctx(out_root, state)
+    ctx.store = store
+    ctx.state = state
+    before = {eid: len(sigs) for eid, sigs in state.freshness.items()}
+    await FreshnessStage().run(ctx)
+    material = sum(
+        1 for sigs in state.freshness.values() for s in sigs if s.material
+    )
+    state.audit_log.append(
+        AuditEvent(
+            at=at,
+            actor="system",
+            role="system",
+            event="freshness_checked",
+            detail=f"{len(state.freshness)} holders checked, {material} enforcement signals",
+        )
+    )
+    store.save(state)
+    changed = sum(
+        1
+        for eid, sigs in state.freshness.items()
+        if before.get(eid, -1) != len(sigs)
+    )
+    return state, len(state.freshness) if not before else max(changed, len(state.freshness))

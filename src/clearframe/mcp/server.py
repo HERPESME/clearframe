@@ -135,6 +135,11 @@ def build_server(out_root: Path) -> MCPServer:
                     "score": state.risk[el.id].score,
                     "owner": research.owner if research else None,
                     "decision": decision.action if decision else None,
+                    "identity": (
+                        state.corroboration[el.id].verdict.value
+                        if el.id in state.corroboration
+                        else None
+                    ),
                 }
             )
         return {"production_id": production_id, "findings": findings}
@@ -158,6 +163,18 @@ def build_server(out_root: Path) -> MCPServer:
             ],
             "court": opinion.model_dump(mode="json") if opinion else None,
             "decision": decision.model_dump(mode="json") if decision else None,
+            "corroboration": (
+                state.corroboration[element_id].model_dump(mode="json")
+                if element_id in state.corroboration
+                else None
+            ),
+            "freshness": [
+                s.model_dump(mode="json") for s in state.freshness.get(element_id, [])
+            ],
+            "territory_risk": [
+                t.model_dump(mode="json")
+                for t in state.territory_risk.get(element_id, [])
+            ],
         }
 
     @server.tool(name="record_decision")
@@ -189,6 +206,96 @@ def build_server(out_root: Path) -> MCPServer:
         except Exception as exc:
             raise ValueError(str(exc))
         return {"ok": True, "pending": pending_ids(state)}
+
+    @server.tool()
+    def verify_identities(production_id: str) -> dict:
+        """Identity-corroboration report: which findings a second, independent
+        detector confirmed, and which are disputed.
+
+        A CONFLICTED finding is never auto-researched — researching a disputed
+        mark would attribute rights to the wrong holder. Resolve identity first,
+        then re-run clearance.
+        """
+        state = _state(production_id)
+        rows = []
+        for el in state.elements:
+            c = state.corroboration.get(el.id)
+            if c is None:
+                continue
+            rows.append(
+                {
+                    "id": el.id,
+                    "label": el.label,
+                    "verdict": c.verdict.value,
+                    "detector": c.detector,
+                    "detected_label": c.detected_label,
+                    "confidence": c.confidence,
+                    "note": c.note,
+                }
+            )
+        conflicts = [r for r in rows if r["verdict"] == "CONFLICTED"]
+        return {
+            "production_id": production_id,
+            "findings": rows,
+            "conflicts": len(conflicts),
+            "blocked_from_research": [r["id"] for r in conflicts],
+        }
+
+    @server.tool()
+    def territory_report(production_id: str) -> dict:
+        """Per-territory clearance exposure for the release plan.
+
+        Clearance is jurisdictional: freedom-of-panorama rules mean the same
+        artwork in frame can be LOW in one territory and HIGH in another.
+        Returns each finding banded per territory with the governing authority.
+        """
+        state = _state(production_id)
+        rows = []
+        for el in state.elements:
+            bands = state.territory_risk.get(el.id, [])
+            if not bands:
+                continue
+            rows.append(
+                {
+                    "id": el.id,
+                    "label": el.label,
+                    "baseline": state.risk[el.id].band.value,
+                    "by_territory": {
+                        t.territory: {
+                            "band": t.band.value,
+                            "rationale": t.rationale,
+                            "authority": t.authority,
+                        }
+                        for t in bands
+                    },
+                }
+            )
+        return {
+            "production_id": production_id,
+            "territories": state.territories,
+            "findings": rows,
+        }
+
+    @server.tool()
+    async def check_freshness(production_id: str) -> dict:
+        """Re-run the live Parallel Search pass over every identified rights
+        holder and report enforcement activity found right now.
+
+        Deep research is a snapshot; this is the live check a reviewer runs
+        before signing off. Costs cents per finding, not dollars.
+        """
+        from clearframe.review import refresh_freshness
+
+        state, checked = await refresh_freshness(store, out_root, production_id, at=_now())
+        return {
+            "production_id": production_id,
+            "checked": checked,
+            "material_signals": {
+                eid: sum(1 for s in sigs if s.material)
+                for eid, sigs in state.freshness.items()
+                if any(s.material for s in sigs)
+            },
+        }
 
     @server.tool()
     async def generate_dossier(production_id: str) -> dict:

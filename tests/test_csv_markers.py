@@ -12,8 +12,8 @@ def test_csv_golden():
         category=ClearanceCategory.COPYRIGHT_ART,
     )
     rows = render_csv([e], fps=24).split("\r\n")
-    assert rows[0] == "timecode_in,timecode_out,label,category,risk_band"
-    assert rows[1] == '01:00:01:00,01:00:02:00,"Poster, ""Tranquility""",COPYRIGHT_ART,MEDIUM'
+    assert rows[0] == "timecode_in,timecode_out,label,category,risk_band,identity"
+    assert rows[1] == '01:00:01:00,01:00:02:00,"Poster, ""Tranquility""",COPYRIGHT_ART,MEDIUM,'
 
 
 def test_formula_injection_neutralized():
