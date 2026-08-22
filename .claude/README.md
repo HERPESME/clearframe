@@ -5,11 +5,17 @@ project context, conventions, the status tracker vs the hackathon resources guid
 and the agreed roadmap. Read it first — especially "Live-mode gotchas" and
 "Environment facts", which record what already went wrong so it doesn't twice.
 
-Current shape: a deterministic **13-stage** pipeline, **346 tests**, a 7-section
+Current shape: a deterministic **13-stage** pipeline, **406 tests**, a 7-section
 smoke script, three transports (CLI / web / MCP with 11 tools), and two Cloud Run
 services. Live validation, MCP, webapp expansion and audio fingerprinting are
 DONE. Open fronts: two-phase reporting, scene chunking for feature-length
 footage, and cloud wiring (Firestore/Pub-Sub/IAP).
+
+**Before claiming a UI change works, open the app.** A whole class of defects
+this project has shipped — transposed bounding boxes, an upload endpoint that
+500'd on a NameError, a page refresh that appeared to delete the analysis, a
+smoke script that killed the user's dev server — passed a green suite and were
+found by a human clicking. `CLAUDE.md` → "UI-mode gotchas" lists them.
 
 Three modules answer questions the clearance pipeline does not: `platform.py`
 (what the platform does — detectability, which inverts legal merit),

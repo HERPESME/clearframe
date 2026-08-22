@@ -90,6 +90,33 @@ cd webapp && npm run build && cd ..   # then commit the dist changes too
 
 ## Verifying visually
 
+`scripts/smoke.sh` runs its own server on port 8399 and kills only what holds
+that port. It used to `pkill -f "clearframe serve"`, which killed any dev
+server you had running on another port — twice per invocation, because the
+EXIT trap fires too. Do not widen that pkill again.
+
+To exercise every UI surface without credentials, load the demo as an advert:
+
+```bash
+curl -X POST localhost:8000/api/productions/demo -H 'Content-Type: application/json' \
+  -d '{"use_context":"ADVERTISING","sponsors":["Pepsi"],"platform":"youtube"}'
+```
+
+Left unset, the sponsor and platform panels stay empty — correctly, since the
+demo declares no sponsor and publishes nowhere.
+
+**Debugging bounding boxes**: never reason about them, draw them. Extract the
+frame at the element's `at_s` and render the stored rectangle onto it:
+
+```bash
+FF=$(.venv/bin/python -c "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())")
+"$FF" -ss <at_s> -i clip.mp4 -frames:v 1 \
+  -vf "drawbox=x=iw*<xmin>:y=ih*<ymin>:w=iw*<w>:h=ih*<h>:color=lime:t=5" -y /tmp/box.png
+```
+
+That is how the axis transposition was found — the assumed reading floated in
+empty wall while the transposed one landed on the object.
+
 Headless Chrome works on this machine:
 
 ```bash
@@ -114,7 +141,7 @@ list_licences · check_coverage · generate_dossier`. Keep
 ## Tests + smoke
 
 ```bash
-.venv/bin/pytest -q     # 346 tests; must be green before any commit
+.venv/bin/pytest -q     # 406 tests; must be green before any commit
 bash scripts/smoke.sh   # 7 sections: CLI, web, SSE, webhook, verification, ledger, MCP
 ```
 
