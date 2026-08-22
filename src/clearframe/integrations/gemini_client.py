@@ -29,10 +29,13 @@ SCAN_PROMPT = (
     "LOCATION, TEXT), a one-sentence description, every time range in which it "
     "appears (seconds), and prominence estimates: total screen time in seconds, "
     "fraction of frame covered (0-1), how central it is to the composition (0-1), "
-    "and whether it is integral to the plot. Give a `bbox` for anything with a "
-    "visible position in frame, as [ymin, xmin, ymax, xmax] normalised 0-1000, "
-    "at the moment the element is most clearly visible — this drives the box "
-    "drawn over the footage in review. Omit bbox for audio. "
+    "and whether it is integral to the plot. For anything with a visible "
+    "position in frame, give `bbox` as an object with named edges ymin, xmin, "
+    "ymax, xmax normalised 0-1000, measured at ONE specific moment when the "
+    "element is clearest, and give `at_s` as the timestamp in seconds of that "
+    "exact moment. The box is drawn over the footage at that timestamp, so a "
+    "box measured in one shot and reported for another is worse than none. "
+    "Omit bbox and at_s for audio. "
     "For brands, businesses, places and people, also report how the element is "
     "PORTRAYED as `depiction`: FAVOURABLE (shown positively, reads as an "
     "endorsement), NEUTRAL (simply present), UNFLATTERING (associated with "
@@ -187,12 +190,21 @@ SCAN_RESPONSE_SCHEMA: dict = {
                             "required": ["start_s", "end_s"],
                         },
                     },
+                    # Named, not ordered. An anonymous 4-array gave the model
+                    # no structural cue and it answered [xmin, ymin, xmax,
+                    # ymax] — the commoner convention — while the prompt asked
+                    # for y-first. Word order in a prompt is not a contract.
                     "bbox": {
-                        "type": "array",
-                        "items": {"type": "number"},
-                        "minItems": 4,
-                        "maxItems": 4,
+                        "type": "object",
+                        "properties": {
+                            "ymin": {"type": "number"},
+                            "xmin": {"type": "number"},
+                            "ymax": {"type": "number"},
+                            "xmax": {"type": "number"},
+                        },
+                        "required": ["ymin", "xmin", "ymax", "xmax"],
                     },
+                    "at_s": {"type": "number"},
                     "depiction": {
                         "type": "string",
                         "enum": ["FAVOURABLE", "NEUTRAL", "UNFLATTERING", "DISPARAGING"],

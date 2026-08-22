@@ -1,0 +1,245 @@
+{
+  "licences": [
+    {
+      "id": "LIC-100",
+      "rights_holder": "Bayer AG",
+      "work": "Bayer word mark and cross logo",
+      "scope": "Archival footage depiction",
+      "rights_type": "ALL",
+      "territories": [
+        "WORLDWIDE"
+      ],
+      "media": [
+        "ALL"
+      ],
+      "starts": "2025-01-01",
+      "expires": null,
+      "reference": "BAY-ARCH-2025-01",
+      "notes": "Perpetual archival depiction licence \u2014 the shape a producer wants and rarely gets."
+    },
+    {
+      "id": "LIC-101",
+      "rights_holder": "Kraft Heinz Company",
+      "work": "Jell-O trade dress",
+      "scope": "Product depiction",
+      "rights_type": "ALL",
+      "territories": [
+        "US",
+        "CA"
+      ],
+      "media": [
+        "THEATRICAL"
+      ],
+      "starts": "2026-01-01",
+      "expires": "2027-12-31",
+      "reference": "KHC-JELLO-2026-14",
+      "notes": "TERRITORY + MEDIA GAP \u2014 North America theatrical only; streaming NOT granted."
+    },
+    {
+      "id": "LIC-102",
+      "rights_holder": "Unilever",
+      "work": "Lipton marks",
+      "scope": "Product depiction",
+      "rights_type": "ALL",
+      "territories": [
+        "WORLDWIDE"
+      ],
+      "media": [
+        "THEATRICAL",
+        "STREAMING"
+      ],
+      "starts": "2025-06-01",
+      "expires": "2030-06-01",
+      "reference": "UNI-LIPTON-2025-88",
+      "notes": ""
+    },
+    {
+      "id": "LIC-103",
+      "rights_holder": "Chevron Corporation",
+      "work": "Texaco marks and star logo",
+      "scope": "Archival advertising footage",
+      "rights_type": "ALL",
+      "territories": [
+        "US"
+      ],
+      "media": [
+        "ALL"
+      ],
+      "starts": "2024-01-01",
+      "expires": "2025-06-30",
+      "reference": "CVX-TEXACO-2024-02",
+      "notes": "TERM GAP \u2014 expired; renew before delivery."
+    },
+    {
+      "id": "LIC-104",
+      "rights_holder": "Volkswagen AG",
+      "work": "VW roundel and Beetle trade dress",
+      "scope": "Vehicle depiction",
+      "rights_type": "ALL",
+      "territories": [
+        "WORLDWIDE"
+      ],
+      "media": [
+        "ALL"
+      ],
+      "starts": "2025-04-01",
+      "expires": null,
+      "reference": "VW-DEPICT-2025-31",
+      "notes": ""
+    },
+    {
+      "id": "LIC-105",
+      "rights_holder": "Universal Music Publishing Group",
+      "work": "Main title song",
+      "scope": "Synchronisation \u2014 composition",
+      "rights_type": "SYNC",
+      "territories": [
+        "WORLDWIDE"
+      ],
+      "media": [
+        "ALL"
+      ],
+      "starts": "2026-01-01",
+      "expires": "2036-01-01",
+      "reference": "UMPG-SYNC-2026-77",
+      "notes": "COMPOSITION HALF ONLY \u2014 pairs with LIC-106. A sync licence alone does not clear the recording."
+    },
+    {
+      "id": "LIC-106",
+      "rights_holder": "Universal Music Group",
+      "work": "Main title song",
+      "scope": "Master use \u2014 recording",
+      "rights_type": "MASTER",
+      "territories": [
+        "WORLDWIDE"
+      ],
+      "media": [
+        "ALL"
+      ],
+      "starts": "2026-01-01",
+      "expires": "2036-01-01",
+      "reference": "UMG-MASTER-2026-77",
+      "notes": "RECORDING HALF \u2014 together with LIC-105 the track is fully cleared."
+    },
+    {
+      "id": "LIC-107",
+      "rights_holder": "Warner Chappell Music",
+      "work": "Diner jukebox cue",
+      "scope": "Synchronisation \u2014 composition",
+      "rights_type": "SYNC",
+      "territories": [
+        "US"
+      ],
+      "media": [
+        "THEATRICAL"
+      ],
+      "starts": "2026-02-01",
+      "expires": "2029-02-01",
+      "reference": "WC-SYNC-2026-12",
+      "notes": "SPLIT GAP \u2014 composition held; no master-use licence on file for this cue."
+    },
+    {
+      "id": "LIC-108",
+      "rights_holder": "Kobalt Music Group",
+      "work": "Montage needle-drop",
+      "scope": "Festival exhibition only",
+      "rights_type": "BOTH",
+      "territories": [
+        "WORLDWIDE"
+      ],
+      "media": [
+        "FESTIVAL"
+      ],
+      "starts": "2026-03-01",
+      "expires": "2027-03-01",
+      "reference": "KOB-FEST-2026-05",
+      "notes": "FESTIVAL TRAP \u2014 does not survive a distribution sale; re-clear before delivery."
+    },
+    {
+      "id": "LIC-109",
+      "rights_holder": "BMG Rights Management",
+      "work": "Closing credits song",
+      "scope": "Broadcast television only",
+      "rights_type": "BOTH",
+      "territories": [
+        "US"
+      ],
+      "media": [
+        "BROADCAST"
+      ],
+      "starts": "2025-01-01",
+      "expires": null,
+      "reference": "BMG-BCAST-2025-19",
+      "notes": "THE WKRP PROBLEM \u2014 broadcast only; home video and streaming NOT granted."
+    },
+    {
+      "id": "LIC-110",
+      "rights_holder": "Getty Images",
+      "work": "Archival stills montage",
+      "scope": "Editorial stills licence",
+      "rights_type": "PRINT",
+      "territories": [
+        "WORLDWIDE"
+      ],
+      "media": [
+        "ALL"
+      ],
+      "starts": "2025-04-01",
+      "expires": "2026-03-31",
+      "reference": "GETTY-ED-2025-441",
+      "notes": "TERM GAP \u2014 expired during post; Getty runs automated image-match enforcement."
+    },
+    {
+      "id": "LIC-111",
+      "rights_holder": "Artists Rights Society",
+      "work": "Gallery wall canvases",
+      "scope": "Reproduction of member artworks",
+      "rights_type": "PRINT",
+      "territories": [
+        "WORLDWIDE"
+      ],
+      "media": [
+        "ALL"
+      ],
+      "starts": "2026-01-01",
+      "expires": "2028-09-30",
+      "reference": "ARS-REPRO-2026-63",
+      "notes": "Covers the artworks; does NOT cover a photographer's separate copyright in a still."
+    },
+    {
+      "id": "LIC-112",
+      "rights_holder": "Associated Press",
+      "work": "News insert footage",
+      "scope": "Archival news footage",
+      "rights_type": "ALL",
+      "territories": [
+        "US"
+      ],
+      "media": [
+        "BROADCAST",
+        "STREAMING"
+      ],
+      "starts": "2026-01-01",
+      "expires": "2029-01-15",
+      "reference": "AP-ARCH-2026-08",
+      "notes": "TERRITORY GAP \u2014 US only; any international sale needs an extension."
+    },
+    {
+      "id": "LIC-113",
+      "rights_holder": "Alphabet Inc.",
+      "work": "Device screens and interface shots",
+      "scope": "Corporate brand usage",
+      "rights_type": "ALL",
+      "territories": [
+        "WORLDWIDE"
+      ],
+      "media": [
+        "ALL"
+      ],
+      "starts": "2026-01-01",
+      "expires": null,
+      "reference": "ALPHA-BRAND-2026-02",
+      "notes": "WRONG ENTITY \u2014 marks are held by Google LLC; confirm the grant binds the operating company."
+    }
+  ]
+}
