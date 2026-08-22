@@ -13,6 +13,15 @@ pass() { printf '  \033[32mPASS\033[0m %s\n' "$1"; }
 fail() { printf '  \033[31mFAIL\033[0m %s\n' "$1"; FAILURES=$((FAILURES + 1)); }
 check() { if [ "$1" -eq 0 ]; then pass "$2"; else fail "$2"; fi }
 
+# curl | grep races under pipefail (grep exits early -> curl gets SIGPIPE
+# -> 141 propagates). Buffer the body, then match.
+has() {  # has <needle> <curl args...>
+  local needle="$1"; shift
+  local body
+  body=$(curl -s "$@") || return 1
+  printf '%s' "$body" | grep -q -- "$needle"
+}
+
 cleanup() { pkill -f "clearframe serve" 2>/dev/null || true; }
 trap cleanup EXIT
 # ensure no stale server from a previous run holds the port
@@ -37,10 +46,10 @@ echo "━━ 3. Review web app"
 SERVE_OUT="$(mktemp -d)/web-out"
 $PY -m clearframe serve --out "$SERVE_OUT" --port $PORT > /tmp/clearframe-smoke-serve.log 2>&1 &
 sleep 2
-curl -sf "$BASE/" | grep -q "ClearFrame"; check $? "SPA served at /"
-curl -sf -X POST "$BASE/api/productions/demo" -H 'Content-Type: application/json' -d '{"pace_s": 0.05}' | grep -q running
+has "ClearFrame" "$BASE/"; check $? "SPA served at /"
+has running -X POST "$BASE/api/productions/demo" -H 'Content-Type: application/json' -d '{"pace_s": 0.05}'
 check $? "paced Mission Control run started"
-curl -sfN --max-time 30 "$BASE/api/productions/demo/events" | grep -q "run_complete"
+has "run_complete" -N --max-time 30 "$BASE/api/productions/demo/events"
 check $? "SSE stream delivered run_complete"
 COUNT=$(curl -sf "$BASE/api/productions/demo" | $PY -c "import json,sys; print(len(json.load(sys.stdin)['elements']))")
 [ "$COUNT" = "8" ]; check $? "pipeline found 8 elements (incl. auditor catch)"
@@ -57,17 +66,17 @@ for el in e1 e2 e3 e4 e5 e6 e7 e8; do
 done
 pass "8 legal decisions recorded"
 
-curl -sf -X POST "$BASE/api/productions/demo/dossier" | grep -q "cue_sheet.csv"
+has "cue_sheet.csv" -X POST "$BASE/api/productions/demo/dossier"
 check $? "dossier generated with all artifacts"
-curl -sf "$BASE/api/productions/demo/artifacts/dossier.html" | grep -q "Clearance Report"
+has "Clearance Report" "$BASE/api/productions/demo/artifacts/dossier.html"
 check $? "artifact served over HTTP"
 
 echo "━━ 4. Living clearance (standing watch)"
 WATCHES=$(curl -sf "$BASE/api/productions/demo" | $PY -c "import json,sys; print(len(json.load(sys.stdin)['watches']))")
 [ "$WATCHES" -ge 3 ]; check $? "standing watches created post-dossier ($WATCHES)"
-curl -sf -X POST "$BASE/api/webhooks/parallel-monitor" -H 'Content-Type: application/json' \
-  -d '{"monitor_id":"mon-e3","summary":"smoke: rights holder posture changed","source_url":""}' \
-  | grep -q '"reopened_element":"e3"'
+has '"reopened_element":"e3"' -X POST "$BASE/api/webhooks/parallel-monitor" \
+  -H 'Content-Type: application/json' \
+  -d '{"monitor_id":"mon-e3","summary":"smoke: rights holder posture changed","source_url":""}'
 check $? "monitor webhook reopened the watched finding"
 curl -sf "$BASE/api/productions/demo" | $PY -c "
 import json, sys
@@ -77,9 +86,43 @@ assert any(a['event'] == 'watch_alert' for a in s['audit_log']), 'no audit event
 "
 check $? "review reopened + audit trail updated"
 
-echo "━━ 5. MCP server (stdio)"
-printf '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"smoke","version":"0"}}}\n' \
-  | $PY -m clearframe.mcp --out "$OUT" 2>/dev/null | grep -q '"clearframe"'
+echo "━━ 5. Verified identity, live signals, territory"
+IDS=$(curl -sf "$BASE/api/productions/demo" | $PY -c "
+import json,sys
+s=json.load(sys.stdin)
+v=[c['verdict'] for c in s['corroboration'].values()]
+print(v.count('CORROBORATED'), v.count('CONFLICTED'))
+")
+[ "$IDS" = "2 1" ]; check $? "identity corroboration: 2 confirmed, 1 disputed ($IDS)"
+
+curl -sf "$BASE/api/productions/demo" | $PY -c "
+import json, sys
+s = json.load(sys.stdin)
+assert s['research']['e8']['status'] == 'incomplete', 'disputed identity was researched anyway'
+assert 'e8' not in s['candidates'], 'disputed identity was enumerated anyway'
+"
+check $? "disputed identity is blocked from rights research"
+
+curl -sf "$BASE/api/productions/demo" | $PY -c "
+import json, sys
+s = json.load(sys.stdin)
+bands = {t['territory']: t['band'] for t in s['territory_risk']['e5']}
+assert bands == {'US': 'MEDIUM', 'DE': 'LOW', 'FR': 'HIGH'}, bands
+assert 'UrhG' in [t['authority'] for t in s['territory_risk']['e5']][1]
+"
+check $? "mural bands per territory US/DE/FR with cited authority"
+
+has '"material_signals"' -X POST "$BASE/api/productions/demo/freshness"
+check $? "live Parallel Search freshness pass ran on demand"
+
+grep -q "Territory exposure" "$OUT/dossier.html"; check $? "dossier reports territory exposure"
+grep -q "Identity verification" "$OUT/dossier.html"; check $? "dossier reports identity verification"
+grep -q "CONFLICTED" "$OUT/markers.csv"; check $? "NLE markers carry the identity verdict"
+
+echo "━━ 6. MCP server (stdio)"
+MCP_OUT=$(printf '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"smoke","version":"0"}}}\n' \
+  | $PY -m clearframe.mcp --out "$OUT" 2>/dev/null)
+printf '%s' "$MCP_OUT" | grep -q '"clearframe"'
 check $? "MCP stdio server answers initialize handshake"
 
 echo

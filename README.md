@@ -16,15 +16,49 @@ Built for the Google Cloud **Agentic Cinema** hackathon, **Parallel** partner tr
 
 ```
 footage ─▶ SCENE SCANNER (Gemini video) ─▶ E&O AUDITOR (2nd Gemini pass: "what did they miss?")
-        ─▶ TRIAGE (rules + dedupe) ─▶ BUDGET PLANNER (allocates Parallel processor tiers + rationale)
+        ─▶ TRIAGE (rules + dedupe)
+        ─▶ IDENTITY CORROBORATOR (independent logo catalogue: do two detectors agree WHAT this is?)
+        ─▶ BUDGET PLANNER (allocates Parallel processor tiers + rationale)
         ─▶ RIGHTS RESEARCHERS (Parallel Task API fan-out, citations + confidence)
-        ─▶ RISK ENGINE (deterministic, reproducible rubric) ─▶ REMEDIATION DRAFTER
+        ─▶ LIVE SIGNALS (Parallel Search: is this holder enforcing right now?)
+        ─▶ RISK ENGINE (deterministic, reproducible rubric)
+        ─▶ TERRITORY ANALYST (per-jurisdiction bands, freedom of panorama)
+        ─▶ REMEDIATION DRAFTER
         ─▶ THE CLEARANCE COURT ⚖  (Studio Counsel vs Fair Use Advocate vs Judge)
         ─▶ [human review — role-gated web app] ─▶ DOSSIER
 
 outputs: dossier.html (E&O-ready report w/ court opinions + audit trail) · dossier.json
          markers.edl (Resolve) · markers.csv · cue_sheet.csv (ASCAP/BMI)
 ```
+
+### We don't guess at brands
+
+A misidentified logo is worse than a missed one: it routes rights research to
+the wrong company and produces a dossier certifying a clearance nobody
+obtained. The E&O Auditor is Gemini reviewing Gemini — same model, same priors,
+so it catches *omissions*, not *misidentifications*. So identity gets a second
+opinion from a detector of a different kind: a closed-vocabulary logo catalogue
+that cannot invent a brand outside it.
+
+| Verdict | Meaning | Effect |
+| --- | --- | --- |
+| `CORROBORATED` | two independent detectors named the same thing | research proceeds |
+| `SINGLE_SOURCE` | only the video model saw it (murals, tattoos, music are outside any catalogue) | research proceeds, flagged in the dossier |
+| `CONFLICTED` | the detectors named **different** things | **research is blocked** — a human resolves identity first |
+
+### Clearance is jurisdictional
+
+Distributors buy territories separately, and the same frame is not equally
+risky everywhere. The demo mural bands three ways:
+
+| Territory | Band | Authority |
+| --- | --- | --- |
+| US | MEDIUM | 17 U.S.C. §120(a) — panorama exemption covers *architectural works only* |
+| DE | LOW | UrhG §59 (Panoramafreiheit) — works permanently in public places |
+| FR | HIGH | CPI art. L.122-5 11° — exception excludes commercial use |
+
+Deterministic table, cited authority per row, and it never touches the
+jurisdiction-neutral baseline score.
 
 ![Mission Control](docs/images/mission-control.png)
 
@@ -34,6 +68,7 @@ Every contested finding (MEDIUM risk and up) is argued by two opposing agents: *
 
 - The pipeline runs both as a plain orchestrator and as a **Google ADK `SequentialAgent`** (`src/clearframe/adk/agents.py`) — try it: `python -m clearframe run --demo --adk --auto-approve --out out` executes the full run under the real ADK Runner.
 - Every research finding carries Parallel's **Basis** output — citations, per-field reasoning, calibrated confidence — because a legal document without provenance is worthless.
+- Deep research is a snapshot; the **Parallel Search API** adds a live pass over every identified rights holder ("has this company started enforcing since we researched them?"). Priced per request rather than per Task run, so it is affordable to re-run on demand from the review screen — the **Check live signals** button.
 - Risk scores are pure code (`src/clearframe/scoring.py`): reproducible from stored inputs, never an LLM guess.
 
 ## Quickstart — demo mode (zero credentials, zero network)
@@ -59,7 +94,8 @@ The whole clearance department is also an **MCP server** — any MCP client (Gem
 
 ```bash
 python -m clearframe.mcp --out out   # stdio transport
-# tools: run_clearance · get_status · list_findings · get_finding · record_decision · generate_dossier
+# tools: run_clearance · get_status · list_findings · get_finding · record_decision
+#        verify_identities · territory_report · check_freshness · generate_dossier
 ```
 
 Role gating and the append-only audit trail apply identically across all three transports (CLI, web app, MCP) — one shared review service owns the rules. See [docs/deploy.md](docs/deploy.md) for client registration.
@@ -82,7 +118,9 @@ Run everything yourself: `./scripts/smoke.sh` verifies the full lifecycle across
 - **Append-only audit trail** — every decision (including revisions) and dossier generation is logged and printed in the dossier.
 - **Research spend cap** — `CLEARFRAME_MAX_RESEARCH` (default 25) bounds the Parallel fan-out; overflow surfaces as RESEARCH INCOMPLETE, never silently dropped.
 - **Gemini safety settings** — explicit `BLOCK_ONLY_HIGH` thresholds on the scan config.
-- **Honest failure states** — unidentifiable rights holders escalate; unscanned footage ranges are listed in the report as not covered.
+- **Honest failure states** — unidentifiable rights holders escalate; unscanned footage ranges are listed in the report as not covered; a disputed identity is never researched rather than researched wrongly.
+- **Independent corroboration** — identity is confirmed by two different kinds of detector, and disagreement blocks the expensive, consequential step.
+- **Best-effort degradation** — if the corroborating detector is unavailable, identities stay `SINGLE_SOURCE`; silence is never reported as agreement.
 - **Stale-dossier protection** — revising any decision reopens review so an outdated report can't circulate.
 
 ## Live mode (Vertex AI Gemini + Parallel Task API)
@@ -95,6 +133,17 @@ python -m clearframe run --live --footage scene.mp4 --title "Golden Hour" --dura
 ```
 
 Footage can be a local mp4 (<20MB, sent inline) or a `gs://` URI. `gemini-3-pro-preview` is tried first and the client falls back to `gemini-2.5-pro` automatically where the preview model isn't available.
+
+Add `--territories US,DE,FR` (or `CLEARFRAME_TERRITORIES`) to band every finding
+per release territory. Identity corroboration additionally needs the Video
+Intelligence API enabled:
+
+```bash
+gcloud services enable videointelligence.googleapis.com
+```
+
+If it is not enabled the pipeline still runs — identities simply stay
+`SINGLE_SOURCE` rather than being falsely reported as agreed.
 
 See [docs/deploy.md](docs/deploy.md) for Cloud Run and Agent Engine deployment.
 
@@ -122,6 +171,7 @@ claude mcp add --transport http clearframe https://clearframe-mcp-220710110855.u
 ```
 src/clearframe/
   models.py scoring.py triage.py remediation.py dossier.py   # core domain (no cloud deps)
+  corroboration.py territory.py freshness.py matching.py     # verification engines (pure code)
   pipeline.py stages/            # deterministic 6-stage orchestrator
   integrations/                  # Gemini + Parallel clients (live & fixture) + recorded fixtures
   exporters/                     # dossier HTML, EDL, CSV markers, cue sheet
