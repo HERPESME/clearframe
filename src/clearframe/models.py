@@ -552,6 +552,49 @@ class PlatformPolicy(BaseModel):
     note: str = ""
 
 
+class ExposureKind(str, Enum):
+    """On-screen exposure that is not intellectual property at all.
+
+    A creator filming at home who leaves a delivery label, a bank statement or
+    a laptop screen in frame has a real problem no clearance tool looks for,
+    because nothing is being infringed. It is the purest unknown-unknown in the
+    threat surface — and it comes free from a scan already being run.
+    """
+
+    MINOR = "MINOR"                            # a child, identifiable
+    PERSONAL_DATA = "PERSONAL_DATA"            # address, phone, email, account number
+    DOCUMENT = "DOCUMENT"                      # letter, statement, ID, contract
+    SCREEN_CONTENT = "SCREEN_CONTENT"          # phone or monitor showing private content
+    VEHICLE_PLATE = "VEHICLE_PLATE"            # registration plate
+    LOCATION_IDENTIFIER = "LOCATION_IDENTIFIER"  # house number, street sign at a home
+
+
+class ExposureFinding(BaseModel):
+    """One thing on screen that should probably not be published."""
+
+    id: str
+    kind: ExposureKind
+    description: str
+    time_ranges: list[TimeRange]
+    bbox: BBox | None = None
+
+
+class AssessedExposure(BaseModel):
+    """An exposure with its severity, the regime that governs it, and the fix."""
+
+    id: str
+    kind: ExposureKind
+    description: str
+    time_ranges: list[TimeRange]
+    bbox: BBox | None = None
+    territory: str
+    regime: str
+    score: int = Field(ge=0, le=100)
+    band: RiskBand
+    rationale: str
+    remedy: str
+
+
 class PreviewFinding(BaseModel):
     """One finding as it stands BEFORE any rights research has run.
 
@@ -613,5 +656,7 @@ class ProductionState(BaseModel):
     # element id -> list of {territory, name, available, authority, note}.
     # Stored untyped because `territory.Defence` imports from this module.
     defences: dict[str, list[dict]] = Field(default_factory=dict)
+    exposures: list[ExposureFinding] = Field(default_factory=list)
+    assessed_exposures: list[AssessedExposure] = Field(default_factory=list)
     preview: list[PreviewFinding] = Field(default_factory=list)
     detector_hits: list[DetectorHit] = Field(default_factory=list)

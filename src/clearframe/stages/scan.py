@@ -71,6 +71,11 @@ class ScanStage:
 
         ctx.state.detections = result.detections + audit.detections
         ctx.state.unscanned_ranges = result.unscanned_ranges + audit.unscanned_ranges
+        # Not clearance items. Nobody owns a delivery label with your address
+        # on it, which is exactly why no clearance tool looks for one.
+        ctx.state.exposures = result.exposures + audit.exposures
+        if ctx.state.exposures:
+            ctx.emit({"type": "exposures_found", "count": len(ctx.state.exposures)})
         ctx.state.audio_matches = _or_empty(matches, "audio fingerprinting")
         ctx.state.detector_hits = _or_empty(hits, "logo corroboration")
 

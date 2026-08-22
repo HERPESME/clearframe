@@ -190,6 +190,12 @@ def build_server(out_root: Path) -> MCPServer:
             # means a rival mark in shot can void a sponsorship fee even though
             # showing it is lawful, and nothing else here would flag it.
             # What the PLATFORM does, which is not what a court would do.
+            # Exposures are not tied to a clearance element — they are a
+            # separate finding class — so they come back whole rather than
+            # filtered by element id.
+            "on_screen_exposures": [
+                x.model_dump(mode="json") for x in state.assessed_exposures
+            ],
             "platform_outcome": next(
                 (
                     o.model_dump(mode="json")

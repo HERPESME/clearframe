@@ -183,6 +183,7 @@ export default function App() {
     research_plan,
     routes,
     sponsor_conflicts,
+    assessed_exposures,
     drift,
     candidates,
     watches,
@@ -391,6 +392,22 @@ export default function App() {
       </div>
 
       <main className="cards">
+        {(assessed_exposures?.length ?? 0) > 0 && (
+          <div className="exposure-banner">
+            <strong>On-screen exposure.</strong> None of this is intellectual property
+            and nobody owns any of it — which is exactly why it gets missed. Severity is
+            set by the strictest release territory, because a publication cannot be
+            un-made in one country and left standing in another.
+            <ul>
+              {assessed_exposures.map((x) => (
+                <li key={x.id}>
+                  <span className={`chip ${x.band}`}>{x.band}</span> {x.description}{" "}
+                  <em>{x.remedy}</em>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         {(sponsor_conflicts?.length ?? 0) > 0 && (
           <div className="sponsor-banner">
             <strong>Sponsor conflict.</strong> A competitor's mark is on screen while a

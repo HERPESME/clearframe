@@ -11,7 +11,12 @@ from typing import Protocol
 
 from pydantic import BaseModel, ValidationError
 
-from clearframe.models import DetectedElement, ScriptMention, TimeRange
+from clearframe.models import (
+    DetectedElement,
+    ExposureFinding,
+    ScriptMention,
+    TimeRange,
+)
 
 SCAN_PROMPT = (
     "You are a film clearance coordinator reviewing raw footage frame by frame. "
@@ -31,6 +36,15 @@ SCAN_PROMPT = (
     "illness or contempt). Judge only what is shown on screen; if the portrayal "
     "is not clear, use NEUTRAL. This matters because rights holders object to "
     "how a brand is depicted far more often than to its mere presence. "
+    "Separately, report anything visible that should probably not be PUBLISHED "
+    "at all, as `exposures` — these are not clearance items and nobody owns "
+    "them, which is exactly why they get missed. Kinds: MINOR (an identifiable "
+    "child), PERSONAL_DATA (a readable address, phone number, email or account "
+    "number), DOCUMENT (a readable letter, statement or identity paper), "
+    "SCREEN_CONTENT (a phone or monitor showing private content), "
+    "VEHICLE_PLATE, LOCATION_IDENTIFIER (a house number or street sign at a "
+    "residence). For each give id, kind, description and time_ranges. Report "
+    "only what is actually legible or identifiable on screen. "
     "Report ranges you could not analyze "
     "as unscanned_ranges. Be exhaustive: missing an element creates legal risk."
 )
@@ -125,6 +139,35 @@ SCAN_RESPONSE_SCHEMA: dict = {
                 "required": ["id", "label", "element_type", "description", "time_ranges", "prominence"],
             },
         },
+        "exposures": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "string"},
+                    "kind": {
+                        "type": "string",
+                        "enum": [
+                            "MINOR", "PERSONAL_DATA", "DOCUMENT",
+                            "SCREEN_CONTENT", "VEHICLE_PLATE", "LOCATION_IDENTIFIER",
+                        ],
+                    },
+                    "description": {"type": "string"},
+                    "time_ranges": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "start_s": {"type": "number"},
+                                "end_s": {"type": "number"},
+                            },
+                            "required": ["start_s", "end_s"],
+                        },
+                    },
+                },
+                "required": ["id", "kind", "description", "time_ranges"],
+            },
+        },
         "unscanned_ranges": {
             "type": "array",
             "items": {
@@ -144,6 +187,9 @@ SCAN_RESPONSE_SCHEMA: dict = {
 class ScanResult(BaseModel):
     detections: list[DetectedElement]
     unscanned_ranges: list[TimeRange]
+    # Not clearance items — things on screen that should probably not be
+    # published at all. Optional so every prior fixture still parses.
+    exposures: list[ExposureFinding] = []
 
 
 def parse_scan_payload(payload: dict) -> ScanResult:
@@ -157,7 +203,15 @@ def parse_scan_payload(payload: dict) -> ScanResult:
     unscanned = [
         TimeRange.model_validate(r) for r in payload.get("unscanned_ranges") or []
     ]
-    return ScanResult(detections=detections, unscanned_ranges=unscanned)
+    exposures: list[ExposureFinding] = []
+    for entry in payload.get("exposures") or []:
+        try:
+            exposures.append(ExposureFinding.model_validate(entry))
+        except ValidationError:
+            skipped += 1
+    return ScanResult(
+        detections=detections, unscanned_ranges=unscanned, exposures=exposures
+    )
 
 
 def parse_script_payload(payload: dict) -> list[ScriptMention]:

@@ -163,6 +163,29 @@ check $? "jurisdiction defences differ per territory, each with its authority"
 curl -sf "$BASE/api/productions/demo" | $PY -c "
 import json, sys
 s = json.load(sys.stdin)
+x = s['assessed_exposures']
+assert len(x) == 1, x
+one = x[0]
+# Not a clearance item — nobody owns a delivery label with an address on it.
+assert one['kind'] == 'PERSONAL_DATA', one['kind']
+# The strictest release territory governs: a publication cannot be un-made in
+# one country and left standing in another.
+assert one['territory'] == 'DE', one['territory']
+assert 'GDPR' in one['regime'], one['regime']
+assert one['band'] == 'CRITICAL', one['band']
+# The fix has to be something an editor can do.
+assert '00:18' in one['remedy'] and '00:21' in one['remedy'], one['remedy']
+# And it stays out of the clearance element list.
+assert all(e['id'] != one['id'] for e in s['elements'])
+"
+check $? "on-screen exposure found, banded by strictest territory, fix timecoded"
+
+grep -q "On-screen exposure" "$OUT/dossier.html"
+check $? "dossier reports on-screen exposure as its own class"
+
+curl -sf "$BASE/api/productions/demo" | $PY -c "
+import json, sys
+s = json.load(sys.stdin)
 el = {e['id']: e for e in s['elements']}['e1']
 c = s['corroboration']['e1']
 assert c['verdict'] == 'FINGERPRINTED', c['verdict']

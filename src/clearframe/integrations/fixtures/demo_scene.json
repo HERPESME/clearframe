@@ -170,5 +170,18 @@
       "depiction": "NEUTRAL"
     }
   ],
-  "unscanned_ranges": []
+  "unscanned_ranges": [],
+  "exposures": [
+    {
+      "id": "x1",
+      "kind": "PERSONAL_DATA",
+      "description": "Addressed delivery label on a parcel by the kitchen table; the street address is legible for about three seconds.",
+      "time_ranges": [
+        {
+          "start_s": 18.0,
+          "end_s": 21.0
+        }
+      ]
+    }
+  ]
 }

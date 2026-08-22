@@ -42,6 +42,8 @@ _TEMPLATE = Template(
   .tone { display:inline-block; padding:2px 10px; border-radius:10px; font-size:11px; font-family:Helvetica,Arial,sans-serif; letter-spacing:.5px; color:#fff; }
   .t-FAVOURABLE { background:#16a085; } .t-NEUTRAL { background:#95a5a6; }
   .t-UNFLATTERING { background:#e67e22; } .t-DISPARAGING { background:#c0392b; }
+  .exposure { background:#fdeaea; border:1px solid #e9b8b8; padding:10px 14px; margin:18px 0 24px; font-size:13px; }
+  .exposure td, .exposure th { padding:4px 10px 4px 0; text-align:left; font-size:12px; vertical-align:top; }
   .platform { background:#fbeee6; border:1px solid #e8c4a8; padding:10px 14px; margin:18px 0 24px; font-size:13px; }
   .platform td, .platform th { padding:4px 10px 4px 0; text-align:left; font-size:12px; vertical-align:top; }
   .pa-CLAIM_LIKELY { color:#c0392b; font-weight:bold; }
@@ -86,6 +88,25 @@ Commercial speech carries no expressive-work shield — Rogers v. Grimaldi prote
 advertisements, and the Supreme Court narrowed it further in Jack Daniel's v. VIP (2023).
 Risk is banded accordingly, and findings that would otherwise need only a posture check are
 escalated to full rights research because permission, not posture, is the open question.</div>
+{% endif %}
+
+{% if d.exposures %}
+<div class="exposure">
+<strong>On-screen exposure ({{ d.exposures|length }}):</strong>
+not intellectual property, and nobody owns any of it — which is exactly why it gets missed.
+Severity is set by the strictest release territory, because a publication cannot be
+un-made in one country and left standing in another.
+<table>
+<tr><th>What</th><th>Where</th><th>Severity</th><th>Governing regime</th><th>Fix</th></tr>
+{% for x in d.exposures %}
+<tr><td>{{ x.description }}</td>
+<td>{% for r in x.time_ranges %}{{ tc(r.start_s) }}–{{ tc(r.end_s) }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+<td><span class="chip" style="background: {{ band_hex[x.band.value] }}">{{ x.band.value }} · {{ x.score }}</span></td>
+<td>{{ x.territory }} — {{ x.regime }}</td>
+<td>{{ x.remedy }}</td></tr>
+{% endfor %}
+</table>
+</div>
 {% endif %}
 
 {% set flagged = d.platform_outcomes|selectattr('action.value','in',['CLAIM_LIKELY','CLAIM_POSSIBLE'])|list %}
