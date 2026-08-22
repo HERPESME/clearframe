@@ -1,0 +1,73 @@
+{
+  "note": "How each platform actually enforces. Automated content matching is the dominant mechanism by volume and does not evaluate fair use, so platform exposure tracks DETECTABILITY rather than legal merit. Re-verify against each platform's published help centre before relying on the strike numbers.",
+  "verified_on": "2026-08-22",
+  "source": "https://torrentfreak.com/youtube-processed-2-5-billion-content-id-copyright-claims-in-2025/",
+  "default": "youtube",
+  "platforms": [
+    {
+      "key": "youtube",
+      "name": "YouTube",
+      "audio_matching": true,
+      "video_matching": true,
+      "considers_fair_use": false,
+      "strikes_to_termination": 3,
+      "strike_expiry_days": 90,
+      "default_claim_outcome": "monetise",
+      "trademark_complaint": "Separate trademark complaint form, reviewed by a human; distinct from the copyright process and does not create a copyright strike.",
+      "privacy_complaint": "Privacy complaint process; the subject must file personally, and YouTube may require the uploader to blur or remove.",
+      "note": "2.5 billion Content ID claims in 2025, 99%+ automated. Rights holders chose to monetise over 90% of them, so the usual outcome is revenue diversion rather than removal. A Content ID claim is NOT a strike; a DMCA takedown is."
+    },
+    {
+      "key": "tiktok",
+      "name": "TikTok",
+      "audio_matching": true,
+      "video_matching": true,
+      "considers_fair_use": false,
+      "strikes_to_termination": null,
+      "strike_expiry_days": null,
+      "default_claim_outcome": "mute_or_remove",
+      "trademark_complaint": "IP infringement report form covering trademark separately from copyright.",
+      "privacy_complaint": "Privacy report; stricter defaults for minors.",
+      "note": "Commercial tracks in the general library are licensed for personal use only — using one on a business or branded account is a common and under-known breach. Muting is the typical automated remedy rather than revenue sharing."
+    },
+    {
+      "key": "instagram",
+      "name": "Instagram / Meta",
+      "audio_matching": true,
+      "video_matching": true,
+      "considers_fair_use": false,
+      "strikes_to_termination": null,
+      "strike_expiry_days": null,
+      "default_claim_outcome": "mute_or_block",
+      "trademark_complaint": "Meta IP reporting form.",
+      "privacy_complaint": "Meta privacy reporting; images of minors handled under separate policy.",
+      "note": "Rights Manager performs the matching. Music availability differs between personal and professional/business accounts, so the same audio can clear on one account and be muted on another."
+    },
+    {
+      "key": "twitch",
+      "name": "Twitch",
+      "audio_matching": true,
+      "video_matching": false,
+      "considers_fair_use": false,
+      "strikes_to_termination": 3,
+      "strike_expiry_days": null,
+      "default_claim_outcome": "mute_vod",
+      "trademark_complaint": "Trademark report form.",
+      "privacy_complaint": "Privacy and harassment reporting.",
+      "note": "Audio matching runs over VODs and clips rather than the live stream, so a violation typically surfaces after broadcast."
+    },
+    {
+      "key": "none",
+      "name": "No platform (theatrical, festival, broadcast delivery)",
+      "audio_matching": false,
+      "video_matching": false,
+      "considers_fair_use": false,
+      "strikes_to_termination": null,
+      "strike_expiry_days": null,
+      "default_claim_outcome": "none",
+      "trademark_complaint": "None — exposure runs through the distributor and the E&O carrier instead.",
+      "privacy_complaint": "None — releases are checked at delivery.",
+      "note": "No automated enforcement exists here, which makes clearance MORE important rather than less: there is no takedown to react to, only a distributor rejecting delivery or a claim after release."
+    }
+  ]
+}

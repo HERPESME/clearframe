@@ -208,6 +208,7 @@ def create_app(out_root: Path) -> FastAPI:
         distribution: str = Form("THEATRICAL,STREAMING"),
         use_context: str = Form("EXPRESSIVE"),
         sponsors: str = Form(""),
+        platform: str = Form("none"),
     ):
         """Upload footage and run the clearance pipeline over it.
 
@@ -264,6 +265,7 @@ def create_app(out_root: Path) -> FastAPI:
             # than 400-ing an upload that is otherwise fine.
             use_context=_use_context(use_context),
             sponsors=[b.strip() for b in sponsors.split(",") if b.strip()],
+            platform=(platform or "none").strip().lower(),
             has_media=True,
         )
         ctx = build_context(cfg.model_copy(update={"mode": "live"}), production, out_root)

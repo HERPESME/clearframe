@@ -15,6 +15,7 @@ from clearframe.models import (
     ProductionState,
     RemediationOption,
     ResearchResult,
+    PlatformOutcome,
     ResearchRoute,
     SponsorConflict,
     UseContext,
@@ -63,6 +64,7 @@ class ClearanceDossier(BaseModel):
     territories: list[str] = []
     sponsor_conflicts: list[SponsorConflict] = []
     use_context: UseContext = UseContext.EXPRESSIVE
+    platform_outcomes: list[PlatformOutcome] = []
     disclaimer: str = DISCLAIMER
 
 
@@ -141,6 +143,7 @@ def build_dossier(state: ProductionState, generated_at: str) -> ClearanceDossier
         audit=state.audit_log,
         territories=state.territories,
         sponsor_conflicts=state.sponsor_conflicts,
+        platform_outcomes=state.platform_outcomes,
         use_context=state.production.use_context,
     )
 

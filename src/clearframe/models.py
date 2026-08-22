@@ -463,6 +463,11 @@ class Production(BaseModel):
     release_territories: list[str] = Field(default_factory=lambda: ["US"])
     use_context: UseContext = UseContext.EXPRESSIVE
     sponsors: list[str] = Field(default_factory=list)
+    # Where this will be published. Defaults to "none" — theatrical, festival
+    # or broadcast delivery — because no automated enforcement exists there,
+    # which makes clearance more important rather than less: there is no
+    # takedown to react to, only a distributor rejecting delivery.
+    platform: str = "none"
     distribution: list[str] = Field(
         default_factory=lambda: ["THEATRICAL", "STREAMING"]
     )
@@ -484,6 +489,67 @@ class SponsorConflict(BaseModel):
     conflicts_with: str
     sector: str
     note: str
+
+
+class DetectionMethod(str, Enum):
+    """HOW a platform would find this — which decides whether it will."""
+
+    AUDIO_FINGERPRINT = "AUDIO_FINGERPRINT"   # automated, at industrial scale
+    VIDEO_FINGERPRINT = "VIDEO_FINGERPRINT"   # automated, for reused footage
+    HUMAN_REPORT = "HUMAN_REPORT"             # only if someone notices and files
+    NOT_DETECTED = "NOT_DETECTED"
+
+
+class PlatformAction(str, Enum):
+    """What the platform does — which is not what a court would do.
+
+    In 2025 YouTube processed 2.5 billion Content ID claims, 99%+ automated,
+    and rights holders chose to MONETISE over 90% of them. The dominant outcome
+    is not removal, it is revenue diversion — and the system does not evaluate
+    fair use, so a perfect legal argument does not prevent the claim.
+    """
+
+    CLAIM_LIKELY = "CLAIM_LIKELY"              # automated match; revenue diverted
+    CLAIM_POSSIBLE = "CLAIM_POSSIBLE"          # may match; identity unconfirmed
+    MANUAL_COMPLAINT = "MANUAL_COMPLAINT"      # only if a human notices and files
+    PRIVACY_COMPLAINT = "PRIVACY_COMPLAINT"    # a person, not a rights holder
+    NO_PLATFORM_ACTION = "NO_PLATFORM_ACTION"
+
+
+class PlatformOutcome(BaseModel):
+    """What happens to this finding when the video is published.
+
+    Deliberately separate from `RiskAssessment`. Risk scores how likely you are
+    to LOSE; this scores how likely you are to be CAUGHT, and the two invert: a
+    background mural carries real legal weight and is almost never detected,
+    while a twelve-second music bed has an excellent fair-use argument and is
+    caught essentially every time.
+    """
+
+    element_id: str
+    platform: str
+    action: PlatformAction
+    confidence: str
+    detected_by: DetectionMethod
+    consequence: str
+    remedy: str
+    revenue_impact: str = ""
+
+
+class PlatformPolicy(BaseModel):
+    """How one platform enforces. Data, not code — see data/platforms.json."""
+
+    key: str
+    name: str
+    audio_matching: bool
+    video_matching: bool
+    considers_fair_use: bool
+    strikes_to_termination: int | None
+    strike_expiry_days: int | None
+    default_claim_outcome: str
+    trademark_complaint: str
+    privacy_complaint: str
+    note: str = ""
 
 
 class PreviewFinding(BaseModel):
@@ -543,5 +609,6 @@ class ProductionState(BaseModel):
     audio_matches: list[AudioMatch] = Field(default_factory=list)
     routes: dict[str, ResearchRoute] = Field(default_factory=dict)
     sponsor_conflicts: list[SponsorConflict] = Field(default_factory=list)
+    platform_outcomes: list[PlatformOutcome] = Field(default_factory=list)
     preview: list[PreviewFinding] = Field(default_factory=list)
     detector_hits: list[DetectorHit] = Field(default_factory=list)

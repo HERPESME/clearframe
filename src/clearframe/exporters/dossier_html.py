@@ -42,6 +42,10 @@ _TEMPLATE = Template(
   .tone { display:inline-block; padding:2px 10px; border-radius:10px; font-size:11px; font-family:Helvetica,Arial,sans-serif; letter-spacing:.5px; color:#fff; }
   .t-FAVOURABLE { background:#16a085; } .t-NEUTRAL { background:#95a5a6; }
   .t-UNFLATTERING { background:#e67e22; } .t-DISPARAGING { background:#c0392b; }
+  .platform { background:#fbeee6; border:1px solid #e8c4a8; padding:10px 14px; margin:18px 0 24px; font-size:13px; }
+  .platform td, .platform th { padding:4px 10px 4px 0; text-align:left; font-size:12px; vertical-align:top; }
+  .pa-CLAIM_LIKELY { color:#c0392b; font-weight:bold; }
+  .pa-CLAIM_POSSIBLE { color:#e67e22; }
   .sponsor { background:#fdf2e9; border:1px solid #f0c9a0; padding:10px 14px; margin:18px 0 24px; font-size:13px; }
   .context { background:#eaf2f8; border:1px solid #b8d4e8; padding:8px 14px; margin:-10px 0 20px; font-size:12px; }
   .routing { background:#f4f1fa; border:1px solid #d9d2ea; padding:10px 14px; margin:18px 0 24px; font-size:13px; }
@@ -82,6 +86,24 @@ Commercial speech carries no expressive-work shield — Rogers v. Grimaldi prote
 advertisements, and the Supreme Court narrowed it further in Jack Daniel's v. VIP (2023).
 Risk is banded accordingly, and findings that would otherwise need only a posture check are
 escalated to full rights research because permission, not posture, is the open question.</div>
+{% endif %}
+
+{% set flagged = d.platform_outcomes|selectattr('action.value','in',['CLAIM_LIKELY','CLAIM_POSSIBLE'])|list %}
+{% if flagged %}
+<div class="platform">
+<strong>Platform enforcement — {{ flagged[0].platform }} ({{ flagged|length }}):</strong>
+this is separate from legal merit. Automated content matching does not evaluate fair use,
+so a finding with a strong legal defence can still be claimed on upload. Ranked by how
+likely the platform is to act, which is not the same order as legal risk.
+<table>
+<tr><th>Finding</th><th>Outcome</th><th>Fix</th><th>Revenue</th></tr>
+{% for o in flagged %}
+<tr><td>{{ label_for(o.element_id) }}</td>
+<td class="pa-{{ o.action.value }}">{{ o.action.value|replace('_',' ') }} · {{ o.confidence }}</td>
+<td>{{ o.remedy }}</td><td>{{ o.revenue_impact }}</td></tr>
+{% endfor %}
+</table>
+</div>
 {% endif %}
 
 {% if d.sponsor_conflicts %}
@@ -284,4 +306,6 @@ def render_dossier_html(d: ClearanceDossier) -> str:
         tc=lambda s: seconds_to_tc(s, fps=d.production.fps),
         incomplete=research_is_incomplete,
         audit=d.audit,
+        # Platform outcomes are keyed by element id; the table needs the label.
+        label_for={e.element.id: e.element.label for e in d.entries}.get,
     )

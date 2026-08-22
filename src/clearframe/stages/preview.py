@@ -20,6 +20,7 @@ to" is available before the expensive rung starts. Research reuses them.
 """
 
 from clearframe.conflicts import find_sponsor_conflicts
+from clearframe.platform import detectability, load_platforms, platform_for, project_all
 from clearframe.knowledge import load_knowledge
 from clearframe.models import PreviewFinding, ResearchTier
 from clearframe.pipeline import PipelineContext
@@ -88,6 +89,31 @@ class PreviewStage:
 
         findings.sort(key=lambda f: f.provisional_score, reverse=True)
         ctx.state.preview = findings
+
+        # What the PLATFORM does, which is not what a court would do. Belongs
+        # in the preliminary report because it needs no research at all — the
+        # fingerprint and the timecodes are already in hand.
+        policy = platform_for(ctx.state.production.platform, load_platforms())
+        outcomes = project_all(elements, policy, ctx.state.audio_matches)
+        ctx.state.platform_outcomes = outcomes
+        actionable = [o for o in outcomes if detectability(o) >= 50]
+        if actionable:
+            ctx.emit(
+                {
+                    "type": "platform_exposure",
+                    "platform": policy.name,
+                    "likely": len(actionable),
+                    "findings": [
+                        {
+                            "element_id": o.element_id,
+                            "action": o.action.value,
+                            "confidence": o.confidence,
+                            "remedy": o.remedy,
+                        }
+                        for o in actionable
+                    ],
+                }
+            )
 
         summary = summarise_routes(routes)
         ctx.emit(
