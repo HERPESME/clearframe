@@ -11,6 +11,7 @@ class ClearFrameConfig(BaseModel):
     location: str
     parallel_api_key: str | None
     gemini_model: str
+    territories: list[str] = []
 
     @classmethod
     def from_env(cls, env: Mapping[str, str]) -> "ClearFrameConfig":
@@ -20,6 +21,11 @@ class ClearFrameConfig(BaseModel):
             location=env.get("GOOGLE_CLOUD_LOCATION", "us-central1"),
             parallel_api_key=env.get("PARALLEL_API_KEY"),
             gemini_model=env.get("CLEARFRAME_GEMINI_MODEL", "gemini-3-pro-preview"),
+            territories=[
+                t.strip().upper()
+                for t in env.get("CLEARFRAME_TERRITORIES", "US").split(",")
+                if t.strip()
+            ],
         )
 
 

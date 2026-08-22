@@ -116,6 +116,7 @@ def _cmd_run(args) -> int:
             footage_uri=args.footage,
             fps=args.fps,
             duration_s=args.duration_s,
+            release_territories=args.territories or cfg.territories or ["US"],
         )
         ctx = build_context(cfg, production, out_dir)
     else:
@@ -164,6 +165,13 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--production-id", default="prod-1")
     run.add_argument("--duration-s", type=float, default=0.0)
     run.add_argument("--fps", type=float, default=24.0, help="Footage frame rate")
+    run.add_argument(
+        "--territories",
+        type=lambda v: [t.strip().upper() for t in v.split(",") if t.strip()],
+        default=None,
+        help="Release territories for per-jurisdiction risk, e.g. US,DE,FR "
+        "(default: $CLEARFRAME_TERRITORIES or US)",
+    )
     run.add_argument("--out", type=Path, default=Path("out"), help="Output directory")
     run.add_argument(
         "--auto-approve",

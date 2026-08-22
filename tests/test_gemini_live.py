@@ -102,3 +102,61 @@ async def test_scan_config_includes_safety_settings():
     config = fake.models.calls[0]["config"]
     assert len(config.safety_settings) == 4
     assert all(str(s.threshold).endswith("BLOCK_ONLY_HIGH") for s in config.safety_settings)
+
+
+async def test_script_scan_requests_the_script_schema_not_the_video_one():
+    """Regression: scan_script routed through _generate, which unconditionally
+    pinned SCAN_RESPONSE_SCHEMA. Gemini was therefore forced to answer in the
+    video shape ({"elements": [...]}) while parse_script_payload looked for
+    {"mentions": [...]}, so live script pre-scan silently returned nothing and
+    drift never computed. Verified against the live API 2026-08-22."""
+    from clearframe.integrations.gemini_client import SCRIPT_RESPONSE_SCHEMA
+
+    seen = {}
+
+    class _Models:
+        def generate_content(self, model, contents, config):
+            seen["schema"] = getattr(config, "response_schema", None)
+            return SimpleNamespace(
+                text=json.dumps(
+                    {
+                        "mentions": [
+                            {
+                                "label": "Coca-Cola can",
+                                "element_type": "LOGO",
+                                "scene": "INT. KITCHEN",
+                            }
+                        ]
+                    }
+                )
+            )
+
+    client = LiveGeminiClient(
+        project="p",
+        location="us-central1",
+        client_factory=lambda: SimpleNamespace(models=_Models()),
+    )
+    mentions = await client.scan_script("INT. KITCHEN - DAY\nA COCA-COLA can.")
+
+    assert seen["schema"] == SCRIPT_RESPONSE_SCHEMA
+    assert [m.label for m in mentions] == ["Coca-Cola can"]
+
+
+async def test_video_scan_still_uses_the_video_schema():
+    seen = {}
+
+    class _Models:
+        def generate_content(self, model, contents, config):
+            seen["schema"] = getattr(config, "response_schema", None)
+            return SimpleNamespace(text=json.dumps(VALID_PAYLOAD))
+
+    from clearframe.integrations.gemini_client import SCAN_RESPONSE_SCHEMA
+
+    client = LiveGeminiClient(
+        project="p",
+        location="us-central1",
+        client_factory=lambda: SimpleNamespace(models=_Models()),
+    )
+    result = await client.scan("gs://b/clip.mp4", 10.0)
+    assert seen["schema"] == SCAN_RESPONSE_SCHEMA
+    assert len(result.detections) == 2

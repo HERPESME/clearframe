@@ -10,7 +10,14 @@ Cost figures are indicative, used for the spend summary shown to producers.
 
 from clearframe.models import ClearanceCategory, ResearchPlan, TriagedElement
 
-EST_COST: dict[str, float] = {"lite": 0.05, "base": 0.20, "pro": 1.00, "ultra": 3.00}
+# Parallel Task API list price per completed run (docs.parallel.ai/getting-started/pricing,
+# checked 2026-08-22). Keep these in step with the published table: the
+# producer-facing budget summary is only useful if it is true.
+EST_COST: dict[str, float] = {"lite": 0.005, "base": 0.010, "pro": 0.100, "ultra": 0.300}
+
+# Parallel Search API, priced per request rather than per run — this is what
+# makes the real-time freshness pass affordable at review time.
+SEARCH_COST_USD: float = 0.005
 
 FAMOUS_MARKS = {
     "coca-cola",

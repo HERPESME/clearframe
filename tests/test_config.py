@@ -68,3 +68,16 @@ def test_cli_live_without_env_exits_2(capsys, monkeypatch):
     assert rc == 2
     out = capsys.readouterr().out
     assert "GOOGLE_CLOUD_PROJECT" in out and "PARALLEL_API_KEY" in out
+
+
+def test_territories_parse_from_env():
+    from clearframe.config import ClearFrameConfig
+
+    cfg = ClearFrameConfig.from_env({"CLEARFRAME_TERRITORIES": "us, de ,fr"})
+    assert cfg.territories == ["US", "DE", "FR"]
+
+
+def test_territories_default_to_us():
+    from clearframe.config import ClearFrameConfig
+
+    assert ClearFrameConfig.from_env({}).territories == ["US"]

@@ -12,6 +12,7 @@ from pathlib import Path
 from clearframe.integrations.gemini_client import (
     SCAN_PROMPT,
     SCAN_RESPONSE_SCHEMA,
+    SCRIPT_RESPONSE_SCHEMA,
     ScanResult,
     parse_scan_payload,
 )
@@ -62,7 +63,7 @@ class LiveGeminiClient:
         return self._client
 
     @staticmethod
-    def _scan_config():
+    def _scan_config(schema: dict | None = None):
         """Structured-output config with explicit safety settings.
 
         Footage analysis must not refuse on mild depicted content (a fight
@@ -82,15 +83,15 @@ class LiveGeminiClient:
         )
         return genai_types.GenerateContentConfig(
             response_mime_type="application/json",
-            response_schema=SCAN_RESPONSE_SCHEMA,
+            response_schema=schema or SCAN_RESPONSE_SCHEMA,
             safety_settings=[
                 genai_types.SafetySetting(category=c, threshold="BLOCK_ONLY_HIGH")
                 for c in categories
             ],
         )
 
-    def _generate(self, contents) -> str:
-        from_config = self._scan_config()
+    def _generate(self, contents, schema: dict | None = None) -> str:
+        from_config = self._scan_config(schema)
 
         client = self._client_or_create()
         models_to_try = [self.model, self.fallback_model]
@@ -126,7 +127,10 @@ class LiveGeminiClient:
         )
 
         def _run():
-            raw = self._generate([SCRIPT_PROMPT + "\n\nSCREENPLAY:\n" + text])
+            raw = self._generate(
+                [SCRIPT_PROMPT + "\n\nSCREENPLAY:\n" + text],
+                schema=SCRIPT_RESPONSE_SCHEMA,
+            )
             return parse_script_payload(json.loads(raw))
 
         return await asyncio.to_thread(_run)
