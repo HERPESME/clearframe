@@ -54,7 +54,9 @@ class CorroborateStage:
 
         for index, el in enumerate(ctx.state.elements):
             if el.category is ClearanceCategory.MUSIC_SYNC:
-                identity = apply_audio_identity(el, matches)
+                identity = apply_audio_identity(
+                    el, matches, checked=ctx.state.audio_checked
+                )
                 if identity.corroboration is None:
                     continue
                 result = identity.corroboration

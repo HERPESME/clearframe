@@ -143,13 +143,33 @@ def _best(matches: list[AudioMatch]) -> AudioMatch:
 
 
 def apply_audio_identity(
-    element: TriagedElement, matches: list[AudioMatch]
+    element: TriagedElement, matches: list[AudioMatch], checked: bool = True
 ) -> AudioIdentity:
-    """Deterministic identity outcome for one element given fingerprint hits."""
+    """Deterministic identity outcome for one element given fingerprint hits.
+
+    `checked` distinguishes "the fingerprint found nothing" from "the
+    fingerprint never ran". Reporting the second as the first is a lie with a
+    comforting shape: one says the recording is probably library or original,
+    the other says nobody looked.
+    """
     if element.category is not ClearanceCategory.MUSIC_SYNC:
         return AudioIdentity(label=element.label, corroboration=None, promoted=False)
 
     if not matches:
+        note = (
+            "Acoustic fingerprinting returned no match. Not a contradiction — "
+            "the recording may be library, original or absent from the database — "
+            "but the title rests on the video model alone and must not be filed "
+            "to a PRO without human confirmation."
+            if checked
+            else (
+                "Acoustic fingerprinting COULD NOT BE CHECKED — the service refused "
+                "the request, so this recording was never looked up. That is not the "
+                "same as finding nothing: the track may well be a commercial release. "
+                "Set a working AUDD_API_TOKEN (an account needs an active trial or "
+                "subscription) and re-run before filing anything to a PRO."
+            )
+        )
         return AudioIdentity(
             label=element.label,
             promoted=False,
@@ -159,12 +179,7 @@ def apply_audio_identity(
                 detector=AUDIO_DETECTOR,
                 detected_label=None,
                 confidence=0.0,
-                note=(
-                    "Acoustic fingerprinting returned no match. Not a contradiction — "
-                    "the recording may be library, original or absent from the database — "
-                    "but the title rests on the video model alone and must not be filed "
-                    "to a PRO without human confirmation."
-                ),
+                note=note,
             ),
         )
 

@@ -655,6 +655,9 @@ class ProductionState(BaseModel):
     territories: list[str] = Field(default_factory=list)
     coverage: dict[str, Coverage] = Field(default_factory=dict)
     audio_matches: list[AudioMatch] = Field(default_factory=list)
+    # False when fingerprinting could not run at all — an unchecked recording
+    # must never be reported as an unmatched one.
+    audio_checked: bool = True
     routes: dict[str, ResearchRoute] = Field(default_factory=dict)
     sponsor_conflicts: list[SponsorConflict] = Field(default_factory=list)
     platform_outcomes: list[PlatformOutcome] = Field(default_factory=list)

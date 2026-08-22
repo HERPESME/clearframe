@@ -87,6 +87,9 @@ class ScanStage:
         if ctx.state.exposures:
             ctx.emit({"type": "exposures_found", "count": len(ctx.state.exposures)})
         ctx.state.audio_matches = _or_empty(matches, "audio fingerprinting")
+        ctx.state.audio_checked = getattr(ctx.audio, "available", True)
+        if not ctx.state.audio_checked:
+            ctx.emit({"type": "fingerprint_unavailable"})
         ctx.state.detector_hits = _or_empty(hits, "logo corroboration")
 
 

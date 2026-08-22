@@ -62,6 +62,17 @@ def extract_segment(
     return out_path if out_path.exists() and out_path.stat().st_size > 1024 else None
 
 
+def service_unavailable(payload: dict) -> bool:
+    """Did the service refuse to answer, as opposed to answering "nothing"?
+
+    AudD returns error 900 for a well-formed token on an account with no active
+    trial or subscription. Reporting that as "no match" is a lie with a
+    comforting shape: one answer says the music is probably library or
+    original, the other says nobody looked.
+    """
+    return isinstance(payload, dict) and payload.get("status") == "error"
+
+
 def parse_audd_response(payload: dict, at_s: float) -> list[AudioMatch]:
     """AudD /recognize -> AudioMatch. Shared by the live and fixture clients.
 
@@ -110,6 +121,9 @@ def parse_audd_response(payload: dict, at_s: float) -> list[AudioMatch]:
 
 class AudioIdClient(Protocol):
     name: str
+    # False once the service has refused to answer, so callers can tell an
+    # unchecked recording from an unmatched one.
+    available: bool
 
     async def identify(
         self,
@@ -123,6 +137,7 @@ class FixtureAudioClient:
     """Replays genuine AudD payloads through the live parser."""
 
     name = AUDIO_DETECTOR
+    available = True
 
     def __init__(self, fixtures_dir: Path):
         self.fixtures_dir = Path(fixtures_dir)
@@ -164,6 +179,9 @@ class LiveAudDClient:
         timeout_s: float = 30.0,
     ):
         self.api_token = api_token
+        # Flips to False if the service refuses to answer. Read by the scan
+        # stage so an unchecked recording is never reported as unmatched.
+        self.available = True
         self.segment_s = segment_s
         self.max_samples = max_samples
         self.timeout_s = timeout_s
@@ -179,7 +197,17 @@ class LiveAudDClient:
                 timeout=self.timeout_s,
             )
         response.raise_for_status()
-        return parse_audd_response(response.json(), at_s=at_s)
+        payload = response.json()
+        if service_unavailable(payload):
+            # Answered HTTP 200 and refused to do the work. Record it so the
+            # dossier does not report "no match" for a check that never ran.
+            self.available = False
+            log.warning(
+                "AudD refused the request (%s) — music identity will be reported "
+                "as UNCHECKED rather than unmatched",
+                (payload.get("error") or {}).get("error_message", payload),
+            )
+        return parse_audd_response(payload, at_s=at_s)
 
     async def identify(
         self,
