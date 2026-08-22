@@ -141,6 +141,9 @@ def build_server(out_root: Path) -> MCPServer:
                         if el.id in state.corroboration
                         else None
                     ),
+                    "resolved_by": (
+                        state.routes[el.id].tier.value if el.id in state.routes else None
+                    ),
                     "coverage": (
                         state.coverage[el.id].status.value
                         if el.id in state.coverage
@@ -172,6 +175,14 @@ def build_server(out_root: Path) -> MCPServer:
             "corroboration": (
                 state.corroboration[element_id].model_dump(mode="json")
                 if element_id in state.corroboration
+                else None
+            ),
+            # Which rung of the escalation ladder answered this, and under what
+            # authority. A finding resolved for free is a documented position,
+            # so a client must be able to read the reasoning, not just the tier.
+            "route": (
+                state.routes[element_id].model_dump(mode="json")
+                if element_id in state.routes
                 else None
             ),
             "freshness": [

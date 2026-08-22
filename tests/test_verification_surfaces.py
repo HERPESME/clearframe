@@ -98,3 +98,25 @@ async def test_mcp_check_freshness_runs_and_audits(tmp_path):
     body = await _call(server, "check_freshness", {"production_id": "demo"})
     assert body["checked"] >= 2
     assert "e3" in body["material_signals"]
+
+
+async def test_mcp_reports_which_rung_answered_each_finding(tmp_path):
+    """A finding resolved for free is a documented position, so an MCP client
+    must be able to read the reasoning and the required action — not just see
+    that no research ran."""
+    server = await _mcp(tmp_path)
+
+    listed = await _call(server, "list_findings", {"production_id": "demo"})
+    tiers = {f["id"]: f["resolved_by"] for f in listed["findings"]}
+    assert tiers["e6"] == "STATUTE"
+    assert tiers["e2"] == "SEARCH"
+    assert tiers["e8"] == "BLOCKED"
+
+    face = await _call(
+        server, "get_finding", {"production_id": "demo", "element_id": "e6"}
+    )
+    route = face["route"]
+    assert route["tier"] == "STATUTE"
+    assert "release" in route["disposition"].lower()
+    assert route["basis"]
+    assert route["est_cost_usd"] == 0.0

@@ -181,6 +181,7 @@ export default function App() {
     decisions,
     court,
     research_plan,
+    routes,
     drift,
     candidates,
     watches,
@@ -391,6 +392,7 @@ export default function App() {
             decision={decisions[el.id]}
             court={court?.[el.id]}
             plan={research_plan?.[el.id]}
+            route={routes?.[el.id]}
             corroboration={corroboration?.[el.id]}
             coverage={coverage?.[el.id]}
             freshness={freshness?.[el.id] ?? []}
