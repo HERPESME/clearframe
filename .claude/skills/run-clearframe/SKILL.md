@@ -56,6 +56,17 @@ calibration baseline, so omitting it reproduces the old numbers exactly.
 infringement — a contract exposure, since category exclusivity is standard in
 brand deals.
 
+`--platform youtube` (or tiktok / instagram / twitch / none) projects what the
+PLATFORM will do, which is not what a court would do. Automated matching does
+not evaluate fair use, so a finding with a strong legal defence can still be
+claimed on upload. Default `none` means theatrical/festival/broadcast delivery:
+no automated enforcement, which makes clearance more important rather than
+less — there is no takedown to react to, only a distributor rejecting delivery.
+
+`--territories` now spans 12 jurisdictions. The dossier prints, per finding,
+which defences that jurisdiction does and does NOT offer — parody is statutory
+in GB/DE/FR/ES and simply absent in India, Japan and Italy.
+
 Without `--auto-approve` the pipeline pauses at review (exercise the web app instead). A rerun with the same `--out` resumes persisted state — pass a fresh dir to start over.
 
 ## Review web app
@@ -103,7 +114,7 @@ list_licences · check_coverage · generate_dossier`. Keep
 ## Tests + smoke
 
 ```bash
-.venv/bin/pytest -q     # 299 tests; must be green before any commit
+.venv/bin/pytest -q     # 346 tests; must be green before any commit
 bash scripts/smoke.sh   # 7 sections: CLI, web, SSE, webhook, verification, ledger, MCP
 ```
 
