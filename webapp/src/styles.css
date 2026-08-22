@@ -848,6 +848,15 @@ button {
 
 /* ---- identity corroboration, live signals, territory ------------------ */
 .badge.verdict { letter-spacing: .4px; }
+.route-chip { display:inline-block; padding:2px 8px; border-radius:9px; font-size:10px; letter-spacing:.6px; border:1px solid transparent; }
+.route-chip.LOCAL { background: rgba(22,160,133,.16); color:#1abc9c; border-color: rgba(22,160,133,.45); }
+.route-chip.STATUTE { background: rgba(142,68,173,.16); color:#a569bd; border-color: rgba(142,68,173,.45); }
+.route-chip.SEARCH { background: rgba(41,128,185,.16); color:#4aa3df; border-color: rgba(41,128,185,.45); }
+.route-chip.DEEP { background: rgba(211,84,0,.16); color:#e67e22; border-color: rgba(211,84,0,.45); }
+.route-chip.BLOCKED { background: rgba(127,140,141,.16); color: var(--muted); border-color: rgba(127,140,141,.4); }
+.route-note .basis { font-style: italic; }
+.route-note.free { border-left: 2px solid rgba(142,68,173,.5); padding-left: 10px; }
+.route-note .disposition { margin-top: 6px; font-size: 12px; }
 .badge.verdict.FINGERPRINTED { background: rgba(41,128,185,.18); color: #4aa3df; border-color: rgba(41,128,185,.5); }
 .badge.verdict.CORROBORATED { background: rgba(39,174,96,.16); color: var(--low); border-color: rgba(39,174,96,.45); }
 .badge.verdict.SINGLE_SOURCE { background: rgba(127,140,141,.16); color: var(--muted); border-color: rgba(127,140,141,.4); }

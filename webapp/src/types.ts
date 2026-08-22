@@ -33,6 +33,26 @@ export interface Element {
   at_s: number | null;
 }
 
+export type ResearchTier =
+  | "LOCAL"
+  | "STATUTE"
+  | "SEARCH"
+  | "DEEP"
+  | "BLOCKED";
+
+export interface ResearchRoute {
+  element_id: string;
+  tier: ResearchTier;
+  rationale: string;
+  basis: string;
+  disposition: string;
+  owner: string | null;
+  posture: string | null;
+  est_cost_usd: number;
+  est_latency_s: number;
+  enumerate_candidates: boolean;
+}
+
 export type IdentityVerdict =
   | "FINGERPRINTED"
   | "CORROBORATED"
@@ -211,6 +231,9 @@ export interface PipelineEvent {
   holding?: CourtHolding;
   count?: number;
   total_est_cost_usd?: number;
+  deep_runs?: number;
+  routes?: Record<string, number>;
+  tier?: string;
 }
 
 export interface ProductionState {
@@ -238,6 +261,7 @@ export interface ProductionState {
   watches: Record<string, ClearanceWatch>;
   alerts: WatchAlert[];
   corroboration: Record<string, Corroboration>;
+  routes: Record<string, ResearchRoute>;
   freshness: Record<string, FreshnessSignal[]>;
   territory_risk: Record<string, TerritoryRisk[]>;
   territories: string[];

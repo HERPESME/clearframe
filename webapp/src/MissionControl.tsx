@@ -182,11 +182,29 @@ export function MissionControl({ onComplete }: { onComplete: () => void }) {
             patch("court", { status: "done", line: "All rulings issued" });
           }
           break;
-        case "research_planned":
+        case "research_planned": {
+          const r = e.routes ?? {};
+          const free = (r.LOCAL ?? 0) + (r.STATUTE ?? 0);
+          const deep = e.deep_runs ?? 0;
           patch("planner", {
             status: "done",
-            line: `$${(e.total_est_cost_usd ?? 0).toFixed(2)} research budget allocated`,
+            line:
+              free > 0
+                ? `${free} resolved free · ${r.SEARCH ?? 0} live search · ${deep} deep · $${(e.total_est_cost_usd ?? 0).toFixed(2)}`
+                : `${deep} deep research runs · $${(e.total_est_cost_usd ?? 0).toFixed(2)}`,
           });
+          break;
+        }
+        case "research_resolved":
+          setResearchRows((rows) => [
+            ...rows,
+            {
+              id: e.element_id!,
+              text: e.label ?? "",
+              chip: e.tier === "BLOCKED" ? "blocked" : "no research needed",
+              chipClass: "tier",
+            },
+          ]);
           break;
         case "research_start":
           setResearchRows((rows) => [

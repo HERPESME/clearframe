@@ -11,6 +11,7 @@ import type {
   RemediationOption,
   Research,
   ResearchPlan,
+  ResearchRoute,
   Risk,
   Role,
   TerritoryRisk,
@@ -23,6 +24,17 @@ const HOLDING_TEXT = {
   defensible: "DEFENSIBLE",
   escalate: "ESCALATE",
 } as const;
+
+// What answered this finding. LOCAL and STATUTE cost nothing and take no time,
+// which is precisely why they must be labelled rather than left to look like
+// research that quietly did not happen.
+const ROUTE_TEXT: Record<string, string> = {
+  LOCAL: "OWNER KNOWN LOCALLY",
+  STATUTE: "SETTLED BY LAW",
+  SEARCH: "LIVE SEARCH",
+  DEEP: "DEEP RESEARCH",
+  BLOCKED: "NOT RESEARCHED",
+};
 
 const VERDICT_TEXT = {
   FINGERPRINTED: "ID FINGERPRINTED",
@@ -73,6 +85,7 @@ interface Props {
   decision: Decision | undefined;
   court: CourtOpinion | undefined;
   plan: ResearchPlan | undefined;
+  route: ResearchRoute | undefined;
   corroboration: Corroboration | undefined;
   coverage: Coverage | undefined;
   freshness: FreshnessSignal[];
@@ -94,6 +107,7 @@ export function ElementCard({
   decision,
   court,
   plan,
+  route,
   corroboration,
   coverage,
   freshness,
@@ -112,6 +126,7 @@ export function ElementCard({
   const complete = research && research.status === "complete";
   const disputed = corroboration?.verdict === "CONFLICTED";
   const materialSignals = freshness.filter((s) => s.material);
+  const freeRoute = route?.tier === "LOCAL" || route?.tier === "STATUTE";
   const divergent =
     territory.length > 0 && new Set(territory.map((t) => t.band)).size > 1;
 
@@ -161,6 +176,14 @@ export function ElementCard({
             title="This element appears on screen but was never in the shooting script — nobody budgeted clearance for it."
           >
             NOT IN SCRIPT
+          </span>
+        )}
+        {route && (
+          <span
+            className={`route-chip ${route.tier}`}
+            title={`${route.rationale}${route.basis ? `\n\nAuthority: ${route.basis}` : ""}`}
+          >
+            {ROUTE_TEXT[route.tier]}
           </span>
         )}
         {plan && (
@@ -223,6 +246,19 @@ export function ElementCard({
         <div className="sec">
           <div className="sec-title">Identity verification</div>
           <div className="kv">{corroboration.note}</div>
+        </div>
+      )}
+
+      {route && (
+        <div className={`sec route-note ${freeRoute ? "free" : ""}`}>
+          <div className="sec-title">How this was resolved</div>
+          <div className="kv">{route.rationale}</div>
+          {route.basis && <div className="kv basis">Authority: {route.basis}</div>}
+          {route.disposition && (
+            <div className="disposition">
+              <strong>Required action:</strong> {route.disposition}
+            </div>
+          )}
         </div>
       )}
 
