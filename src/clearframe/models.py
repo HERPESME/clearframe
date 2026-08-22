@@ -610,5 +610,8 @@ class ProductionState(BaseModel):
     routes: dict[str, ResearchRoute] = Field(default_factory=dict)
     sponsor_conflicts: list[SponsorConflict] = Field(default_factory=list)
     platform_outcomes: list[PlatformOutcome] = Field(default_factory=list)
+    # element id -> list of {territory, name, available, authority, note}.
+    # Stored untyped because `territory.Defence` imports from this module.
+    defences: dict[str, list[dict]] = Field(default_factory=dict)
     preview: list[PreviewFinding] = Field(default_factory=list)
     detector_hits: list[DetectorHit] = Field(default_factory=list)

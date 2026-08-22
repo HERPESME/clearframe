@@ -116,6 +116,50 @@ assert 'UrhG' in [t['authority'] for t in s['territory_risk']['e5']][1]
 "
 check $? "mural bands per territory US/DE/FR with cited authority"
 
+$PY - <<'PHASE_C'
+import asyncio, tempfile
+from clearframe.pipeline import Pipeline, build_demo_pipeline, demo_context
+from clearframe.territory import TERRITORY_RULES
+
+
+async def main():
+    assert len(TERRITORY_RULES) >= 12, len(TERRITORY_RULES)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        ctx = demo_context(tmp)
+        ctx.state.production = ctx.state.production.model_copy(
+            update={"release_territories": ["IN", "GB", "IT"]}
+        )
+        st = await Pipeline(build_demo_pipeline()).run(ctx)
+
+    rows = st.defences["e5"]  # the unknown-artist mural
+    by = {(r["territory"], r["name"]): r for r in rows}
+
+    # Parody: statutory in the UK, absent in India and Italy. One global answer
+    # could not have told a skit maker any of this.
+    assert by[("GB", "Parody / caricature")]["available"] is True
+    assert by[("IN", "Parody / caricature")]["available"] is False
+    assert by[("IT", "Parody / caricature")]["available"] is False
+
+    # India is unusually generous about background artwork in a film.
+    incidental_in = by[("IN", "Incidental inclusion")]
+    assert incidental_in["available"] is True
+    assert "52(1)(u)" in incidental_in["authority"]
+
+    # Italy is the most restrictive: no panorama exception at all.
+    assert by[("IT", "Freedom of panorama")]["available"] is False
+
+    # Only the US has an open-ended exceptions regime.
+    assert by[("GB", "Fair use (open-ended)")]["available"] is False
+
+    # Every row carries its authority — an uncited legal claim is worse than none.
+    assert all(r["authority"] for r in rows)
+
+
+asyncio.run(main())
+PHASE_C
+check $? "jurisdiction defences differ per territory, each with its authority"
+
 curl -sf "$BASE/api/productions/demo" | $PY -c "
 import json, sys
 s = json.load(sys.stdin)

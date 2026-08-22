@@ -65,6 +65,7 @@ class ClearanceDossier(BaseModel):
     sponsor_conflicts: list[SponsorConflict] = []
     use_context: UseContext = UseContext.EXPRESSIVE
     platform_outcomes: list[PlatformOutcome] = []
+    defences: dict[str, list[dict]] = {}
     disclaimer: str = DISCLAIMER
 
 
@@ -144,6 +145,7 @@ def build_dossier(state: ProductionState, generated_at: str) -> ClearanceDossier
         territories=state.territories,
         sponsor_conflicts=state.sponsor_conflicts,
         platform_outcomes=state.platform_outcomes,
+        defences=state.defences,
         use_context=state.production.use_context,
     )
 
