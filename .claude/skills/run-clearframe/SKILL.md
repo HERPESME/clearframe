@@ -46,6 +46,16 @@ set -a && source .env && set +a               # nothing auto-loads .env
 `--territories` (or `CLEARFRAME_TERRITORIES`) drives per-jurisdiction banding;
 without it live runs are US-only.
 
+`--use-context ADVERTISING` (or SPONSORED / NEWS / EDUCATIONAL) tells the risk
+engine this is commercial speech, which carries no expressive-work shield:
+scores rise and posture checks escalate to full rights research, because the
+open question becomes permission rather than posture. Default EXPRESSIVE is the
+calibration baseline, so omitting it reproduces the old numbers exactly.
+
+`--sponsors "Coca-Cola,Nike"` flags competitor marks in shot. Not an
+infringement — a contract exposure, since category exclusivity is standard in
+brand deals.
+
 Without `--auto-approve` the pipeline pauses at review (exercise the web app instead). A rerun with the same `--out` resumes persisted state — pass a fresh dir to start over.
 
 ## Review web app
@@ -93,7 +103,7 @@ list_licences · check_coverage · generate_dossier`. Keep
 ## Tests + smoke
 
 ```bash
-.venv/bin/pytest -q     # 262 tests; must be green before any commit
+.venv/bin/pytest -q     # 299 tests; must be green before any commit
 bash scripts/smoke.sh   # 7 sections: CLI, web, SSE, webhook, verification, ledger, MCP
 ```
 
