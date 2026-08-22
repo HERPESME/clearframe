@@ -347,6 +347,23 @@ class TerritoryRisk(BaseModel):
     authority: str
 
 
+class RightsType(str, Enum):
+    """Which half (or which kind) of a right a grant actually conveys.
+
+    Music needs TWO licences from two different holders: the synchronisation
+    licence for the composition (publisher) and the master-use licence for the
+    recording (label). Holding one and shipping on it is the most common music
+    clearance failure in the industry, and it was previously unrepresentable
+    here — `scope` was free text, so a sync-only grant read as full coverage.
+    """
+
+    ALL = "ALL"          # grant does not distinguish; the default
+    SYNC = "SYNC"        # composition, from the publisher
+    MASTER = "MASTER"    # sound recording, from the label
+    BOTH = "BOTH"        # one paper covering composition and recording
+    PRINT = "PRINT"      # reproduction of artwork or a photograph
+
+
 class LicenceGrant(BaseModel):
     """A clearance the production ALREADY holds.
 
@@ -362,6 +379,7 @@ class LicenceGrant(BaseModel):
     rights_holder: str
     work: str = ""
     scope: str = ""
+    rights_type: RightsType = RightsType.ALL
     territories: list[str] = Field(default_factory=lambda: ["WORLDWIDE"])
     media: list[str] = Field(default_factory=lambda: ["ALL"])
     starts: str = ""
