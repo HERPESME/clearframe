@@ -23,7 +23,15 @@ SCAN_PROMPT = (
     "LOCATION, TEXT), a one-sentence description, every time range in which it "
     "appears (seconds), and prominence estimates: total screen time in seconds, "
     "fraction of frame covered (0-1), how central it is to the composition (0-1), "
-    "and whether it is integral to the plot. Report ranges you could not analyze "
+    "and whether it is integral to the plot. "
+    "For brands, businesses, places and people, also report how the element is "
+    "PORTRAYED as `depiction`: FAVOURABLE (shown positively, reads as an "
+    "endorsement), NEUTRAL (simply present), UNFLATTERING (associated with "
+    "failure, mess or mishap), or DISPARAGING (associated with harm, crime, "
+    "illness or contempt). Judge only what is shown on screen; if the portrayal "
+    "is not clear, use NEUTRAL. This matters because rights holders object to "
+    "how a brand is depicted far more often than to its mere presence. "
+    "Report ranges you could not analyze "
     "as unscanned_ranges. Be exhaustive: missing an element creates legal risk."
 )
 
@@ -93,6 +101,10 @@ SCAN_RESPONSE_SCHEMA: dict = {
                             },
                             "required": ["start_s", "end_s"],
                         },
+                    },
+                    "depiction": {
+                        "type": "string",
+                        "enum": ["FAVOURABLE", "NEUTRAL", "UNFLATTERING", "DISPARAGING"],
                     },
                     "prominence": {
                         "type": "object",

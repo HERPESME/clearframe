@@ -8,7 +8,7 @@ from pathlib import Path
 
 from clearframe.config import ClearFrameConfig, validate_live
 from clearframe.dossier import auto_decisions
-from clearframe.models import Production
+from clearframe.models import Production, UseContext
 from clearframe.pipeline import (
     Pipeline,
     PipelineContext,
@@ -117,6 +117,8 @@ def _cmd_run(args) -> int:
             fps=args.fps,
             duration_s=args.duration_s,
             release_territories=args.territories or cfg.territories or ["US"],
+            use_context=args.use_context,
+            sponsors=args.sponsors or [],
         )
         ctx = build_context(cfg, production, out_dir)
     else:
@@ -171,6 +173,21 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="Release territories for per-jurisdiction risk, e.g. US,DE,FR "
         "(default: $CLEARFRAME_TERRITORIES or US)",
+    )
+    run.add_argument(
+        "--use-context",
+        type=lambda v: UseContext(v.strip().upper()),
+        default=UseContext.EXPRESSIVE,
+        help="What kind of work this is: EXPRESSIVE (film/TV/skit, default) · "
+        "ADVERTISING · SPONSORED · NEWS · EDUCATIONAL. Commercial speech gets no "
+        "expressive-work shield, so an advert is scored and researched harder.",
+    )
+    run.add_argument(
+        "--sponsors",
+        type=lambda v: [b.strip() for b in v.split(",") if b.strip()],
+        default=None,
+        help="Brands paying for this production, comma separated. Competing marks "
+        "detected on screen are flagged as sponsor conflicts.",
     )
     run.add_argument("--out", type=Path, default=Path("out"), help="Output directory")
     run.add_argument(

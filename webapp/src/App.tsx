@@ -182,6 +182,7 @@ export default function App() {
     court,
     research_plan,
     routes,
+    sponsor_conflicts,
     drift,
     candidates,
     watches,
@@ -337,6 +338,14 @@ export default function App() {
             <span className="n">{covCount("NOT_COVERED")}</span> unlicensed
           </span>
         )}
+        {(sponsor_conflicts?.length ?? 0) > 0 && (
+          <span
+            className="chip HIGH"
+            title="A competitor's mark is on screen while a sponsor is paying. Not an infringement — a contract exposure, since category exclusivity is standard in brand deals."
+          >
+            <span className="n">{sponsor_conflicts.length}</span> sponsor conflicts
+          </span>
+        )}
         {corroborated.length > 0 && (
           <span
             className="chip ok"
@@ -382,6 +391,23 @@ export default function App() {
       </div>
 
       <main className="cards">
+        {(sponsor_conflicts?.length ?? 0) > 0 && (
+          <div className="sponsor-banner">
+            <strong>Sponsor conflict.</strong> A competitor's mark is on screen while a
+            sponsor is paying for this production. Nothing is being infringed — but
+            category exclusivity is standard in sponsorship contracts, so this can breach
+            the deal even though the depiction is lawful. Check the exclusivity clause
+            before delivery.
+            <ul>
+              {sponsor_conflicts.map((c) => (
+                <li key={c.element_id}>
+                  {c.label} ({c.detected_owner}) competes with {c.conflicts_with} in{" "}
+                  {c.sector}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         {sorted.map((el) => (
           <ElementCard
             key={el.id}

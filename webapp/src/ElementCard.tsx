@@ -28,6 +28,16 @@ const HOLDING_TEXT = {
 // What answered this finding. LOCAL and STATUTE cost nothing and take no time,
 // which is precisely why they must be labelled rather than left to look like
 // research that quietly did not happen.
+// Rights holders object to how a brand is SHOWN far more often than to its
+// presence. NBC digitally erased In-Sink-Erator from Heroes because a hand got
+// mangled in the disposal, not because the logo was visible.
+const TONE_TEXT: Record<string, string> = {
+  FAVOURABLE: "SHOWN FAVOURABLY",
+  NEUTRAL: "SHOWN NEUTRALLY",
+  UNFLATTERING: "SHOWN UNFLATTERINGLY",
+  DISPARAGING: "SHOWN DISPARAGINGLY",
+};
+
 const ROUTE_TEXT: Record<string, string> = {
   LOCAL: "OWNER KNOWN LOCALLY",
   STATUTE: "SETTLED BY LAW",
@@ -176,6 +186,14 @@ export function ElementCard({
             title="This element appears on screen but was never in the shooting script — nobody budgeted clearance for it."
           >
             NOT IN SCRIPT
+          </span>
+        )}
+        {element.depiction && (
+          <span
+            className={`tone-chip ${element.depiction}`}
+            title="How the element is portrayed. Brand owners object to depiction far more often than to presence."
+          >
+            {TONE_TEXT[element.depiction]}
           </span>
         )}
         {route && (

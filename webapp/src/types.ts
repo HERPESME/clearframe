@@ -31,6 +31,22 @@ export interface Element {
   prominence: Prominence;
   bbox: BBox | null;
   at_s: number | null;
+  depiction: DepictionTone | null;
+}
+
+export type DepictionTone =
+  | "FAVOURABLE"
+  | "NEUTRAL"
+  | "UNFLATTERING"
+  | "DISPARAGING";
+
+export interface SponsorConflict {
+  element_id: string;
+  label: string;
+  detected_owner: string;
+  conflicts_with: string;
+  sector: string;
+  note: string;
 }
 
 export type ResearchTier =
@@ -233,6 +249,8 @@ export interface PipelineEvent {
   total_est_cost_usd?: number;
   deep_runs?: number;
   awaiting_research?: number;
+  conflicts_with?: string;
+  sector?: string;
   resolved_now?: number;
   findings?: {
     element_id: string;
@@ -275,6 +293,7 @@ export interface ProductionState {
   alerts: WatchAlert[];
   corroboration: Record<string, Corroboration>;
   routes: Record<string, ResearchRoute>;
+  sponsor_conflicts: SponsorConflict[];
   freshness: Record<string, FreshnessSignal[]>;
   territory_risk: Record<string, TerritoryRisk[]>;
   territories: string[];

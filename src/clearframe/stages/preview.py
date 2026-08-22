@@ -19,6 +19,7 @@ This stage also fixes the routes, so the answer to "which rung is this going
 to" is available before the expensive rung starts. Research reuses them.
 """
 
+from clearframe.conflicts import find_sponsor_conflicts
 from clearframe.knowledge import load_knowledge
 from clearframe.models import PreviewFinding, ResearchTier
 from clearframe.pipeline import PipelineContext
@@ -36,13 +37,32 @@ class PreviewStage:
             ctx.emit({"type": "preview_ready", "count": 0, "findings": []})
             return
 
-        routes = route_all(elements, load_knowledge(), ctx.state.corroboration)
+        use_context = ctx.state.production.use_context
+        knowledge = load_knowledge()
+        routes = route_all(
+            elements, knowledge, ctx.state.corroboration, use_context=use_context
+        )
         ctx.state.routes = routes
+
+        conflicts = find_sponsor_conflicts(
+            elements, ctx.state.production.sponsors, knowledge
+        )
+        ctx.state.sponsor_conflicts = conflicts
+        for c in conflicts:
+            ctx.emit(
+                {
+                    "type": "sponsor_conflict",
+                    "element_id": c.element_id,
+                    "label": c.label,
+                    "conflicts_with": c.conflicts_with,
+                    "sector": c.sector,
+                }
+            )
 
         territories = ctx.state.production.release_territories or []
         findings: list[PreviewFinding] = []
         for el in elements:
-            score = provisional_score(el)
+            score = provisional_score(el, use_context)
             band = band_for(score)
             corroboration = ctx.state.corroboration.get(el.id)
             route = routes[el.id]
@@ -57,6 +77,7 @@ class PreviewStage:
                     provisional_score=score,
                     provisional_band=band,
                     identity=corroboration.verdict if corroboration else None,
+                    depiction=el.depiction,
                     territory=[assess_territory(el, band, t) for t in territories],
                     route_tier=route.tier,
                     disposition=route.disposition,
@@ -84,6 +105,7 @@ class PreviewStage:
                         "score": f.provisional_score,
                         "tier": f.route_tier.value,
                         "identity": f.identity.value if f.identity else None,
+                        "depiction": f.depiction.value if f.depiction else None,
                         "start_s": f.time_ranges[0].start_s if f.time_ranges else None,
                         "awaiting_research": f.awaiting_research,
                     }

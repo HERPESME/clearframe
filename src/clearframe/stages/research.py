@@ -36,11 +36,23 @@ from clearframe.models import (
     ResearchRoute,
     ResearchTier,
     TriagedElement,
+    UseContext,
     WebFinding,
 )
 from clearframe.pipeline import PipelineContext
 from clearframe.planner import EST_COST, plan_research
 from clearframe.routing import route_all, summarise_routes
+
+# How to describe the work to a researcher. Rogers v. Grimaldi protects films
+# and not adverts, so a search framed around the wrong medium returns guidance
+# that does not apply to the user's actual exposure.
+USE_CONTEXT_MEDIUM: dict[UseContext, str] = {
+    UseContext.EXPRESSIVE: "a film or television production",
+    UseContext.SPONSORED: "sponsored online video content with a paid brand placement",
+    UseContext.ADVERTISING: "a commercial advertisement or brand campaign",
+    UseContext.NEWS: "a news or journalistic report",
+    UseContext.EDUCATIONAL: "educational or critical commentary",
+}
 
 ENUMERABLE = {
     ClearanceCategory.COPYRIGHT_ART,
@@ -168,7 +180,10 @@ class ResearchStage:
         # `preview` already routed everything so the producer could see the
         # rungs before the expensive one started. Reuse those decisions rather
         # than recomputing: identical inputs, but a single recorded answer.
-        routes = ctx.state.routes or route_all(elements, kb, ctx.state.corroboration)
+        use_context = ctx.state.production.use_context
+        routes = ctx.state.routes or route_all(
+            elements, kb, ctx.state.corroboration, use_context=use_context
+        )
 
         # A CONFLICTED identity is routed BLOCKED by the router; keep the
         # explicit check so the invariant holds even if routing changes.
@@ -251,11 +266,14 @@ class ResearchStage:
                 {"type": "research_start", "element_id": eid, "label": el.label,
                  "processor": "search"}
             )
+            # The medium is not decoration: an advert and a feature are
+            # different legal questions, and asking about the wrong one returns
+            # research that does not apply.
             objective = (
                 f"Current licensing posture, enforcement behaviour and rights-clearance "
                 f"contact for '{el.label}'"
                 + (f", owned by {r.owner}" if r.owner else "")
-                + ", as it appears on screen in a film or television production."
+                + f", as it appears on screen in {USE_CONTEXT_MEDIUM[use_context]}."
             )
             findings = await ctx.parallel.search(
                 objective, [el.label, f"{r.owner or el.label} licensing clearance"],

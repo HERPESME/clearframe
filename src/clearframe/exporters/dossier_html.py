@@ -39,6 +39,11 @@ _TEMPLATE = Template(
   .route { display:inline-block; padding:2px 10px; border-radius:10px; font-size:11px; font-family:Helvetica,Arial,sans-serif; letter-spacing:.5px; color:#fff; background:#34495e; }
   .r-LOCAL { background:#16a085; } .r-STATUTE { background:#8e44ad; } .r-SEARCH { background:#2980b9; }
   .r-DEEP { background:#d35400; } .r-BLOCKED { background:#7f8c8d; }
+  .tone { display:inline-block; padding:2px 10px; border-radius:10px; font-size:11px; font-family:Helvetica,Arial,sans-serif; letter-spacing:.5px; color:#fff; }
+  .t-FAVOURABLE { background:#16a085; } .t-NEUTRAL { background:#95a5a6; }
+  .t-UNFLATTERING { background:#e67e22; } .t-DISPARAGING { background:#c0392b; }
+  .sponsor { background:#fdf2e9; border:1px solid #f0c9a0; padding:10px 14px; margin:18px 0 24px; font-size:13px; }
+  .context { background:#eaf2f8; border:1px solid #b8d4e8; padding:8px 14px; margin:-10px 0 20px; font-size:12px; }
   .routing { background:#f4f1fa; border:1px solid #d9d2ea; padding:10px 14px; margin:18px 0 24px; font-size:13px; }
   .routing td, .routing th { padding:3px 10px 3px 0; text-align:left; font-size:12px; } .v-SINGLE_SOURCE { background:#7f8c8d; } .v-CONFLICTED { background:#c0392b; }
   table.terr { border-collapse: collapse; margin: 6px 0 2px; font-size: 12px; }
@@ -70,6 +75,28 @@ _TEMPLATE = Template(
 <td>{{ d.summary.get('coverage_covered', 0) }}</td><td>{{ d.summary.get('coverage_partial', 0) }}</td>
 <td>{{ d.summary.get('coverage_not_covered', 0) }}</td></tr>
 </table>
+
+{% if d.use_context.value != 'EXPRESSIVE' %}
+<div class="context"><strong>Use context: {{ d.use_context.value }}.</strong>
+Commercial speech carries no expressive-work shield — Rogers v. Grimaldi protects films, not
+advertisements, and the Supreme Court narrowed it further in Jack Daniel's v. VIP (2023).
+Risk is banded accordingly, and findings that would otherwise need only a posture check are
+escalated to full rights research because permission, not posture, is the open question.</div>
+{% endif %}
+
+{% if d.sponsor_conflicts %}
+<div class="sponsor">
+<strong>Sponsor conflicts ({{ d.sponsor_conflicts|length }}):</strong>
+these are not infringements. Category exclusivity is standard in sponsorship contracts, so a
+rival mark in shot can breach the deal even though the depiction is entirely lawful.
+<table>
+<tr><th>Finding</th><th>Owner</th><th>Competes with</th><th>Sector</th></tr>
+{% for c in d.sponsor_conflicts %}
+<tr><td>{{ c.label }}</td><td>{{ c.detected_owner }}</td><td>{{ c.conflicts_with }}</td><td>{{ c.sector }}</td></tr>
+{% endfor %}
+</table>
+</div>
+{% endif %}
 
 {% set free = d.entries|selectattr('route')|selectattr('route.tier.value','in',['LOCAL','STATUTE'])|list %}
 {% if free %}
@@ -109,6 +136,7 @@ without documentation. {{ d.summary.get('deep_research_runs', 0) }} finding(s) r
   {% if e.corroboration %}<span class="verdict v-{{ e.corroboration.verdict.value }}">{{ e.corroboration.verdict.value|replace('_',' ') }}</span>{% endif %}
   {% if e.coverage %}<span class="cov cov-{{ e.coverage.status.value }}">{{ e.coverage.status.value|replace('_',' ') }}</span>{% endif %}
   {% if e.route %}<span class="route r-{{ e.route.tier.value }}">{{ e.route.tier.value }}</span>{% endif %}
+  {% if e.element.depiction %}<span class="tone t-{{ e.element.depiction.value }}">SHOWN {{ e.element.depiction.value }}</span>{% endif %}
   <div class="tcs">Appears:
     {% for r in e.element.time_ranges %}{{ tc(r.start_s) }}–{{ tc(r.end_s) }}{% if not loop.last %}, {% endif %}{% endfor %}
     · {{ e.element.description }}</div>

@@ -43,6 +43,7 @@ from clearframe.matching import tokens
 from clearframe.scoring import provisional_score
 from clearframe.models import (
     ClearanceCategory,
+    DepictionTone,
     Corroboration,
     IdentityVerdict,
     LicensingPosture,
@@ -50,6 +51,7 @@ from clearframe.models import (
     ResearchRoute,
     ResearchTier,
     TriagedElement,
+    UseContext,
 )
 
 SEARCH_COST_USD = 0.005
@@ -65,6 +67,15 @@ DEEP_LATENCY_S = 180.0
 # citations an underwriter can follow. Speed is worth having everywhere except
 # where the money is.
 MATERIALITY_ESCALATION_SCORE = 45
+
+# Commercial speech gets no expressive-work shield, so knowing the holder's
+# posture is no longer enough — you need an actual licence, which means an
+# actual contact and cost band, which only a deep run produces.
+_COMMERCIAL = {UseContext.ADVERTISING, UseContext.SPONSORED}
+
+# Portrayals a rights holder is likely to object to. Presence is rarely the
+# complaint; association is.
+_ADVERSE = {DepictionTone.UNFLATTERING, DepictionTone.DISPARAGING}
 
 # --- vocabularies ----------------------------------------------------------
 
@@ -360,15 +371,34 @@ def _route_art(el: TriagedElement) -> ResearchRoute:
     )
 
 
-def _route_person(el: TriagedElement) -> ResearchRoute:
+def _route_person(el: TriagedElement, use_context: UseContext) -> ResearchRoute:
     if _any_token(el.label, _ANONYMOUS):
+        commercial = use_context in _COMMERCIAL
         return _statute(
             el,
             "An unnamed individual has no discoverable rights holder. Research "
-            "cannot produce the instrument this needs.",
-            "Right of publicity — cleared by consent, not by ownership research",
-            "Obtain a personal release, or blur. If shot in a public place under a "
-            "crowd notice, file the notice against this finding.",
+            "cannot produce the instrument this needs."
+            + (
+                " In a commercial context this is not advisory: the right of "
+                "publicity is a tort of COMMERCIAL appropriation, so an advert "
+                "is the one place the claim is at its strongest."
+                if commercial
+                else ""
+            ),
+            "Right of publicity — cleared by consent, not by ownership research"
+            + (
+                "; commercial appropriation is the core of the tort"
+                if commercial
+                else ""
+            ),
+            (
+                "A signed personal release is MANDATORY before this can run "
+                "commercially. Blur otherwise — a crowd notice does not cover "
+                "advertising use."
+                if commercial
+                else "Obtain a personal release, or blur. If shot in a public place "
+                "under a crowd notice, file the notice against this finding."
+            ),
         )
     return _search(
         el,
@@ -423,12 +453,12 @@ def _route_text(el: TriagedElement, kb: KnowledgeBase) -> ResearchRoute:
 
 
 _ROUTERS = {
-    ClearanceCategory.TRADEMARK: lambda el, kb, corr: _route_trademark(el, kb),
-    ClearanceCategory.MUSIC_SYNC: lambda el, kb, corr: _route_music(el, corr),
-    ClearanceCategory.COPYRIGHT_ART: lambda el, kb, corr: _route_art(el),
-    ClearanceCategory.RIGHT_OF_PUBLICITY: lambda el, kb, corr: _route_person(el),
-    ClearanceCategory.LOCATION: lambda el, kb, corr: _route_location(el),
-    ClearanceCategory.TEXT_ON_SCREEN: lambda el, kb, corr: _route_text(el, kb),
+    ClearanceCategory.TRADEMARK: lambda el, kb, corr, ctx: _route_trademark(el, kb),
+    ClearanceCategory.MUSIC_SYNC: lambda el, kb, corr, ctx: _route_music(el, corr),
+    ClearanceCategory.COPYRIGHT_ART: lambda el, kb, corr, ctx: _route_art(el),
+    ClearanceCategory.RIGHT_OF_PUBLICITY: lambda el, kb, corr, ctx: _route_person(el, ctx),
+    ClearanceCategory.LOCATION: lambda el, kb, corr, ctx: _route_location(el),
+    ClearanceCategory.TEXT_ON_SCREEN: lambda el, kb, corr, ctx: _route_text(el, kb),
 }
 
 
@@ -437,6 +467,7 @@ def route(
     knowledge: KnowledgeBase,
     corroboration: Corroboration | None = None,
     escalate_material: bool = True,
+    use_context: UseContext = UseContext.EXPRESSIVE,
 ) -> ResearchRoute:
     """Decide how one finding gets resolved. Deterministic and reproducible."""
     if corroboration is not None and corroboration.verdict is IdentityVerdict.CONFLICTED:
@@ -451,14 +482,62 @@ def route(
             basis="Identity conflict",
             disposition="A human resolves identity before any research runs.",
         )
-    chosen = _ROUTERS[element.category](element, knowledge, corroboration)
+    chosen = _ROUTERS[element.category](element, knowledge, corroboration, use_context)
+
+    # An adverse depiction changes the question being asked. Ownership is known
+    # and posture would normally be a two-second search — but "are they
+    # litigious in general" is not what matters here. "Will they object to
+    # THIS" does, and answering it needs a contact and a route to ask.
+    if chosen.tier is ResearchTier.SEARCH and element.depiction in _ADVERSE:
+        return chosen.model_copy(
+            update={
+                "tier": ResearchTier.DEEP,
+                "rationale": (
+                    f"The mark is depicted as {element.depiction.value.lower()}, which "
+                    "is what rights holders actually object to — presence is rarely the "
+                    "complaint. So the open question is not general posture but whether "
+                    "this holder will object to this scene, which needs a named contact "
+                    f"and a route to ask. {chosen.rationale}"
+                ),
+                "basis": (
+                    "Wham-O v. Paramount (C.D. Cal. 2003) — suit filed over an "
+                    "unflattering product gag; In-Sink-Erator / NBC 'Heroes' (2006) — "
+                    "mark digitally removed in post rather than defended"
+                ),
+                "disposition": (
+                    "Seek written permission for this specific depiction, or plan a "
+                    "digital removal. NBC chose removal and paid for it in post."
+                ),
+                "est_cost_usd": 0.0,
+                "est_latency_s": DEEP_LATENCY_S,
+            }
+        )
+
+    # Commercial speech: posture is no longer the open question, permission is.
+    if chosen.tier is ResearchTier.SEARCH and use_context in _COMMERCIAL:
+        return chosen.model_copy(
+            update={
+                "tier": ResearchTier.DEEP,
+                "rationale": (
+                    f"This is {use_context.value.lower()} use, which carries no "
+                    "expressive-work shield — Rogers v. Grimaldi protects films, "
+                    "not adverts, and every brand-owner win in the record is an "
+                    "advert (Falkner v. GM, Mercedes v. the Detroit muralists, "
+                    "Revok v. H&M). Knowing the posture is not enough; you need "
+                    "an actual licence, so you need the contact and the cost "
+                    f"band. {chosen.rationale}"
+                ),
+                "est_cost_usd": 0.0,
+                "est_latency_s": DEEP_LATENCY_S,
+            }
+        )
 
     if (
         escalate_material
         and chosen.tier is ResearchTier.SEARCH
-        and provisional_score(element) >= MATERIALITY_ESCALATION_SCORE
+        and provisional_score(element, use_context) >= MATERIALITY_ESCALATION_SCORE
     ):
-        score = provisional_score(element)
+        score = provisional_score(element, use_context)
         return chosen.model_copy(
             update={
                 "tier": ResearchTier.DEEP,
@@ -480,10 +559,13 @@ def route_all(
     knowledge: KnowledgeBase,
     corroboration: dict[str, Corroboration] | None = None,
     escalate_material: bool = True,
+    use_context: UseContext = UseContext.EXPRESSIVE,
 ) -> dict[str, ResearchRoute]:
     corroboration = corroboration or {}
     return {
-        el.id: route(el, knowledge, corroboration.get(el.id), escalate_material)
+        el.id: route(
+            el, knowledge, corroboration.get(el.id), escalate_material, use_context
+        )
         for el in elements
     }
 
