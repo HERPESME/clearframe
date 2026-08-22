@@ -53,6 +53,30 @@ export interface FreshnessSignal {
   material: boolean;
 }
 
+export type CoverageStatus = "COVERED" | "PARTIAL" | "NOT_COVERED" | "UNKNOWN";
+
+export interface Coverage {
+  element_id: string;
+  status: CoverageStatus;
+  licence_id: string | null;
+  rights_holder: string | null;
+  gaps: string[];
+  note: string;
+}
+
+export interface LicenceGrant {
+  id: string;
+  rights_holder: string;
+  work: string;
+  scope: string;
+  territories: string[];
+  media: string[];
+  starts: string;
+  expires: string | null;
+  reference: string;
+  notes: string;
+}
+
 export interface TerritoryRisk {
   element_id: string;
   territory: string;
@@ -191,6 +215,9 @@ export interface ProductionState {
     footage_uri: string;
     fps: number;
     duration_s: number;
+    release_territories: string[];
+    distribution: string[];
+    has_media: boolean;
   };
   stage_status: Record<string, string>;
   elements: Element[];
@@ -209,4 +236,5 @@ export interface ProductionState {
   freshness: Record<string, FreshnessSignal[]>;
   territory_risk: Record<string, TerritoryRisk[]>;
   territories: string[];
+  coverage: Record<string, Coverage>;
 }

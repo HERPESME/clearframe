@@ -3,6 +3,7 @@ import type {
   Action,
   CandidateEntity,
   Corroboration,
+  Coverage,
   CourtOpinion,
   Decision,
   Element,
@@ -28,6 +29,13 @@ const VERDICT_TEXT = {
   SINGLE_SOURCE: "ID SINGLE-SOURCE",
   CONFLICTED: "ID DISPUTED",
 } as const;
+
+const COVERAGE_TEXT: Record<string, string> = {
+  COVERED: "ALREADY LICENSED",
+  PARTIAL: "LICENCE GAP",
+  NOT_COVERED: "UNLICENSED",
+  UNKNOWN: "COVERAGE UNKNOWN",
+};
 
 const VERDICT_HELP = {
   CORROBORATED:
@@ -63,6 +71,7 @@ interface Props {
   court: CourtOpinion | undefined;
   plan: ResearchPlan | undefined;
   corroboration: Corroboration | undefined;
+  coverage: Coverage | undefined;
   freshness: FreshnessSignal[];
   territory: TerritoryRisk[];
   unscripted: boolean;
@@ -83,6 +92,7 @@ export function ElementCard({
   court,
   plan,
   corroboration,
+  coverage,
   freshness,
   territory,
   unscripted,
@@ -126,6 +136,14 @@ export function ElementCard({
           {risk.band} · {risk.score}
         </span>
         {risk.de_minimis && <span className="badge dim">DE MINIMIS</span>}
+        {coverage && (
+          <span
+            className={`badge cov ${coverage.status}`}
+            title={coverage.note}
+          >
+            {COVERAGE_TEXT[coverage.status]}
+          </span>
+        )}
         {corroboration && (
           <span
             className={`badge verdict ${corroboration.verdict}`}
@@ -176,6 +194,25 @@ export function ElementCard({
       {disputed && (
         <div className="conflict-banner">
           <strong>IDENTITY DISPUTED — research blocked.</strong> {corroboration!.note}
+        </div>
+      )}
+
+      {coverage && (
+        <div className="sec">
+          <div className="sec-title">
+            Rights already held
+            {coverage.licence_id && <span className="sec-note"> · {coverage.licence_id}</span>}
+          </div>
+          <div className={coverage.gaps.length ? "gap-note" : "kv"}>
+            {coverage.note}
+            {coverage.gaps.length > 0 && (
+              <ul className="gap-list">
+                {coverage.gaps.map((g, i) => (
+                  <li key={i}>{g}</li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       )}
 

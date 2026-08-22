@@ -913,3 +913,51 @@ button.secondary:disabled { opacity: .5; cursor: default; }
   .card-body { flex-direction: column; }
   .frame-pos { align-self: flex-start; }
 }
+
+/* ---- video player + overlay ------------------------------------------ */
+.player-wrap { padding: 14px 24px 4px; background: var(--panel, #111); border-bottom: 1px solid var(--line); }
+.player-frame { position: relative; max-width: 900px; margin: 0 auto; line-height: 0; }
+.player-frame video { width: 100%; height: auto; display: block; border-radius: 4px; background: #000; }
+.player-overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.ov-g { pointer-events: auto; cursor: pointer; }
+.ov-box { fill: transparent; stroke-width: 2; }
+.ov-box.CRITICAL { stroke: var(--critical); } .ov-box.HIGH { stroke: var(--high); }
+.ov-box.MEDIUM { stroke: var(--medium); }   .ov-box.LOW { stroke: var(--low); }
+.ov-box.active { stroke-width: 3; fill: rgba(255,255,255,.07); }
+.ov-label {
+  position: absolute; transform: translateY(-110%);
+  font-family: var(--mono); font-size: 10px; line-height: 1.4;
+  background: rgba(10,10,10,.86); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 3px;
+  padding: 2px 7px; cursor: pointer; white-space: nowrap; max-width: 92%;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.ov-label.CRITICAL { border-color: var(--critical); } .ov-label.HIGH { border-color: var(--high); }
+.ov-label.MEDIUM { border-color: var(--medium); }     .ov-label.LOW { border-color: var(--low); }
+.ov-flag { margin-left: 6px; color: var(--critical); font-weight: 700; }
+.ov-cov { margin-left: 6px; font-size: 9px; letter-spacing: .3px; }
+.ov-cov.COVERED { color: var(--low); } .ov-cov.PARTIAL { color: var(--high); }
+.ov-cov.NOT_COVERED { color: var(--critical); } .ov-cov.UNKNOWN { color: var(--muted); }
+.player-status { max-width: 900px; margin: 6px auto 0; font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
+
+/* ---- coverage --------------------------------------------------------- */
+.badge.cov.COVERED { background: rgba(39,174,96,.16); color: var(--low); border-color: rgba(39,174,96,.5); }
+.badge.cov.PARTIAL { background: rgba(230,126,34,.16); color: var(--high); border-color: rgba(230,126,34,.5); }
+.badge.cov.NOT_COVERED { background: rgba(192,57,43,.16); color: var(--critical); border-color: rgba(192,57,43,.5); }
+.badge.cov.UNKNOWN { background: rgba(127,140,141,.14); color: var(--muted); border-color: rgba(127,140,141,.4); }
+.gap-note { font-size: 12.5px; line-height: 1.55; background: rgba(230,126,34,.08); border: 1px solid rgba(230,126,34,.4); border-left-width: 3px; border-radius: 3px; padding: 8px 12px; }
+.gap-list { margin: 6px 0 0 18px; color: var(--high); }
+
+/* ---- uploader --------------------------------------------------------- */
+.hero-actions { display: flex; gap: 12px; justify-content: center; margin-top: 8px; }
+.uploader { display: grid; gap: 18px; max-width: 640px; margin: 26px auto 0; text-align: left; }
+.up-block { border: 1px solid var(--line); border-radius: 4px; padding: 16px 18px; background: rgba(255,255,255,.02); }
+.up-block input[type="file"] { display: block; margin: 10px 0; font-size: 12px; color: var(--muted); }
+.up-text { width: 100%; padding: 8px 10px; margin: 8px 0; background: transparent; border: 1px solid var(--line); border-radius: 3px; color: var(--ink); font-family: inherit; font-size: 13px; }
+.up-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+.up-label { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-right: 4px; }
+.up-chip { font-family: var(--mono); font-size: 10px; padding: 4px 9px; border-radius: 3px; border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; }
+.up-chip.on { border-color: var(--accent); color: var(--accent); }
+.up-help { font-size: 12.5px; line-height: 1.6; color: var(--muted); margin: 6px 0 10px; }
+.up-code { display: block; font-family: var(--mono); font-size: 10px; color: var(--muted); background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 3px; padding: 7px 9px; overflow-x: auto; }
+.up-ok { font-size: 12px; color: var(--low); margin-top: 6px; }

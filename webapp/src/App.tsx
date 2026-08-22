@@ -3,6 +3,8 @@ import { api, ApiError, setRole } from "./api";
 import { ElementCard } from "./ElementCard";
 import { MissionControl } from "./MissionControl";
 import { Timeline } from "./Timeline";
+import { Uploader } from "./Uploader";
+import { VideoPlayer } from "./VideoPlayer";
 import type { Action, ProductionState, RiskBand, Role } from "./types";
 
 const BANDS: RiskBand[] = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
@@ -18,7 +20,9 @@ export default function App() {
   const [checking, setChecking] = useState(false);
   const [freshNote, setFreshNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showUpload, setShowUpload] = useState(false);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     api.meta().then((m) => setMode(m.mode)).catch(() => {});
@@ -146,9 +150,23 @@ export default function App() {
           Gemini watches the footage and finds everything that needs legal clearance.
           Parallel researches who owns it. You make the call — with evidence attached.
         </p>
-        <button className="generate" onClick={loadDemo}>
-          Run the clearance pipeline
-        </button>
+        <div className="hero-actions">
+          <button className="generate" onClick={loadDemo}>
+            Run the demo scene
+          </button>
+          <button className="secondary" onClick={() => setShowUpload((v) => !v)}>
+            {showUpload ? "Hide upload" : "Upload my own footage"}
+          </button>
+        </div>
+        {showUpload && (
+          <Uploader
+            onStarted={() => {
+              setState(null);
+              setMission(true);
+            }}
+            onLedger={() => {}}
+          />
+        )}
         {error && <div className="error-banner">{error}</div>}
       </div>
     );
@@ -171,6 +189,7 @@ export default function App() {
     freshness,
     territory_risk,
     territories,
+    coverage,
   } = state;
   const unscriptedIds = new Set(drift?.unscripted_element_ids ?? []);
   const sorted = [...elements].sort((a, b) => risk[b.id].score - risk[a.id].score);
@@ -181,6 +200,8 @@ export default function App() {
   const corroborated = elements.filter(
     (el) => corroboration?.[el.id]?.verdict === "CORROBORATED",
   );
+  const covCount = (s: string) =>
+    elements.filter((el) => coverage?.[el.id]?.status === s).length;
   const materialSignals = Object.values(freshness ?? {})
     .flat()
     .filter((s) => s.material).length;
@@ -190,6 +211,11 @@ export default function App() {
 
   const jumpTo = (id: string) => {
     setActiveId(id);
+    const el = elements.find((e) => e.id === id);
+    if (el && videoRef.current && production.has_media) {
+      // land a beat before the element appears so the box is already on screen
+      videoRef.current.currentTime = Math.max(el.time_ranges[0].start_s - 0.25, 0);
+    }
     cardRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
@@ -237,6 +263,20 @@ export default function App() {
         </button>
       </header>
 
+      {production.has_media && (
+        <VideoPlayer
+          ref={videoRef}
+          pid={production.id}
+          elements={elements}
+          risk={risk}
+          corroboration={corroboration ?? {}}
+          coverage={coverage ?? {}}
+          fps={production.fps}
+          activeId={activeId}
+          onPick={jumpTo}
+        />
+      )}
+
       <Timeline
         elements={sorted}
         risk={risk}
@@ -278,6 +318,21 @@ export default function App() {
         <span className="chip">
           <span className="n">{pending.length}</span> awaiting decision
         </span>
+        {covCount("COVERED") > 0 && (
+          <span className="chip ok" title="Already licensed — a matching grant is on file in the rights ledger.">
+            <span className="n">{covCount("COVERED")}</span> already licensed
+          </span>
+        )}
+        {covCount("PARTIAL") > 0 && (
+          <span className="chip HIGH" title="A licence exists but does not reach this use — territory, term or media gap.">
+            <span className="n">{covCount("PARTIAL")}</span> licence gaps
+          </span>
+        )}
+        {covCount("NOT_COVERED") > 0 && (
+          <span className="chip CRITICAL" title="Rights holder identified, but no licence on file.">
+            <span className="n">{covCount("NOT_COVERED")}</span> unlicensed
+          </span>
+        )}
         {corroborated.length > 0 && (
           <span
             className="chip ok"
@@ -334,6 +389,7 @@ export default function App() {
             court={court?.[el.id]}
             plan={research_plan?.[el.id]}
             corroboration={corroboration?.[el.id]}
+            coverage={coverage?.[el.id]}
             freshness={freshness?.[el.id] ?? []}
             territory={territory_risk?.[el.id] ?? []}
             unscripted={unscriptedIds.has(el.id)}

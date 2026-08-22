@@ -2,17 +2,26 @@
 
 import asyncio
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
 
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from clearframe.config import ClearFrameConfig, validate_live
 from clearframe.dossier import pending_ids
-from clearframe.pipeline import Pipeline, build_demo_pipeline, demo_context
+from clearframe.licensing import assign_ids, parse_licence_csv, parse_licence_json
+from clearframe.models import Production
+from clearframe.pipeline import (
+    Pipeline,
+    build_context,
+    build_demo_pipeline,
+    demo_context,
+)
 from clearframe.review import (
     RoleNotPermittedError,
     UnknownElementError,
@@ -22,7 +31,16 @@ from clearframe.review import (
     refresh_freshness,
 )
 from clearframe.stages.dossier import ReviewPendingError
-from clearframe.store import LocalJsonStore
+from clearframe.store import LicenceStore, LocalJsonStore
+
+# Browsers must be able to <video> it; keep the accepted set narrow.
+MEDIA_TYPES = {
+    ".mp4": "video/mp4",
+    ".m4v": "video/mp4",
+    ".mov": "video/quicktime",
+    ".webm": "video/webm",
+}
+MAX_UPLOAD_BYTES = 512 * 1024 * 1024
 
 ARTIFACT_WHITELIST = (
     "dossier.html",
@@ -152,6 +170,148 @@ def create_app(out_root: Path) -> FastAPI:
             ctx.store = store
             state = await Pipeline(build_demo_pipeline()).run(ctx)
         return JSONResponse(state.model_dump(mode="json"))
+
+    def _safe_media_name(filename: str) -> str:
+        """Never trust an upload's filename: keep the extension, drop the path."""
+        suffix = Path(filename or "").suffix.lower()
+        if suffix not in MEDIA_TYPES:
+            raise HTTPException(
+                status_code=415,
+                detail=f"Unsupported footage type '{suffix}'. Use one of: "
+                + ", ".join(sorted(MEDIA_TYPES)),
+            )
+        return f"footage{suffix}"
+
+    @app.post("/api/productions")
+    async def create_production(
+        file: UploadFile = File(...),
+        title: str = Form("Untitled Production"),
+        production_id: str = Form("upload"),
+        duration_s: float = Form(0.0),
+        fps: float = Form(24.0),
+        territories: str = Form("US"),
+        distribution: str = Form("THEATRICAL,STREAMING"),
+    ):
+        """Upload footage and run the clearance pipeline over it.
+
+        Demo mode deliberately refuses: it replays recorded fixtures, so it
+        would return Golden Hour's findings for your clip. Saying so is better
+        than quietly showing someone else's results as their own.
+        """
+        cfg = ClearFrameConfig.from_env(os.environ)
+        if cfg.mode != "live":
+            raise HTTPException(
+                status_code=409,
+                detail=(
+                    "This deployment is in demo mode, which replays recorded fixtures "
+                    "and cannot analyse new footage. Set CLEARFRAME_MODE=live with "
+                    "GOOGLE_CLOUD_PROJECT and PARALLEL_API_KEY to scan your own clip."
+                ),
+            )
+        missing = validate_live(cfg.model_copy(update={"mode": "live"}))
+        if missing:
+            raise HTTPException(
+                status_code=503,
+                detail="Live mode is not configured. Missing: " + ", ".join(missing),
+            )
+
+        pid = "".join(c for c in production_id if c.isalnum() or c in "-_") or "upload"
+        name = _safe_media_name(file.filename or "")
+        media_dir = out_root / "media" / pid
+        media_dir.mkdir(parents=True, exist_ok=True)
+        target = media_dir / name
+
+        written = 0
+        with open(target, "wb") as out:
+            while chunk := await file.read(1024 * 1024):
+                written += len(chunk)
+                if written > MAX_UPLOAD_BYTES:
+                    out.close()
+                    target.unlink(missing_ok=True)
+                    raise HTTPException(
+                        status_code=413,
+                        detail=f"Footage exceeds {MAX_UPLOAD_BYTES // (1024 * 1024)}MB.",
+                    )
+                out.write(chunk)
+
+        production = Production(
+            id=pid,
+            title=title,
+            footage_uri=str(target),
+            fps=fps,
+            duration_s=duration_s,
+            release_territories=[t.strip().upper() for t in territories.split(",") if t.strip()]
+            or ["US"],
+            distribution=[d.strip().upper() for d in distribution.split(",") if d.strip()],
+            has_media=True,
+        )
+        ctx = build_context(cfg.model_copy(update={"mode": "live"}), production, out_root)
+        ctx.store = store
+        event_queues[pid] = asyncio.Queue()
+        ctx.listener = event_queues[pid].put_nowait
+
+        async def _run() -> None:
+            try:
+                await Pipeline(build_demo_pipeline()).run(ctx)
+            finally:
+                event_queues[pid].put_nowait({"type": "run_complete"})
+
+        asyncio.create_task(_run())
+        return {"production_id": pid, "status": "running", "media": name}
+
+    @app.get("/api/productions/{pid}/media")
+    def get_media(pid: str):
+        """Serve the uploaded footage so the review UI can play it."""
+        _load(pid)
+        media_dir = out_root / "media" / pid
+        for suffix, media_type in MEDIA_TYPES.items():
+            candidate = media_dir / f"footage{suffix}"
+            if candidate.exists():
+                return FileResponse(candidate, media_type=media_type)
+        raise HTTPException(status_code=404, detail="No footage stored for this production")
+
+    @app.get("/api/licences")
+    def list_licences():
+        """The rights ledger: clearances this deployment already holds."""
+        ledger = LicenceStore(out_root / "state")
+        return {"licences": [lic.model_dump(mode="json") for lic in ledger.load()]}
+
+    @app.post("/api/licences")
+    async def upload_licences(
+        file: UploadFile = File(...),
+        replace: bool = Form(True),
+        x_clearframe_role: str = Header(default="editor"),
+    ):
+        """Upload your own rights ledger as JSON or CSV.
+
+        CSV columns: id, rights_holder, work, scope, territories, media,
+        starts, expires, reference, notes. Territories and media are
+        pipe- or semicolon-separated (e.g. "US|DE|FR").
+        """
+        if x_clearframe_role.lower() not in {"legal", "producer"}:
+            raise HTTPException(
+                status_code=403,
+                detail="Only legal or producer may change the rights ledger.",
+            )
+        raw = (await file.read(MAX_UPLOAD_BYTES)).decode("utf-8", errors="replace")
+        name = (file.filename or "").lower()
+        try:
+            parsed = (
+                parse_licence_csv(raw) if name.endswith(".csv") else parse_licence_json(raw)
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc))
+        if not parsed:
+            raise HTTPException(status_code=400, detail="No usable licence rows found.")
+
+        ledger = LicenceStore(out_root / "state")
+        existing = [] if replace else ledger.load()
+        by_id = {lic.id: lic for lic in existing}
+        for lic in assign_ids(parsed, set(by_id)):
+            by_id[lic.id] = lic
+        merged = list(by_id.values())
+        ledger.save(merged)
+        return {"stored": len(merged), "added": len(parsed), "replaced": replace}
 
     @app.get("/api/productions/{pid}/events")
     async def stream_events(pid: str):

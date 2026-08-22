@@ -153,3 +153,100 @@ def summarise(coverage: dict[str, Coverage]) -> dict[str, int]:
     for c in coverage.values():
         counts[c.status.value] += 1
     return counts
+
+
+def _split_multi(value: str) -> list[str]:
+    """Ledger CSVs use pipes or semicolons inside a cell — commas are taken."""
+    for sep in ("|", ";"):
+        if sep in value:
+            return [v.strip().upper() for v in value.split(sep) if v.strip()]
+    return [value.strip().upper()] if value.strip() else []
+
+
+def parse_licence_json(raw: str) -> list[LicenceGrant]:
+    import json
+
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Not valid JSON: {exc}")
+    rows = payload.get("licences", payload) if isinstance(payload, dict) else payload
+    if not isinstance(rows, list):
+        raise ValueError('Expected a list of licences, or {"licences": [...]}.')
+    out: list[LicenceGrant] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        row.setdefault("id", "")
+        try:
+            out.append(LicenceGrant.model_validate(row))
+        except Exception:
+            continue
+    return out
+
+
+def parse_licence_csv(raw: str) -> list[LicenceGrant]:
+    """Parse a clearance department's licence register exported as CSV."""
+    import csv
+    import io
+
+    reader = csv.DictReader(io.StringIO(raw))
+    if not reader.fieldnames:
+        raise ValueError("CSV has no header row.")
+    headers = {(h or "").strip().lower() for h in reader.fieldnames}
+    if "rights_holder" not in headers:
+        raise ValueError(
+            "CSV must contain a 'rights_holder' column. Recognised columns: id, "
+            "rights_holder, work, scope, territories, media, starts, expires, "
+            "reference, notes."
+        )
+    out: list[LicenceGrant] = []
+    for row in reader:
+        clean = {(k or "").strip().lower(): (v or "").strip() for k, v in row.items()}
+        holder = clean.get("rights_holder", "")
+        if not holder:
+            continue
+        expires = clean.get("expires") or None
+        try:
+            out.append(
+                LicenceGrant(
+                    id=clean.get("id", ""),
+                    rights_holder=holder,
+                    work=clean.get("work", ""),
+                    scope=clean.get("scope", ""),
+                    territories=_split_multi(clean.get("territories", "")) or ["WORLDWIDE"],
+                    media=_split_multi(clean.get("media", "")) or ["ALL"],
+                    starts=clean.get("starts", ""),
+                    expires=expires,
+                    reference=clean.get("reference", ""),
+                    notes=clean.get("notes", ""),
+                )
+            )
+        except Exception:
+            continue
+    return out
+
+
+def assign_ids(
+    parsed: list[LicenceGrant], taken: set[str], prefix: str = "LIC"
+) -> list[LicenceGrant]:
+    """Give every id-less upload row an id that collides with nothing.
+
+    An uploaded register often has no id column. Numbering those rows by
+    position would quietly overwrite existing ledger entries on merge — the
+    kind of silent data loss that makes a rights ledger untrustworthy.
+    """
+    used = set(taken)
+    out: list[LicenceGrant] = []
+    counter = 1
+    for lic in parsed:
+        if lic.id:
+            out.append(lic)
+            used.add(lic.id)
+            continue
+        while f"{prefix}-{counter:03d}" in used:
+            counter += 1
+        new_id = f"{prefix}-{counter:03d}"
+        used.add(new_id)
+        out.append(lic.model_copy(update={"id": new_id}))
+    return out

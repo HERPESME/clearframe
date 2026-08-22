@@ -328,6 +328,7 @@ class Production(BaseModel):
     distribution: list[str] = Field(
         default_factory=lambda: ["THEATRICAL", "STREAMING"]
     )
+    has_media: bool = False
 
 
 class ProductionState(BaseModel):

@@ -22,7 +22,7 @@ from clearframe.pipeline import (
     demo_context,
 )
 from clearframe.review import generate_dossier_async, record_decision
-from clearframe.store import LocalJsonStore
+from clearframe.store import LicenceStore, LocalJsonStore
 
 
 def _now() -> str:
@@ -32,6 +32,7 @@ def _now() -> str:
 def build_server(out_root: Path) -> MCPServer:
     out_root = Path(out_root)
     store = LocalJsonStore(out_root / "state")
+    ledger = LicenceStore(out_root / "state")
 
     server = MCPServer(
         name="clearframe",
@@ -140,6 +141,11 @@ def build_server(out_root: Path) -> MCPServer:
                         if el.id in state.corroboration
                         else None
                     ),
+                    "coverage": (
+                        state.coverage[el.id].status.value
+                        if el.id in state.coverage
+                        else None
+                    ),
                 }
             )
         return {"production_id": production_id, "findings": findings}
@@ -175,6 +181,11 @@ def build_server(out_root: Path) -> MCPServer:
                 t.model_dump(mode="json")
                 for t in state.territory_risk.get(element_id, [])
             ],
+            "coverage": (
+                state.coverage[element_id].model_dump(mode="json")
+                if element_id in state.coverage
+                else None
+            ),
         }
 
     @server.tool(name="record_decision")
@@ -295,6 +306,52 @@ def build_server(out_root: Path) -> MCPServer:
                 for eid, sigs in state.freshness.items()
                 if any(s.material for s in sigs)
             },
+        }
+
+    @server.tool()
+    def list_licences() -> dict:
+        """The rights ledger: clearances this deployment already holds."""
+        licences = ledger.load()
+        return {
+            "count": len(licences),
+            "licences": [lic.model_dump(mode="json") for lic in licences],
+        }
+
+    @server.tool()
+    def check_coverage(production_id: str) -> dict:
+        """Which findings are already licensed, and exactly where the gaps are.
+
+        COVERED      a matching grant reaches this use
+        PARTIAL      a grant exists but misses territory, term or media scope
+        NOT_COVERED  rights holder identified, nothing on file
+        UNKNOWN      ownership or identity unresolved, so coverage is unknowable
+        """
+        state = _state(production_id)
+        rows = []
+        for el in state.elements:
+            cov = state.coverage.get(el.id)
+            if cov is None:
+                continue
+            rows.append(
+                {
+                    "id": el.id,
+                    "label": el.label,
+                    "status": cov.status.value,
+                    "licence_id": cov.licence_id,
+                    "gaps": cov.gaps,
+                    "note": cov.note,
+                }
+            )
+        counts: dict[str, int] = {}
+        for row in rows:
+            counts[row["status"]] = counts.get(row["status"], 0) + 1
+        return {
+            "production_id": production_id,
+            "territories": state.territories,
+            "distribution": state.production.distribution,
+            "summary": counts,
+            "findings": rows,
+            "needs_clearance": [r["id"] for r in rows if r["status"] != "COVERED"],
         }
 
     @server.tool()
