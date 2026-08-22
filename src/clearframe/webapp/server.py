@@ -15,6 +15,7 @@ from pydantic import BaseModel
 from clearframe.config import ClearFrameConfig, validate_live
 from clearframe.dossier import pending_ids
 from clearframe.licensing import assign_ids, parse_licence_csv, parse_licence_json
+from clearframe.media import probe_duration_s
 from clearframe.models import Production
 from clearframe.pipeline import (
     Pipeline,
@@ -306,7 +307,11 @@ def create_app(out_root: Path) -> FastAPI:
             title=title,
             footage_uri=str(target),
             fps=fps,
-            duration_s=duration_s,
+            # Measure it. The form defaults to 0.0 and nothing used to correct
+            # that, so a 49-second clip declared itself zero seconds long and
+            # got a single audio fingerprint sample at the head. A caller who
+            # supplies a duration is trusted; otherwise ffmpeg decides.
+            duration_s=duration_s or probe_duration_s(dest),
             release_territories=[t.strip().upper() for t in territories.split(",") if t.strip()]
             or ["US"],
             distribution=[d.strip().upper() for d in distribution.split(",") if d.strip()],

@@ -13,6 +13,7 @@ CATEGORY_RULES: dict[ElementType, ClearanceCategory] = {
     ElementType.ARTWORK: ClearanceCategory.COPYRIGHT_ART,
     ElementType.MUSIC: ClearanceCategory.MUSIC_SYNC,
     ElementType.FACE: ClearanceCategory.RIGHT_OF_PUBLICITY,
+    ElementType.CHARACTER: ClearanceCategory.COPYRIGHT_ART,
     ElementType.TATTOO: ClearanceCategory.COPYRIGHT_ART,
     ElementType.LOCATION: ClearanceCategory.LOCATION,
     ElementType.TEXT: ClearanceCategory.TEXT_ON_SCREEN,

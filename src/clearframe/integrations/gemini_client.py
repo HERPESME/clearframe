@@ -24,9 +24,11 @@ SCAN_PROMPT = (
     "Identify EVERY element that may require legal clearance before distribution: "
     "brand logos, trademarks, artwork (posters, murals, paintings, photographs), "
     "audible music, recognizable faces of non-cast individuals, tattoos, "
+    "drawn or animated characters, "
     "distinctive locations/storefronts, and readable on-screen text. For each "
-    "element report: a short label, its type (LOGO, ARTWORK, MUSIC, FACE, TATTOO, "
-    "LOCATION, TEXT), a one-sentence description, every time range in which it "
+    "element report: a short label, its type (LOGO, ARTWORK, MUSIC, FACE, "
+    "CHARACTER, TATTOO, LOCATION, TEXT), a one-sentence description, every "
+    "time range in which it "
     "appears (seconds), and prominence estimates: total screen time in seconds, "
     "fraction of frame covered (0-1), how central it is to the composition (0-1), "
     "and whether it is integral to the plot. For anything with a visible "
@@ -43,6 +45,10 @@ SCAN_PROMPT = (
     "illness or contempt). Judge only what is shown on screen; if the portrayal "
     "is not clear, use NEUTRAL. This matters because rights holders object to "
     "how a brand is depicted far more often than to its mere presence. "
+    "Use FACE only for a REAL PERSON captured on camera; use CHARACTER for a "
+    "drawn, animated, rendered or otherwise fictional character. The two need "
+    "opposite instruments: a real person signs a release, while a character's "
+    "design is owned by a studio and must be licensed. "
     "Separately, report anything visible that should probably not be PUBLISHED "
     "at all, as `exposures` — these are not clearance items and nobody owns "
     "them, which is exactly why they get missed. Kinds: MINOR (an identifiable "
@@ -143,7 +149,10 @@ SCRIPT_RESPONSE_SCHEMA: dict = {
                     "label": {"type": "string"},
                     "element_type": {
                         "type": "string",
-                        "enum": ["LOGO", "ARTWORK", "MUSIC", "FACE", "TATTOO", "LOCATION", "TEXT"],
+                        "enum": [
+                            "LOGO", "ARTWORK", "MUSIC", "FACE", "CHARACTER",
+                            "TATTOO", "LOCATION", "TEXT",
+                        ],
                     },
                     "scene": {"type": "string"},
                 },
@@ -176,7 +185,10 @@ SCAN_RESPONSE_SCHEMA: dict = {
                     "label": {"type": "string"},
                     "element_type": {
                         "type": "string",
-                        "enum": ["LOGO", "ARTWORK", "MUSIC", "FACE", "TATTOO", "LOCATION", "TEXT"],
+                        "enum": [
+                            "LOGO", "ARTWORK", "MUSIC", "FACE", "CHARACTER",
+                            "TATTOO", "LOCATION", "TEXT",
+                        ],
                     },
                     "description": {"type": "string"},
                     "time_ranges": {
