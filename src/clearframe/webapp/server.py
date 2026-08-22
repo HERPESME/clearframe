@@ -75,7 +75,24 @@ class DecisionRequest(BaseModel):
 
 
 class DemoRunRequest(BaseModel):
+    """Demo run options.
+
+    The three declarations exist so a UI tester can reach every surface without
+    credentials. Left unset the demo behaves exactly as it always has — an
+    expressive work, no sponsors, no publishing platform — which is also the
+    combination that leaves the sponsor and platform panels empty.
+    """
+
     pace_s: float = 0.0
+    use_context: str | None = None
+    sponsors: list[str] | None = None
+    platform: str | None = None
+
+    @property
+    def declares_anything(self) -> bool:
+        return any(
+            v is not None for v in (self.use_context, self.sponsors, self.platform)
+        )
 
 
 class MonitorAlertRequest(BaseModel):
@@ -155,9 +172,11 @@ def create_app(out_root: Path) -> FastAPI:
             )
         return out
 
-    async def _run_paced_demo(pace_s: float) -> None:
+    async def _run_paced_demo(pace_s: float, declared: dict | None = None) -> None:
         queue = event_queues["demo"]
         ctx = demo_context(out_root)
+        if declared:
+            ctx.state.production = ctx.state.production.model_copy(update=declared)
         ctx.store = store
         ctx.listener = queue.put_nowait
         stages = [_PacedStage(s, pace_s) for s in build_demo_pipeline()]
@@ -169,6 +188,20 @@ def create_app(out_root: Path) -> FastAPI:
     @app.post("/api/productions/demo")
     async def create_demo(body: DemoRunRequest | None = None):
         pace_s = body.pace_s if body else 0.0
+
+        def _apply(ctx):
+            if body is None:
+                return ctx
+            update = {}
+            if body.use_context is not None:
+                update["use_context"] = _use_context(body.use_context)
+            if body.sponsors is not None:
+                update["sponsors"] = body.sponsors
+            if body.platform is not None:
+                update["platform"] = body.platform.strip().lower()
+            if update:
+                ctx.state.production = ctx.state.production.model_copy(update=update)
+            return ctx
         if pace_s > 0:
             # Mission Control mode: fresh paced run in the background, events
             # streamed over /events. Restarts the demo production from scratch.
@@ -176,12 +209,28 @@ def create_app(out_root: Path) -> FastAPI:
             if state_path.exists():
                 state_path.unlink()
             event_queues["demo"] = asyncio.Queue()
-            asyncio.create_task(_run_paced_demo(pace_s))
+            declared: dict = {}
+            if body is not None:
+                if body.use_context is not None:
+                    declared["use_context"] = _use_context(body.use_context)
+                if body.sponsors is not None:
+                    declared["sponsors"] = body.sponsors
+                if body.platform is not None:
+                    declared["platform"] = body.platform.strip().lower()
+            asyncio.create_task(_run_paced_demo(pace_s, declared))
             return {"status": "running"}
+        # A cached run cannot answer a different question, so declaring
+        # anything forces a fresh one rather than silently returning the
+        # previous configuration's numbers.
+        if body is not None and body.declares_anything:
+            state_path = store.root / "demo.json"
+            if state_path.exists():
+                state_path.unlink()
+
         try:
             state = store.load("demo")
         except FileNotFoundError:
-            ctx = demo_context(out_root)
+            ctx = _apply(demo_context(out_root))
             ctx.store = store
             state = await Pipeline(build_demo_pipeline()).run(ctx)
         return JSONResponse(state.model_dump(mode="json"))

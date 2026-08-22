@@ -184,6 +184,7 @@ export default function App() {
     routes,
     sponsor_conflicts,
     assessed_exposures,
+    platform_outcomes,
     drift,
     candidates,
     watches,
@@ -206,6 +207,13 @@ export default function App() {
     const v = corroboration?.[el.id]?.verdict;
     return v === "CORROBORATED" || v === "FINGERPRINTED";
   });
+  const byId = Object.fromEntries(elements.map((el) => [el.id, el]));
+  // Only the outcomes a platform would actually act on automatically. The
+  // manual-complaint rows are real but far less likely, and putting them in a
+  // banner would train the reader to ignore it.
+  const claimed = (platform_outcomes ?? []).filter(
+    (o) => o.action === "CLAIM_LIKELY" || o.action === "CLAIM_POSSIBLE",
+  );
   const covCount = (s: string) =>
     elements.filter((el) => coverage?.[el.id]?.status === s).length;
   const materialSignals = Object.values(freshness ?? {})
@@ -344,7 +352,17 @@ export default function App() {
             className="chip HIGH"
             title="A competitor's mark is on screen while a sponsor is paying. Not an infringement — a contract exposure, since category exclusivity is standard in brand deals."
           >
-            <span className="n">{sponsor_conflicts.length}</span> sponsor conflicts
+            <span className="n">{sponsor_conflicts.length}</span> sponsor conflict
+            {sponsor_conflicts.length === 1 ? "" : "s"}
+          </span>
+        )}
+        {claimed.length > 0 && (
+          <span
+            className="chip CRITICAL"
+            title="The platform will match this automatically on upload. Content ID does not evaluate fair use."
+          >
+            <span className="n">{claimed.length}</span> platform claim
+            {claimed.length === 1 ? "" : "s"}
           </span>
         )}
         {corroborated.length > 0 && (
@@ -392,6 +410,22 @@ export default function App() {
       </div>
 
       <main className="cards">
+        {claimed.length > 0 && (
+          <div className="platform-banner">
+            <strong>Platform enforcement — {claimed[0].platform}.</strong> Separate from
+            legal merit: automated content matching does not evaluate fair use, so a
+            finding with a strong legal defence can still be claimed on upload.
+            <ul>
+              {claimed.map((o) => (
+                <li key={o.element_id}>
+                  <span className="chip CRITICAL">{o.action.replace(/_/g, " ")}</span>{" "}
+                  {byId[o.element_id]?.label ?? o.element_id} — <em>{o.remedy}</em>
+                  {o.revenue_impact && <> {o.revenue_impact}</>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         {(assessed_exposures?.length ?? 0) > 0 && (
           <div className="exposure-banner">
             <strong>On-screen exposure.</strong> None of this is intellectual property

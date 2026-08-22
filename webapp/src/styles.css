@@ -860,6 +860,9 @@ button {
 .tone-chip.NEUTRAL { background: rgba(127,140,141,.14); color: var(--muted); border-color: rgba(127,140,141,.35); }
 .tone-chip.UNFLATTERING { background: rgba(230,126,34,.16); color:#e67e22; border-color: rgba(230,126,34,.45); }
 .tone-chip.DISPARAGING { background: rgba(192,57,43,.18); color: var(--critical); border-color: rgba(192,57,43,.55); }
+.platform-banner { background: rgba(211,84,0,.10); border:1px solid rgba(211,84,0,.4); border-radius:4px; padding:10px 14px; margin: 0 0 16px; font-size:13px; }
+.platform-banner strong { color:#e67e22; }
+.platform-banner em { color: var(--muted); font-style: normal; }
 .exposure-banner { background: rgba(192,57,43,.10); border:1px solid rgba(192,57,43,.4); border-radius:4px; padding:10px 14px; margin: 0 0 16px; font-size:13px; }
 .exposure-banner strong { color: var(--critical); }
 .exposure-banner em { color: var(--muted); font-style: normal; }
