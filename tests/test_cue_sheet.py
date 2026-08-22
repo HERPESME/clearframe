@@ -12,7 +12,10 @@ async def test_cue_sheet_golden(tmp_path):
     )
     assert len(rows) == 2  # one music cue in the demo scene
     cue = rows[1]
-    assert cue.startswith("1,Blinding Lights - The Weeknd,")
+    # The scan only ever saw "Upbeat electronic music". A cue sheet is a legal
+    # filing to a PRO, so what lands here must be the FINGERPRINTED identity,
+    # not the video model's description.
+    assert cue.startswith("1,Blinding Lights — The Weeknd,")
     assert ",Feature," in cue
     assert cue.endswith(",12.0")
 
