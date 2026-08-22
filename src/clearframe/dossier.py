@@ -15,6 +15,8 @@ from clearframe.models import (
     ProductionState,
     RemediationOption,
     ResearchResult,
+    ResearchRoute,
+    ResearchTier,
     RiskAssessment,
     RiskBand,
     TerritoryRisk,
@@ -46,6 +48,7 @@ class DossierEntry(BaseModel):
     freshness: list[FreshnessSignal] = []
     territory: list[TerritoryRisk] = []
     coverage: Coverage | None = None
+    route: ResearchRoute | None = None
 
 
 class ClearanceDossier(BaseModel):
@@ -72,6 +75,7 @@ def build_dossier(state: ProductionState, generated_at: str) -> ClearanceDossier
             freshness=state.freshness.get(el.id, []),
             territory=state.territory_risk.get(el.id, []),
             coverage=state.coverage.get(el.id),
+            route=state.routes.get(el.id),
         )
         for el in state.elements
     ]
@@ -82,6 +86,19 @@ def build_dossier(state: ProductionState, generated_at: str) -> ClearanceDossier
         summary[e.risk.band.value] += 1
     summary["incomplete_research"] = sum(
         1 for e in entries if research_is_incomplete(e.research)
+    )
+    # The honesty guardrail. A finding resolved without paying for research is
+    # still a finding, and E&O carriers reject "incidental use" asserted without
+    # documentation — so what the ladder settled cheaply is counted here and
+    # printed with its authority, never dropped.
+    summary["resolved_by_statute"] = sum(
+        1 for e in entries if e.route is not None and e.route.tier is ResearchTier.STATUTE
+    )
+    summary["resolved_locally"] = sum(
+        1 for e in entries if e.route is not None and e.route.tier is ResearchTier.LOCAL
+    )
+    summary["deep_research_runs"] = sum(
+        1 for e in entries if e.route is not None and e.route.tier is ResearchTier.DEEP
     )
     summary["pending_decisions"] = sum(1 for e in entries if e.decision is None)
     summary["identity_conflicts"] = sum(

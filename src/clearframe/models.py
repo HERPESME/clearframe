@@ -210,6 +210,40 @@ class ResearchPlan(BaseModel):
     est_cost_usd: float
 
 
+class ResearchTier(str, Enum):
+    """Which rung of the escalation ladder answered this finding.
+
+    Ordered cheapest-first. A finding enters at LOCAL and stops at the first
+    rung that can genuinely answer it, so only DEEP costs minutes.
+    """
+
+    LOCAL = "LOCAL"        # local rights table — 0ms, $0
+    STATUTE = "STATUTE"    # deterministic law — 0ms, $0
+    SEARCH = "SEARCH"      # Parallel Search — ~2s, $0.005
+    DEEP = "DEEP"          # Parallel Task — minutes, $0.01-0.30
+    BLOCKED = "BLOCKED"    # disputed identity; research would be meaningless
+
+
+class ResearchRoute(BaseModel):
+    """How one finding will be resolved, and why.
+
+    `disposition` and `basis` exist so a cheap route is never a silent skip:
+    the dossier can state what the producer must actually DO about a finding
+    that cost nothing to resolve, and under what authority.
+    """
+
+    element_id: str
+    tier: ResearchTier
+    rationale: str
+    basis: str = ""
+    disposition: str = ""
+    owner: str | None = None
+    posture: LicensingPosture | None = None
+    est_cost_usd: float = 0.0
+    est_latency_s: float = 0.0
+    enumerate_candidates: bool = False
+
+
 class AuditEvent(BaseModel):
     at: str
     actor: str
@@ -390,4 +424,5 @@ class ProductionState(BaseModel):
     territories: list[str] = Field(default_factory=list)
     coverage: dict[str, Coverage] = Field(default_factory=dict)
     audio_matches: list[AudioMatch] = Field(default_factory=list)
+    routes: dict[str, ResearchRoute] = Field(default_factory=dict)
     detector_hits: list[DetectorHit] = Field(default_factory=list)

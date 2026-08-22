@@ -255,7 +255,11 @@ class LiveParallelClient:
         api_key: str,
         base_url: str = "https://api.parallel.ai",
         processor: str = "pro",
-        poll_interval_s: float = 10.0,
+        # A ten-second poll added up to five seconds of pure waiting per run on
+        # average, multiplied by every concurrent task. Task runs are minutes
+        # long, so polling every two seconds is negligible load and removes a
+        # latency floor we were paying for nothing.
+        poll_interval_s: float = 2.0,
         timeout_s: float = 600.0,
         attempts: int = 2,
         backoff_s: float = 2.0,

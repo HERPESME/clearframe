@@ -1,0 +1,182 @@
+{
+ "note": "Depiction-related actions against productions. Used to make licensing posture a cited fact rather than a model's impression, and to supply the Clearance Court with real precedent.",
+ "verified_on": "2026-08-22",
+ "cases": [
+  {
+   "name": "Ringgold v. Black Entertainment Television",
+   "citation": "126 F.3d 70 (2d Cir. 1997)",
+   "year": 1997,
+   "category": "COPYRIGHT_ART",
+   "prevailing": "plaintiff",
+   "fact_pattern": "A poster of the artist's story quilt appeared in the background of a TV sitcom set, visible in nine segments totalling roughly 27 seconds.",
+   "holding": "Background use was not de minimis: the work was recognisable and displayed long enough for the audience to appreciate it.",
+   "lesson": "Recognisability plus duration defeats a de minimis defence for background artwork.",
+   "url": "https://en.wikipedia.org/wiki/Ringgold_v._Black_Entertainment_Television"
+  },
+  {
+   "name": "Sandoval v. New Line Cinema",
+   "citation": "147 F.3d 215 (2d Cir. 1998)",
+   "year": 1998,
+   "category": "COPYRIGHT_ART",
+   "prevailing": "defendant",
+   "fact_pattern": "The photographer's transparencies appeared in the film Seven, out of focus, in shadow, and never in full.",
+   "holding": "De minimis: the works were not displayed with sufficient detail for the average observer to identify them.",
+   "lesson": "Out-of-focus, partial or fleeting artwork is defensible. Focus and framing decide the case, not mere presence.",
+   "url": "https://en.wikipedia.org/wiki/Sandoval_v._New_Line_Cinema_Corp."
+  },
+  {
+   "name": "Gottlieb Development LLC v. Paramount Pictures",
+   "citation": "590 F. Supp. 2d 625 (S.D.N.Y. 2008)",
+   "year": 2008,
+   "category": "COPYRIGHT_ART",
+   "prevailing": "defendant",
+   "fact_pattern": "A pinball machine bearing the plaintiff's artwork appeared in the background of What Women Want for about three and a half minutes, never in focus.",
+   "holding": "De minimis in both copyright and trademark: the machine was always in the background and partly obscured.",
+   "lesson": "Duration alone does not defeat de minimis when the work is never the subject of the shot.",
+   "url": ""
+  },
+  {
+   "name": "Falkner v. General Motors",
+   "citation": "No. 2:18-cv-00549 (C.D. Cal. 2018)",
+   "year": 2018,
+   "category": "COPYRIGHT_ART",
+   "prevailing": "plaintiff_survived_dismissal",
+   "fact_pattern": "A Cadillac social campaign featured a photograph of a mural painted on a Detroit parking-garage elevator shed.",
+   "holding": "Court rejected GM's 17 U.S.C. §120(a) architectural defence: the mural was not part of an architectural work, so the panorama exception did not apply.",
+   "lesson": "Painted art on a building is NOT covered by the US architectural exemption. Murals are the single highest-value visual clearance risk.",
+   "url": "https://www.loeb.com/en/insights/publications/2018/09/falkner-v-general-motors-llc"
+  },
+  {
+   "name": "Williams (Revok) v. H&M",
+   "citation": "No. 1:18-cv-01490 (E.D.N.Y. 2018)",
+   "year": 2018,
+   "category": "COPYRIGHT_ART",
+   "prevailing": "plaintiff",
+   "fact_pattern": "An H&M campaign was shot in front of a handball-court mural. H&M sued for a declaration that illegally-placed street art cannot be copyrighted.",
+   "holding": "H&M withdrew the action after public backlash; the artist's position prevailed.",
+   "lesson": "Illegality of placement is not a reliable defence to street-art copyright, and the reputational cost of arguing it is severe.",
+   "url": "https://www.withersworldwide.com/en-gb/insight/read/companies-must-beware-street-artists-ip-suits"
+  },
+  {
+   "name": "Solid Oak Sketches v. 2K Games",
+   "citation": "449 F. Supp. 3d 333 (S.D.N.Y. 2020)",
+   "year": 2020,
+   "category": "COPYRIGHT_ART",
+   "prevailing": "defendant",
+   "fact_pattern": "Five tattoos inked on NBA players were reproduced on their in-game avatars.",
+   "holding": "Defence won on three independent grounds: de minimis, implied licence, and fair use.",
+   "lesson": "Tattoos on a real person the production is entitled to depict are usually defensible.",
+   "url": "https://www.wsgr.com/en/insights/courts-provide-guidance-on-the-depiction-of-real-world-works-including-video-games.html"
+  },
+  {
+   "name": "Alexander v. Take-Two Interactive",
+   "citation": "No. 3:18-cv-00966 (S.D. Ill. 2022)",
+   "year": 2022,
+   "category": "COPYRIGHT_ART",
+   "prevailing": "plaintiff",
+   "fact_pattern": "Tattoos inked on wrestler Randy Orton were reproduced on his WWE 2K avatar.",
+   "holding": "Jury rejected fair use; the court rejected de minimis and implied licence. Damages awarded: $3,750.",
+   "lesson": "Tattoo claims are real but low-value. Worth flagging for a release, not worth a deep ownership investigation.",
+   "url": "https://news.artnet.com/art-world/tattoo-artist-artist-precedent-2186189"
+  },
+  {
+   "name": "Whitmill v. Warner Bros.",
+   "citation": "No. 4:11-cv-00752 (E.D. Mo. 2011)",
+   "year": 2011,
+   "category": "COPYRIGHT_ART",
+   "prevailing": "settled",
+   "fact_pattern": "Mike Tyson's facial tattoo was replicated on another actor in The Hangover Part II.",
+   "holding": "Preliminary injunction denied but the court called the copyright claim strong; settled before trial.",
+   "lesson": "Replicating a tattoo onto a different person is materially riskier than filming the person who wears it.",
+   "url": ""
+  },
+  {
+   "name": "Rogers v. Grimaldi",
+   "citation": "875 F.2d 994 (2d Cir. 1989)",
+   "year": 1989,
+   "category": "TRADEMARK",
+   "prevailing": "defendant",
+   "fact_pattern": "Ginger Rogers objected to the film title Ginger and Fred.",
+   "holding": "Trademark yields to expressive works unless the use has no artistic relevance or explicitly misleads as to source.",
+   "lesson": "The controlling defence for brands appearing in narrative film. It is why most brand-owner suits against productions fail.",
+   "url": ""
+  },
+  {
+   "name": "Wham-O v. Paramount Pictures",
+   "citation": "C.D. Cal. 2003 (Slip 'N Slide / Dickie Roberts)",
+   "year": 2003,
+   "category": "TRADEMARK",
+   "prevailing": "defendant",
+   "fact_pattern": "A character was injured using a dry Slip 'N Slide; Wham-O alleged the depiction disparaged the product.",
+   "holding": "Injunction denied; the exaggerated depiction could not be read as endorsement or as a realistic safety claim.",
+   "lesson": "Brand-owner suits over depiction generally fail — but they are filed over UNFLATTERING depiction, which is the signal worth extracting.",
+   "url": "https://www.theglobeandmail.com/report-on-business/industry-news/marketing/out-of-place-how-brands-respond-to-unauthorized-product-placements/article6824723/"
+  },
+  {
+   "name": "Caterpillar v. Walt Disney",
+   "citation": "287 F. Supp. 2d 913 (C.D. Ill. 2003)",
+   "year": 2003,
+   "category": "TRADEMARK",
+   "prevailing": "defendant",
+   "fact_pattern": "Caterpillar bulldozers were depicted as instruments of villainy in George of the Jungle 2.",
+   "holding": "No infringement: viewers would not believe Caterpillar sponsored the film, and depicting a product is not use as a mark.",
+   "lesson": "Even villainous depiction of a branded product is usually lawful in the US.",
+   "url": ""
+  },
+  {
+   "name": "In-Sink-Erator / NBC 'Heroes'",
+   "citation": "dispute, 2006 (no reported decision)",
+   "year": 2006,
+   "category": "TRADEMARK",
+   "prevailing": "settled",
+   "fact_pattern": "A character's hand was mangled in a garbage disposal with the brand name visible; the manufacturer said the scene cast the product in an unsavoury light.",
+   "holding": "NBC digitally removed the trademark rather than litigate.",
+   "lesson": "Disparaging depiction is resolved by digital removal at post cost. Catching it before the lock is the entire value of a pre-flight scan.",
+   "url": ""
+  },
+  {
+   "name": "Louis Vuitton Malletier v. Warner Bros.",
+   "citation": "868 F. Supp. 2d 172 (S.D.N.Y. 2012)",
+   "year": 2012,
+   "category": "TRADEMARK",
+   "prevailing": "defendant",
+   "fact_pattern": "A character carried a counterfeit LV-style bag in The Hangover Part II and referred to it by name.",
+   "holding": "Dismissed under Rogers: artistically relevant and not explicitly misleading.",
+   "lesson": "Luxury houses do sue over film depiction even when the law favours the studio. Budget for defence, not just for licence.",
+   "url": ""
+  },
+  {
+   "name": "Bridgeport Music v. Dimension Films",
+   "citation": "410 F.3d 792 (6th Cir. 2005)",
+   "year": 2005,
+   "category": "MUSIC_SYNC",
+   "prevailing": "plaintiff",
+   "fact_pattern": "A two-second, pitch-shifted guitar sample was used in a film soundtrack.",
+   "holding": "No de minimis defence for sound recordings in the Sixth Circuit: 'Get a licence or do not sample.'",
+   "lesson": "For recordings there is a live circuit split, so the safe assumption is that no amount of music is too short to clear.",
+   "url": ""
+  },
+  {
+   "name": "VMG Salsoul v. Ciccone",
+   "citation": "824 F.3d 871 (9th Cir. 2016)",
+   "year": 2016,
+   "category": "MUSIC_SYNC",
+   "prevailing": "defendant",
+   "fact_pattern": "A 0.23-second horn sample was used in a Madonna recording.",
+   "holding": "De minimis DOES apply to sound recordings in the Ninth Circuit, expressly splitting with Bridgeport.",
+   "lesson": "Music exposure is jurisdiction-dependent within the US itself; the same cue can be clear in California and infringing in Ohio.",
+   "url": ""
+  },
+  {
+   "name": "NMPA v. Fullscreen",
+   "citation": "S.D.N.Y. 2013 (settled 2014)",
+   "year": 2013,
+   "category": "MUSIC_SYNC",
+   "prevailing": "settled",
+   "fact_pattern": "A YouTube multi-channel network monetised creator videos containing unlicensed compositions.",
+   "holding": "Settled with a licensing framework after the publishers' trade body sued the network rather than the creators.",
+   "lesson": "Music publishers enforce systematically and at platform scale. Music is the highest-frequency claim source for creators, not brands.",
+   "url": "https://variety.com/2013/digital/news/fullscreen-sued-by-music-publishers-group-over-songs-in-youtube-videos-1200574935"
+  }
+ ]
+}

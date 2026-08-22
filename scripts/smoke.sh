@@ -130,6 +130,23 @@ check $? "music identity promoted by fingerprint (description -> named work)"
 CUE=$(grep -c 'Blinding Lights — The Weeknd' "$OUT/cue_sheet.csv")
 [ "$CUE" = "1" ]; check $? "PRO cue sheet carries the fingerprinted title, not the description"
 
+curl -sf "$BASE/api/productions/demo" | $PY -c "
+import json, sys
+s = json.load(sys.stdin)
+tiers = {k: v['tier'] for k, v in s['routes'].items()}
+assert tiers['e2'] == 'SEARCH', tiers['e2']    # Coca-Cola: owner local, posture live
+assert tiers['e6'] == 'STATUTE', tiers['e6']   # background face: release form
+assert tiers['e8'] == 'BLOCKED', tiers['e8']   # disputed identity
+assert tiers['e5'] == 'DEEP', tiers['e5']      # unknown-artist mural
+assert s['routes']['e5']['enumerate_candidates'] is True
+# every route must carry a reason; a cheap route is a documented position
+assert all(r['rationale'] for r in s['routes'].values())
+"
+check $? "escalation ladder routes every finding with a recorded reason"
+
+grep -q "Resolved without rights research" "$OUT/dossier.html"
+check $? "dossier declares what was resolved without research (honesty guardrail)"
+
 has '"material_signals"' -X POST "$BASE/api/productions/demo/freshness"
 check $? "live Parallel Search freshness pass ran on demand"
 

@@ -36,15 +36,32 @@ def band_for(score: int) -> RiskBand:
     return RiskBand.CRITICAL
 
 
-def score_element(element: TriagedElement, research: ResearchResult | None) -> RiskAssessment:
+def prominence_score(element: TriagedElement) -> float:
     p = element.prominence
-    screen_time_norm = min(p.screen_time_s / 10.0, 1.0)
-    prominence_score = (
-        0.4 * screen_time_norm
+    return (
+        0.4 * min(p.screen_time_s / 10.0, 1.0)
         + 0.3 * p.frame_coverage
         + 0.2 * p.centrality
         + (0.1 if p.plot_integral else 0.0)
     )
+
+
+def provisional_score(element: TriagedElement) -> int:
+    """Risk before anything is known about the rights holder.
+
+    Identical arithmetic to `score_element` with the posture factor pinned at
+    its worst case, so it is an upper bound rather than an optimistic guess.
+    Two uses: the router escalates materially exposed findings to deep
+    research, and the two-phase report can band every finding before a single
+    network call returns.
+    """
+    return round(100 * prominence_score(element) * CATEGORY_WEIGHT[element.category])
+
+
+def score_element(element: TriagedElement, research: ResearchResult | None) -> RiskAssessment:
+    p = element.prominence
+    screen_time_norm = min(p.screen_time_s / 10.0, 1.0)
+    prominence_score_value = prominence_score(element)
     weight = CATEGORY_WEIGHT[element.category]
 
     if research_is_incomplete(research):
@@ -53,7 +70,7 @@ def score_element(element: TriagedElement, research: ResearchResult | None) -> R
         posture = research.licensing_posture
     posture_factor = POSTURE_FACTOR[posture]
 
-    score = round(100 * prominence_score * weight * posture_factor)
+    score = round(100 * prominence_score_value * weight * posture_factor)
 
     de_minimis = (
         p.screen_time_s < 2.0
@@ -71,7 +88,7 @@ def score_element(element: TriagedElement, research: ResearchResult | None) -> R
         band=band,
         factors={
             "screen_time_norm": round(screen_time_norm, 3),
-            "prominence_score": round(prominence_score, 3),
+            "prominence_score": round(prominence_score_value, 3),
             "category_weight": round(weight, 3),
             "posture_factor": round(posture_factor, 3),
         },
