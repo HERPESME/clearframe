@@ -181,6 +181,54 @@ asyncio.run(main())
 PHASE_A
 check $? "advertising context scores harder, music exempt, sponsor conflict flagged"
 
+$PY - <<'PHASE_B'
+import asyncio, tempfile
+from clearframe.pipeline import Pipeline, build_demo_pipeline, demo_context
+from clearframe.platform import detectability
+
+
+async def main():
+    with tempfile.TemporaryDirectory() as tmp:
+        ctx = demo_context(tmp)
+        ctx.state.production = ctx.state.production.model_copy(
+            update={"platform": "youtube"}
+        )
+        st = await Pipeline(build_demo_pipeline()).run(ctx)
+
+    outcomes = st.platform_outcomes
+    assert len(outcomes) == len(st.elements)
+
+    # Ranked by how likely the PLATFORM is to act, not by legal merit.
+    scores = [detectability(o) for o in outcomes]
+    assert scores == sorted(scores, reverse=True), scores
+
+    # Detectability inverts legal merit: a fingerprinted track is caught
+    # essentially always; a mural with real legal weight almost never is.
+    top = outcomes[0]
+    assert top.action.value == "CLAIM_LIKELY", top.action
+    assert top.confidence == "near-certain"
+    assert "00:12" in top.remedy, top.remedy          # actionable timecode
+    assert "Republic Records" in top.revenue_impact   # who gets the money
+    assert "fair use" in top.consequence.lower()      # and that it is no defence
+
+    visual = [o for o in outcomes if o.action.value == "MANUAL_COMPLAINT"]
+    assert visual and detectability(visual[0]) < detectability(top)
+
+
+asyncio.run(main())
+PHASE_B
+check $? "platform outcomes rank by detectability, not legal merit"
+
+curl -sf "$BASE/api/productions/demo" | $PY -c "
+import json, sys
+s = json.load(sys.stdin)
+# Default platform is 'none' — theatrical/festival delivery, no automated
+# enforcement — so nothing is reported as an automated claim.
+assert s['production']['platform'] == 'none', s['production']['platform']
+assert all(o['action'] != 'CLAIM_LIKELY' for o in s['platform_outcomes'])
+"
+check $? "default platform is none — no automated enforcement claimed"
+
 curl -sf "$BASE/api/productions/demo" | $PY -c "
 import json, sys
 s = json.load(sys.stdin)

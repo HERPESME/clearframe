@@ -119,6 +119,7 @@ def _cmd_run(args) -> int:
             release_territories=args.territories or cfg.territories or ["US"],
             use_context=args.use_context,
             sponsors=args.sponsors or [],
+            platform=args.platform,
         )
         ctx = build_context(cfg, production, out_dir)
     else:
@@ -188,6 +189,13 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="Brands paying for this production, comma separated. Competing marks "
         "detected on screen are flagged as sponsor conflicts.",
+    )
+    run.add_argument(
+        "--platform",
+        default="none",
+        help="Where this will be published: youtube · tiktok · instagram · twitch · "
+        "none (theatrical/festival/broadcast, the default). Drives what the platform "
+        "will actually DO — automated matching does not evaluate fair use.",
     )
     run.add_argument("--out", type=Path, default=Path("out"), help="Output directory")
     run.add_argument(

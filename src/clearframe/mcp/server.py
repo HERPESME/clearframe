@@ -189,6 +189,15 @@ def build_server(out_root: Path) -> MCPServer:
             # Not an infringement — a contract exposure. Category exclusivity
             # means a rival mark in shot can void a sponsorship fee even though
             # showing it is lawful, and nothing else here would flag it.
+            # What the PLATFORM does, which is not what a court would do.
+            "platform_outcome": next(
+                (
+                    o.model_dump(mode="json")
+                    for o in state.platform_outcomes
+                    if o.element_id == element_id
+                ),
+                None,
+            ),
             "sponsor_conflicts": [
                 c.model_dump(mode="json")
                 for c in state.sponsor_conflicts
