@@ -16,6 +16,8 @@ from clearframe.models import (
     RemediationOption,
     ResearchResult,
     ResearchRoute,
+    SponsorConflict,
+    UseContext,
     ResearchTier,
     RiskAssessment,
     RiskBand,
@@ -59,6 +61,8 @@ class ClearanceDossier(BaseModel):
     unscanned_ranges: list[TimeRange]
     audit: list[AuditEvent] = []
     territories: list[str] = []
+    sponsor_conflicts: list[SponsorConflict] = []
+    use_context: UseContext = UseContext.EXPRESSIVE
     disclaimer: str = DISCLAIMER
 
 
@@ -136,6 +140,8 @@ def build_dossier(state: ProductionState, generated_at: str) -> ClearanceDossier
         unscanned_ranges=state.unscanned_ranges,
         audit=state.audit_log,
         territories=state.territories,
+        sponsor_conflicts=state.sponsor_conflicts,
+        use_context=state.production.use_context,
     )
 
 

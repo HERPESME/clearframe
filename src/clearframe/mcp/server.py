@@ -144,6 +144,7 @@ def build_server(out_root: Path) -> MCPServer:
                     "resolved_by": (
                         state.routes[el.id].tier.value if el.id in state.routes else None
                     ),
+                    "depiction": el.depiction.value if el.depiction else None,
                     "coverage": (
                         state.coverage[el.id].status.value
                         if el.id in state.coverage
@@ -185,6 +186,14 @@ def build_server(out_root: Path) -> MCPServer:
                 if element_id in state.routes
                 else None
             ),
+            # Not an infringement — a contract exposure. Category exclusivity
+            # means a rival mark in shot can void a sponsorship fee even though
+            # showing it is lawful, and nothing else here would flag it.
+            "sponsor_conflicts": [
+                c.model_dump(mode="json")
+                for c in state.sponsor_conflicts
+                if c.element_id == element_id
+            ],
             "freshness": [
                 s.model_dump(mode="json") for s in state.freshness.get(element_id, [])
             ],

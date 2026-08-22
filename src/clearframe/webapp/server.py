@@ -99,6 +99,21 @@ class _PacedStage:
         await asyncio.sleep(self._pace_s)
 
 
+def _use_context(raw: str):
+    """Parse a declared use context, defaulting to the calibration baseline.
+
+    EXPRESSIVE is what every score was calibrated against, so an unrecognised
+    or missing value must land there — never on a harsher band the uploader
+    did not ask for.
+    """
+    from clearframe.models import UseContext
+
+    try:
+        return UseContext((raw or "").strip().upper())
+    except ValueError:
+        return UseContext.EXPRESSIVE
+
+
 def create_app(out_root: Path) -> FastAPI:
     out_root = Path(out_root)
     store = LocalJsonStore(out_root / "state")
@@ -191,6 +206,8 @@ def create_app(out_root: Path) -> FastAPI:
         fps: float = Form(24.0),
         territories: str = Form("US"),
         distribution: str = Form("THEATRICAL,STREAMING"),
+        use_context: str = Form("EXPRESSIVE"),
+        sponsors: str = Form(""),
     ):
         """Upload footage and run the clearance pipeline over it.
 
@@ -243,6 +260,10 @@ def create_app(out_root: Path) -> FastAPI:
             release_territories=[t.strip().upper() for t in territories.split(",") if t.strip()]
             or ["US"],
             distribution=[d.strip().upper() for d in distribution.split(",") if d.strip()],
+            # An unrecognised value falls back to the calibration baseline rather
+            # than 400-ing an upload that is otherwise fine.
+            use_context=_use_context(use_context),
+            sponsors=[b.strip() for b in sponsors.split(",") if b.strip()],
             has_media=True,
         )
         ctx = build_context(cfg.model_copy(update={"mode": "live"}), production, out_root)

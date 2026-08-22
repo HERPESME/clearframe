@@ -144,6 +144,53 @@ assert any(not f['awaiting_research'] and f['disposition'] for f in p)
 "
 check $? "preliminary report is complete and banded before research runs"
 
+$PY - <<'PHASE_A'
+import asyncio, tempfile
+from clearframe.models import UseContext
+from clearframe.pipeline import Pipeline, build_demo_pipeline, demo_context
+
+
+async def main():
+    with tempfile.TemporaryDirectory() as tmp:
+        expressive = await Pipeline(build_demo_pipeline()).run(demo_context(tmp))
+
+    with tempfile.TemporaryDirectory() as tmp:
+        ctx = demo_context(tmp)
+        ctx.state.production = ctx.state.production.model_copy(
+            update={"use_context": UseContext.ADVERTISING, "sponsors": ["Pepsi"]}
+        )
+        ad = await Pipeline(build_demo_pipeline()).run(ctx)
+
+    # Commercial speech carries no expressive-work shield, so the same finding
+    # scores harder. Rogers v. Grimaldi protects films, not advertisements.
+    assert ad.risk["e3"].score > expressive.risk["e3"].score
+    assert ad.risk["e3"].factors["use_context_factor"] == 1.4
+
+    # Music is exempt: sync + master are required whichever medium this is.
+    assert ad.risk["e1"].score == expressive.risk["e1"].score
+
+    # A rival mark while a sponsor pays is a CONTRACT exposure, not infringement.
+    assert [c.conflicts_with for c in ad.sponsor_conflicts] == ["Pepsi"]
+    assert ad.sponsor_conflicts[0].label == "Coca-Cola can"
+
+    # In an advert the open question is permission, not posture.
+    assert ad.routes["e2"].tier.value == "DEEP", ad.routes["e2"].tier
+
+
+asyncio.run(main())
+PHASE_A
+check $? "advertising context scores harder, music exempt, sponsor conflict flagged"
+
+curl -sf "$BASE/api/productions/demo" | $PY -c "
+import json, sys
+s = json.load(sys.stdin)
+assert s['production']['use_context'] == 'EXPRESSIVE', s['production']['use_context']
+assert s['sponsor_conflicts'] == []
+assert all(f['depiction'] in (None, 'NEUTRAL') for f in s['preview'])
+assert all(r['factors']['use_context_factor'] == 1.0 for r in s['risk'].values())
+"
+check $? "default context is EXPRESSIVE — existing runs score exactly as before"
+
 curl -sf "$BASE/api/productions/demo" | $PY -c "
 import json, sys
 s = json.load(sys.stdin)

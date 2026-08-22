@@ -39,6 +39,31 @@ class LicensingPosture(str, Enum):
     UNKNOWN = "unknown"
 
 
+class UseContext(str, Enum):
+    """What KIND of work this is — which decides whether the shield applies.
+
+    Rogers v. Grimaldi protects expressive works: a trademark yields unless the
+    use has no artistic relevance or explicitly misleads about source. An
+    advertisement is commercial speech and gets no such protection, and the
+    Supreme Court narrowed Rogers further in Jack Daniel's v. VIP (2023).
+
+    The litigation record splits cleanly along this line. Every brand-owner WIN
+    is an advert — Falkner v. General Motors (Cadillac campaign), Mercedes-Benz
+    v. the Detroit muralists, Revok v. H&M. Every brand-owner LOSS is an
+    expressive work — Wham-O v. Paramount, Caterpillar v. Disney, Louis Vuitton
+    v. Warner Bros.
+
+    EXPRESSIVE is the default and the calibration baseline, so a production that
+    does not declare a context scores exactly as it did before this existed.
+    """
+
+    EXPRESSIVE = "EXPRESSIVE"      # film, TV, skit, narrative short
+    SPONSORED = "SPONSORED"        # creator content with a paid placement
+    ADVERTISING = "ADVERTISING"    # commercial, brand campaign, promo
+    NEWS = "NEWS"                  # reportage; strongest protection
+    EDUCATIONAL = "EDUCATIONAL"    # teaching, commentary, criticism
+
+
 class TimeRange(BaseModel):
     start_s: float = Field(ge=0)
     end_s: float
@@ -80,6 +105,29 @@ class BBox(BaseModel):
         return self
 
 
+class DepictionTone(str, Enum):
+    """How the element is PORTRAYED, not whether it is present.
+
+    The litigation record says brand owners rarely object to presence and
+    reliably object to portrayal. Wham-O sued Paramount over a gag in which a
+    character was hurt by a Slip 'N Slide. In-Sink-Erator complained when a
+    character's hand was mangled in a garbage disposal on NBC's Heroes — and
+    NBC digitally erased the mark rather than litigate, paying in post.
+
+    One question added to a scan we already run answers three threat classes:
+    trademark disparagement, false endorsement, and trade libel against a
+    named business.
+
+    None means the scan did not report it, which must behave exactly as
+    NEUTRAL so that every stored state and fixture predating this is unchanged.
+    """
+
+    FAVOURABLE = "FAVOURABLE"        # reads as endorsement; free advertising
+    NEUTRAL = "NEUTRAL"              # simply present
+    UNFLATTERING = "UNFLATTERING"    # associated with failure, mess, mishap
+    DISPARAGING = "DISPARAGING"      # associated with harm, crime, illness, contempt
+
+
 class DetectedElement(BaseModel):
     id: str
     label: str
@@ -89,6 +137,7 @@ class DetectedElement(BaseModel):
     prominence: Prominence
     bbox: BBox | None = None
     at_s: float | None = None
+    depiction: DepictionTone | None = None
 
 
 class TriagedElement(DetectedElement):
@@ -412,10 +461,29 @@ class Production(BaseModel):
     duration_s: float
     script_uri: str | None = None
     release_territories: list[str] = Field(default_factory=lambda: ["US"])
+    use_context: UseContext = UseContext.EXPRESSIVE
+    sponsors: list[str] = Field(default_factory=list)
     distribution: list[str] = Field(
         default_factory=lambda: ["THEATRICAL", "STREAMING"]
     )
     has_media: bool = False
+
+
+class SponsorConflict(BaseModel):
+    """A competitor's mark in shot while a sponsor is paying for the production.
+
+    Not an infringement at all — a contract problem. Brand deals routinely carry
+    category exclusivity, so a rival logo can void the fee even though showing
+    it is perfectly lawful. Nothing else in this pipeline would flag it, because
+    nothing is being infringed.
+    """
+
+    element_id: str
+    label: str
+    detected_owner: str
+    conflicts_with: str
+    sector: str
+    note: str
 
 
 class PreviewFinding(BaseModel):
@@ -442,6 +510,7 @@ class PreviewFinding(BaseModel):
     provisional_score: int
     provisional_band: RiskBand
     identity: IdentityVerdict | None = None
+    depiction: DepictionTone | None = None
     territory: list[TerritoryRisk] = Field(default_factory=list)
     route_tier: ResearchTier
     disposition: str = ""
@@ -473,5 +542,6 @@ class ProductionState(BaseModel):
     coverage: dict[str, Coverage] = Field(default_factory=dict)
     audio_matches: list[AudioMatch] = Field(default_factory=list)
     routes: dict[str, ResearchRoute] = Field(default_factory=dict)
+    sponsor_conflicts: list[SponsorConflict] = Field(default_factory=list)
     preview: list[PreviewFinding] = Field(default_factory=list)
     detector_hits: list[DetectorHit] = Field(default_factory=list)
