@@ -13,12 +13,16 @@ async def test_pipeline_emits_stage_and_agent_events(tmp_path):
     ctx.listener = events.append
     await Pipeline(build_demo_pipeline()).run(ctx)
     types = [e["type"] for e in events]
-    assert types.count("stage_start") == 8
-    assert types.count("stage_complete") == 8
+    assert types.count("stage_start") == 11
+    assert types.count("stage_complete") == 11
     assert "script_mentions" in types and "drift_computed" in types
     assert "scan_found" in types and "audit_found" in types
     assert "research_planned" in types
+    # 8 findings, but the disputed identity (e8) is never dispatched to research
     assert types.count("research_start") == 7
+    assert types.count("research_blocked") == 1
+    assert "corroboration_done" in types and "identity_conflict" in types
+    assert "territory_assessed" in types and "freshness_checked" in types
     assert types.count("case_ruled") == 5
     ruled = [e for e in events if e["type"] == "case_ruled"]
     assert any(e["holding"] == "clear_required" for e in ruled)
@@ -48,7 +52,7 @@ def test_paced_demo_run_streams_events_over_sse(client):
     assert types[-1] == "run_complete"
 
     state = client.get("/api/productions/demo").json()
-    assert len(state["elements"]) == 7
+    assert len(state["elements"]) == 8
 
 
 def test_events_without_run_404(client):

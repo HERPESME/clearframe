@@ -8,6 +8,7 @@ honestly as RESEARCH_INCOMPLETE instead of being silently dropped.
 
 import asyncio
 
+from clearframe.corroboration import blocks_research
 from clearframe.integrations.parallel_client import _incomplete
 from clearframe.models import ClearanceCategory
 from clearframe.pipeline import PipelineContext
@@ -31,11 +32,27 @@ class ResearchStage:
             }
         )
 
+        # A disputed identity must not be researched: the whole point of
+        # research is "who owns THIS", and we do not yet agree on what THIS is.
+        blocked = [
+            el for el in elements if blocks_research(ctx.state.corroboration.get(el.id))
+        ]
+        for el in blocked:
+            ctx.emit(
+                {
+                    "type": "research_blocked",
+                    "element_id": el.id,
+                    "label": el.label,
+                    "reason": "identity conflict",
+                }
+            )
+
+        researchable = [el for el in elements if el not in blocked]
         ranked = sorted(
-            elements, key=lambda el: el.prominence.screen_time_s, reverse=True
+            researchable, key=lambda el: el.prominence.screen_time_s, reverse=True
         )
         funded = ranked[: self.max_research]
-        skipped = ranked[self.max_research :]
+        skipped = ranked[self.max_research :] + blocked
 
         async def _one(el):
             ctx.emit(
@@ -76,6 +93,8 @@ class ResearchStage:
         for el in elements:
             if research[el.id].status != "incomplete" or el.category not in enumerable:
                 continue
+            if blocks_research(ctx.state.corroboration.get(el.id)):
+                continue  # resolve identity first; enumerating a disputed mark is noise
             candidates = await ctx.parallel.find_all(el, ctx.state.production.title)
             if candidates:
                 ctx.state.candidates[el.id] = candidates

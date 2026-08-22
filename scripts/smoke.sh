@@ -43,19 +43,19 @@ check $? "paced Mission Control run started"
 curl -sfN --max-time 30 "$BASE/api/productions/demo/events" | grep -q "run_complete"
 check $? "SSE stream delivered run_complete"
 COUNT=$(curl -sf "$BASE/api/productions/demo" | $PY -c "import json,sys; print(len(json.load(sys.stdin)['elements']))")
-[ "$COUNT" = "7" ]; check $? "pipeline found 7 elements (incl. auditor catch)"
+[ "$COUNT" = "8" ]; check $? "pipeline found 8 elements (incl. auditor catch)"
 
 CODE=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/api/productions/demo/decisions" \
   -H 'Content-Type: application/json' -H 'X-ClearFrame-Role: editor' \
   -d '{"element_id":"e1","action":"license","note":""}')
 [ "$CODE" = "403" ]; check $? "editor role rejected (403) — server-side gating"
 
-for el in e1 e2 e3 e4 e5 e6 e7; do
+for el in e1 e2 e3 e4 e5 e6 e7 e8; do
   curl -sf -X POST "$BASE/api/productions/demo/decisions" \
     -H 'Content-Type: application/json' -H 'X-ClearFrame-Role: legal' \
     -d "{\"element_id\":\"$el\",\"action\":\"license\",\"note\":\"smoke\"}" > /dev/null || FAILURES=$((FAILURES+1))
 done
-pass "7 legal decisions recorded"
+pass "8 legal decisions recorded"
 
 curl -sf -X POST "$BASE/api/productions/demo/dossier" | grep -q "cue_sheet.csv"
 check $? "dossier generated with all artifacts"

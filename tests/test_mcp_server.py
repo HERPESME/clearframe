@@ -35,11 +35,11 @@ async def test_full_clearance_flow(server, tmp_path):
             {"footage_uri": "demo://salted-scene", "title": "Golden Hour"},
         )
     )
-    assert run["findings"] == 7 and run["bands"]["CRITICAL"] == 1
+    assert run["findings"] == 8 and run["bands"]["CRITICAL"] == 1
     pid = run["production_id"]
 
     findings = _payload(await server.call_tool("list_findings", {"production_id": pid}))
-    assert len(findings["findings"]) == 7
+    assert len(findings["findings"]) == 8
     top = findings["findings"][0]
     assert top["band"] == "CRITICAL"
 

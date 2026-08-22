@@ -7,6 +7,10 @@ from typing import Callable, Protocol
 from clearframe.integrations.court_client import CourtClient, FixtureCourtClient
 from clearframe.integrations.gemini_client import FixtureGeminiClient, GeminiClient
 from clearframe.integrations.parallel_client import FixtureParallelClient, ParallelClient
+from clearframe.integrations.vision_client import (
+    CorroborationClient,
+    FixtureVisionClient,
+)
 from clearframe.models import Production, ProductionState
 from clearframe.store import LocalJsonStore
 
@@ -16,9 +20,12 @@ ANALYSIS_STAGES = (
     "script",
     "scan",
     "triage",
+    "corroborate",
     "drift",
     "research",
+    "freshness",
     "risk",
+    "territory",
     "remediation",
     "court",
 )
@@ -31,6 +38,7 @@ class PipelineContext:
     parallel: ParallelClient
     store: LocalJsonStore
     court: "CourtClient | None" = None
+    corroborator: "CorroborationClient | None" = None
     listener: "Callable[[dict], None] | None" = None
 
     def emit(self, event: dict) -> None:
@@ -75,9 +83,12 @@ def build_demo_pipeline(max_research: int | None = None) -> list[Stage]:
     from clearframe.stages.scan import ScanStage
     from clearframe.stages.triage_stage import TriageStage
 
+    from clearframe.stages.corroborate import CorroborateStage
     from clearframe.stages.court import CourtStage
     from clearframe.stages.drift_stage import DriftStage
+    from clearframe.stages.freshness import FreshnessStage
     from clearframe.stages.script import ScriptStage
+    from clearframe.stages.territory_stage import TerritoryStage
 
     if max_research is None:
         max_research = int(os.environ.get("CLEARFRAME_MAX_RESEARCH", "25"))
@@ -85,9 +96,12 @@ def build_demo_pipeline(max_research: int | None = None) -> list[Stage]:
         ScriptStage(),
         ScanStage(),
         TriageStage(),
+        CorroborateStage(),
         DriftStage(),
         ResearchStage(max_research=max_research),
+        FreshnessStage(),
         RiskStage(),
+        TerritoryStage(),
         RemediationStage(),
         CourtStage(),
     ]
@@ -108,16 +122,21 @@ def build_context(cfg, production: Production, out_root: Path) -> PipelineContex
         court: CourtClient = LiveCourtClient(
             project=cfg.project, location=cfg.location, model=cfg.gemini_model
         )
+        from clearframe.integrations.vision_client import LiveVideoIntelligenceClient
+
+        corroborator: CorroborationClient = LiveVideoIntelligenceClient()
     else:
         gemini = FixtureGeminiClient(FIXTURES_DIR)
         parallel = FixtureParallelClient(FIXTURES_DIR)
         court = FixtureCourtClient(FIXTURES_DIR)
+        corroborator = FixtureVisionClient(FIXTURES_DIR)
     return PipelineContext(
         state=ProductionState(production=production),
         gemini=gemini,
         parallel=parallel,
         store=LocalJsonStore(Path(out_root) / "state"),
         court=court,
+        corroborator=corroborator,
     )
 
 
@@ -128,6 +147,7 @@ def demo_context(out_root: Path) -> PipelineContext:
         footage_uri="demo://salted-scene",
         duration_s=62.0,
         script_uri="demo://golden-hour-script",
+        release_territories=["US", "DE", "FR"],
     )
     return PipelineContext(
         state=ProductionState(production=production),
@@ -135,4 +155,5 @@ def demo_context(out_root: Path) -> PipelineContext:
         parallel=FixtureParallelClient(FIXTURES_DIR),
         store=LocalJsonStore(Path(out_root) / "state"),
         court=FixtureCourtClient(FIXTURES_DIR),
+        corroborator=FixtureVisionClient(FIXTURES_DIR),
     )

@@ -6,7 +6,7 @@ async def test_planner_assigns_tiers_by_policy(tmp_path):
     ctx = demo_context(tmp_path)
     state = await Pipeline(build_demo_pipeline()).run(ctx)
     plan = state.research_plan
-    assert len(plan) == 7
+    assert len(plan) == 8
     assert plan["e1"].processor == "pro"  # music: split ownership chains
     assert plan["e5"].processor == "ultra"  # unknown-artist mural: deep dig
     assert plan["e2"].processor == "lite"  # famous mark, trivial ownership

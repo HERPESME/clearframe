@@ -15,7 +15,7 @@ async def test_dossier_sorted_and_summarised(tmp_path):
     state.decisions = auto_decisions(state)
     d = build_dossier(state, generated_at="2026-08-15T12:00:00Z")
     assert d.entries[0].element.id == "e1"  # highest score first
-    assert d.summary["CRITICAL"] == 1 and d.summary["incomplete_research"] == 2
+    assert d.summary["CRITICAL"] == 1 and d.summary["incomplete_research"] == 3
 
 
 async def test_html_contains_citations_and_disclaimer(tmp_path):

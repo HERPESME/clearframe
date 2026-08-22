@@ -61,6 +61,25 @@ class Prominence(BaseModel):
     plot_integral: bool
 
 
+class BBox(BaseModel):
+    """Normalized frame box, origin top-left, all coords 0-1.
+
+    Gemini returns [ymin, xmin, ymax, xmax] scaled 0-1000; the parser divides
+    by 1000 so downstream code (UI overlay, frame crops) is resolution-free.
+    """
+
+    ymin: float = Field(ge=0, le=1)
+    xmin: float = Field(ge=0, le=1)
+    ymax: float = Field(ge=0, le=1)
+    xmax: float = Field(ge=0, le=1)
+
+    @model_validator(mode="after")
+    def _check_order(self) -> "BBox":
+        if self.ymax <= self.ymin or self.xmax <= self.xmin:
+            raise ValueError("bbox max coords must exceed min coords")
+        return self
+
+
 class DetectedElement(BaseModel):
     id: str
     label: str
@@ -68,6 +87,8 @@ class DetectedElement(BaseModel):
     description: str
     time_ranges: list[TimeRange]
     prominence: Prominence
+    bbox: BBox | None = None
+    at_s: float | None = None
 
 
 class TriagedElement(DetectedElement):
@@ -197,6 +218,66 @@ class AuditEvent(BaseModel):
     detail: str
 
 
+class IdentityVerdict(str, Enum):
+    """How well a second, independent detector agreed on WHAT this element is.
+
+    The E&O auditor pass is Gemini checking Gemini — same model, correlated
+    errors. It catches misses, not misidentifications. A misidentified brand
+    routes research to the wrong rights holder and certifies a clearance that
+    was never obtained, so identity gets its own corroborated/conflicted state.
+    """
+
+    CORROBORATED = "CORROBORATED"
+    SINGLE_SOURCE = "SINGLE_SOURCE"
+    CONFLICTED = "CONFLICTED"
+
+
+class DetectorHit(BaseModel):
+    """One observation from a second, independent detector."""
+
+    label: str
+    confidence: float = Field(ge=0, le=1)
+    start_s: float | None = None
+    end_s: float | None = None
+    bbox: BBox | None = None
+
+
+class Corroboration(BaseModel):
+    element_id: str
+    verdict: IdentityVerdict
+    detector: str
+    detected_label: str | None
+    confidence: float = Field(ge=0, le=1)
+    note: str
+
+
+class WebFinding(BaseModel):
+    """One ranked web result with an LLM-optimized excerpt (Parallel Search)."""
+
+    title: str
+    url: str
+    excerpt: str
+
+
+class FreshnessSignal(BaseModel):
+    """A real-time web signal about the rights holder, found at review time."""
+
+    element_id: str
+    owner: str
+    title: str
+    url: str
+    excerpt: str
+    material: bool
+
+
+class TerritoryRisk(BaseModel):
+    element_id: str
+    territory: str
+    band: RiskBand
+    rationale: str
+    authority: str
+
+
 class Production(BaseModel):
     id: str
     title: str
@@ -204,6 +285,7 @@ class Production(BaseModel):
     fps: float = 24.0
     duration_s: float
     script_uri: str | None = None
+    release_territories: list[str] = Field(default_factory=lambda: ["US"])
 
 
 class ProductionState(BaseModel):
@@ -224,3 +306,7 @@ class ProductionState(BaseModel):
     candidates: dict[str, list[CandidateEntity]] = Field(default_factory=dict)
     watches: dict[str, ClearanceWatch] = Field(default_factory=dict)
     alerts: list[WatchAlert] = Field(default_factory=list)
+    corroboration: dict[str, Corroboration] = Field(default_factory=dict)
+    freshness: dict[str, list[FreshnessSignal]] = Field(default_factory=dict)
+    territory_risk: dict[str, list[TerritoryRisk]] = Field(default_factory=dict)
+    territories: list[str] = Field(default_factory=list)

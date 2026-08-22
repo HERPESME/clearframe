@@ -19,7 +19,11 @@ from clearframe.models import (
     LicensingPosture,
     ResearchResult,
     TriagedElement,
+    WebFinding,
 )
+
+# Search + Extract are a public beta behind a dated capability header.
+SEARCH_BETA_HEADER = "search-extract-2025-10-10"
 
 RESEARCH_OUTPUT_SCHEMA: dict = {
     "type": "object",
@@ -141,6 +145,32 @@ def parse_findall_result(payload: dict, limit: int | None = None) -> list[Candid
     return candidates
 
 
+def parse_search_results(payload: dict, limit: int | None = None) -> list[WebFinding]:
+    """Map a Parallel Search response (POST /v1beta/search) to web findings.
+
+    Shape: {"search_id", "results": [{"url", "title", "excerpts": [str]}], "usage"}
+    """
+    findings: list[WebFinding] = []
+    for r in payload.get("results") or []:
+        excerpts = r.get("excerpts") or []
+        findings.append(
+            WebFinding(
+                title=(r.get("title") or "").strip(),
+                url=r.get("url", ""),
+                excerpt=(excerpts[0] if excerpts else "").strip(),
+            )
+        )
+    return findings[:limit] if limit is not None else findings
+
+
+def build_freshness_objective(owner: str, label: str) -> str:
+    return (
+        f"Recent litigation, trademark or copyright enforcement actions, cease-and-desist "
+        f"campaigns, or licensing-policy changes by {owner} affecting depiction of "
+        f"'{label}' in film or television."
+    )
+
+
 def _incomplete(element_id: str) -> ResearchResult:
     return ResearchResult(
         element_id=element_id,
@@ -170,6 +200,10 @@ class ParallelClient(Protocol):
     async def create_monitor(
         self, element_id: str, query: str, frequency: str, webhook_url: str
     ) -> ClearanceWatch | None: ...
+
+    async def search(
+        self, objective: str, queries: list[str], max_results: int = 5
+    ) -> list[WebFinding]: ...
 
 
 class FixtureParallelClient:
@@ -204,6 +238,15 @@ class FixtureParallelClient:
             query=query,
             frequency=frequency,
         )
+
+    async def search(
+        self, objective: str, queries: list[str], max_results: int = 5
+    ) -> list[WebFinding]:
+        name = slug(queries[0]) if queries else "default"
+        path = self.fixtures_dir / "search" / f"{name}.json"
+        if not path.exists():
+            return []
+        return parse_search_results(json.loads(path.read_text()), limit=max_results)
 
 
 class LiveParallelClient:
@@ -377,3 +420,32 @@ class LiveParallelClient:
                 query=query,
                 frequency=frequency,
             )
+
+    async def search(
+        self, objective: str, queries: list[str], max_results: int = 5
+    ) -> list[WebFinding]:
+        """Parallel Search API — one round trip, ranked results with excerpts.
+
+        Live-verified 2026-08-22: POST /v1beta/search with the dated beta
+        header returns {"search_id", "results": [{url, title, excerpts}]}.
+        Priced per request (cents), unlike a Task run, so this is the call we
+        can afford to make in real time while a reviewer is on the page.
+        Best-effort: search failure degrades to "no fresh signal", never an error.
+        """
+        headers = {**self._headers, "parallel-beta": SEARCH_BETA_HEADER}
+        try:
+            async with httpx.AsyncClient(timeout=45.0) as client:
+                resp = await client.post(
+                    f"{self.base_url}/v1beta/search",
+                    headers=headers,
+                    json={
+                        "objective": objective,
+                        "search_queries": queries[:5],
+                        "max_results": max_results,
+                        "max_chars_per_result": 600,
+                    },
+                )
+                resp.raise_for_status()
+                return parse_search_results(resp.json(), limit=max_results)
+        except (httpx.HTTPError, KeyError, ValueError):
+            return []

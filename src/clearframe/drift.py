@@ -5,22 +5,8 @@ elements nobody budgeted clearance for. FACE elements are excluded (people in
 frame aren't script props; publicity releases are a separate workflow).
 """
 
+from clearframe.matching import labels_match as _matches
 from clearframe.models import ElementType, ScriptDrift, ScriptMention, TriagedElement
-
-_STOPWORDS = {"the", "a", "an", "of", "on", "in", "-", "—"}
-
-
-def _tokens(label: str) -> set[str]:
-    cleaned = "".join(c if (c.isalnum() or c.isspace()) else " " for c in label.casefold())
-    return {t for t in cleaned.split() if t and t not in _STOPWORDS}
-
-
-def _matches(a: str, b: str) -> bool:
-    ta, tb = _tokens(a), _tokens(b)
-    if not ta or not tb:
-        return False
-    overlap = len(ta & tb)
-    return overlap / min(len(ta), len(tb)) >= 0.6
 
 
 def compute_drift(

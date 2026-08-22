@@ -1,0 +1,16 @@
+{
+  "search_id": "srch_demo_umg",
+  "results": [
+    {
+      "url": "https://www.billboard.com/pro/music-sync-licensing-lawsuits/",
+      "title": "Majors escalate sync enforcement against unlicensed film use",
+      "excerpts": ["Universal Music Group has filed suit against several production companies over uncleared synchronisation of recordings, seeking statutory damages under 17 U.S.C. 504(c)."]
+    },
+    {
+      "url": "https://www.umusicpub.com/",
+      "title": "Universal Music Publishing Group — sync licensing",
+      "excerpts": ["UMPG administers the composition catalogue and processes synchronisation requests for film and television through its licensing desk."]
+    }
+  ],
+  "usage": {"requests": 1}
+}

@@ -1,0 +1,81 @@
+{
+  "annotation_results": [
+    {
+      "input_uri": "demo://salted-scene",
+      "logo_recognition_annotations": [
+        {
+          "entity": {
+            "entity_id": "/m/05p0rrx",
+            "description": "Coca-Cola",
+            "language_code": "en-US"
+          },
+          "tracks": [
+            {
+              "segment": {
+                "start_time_offset": {"seconds": 5, "nanos": 0},
+                "end_time_offset": {"seconds": 11, "nanos": 0}
+              },
+              "confidence": 0.8843,
+              "timestamped_objects": [
+                {
+                  "normalized_bounding_box": {
+                    "left": 0.41, "top": 0.52, "right": 0.55, "bottom": 0.79
+                  },
+                  "time_offset": {"seconds": 6, "nanos": 0}
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "entity": {
+            "entity_id": "/m/05bmb",
+            "description": "Nike",
+            "language_code": "en-US"
+          },
+          "tracks": [
+            {
+              "segment": {
+                "start_time_offset": {"seconds": 8, "nanos": 0},
+                "end_time_offset": {"seconds": 18, "nanos": 0}
+              },
+              "confidence": 0.9312,
+              "timestamped_objects": [
+                {
+                  "normalized_bounding_box": {
+                    "left": 0.30, "top": 0.34, "right": 0.46, "bottom": 0.52
+                  },
+                  "time_offset": {"seconds": 10, "nanos": 0}
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "entity": {
+            "entity_id": "/m/01vtj38",
+            "description": "Kappa",
+            "language_code": "en-US"
+          },
+          "tracks": [
+            {
+              "segment": {
+                "start_time_offset": {"seconds": 26, "nanos": 0},
+                "end_time_offset": {"seconds": 30, "nanos": 0}
+              },
+              "confidence": 0.7106,
+              "timestamped_objects": [
+                {
+                  "normalized_bounding_box": {
+                    "left": 0.58, "top": 0.61, "right": 0.72, "bottom": 0.80
+                  },
+                  "time_offset": {"seconds": 27, "nanos": 0}
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
