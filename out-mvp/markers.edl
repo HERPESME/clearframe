@@ -1,0 +1,53 @@
+TITLE: ClearFrame Risk Markers - Bayer spot — creator upload
+FCM: NON-DROP FRAME
+
+001  001      V     C        01:00:00:00 01:00:00:01 01:00:00:00 01:00:00:01
+* LOC: 01:00:00:00 GREEN LOW|COPYRIGHT_ART|Landscape Painting
+
+002  001      V     C        01:00:00:12 01:00:00:13 01:00:00:12 01:00:00:13
+* LOC: 01:00:00:12 CYAN MEDIUM|RIGHT_OF_PUBLICITY|Elderly woman at dinner table
+
+003  001      V     C        01:00:00:12 01:00:00:13 01:00:00:12 01:00:00:13
+* LOC: 01:00:00:12 CYAN MEDIUM|RIGHT_OF_PUBLICITY|Man in tie at dinner table
+
+004  001      V     C        01:00:01:22 01:00:01:23 01:00:01:22 01:00:01:23
+* LOC: 01:00:01:22 CYAN MEDIUM|RIGHT_OF_PUBLICITY|Elderly woman at dinner table
+
+005  001      V     C        01:00:03:17 01:00:03:18 01:00:03:17 01:00:03:18
+* LOC: 01:00:03:17 YELLOW HIGH|RIGHT_OF_PUBLICITY|Young boy at dinner table
+
+006  001      V     C        01:00:05:10 01:00:05:11 01:00:05:10 01:00:05:11
+* LOC: 01:00:05:10 CYAN MEDIUM|RIGHT_OF_PUBLICITY|Young girl at dinner table
+
+007  001      V     C        01:00:06:00 01:00:06:01 01:00:06:00 01:00:06:01
+* LOC: 01:00:06:00 CYAN MEDIUM|TEXT_ON_SCREEN|Dinner Dialogue
+
+008  001      V     C        01:00:07:12 01:00:07:13 01:00:07:12 01:00:07:13
+* LOC: 01:00:07:12 CYAN MEDIUM|RIGHT_OF_PUBLICITY|Man in tie at dinner table
+
+009  001      V     C        01:00:09:22 01:00:09:23 01:00:09:22 01:00:09:23
+* LOC: 01:00:09:22 CYAN MEDIUM|RIGHT_OF_PUBLICITY|Young girl at dinner table
+
+010  001      V     C        01:00:12:19 01:00:12:20 01:00:12:19 01:00:12:20
+* LOC: 01:00:12:19 YELLOW HIGH|RIGHT_OF_PUBLICITY|Young boy at dinner table
+
+011  001      V     C        01:00:16:07 01:00:16:08 01:00:16:07 01:00:16:08
+* LOC: 01:00:16:07 YELLOW HIGH|RIGHT_OF_PUBLICITY|Man with headache
+
+012  001      V     C        01:00:17:12 01:00:17:13 01:00:17:12 01:00:17:13
+* LOC: 01:00:17:12 CYAN MEDIUM|TEXT_ON_SCREEN|Fast Pain Relief
+
+013  001      V     C        01:00:17:14 01:00:17:15 01:00:17:14 01:00:17:15
+* LOC: 01:00:17:14 CYAN MEDIUM|TRADEMARK|Bayer Aspirin
+
+014  001      V     C        01:00:21:14 01:00:21:15 01:00:21:14 01:00:21:15
+* LOC: 01:00:21:14 YELLOW HIGH|RIGHT_OF_PUBLICITY|Man with headache
+
+015  001      V     C        01:00:25:19 01:00:25:20 01:00:25:19 01:00:25:20
+* LOC: 01:00:25:19 CYAN MEDIUM|TRADEMARK|Bayer Aspirin
+
+016  001      V     C        01:00:26:12 01:00:26:13 01:00:26:12 01:00:26:13
+* LOC: 01:00:26:12 CYAN MEDIUM|TEXT_ON_SCREEN|Fast Pain Relief
+
+017  001      V     C        01:00:27:00 01:00:27:01 01:00:27:00 01:00:27:01
+* LOC: 01:00:27:00 GREEN LOW|TEXT_ON_SCREEN|Bayer Works Wonders
