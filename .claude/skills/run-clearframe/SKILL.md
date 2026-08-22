@@ -20,6 +20,18 @@ Demo scene is **8 elements**. Expect 1 CRITICAL, 1 identity `CONFLICTED` (the
 Adidas duffel the logo catalogue reads as Kappa — research is blocked for it),
 and coverage spanning COVERED / PARTIAL / NOT_COVERED / UNKNOWN.
 
+Two behaviours worth watching in the output because they are the product:
+
+- **e1 promotes.** The scan only ever sees "Upbeat electronic music"; acoustic
+  fingerprinting turns it into "Blinding Lights — The Weeknd" with verdict
+  `FINGERPRINTED`, and that is what lands in `cue_sheet.csv` — a legal filing
+  to a PRO.
+- **The ladder routes.** `state/demo.json` → `routes` shows `SEARCH` for
+  Coca-Cola (owner known locally, posture live), `STATUTE` for the background
+  face (a release form, not research), `BLOCKED` for the disputed Adidas
+  identity, `DEEP` for the unknown-artist mural. The dossier prints
+  "Resolved without rights research (N of M)" with the authority for each.
+
 ## Live run on your own footage
 
 ```bash
@@ -81,12 +93,16 @@ list_licences · check_coverage · generate_dossier`. Keep
 ## Tests + smoke
 
 ```bash
-.venv/bin/pytest -q     # 161 tests; must be green before any commit
+.venv/bin/pytest -q     # 231 tests; must be green before any commit
 bash scripts/smoke.sh   # 7 sections: CLI, web, SSE, webhook, verification, ledger, MCP
 ```
 
 When adding a smoke check, use its `has <needle> <curl args…>` helper. A bare
 `curl … | grep -q` races under `set -o pipefail`: grep exits on first match, curl
 dies of SIGPIPE (141), and the pipeline reports failure though the needle matched.
+The helper buffers the body and matches with a **here-string**, not a pipe —
+buffering alone is not enough, because `grep -q` still stops reading early and
+kills any writer whose output exceeds the 64KB pipe buffer. The dossier crossed
+that threshold and a correct check reported failure.
 
 Cloud-dependent tests auto-skip without the `cloud` extra. Live mode needs env vars — see the live-validate skill. Deployment — see the deploy-cloud skill.

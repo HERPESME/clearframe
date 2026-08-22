@@ -1,0 +1,12 @@
+{
+  "_comment": "Hand-labelled expectations for the fetched spots. 'must_find' marks are the ones a miss should count against; everything else is a bonus. Timecodes are approximate — match on label, not exact seconds.",
+  "source": "https://archive.org/details/ctvc (Creative Commons public domain)",
+  "clips": [
+    {"file": "ctvc_BAYER_512kb.mp4",   "truth": [{"label": "Bayer", "type": "LOGO", "must_find": true}]},
+    {"file": "ctvc_JELLO_512kb.mp4",   "truth": [{"label": "Jell-O", "type": "LOGO", "must_find": true}]},
+    {"file": "ctvc_LIPTON_512kb.mp4",  "truth": [{"label": "Lipton", "type": "LOGO", "must_find": true}]},
+    {"file": "ctvc_TEXACO_512kb.mp4",  "truth": [{"label": "Texaco", "type": "LOGO", "must_find": true}]},
+    {"file": "ctvc_PLAYTEX_512kb.mp4", "truth": [{"label": "Playtex", "type": "LOGO", "must_find": true}]},
+    {"file": "ctvc_VWBUG_512kb.mp4",   "truth": [{"label": "Volkswagen", "type": "LOGO", "must_find": true}]}
+  ]
+}

@@ -1,6 +1,8 @@
 # ClearFrame Phase 9 — The Escalation Ladder
 
-**Status:** Planned 2026-08-22 (branch `feat/corroboration-search-territory`).
+**Status:** Implemented 2026-08-22 (branch `feat/corroboration-search-territory`).
+231 tests, smoke green. Tasks 1, 2, 3, 5 and 7 shipped; 4, 6 and 8 remain (see
+"What is deliberately not done yet" at the end).
 
 **Problem.** A 21.8s clip took ~20 minutes. Measured cause: 16 Parallel deep-research
 Task runs, 6 of which returned no owner at all. Category mix was 7
@@ -198,18 +200,67 @@ Archives, Blender open movies (CC-BY), and NASA footage. Extend
 
 ## 5. Implementation order
 
-| # | Task | Unblocks |
+| # | Task | Status |
 | --- | --- | --- |
-| 1 | `imageio-ffmpeg` + `integrations/audio_client.py` (protocol + fixture + live AudD); `AUDIO_API_KEY` → `AUDD_API_TOKEN`; add `MUSIC_SYNC` to `CORROBORATABLE` | The highest-stakes correctness gap |
-| 2 | `data/rights/*.json` + `knowledge.py` loader | L0/L1 |
-| 3 | `routing.py` — the ladder, pure code, auditable like `planner.py`; `planner.py` becomes L4-only | The latency win |
-| 4 | Two-phase emit: report at L2, enrich over SSE | Perceived latency |
-| 5 | Latency fixes (poll interval, concurrent Court, concurrent audio) | Tail latency |
-| 6 | Depiction-context signal in `SCAN_PROMPT` + scan schema | Trademark accuracy; new differentiator |
-| 7 | `LicenceGrant.rights_type` + expanded ledger + corpus | Dataset breadth |
-| 8 | Scene chunking > 60 s | Feature-length footage |
+| 1 | `imageio-ffmpeg` + `integrations/audio_client.py` (protocol + fixture + live AudD); `AUDIO_API_KEY` → `AUDD_API_TOKEN` | **done** |
+| 2 | `data/rights/*.json` + `knowledge.py` loader | **done** |
+| 3 | `routing.py` — the ladder, pure code, auditable like `planner.py`; `planner.py` becomes L4-only | **done** |
+| 4 | Two-phase emit: report at L2, enrich over SSE | open |
+| 5 | Latency fixes (poll interval, concurrent Court, concurrent scan/VI/audio) | **done** |
+| 6 | Depiction-context signal in `SCAN_PROMPT` + scan schema | open |
+| 7 | `LicenceGrant.rights_type` + expanded ledger + corpus | **done** |
+| 8 | Scene chunking > 60 s | open |
 
-Tasks 1, 3 and 5 deliver most of the speedup.
+## What changed during implementation
+
+Three decisions differ from the plan, each because building it made the plan
+look wrong:
+
+1. **Music fingerprinting is an identity SOURCE, not a corroborator.** The plan
+   said "add `MUSIC_SYNC` to `CORROBORATABLE`". That would have been wrong: the
+   video model's "Upbeat Electronic Music" is not a competing identity claim to
+   be reconciled, it is the *absence* of one. Comparing them would have produced
+   CONFLICTED and blocked research on a song we had just correctly identified.
+   `audio.apply_audio_identity` promotes instead, and `FINGERPRINTED` was added
+   as a verdict that outranks `CORROBORATED`.
+
+2. **A rung must be able to answer the question its category poses.** The plan
+   routed attributable artwork to SEARCH. But for artwork "who owns this" IS the
+   question — a poster's rights can sit with the band, the label, the
+   photographer or the designer — and a two-second search cannot resolve it.
+   Trademark is the opposite: ownership is a local lookup and only posture is
+   live. So art goes DEEP and trademark goes SEARCH.
+
+3. **Materiality overrides the ladder.** Cheapest-that-can-answer is the right
+   default and the wrong rule for the two or three findings that will actually
+   sink a delivery. Anything at or above the HIGH band escalates to a deep run
+   regardless of category, because only a deep run produces a licensing contact,
+   a cost band and citations an underwriter can follow.
+
+## Defects found and fixed while building
+
+- **False licence matches from corporate name tokens.** `find_licences` matched
+  holders on raw token overlap, so "Kobalt Music Group" matched an owner string
+  containing "Universal Music Group" on `{music, group}` alone and reported a
+  festival-only cue licence as covering a Weeknd master. `matching.holders_match`
+  now compares identifying tokens only. Being wrong in the *covered* direction is
+  the one failure the ledger must not have.
+- **The smoke `has` helper still raced.** It had been "fixed" by buffering the
+  body before piping, but `grep -q` stops reading at the first match, so any
+  body over the 64KB pipe buffer still killed the writer. The dossier grew past
+  that line and a passing check reported failure. Here-strings are file-backed.
+
+## What is deliberately not done yet
+
+- **Two-phase emit (task 4).** `scoring.provisional_score` exists for it; the
+  SSE emit is not wired. This is the remaining *perceived*-latency win: a
+  complete timestamped risk report at ~45s with ownership arriving behind it.
+- **Depiction-context signal (task 6).** The research says brand risk turns on
+  *how* a mark is shown. Gemini can report it from footage already sent, free.
+- **Scene chunking (task 8).** Needed for feature-length footage, both for
+  parallelism and for timestamp accuracy over long spans.
+- **USPTO TSDR as a registry rung.** Would resolve unknown marks without a deep
+  run; needs an API key.
 
 ## Honesty guardrail
 
