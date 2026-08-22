@@ -14,6 +14,7 @@ and resumable.
 import asyncio
 import logging
 
+from clearframe.integrations.gemini_client import build_scan_context
 from clearframe.pipeline import PipelineContext
 
 log = logging.getLogger("clearframe.scan")
@@ -25,13 +26,22 @@ class ScanStage:
     async def run(self, ctx: PipelineContext) -> None:
         production = ctx.state.production
 
+        # The `script` stage has already run, so what the screenplay named is
+        # available to prime the scan. Gemini receives the whole mp4 either way
+        # — both tracks, natively — but until now it knew nothing ABOUT the
+        # production it was watching.
+        scan_context = build_scan_context(production, ctx.state.script_mentions)
+
         async def _watch():
-            result = await ctx.gemini.scan(production.footage_uri, production.duration_s)
+            result = await ctx.gemini.scan(
+                production.footage_uri, production.duration_s, scan_context
+            )
             ctx.emit({"type": "scan_found", "count": len(result.detections)})
             audit = await ctx.gemini.audit_scan(
                 production.footage_uri,
                 production.duration_s,
                 [d.label for d in result.detections],
+                scan_context,
             )
             ctx.emit({"type": "audit_found", "count": len(audit.detections)})
             return result, audit

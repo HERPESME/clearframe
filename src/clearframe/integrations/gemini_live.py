@@ -171,15 +171,23 @@ class LiveGeminiClient:
         raise ScanFailedError("unreachable")
 
     async def audit_scan(
-        self, footage_uri: str, duration_s: float, found_labels: list[str]
+        self,
+        footage_uri: str,
+        duration_s: float,
+        found_labels: list[str],
+        context: str = "",
     ) -> ScanResult:
         from clearframe.integrations.gemini_client import AUDIT_PROMPT_TEMPLATE
 
         prompt = AUDIT_PROMPT_TEMPLATE.format(found=", ".join(found_labels) or "nothing")
-        return await self._scan_with_prompt(footage_uri, prompt)
+        return await self._scan_with_prompt(footage_uri, prompt + context)
 
-    async def scan(self, footage_uri: str, duration_s: float) -> ScanResult:
-        return await self._scan_with_prompt(footage_uri, SCAN_PROMPT)
+    async def scan(
+        self, footage_uri: str, duration_s: float, context: str = ""
+    ) -> ScanResult:
+        from clearframe.integrations.gemini_client import scan_prompt_with
+
+        return await self._scan_with_prompt(footage_uri, scan_prompt_with(context))
 
     async def scan_script(self, text: str):
         from clearframe.integrations.gemini_client import (

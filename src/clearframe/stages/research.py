@@ -182,7 +182,11 @@ class ResearchStage:
         # than recomputing: identical inputs, but a single recorded answer.
         use_context = ctx.state.production.use_context
         routes = ctx.state.routes or route_all(
-            elements, kb, ctx.state.corroboration, use_context=use_context
+            elements,
+            kb,
+            ctx.state.corroboration,
+            use_context=use_context,
+            sponsors=ctx.state.production.sponsors,
         )
 
         # A CONFLICTED identity is routed BLOCKED by the router; keep the
