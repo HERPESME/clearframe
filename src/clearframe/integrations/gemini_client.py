@@ -49,6 +49,73 @@ SCAN_PROMPT = (
     "as unscanned_ranges. Be exhaustive: missing an element creates legal risk."
 )
 
+_MEDIUM_DESCRIPTION = {
+    "EXPRESSIVE": "a film, television or narrative short",
+    "SPONSORED": "sponsored online video with a paid brand placement",
+    "ADVERTISING": "a commercial advertisement or brand campaign",
+    "NEWS": "a news or journalistic report",
+    "EDUCATIONAL": "educational or critical commentary",
+}
+
+_MAX_SCRIPT_MENTIONS = 40
+
+
+def build_scan_context(production, script_mentions) -> str:
+    """Production context to hand the scan alongside the footage.
+
+    Gemini already receives the whole mp4, so it hears the dialogue and reads
+    on-screen text natively — that was never the gap. The gap was that it knew
+    nothing ABOUT the production: not the title, not that this is an advert
+    rather than a film, not who is paying for it, not what the script said.
+
+    Context sharpens two judgements the scan is otherwise guessing at: how
+    prominent something is to the story, and how it is portrayed.
+
+    It must never license an omission. Detection breadth is this product's
+    safety claim, and a hint about what matters is one careless sentence away
+    from becoming permission to skip things — so the closing instruction below
+    is load-bearing and has a test guarding it.
+    """
+    lines: list[str] = []
+
+    if getattr(production, "use_context", None) is not None:
+        medium = _MEDIUM_DESCRIPTION.get(production.use_context.value)
+        if medium and production.use_context.value != "EXPRESSIVE":
+            lines.append(f"- This work is {medium}.")
+
+    sponsors = list(getattr(production, "sponsors", []) or [])
+    if sponsors:
+        lines.append(
+            f"- Paying sponsors: {', '.join(sponsors)}. Their marks are authorised "
+            "here, but you must still report them — the report has to be complete."
+        )
+
+    labels = [m.label for m in (script_mentions or [])][:_MAX_SCRIPT_MENTIONS]
+    if labels:
+        lines.append(
+            f"- Named in the script: {', '.join(labels)}. Anything on screen that is "
+            "NOT on this list matters more, not less — unscripted set dressing is "
+            "what nobody budgeted clearance for."
+        )
+
+    if not lines:
+        return ""
+
+    title = getattr(production, "title", "") or "this production"
+    return (
+        f'\n\nPRODUCTION CONTEXT for "{title}":\n'
+        + "\n".join(lines)
+        + "\n\nUse this only to judge prominence and depiction more accurately. "
+        "Report everything you observe regardless of the context above; it must "
+        "not cause you to omit anything."
+    )
+
+
+def scan_prompt_with(context: str) -> str:
+    """SCAN_PROMPT plus context. Empty context returns the prompt unchanged."""
+    return SCAN_PROMPT + context if context else SCAN_PROMPT
+
+
 SCRIPT_PROMPT = (
     "You are a script clearance reader. Read this screenplay text and list every "
     "element that will require legal clearance when filmed: brand names/logos, "
@@ -225,10 +292,18 @@ def parse_script_payload(payload: dict) -> list[ScriptMention]:
 
 
 class GeminiClient(Protocol):
-    async def scan(self, footage_uri: str, duration_s: float) -> ScanResult: ...
+    # `context` is keyword-with-default throughout: a caller that does not
+    # supply it gets byte-identical behaviour to before it existed.
+    async def scan(
+        self, footage_uri: str, duration_s: float, context: str = ""
+    ) -> ScanResult: ...
 
     async def audit_scan(
-        self, footage_uri: str, duration_s: float, found_labels: list[str]
+        self,
+        footage_uri: str,
+        duration_s: float,
+        found_labels: list[str],
+        context: str = "",
     ) -> ScanResult: ...
 
     async def scan_script(self, text: str) -> list[ScriptMention]: ...
@@ -238,12 +313,18 @@ class FixtureGeminiClient:
     def __init__(self, fixtures_dir: Path):
         self.fixtures_dir = Path(fixtures_dir)
 
-    async def scan(self, footage_uri: str, duration_s: float) -> ScanResult:
+    async def scan(
+        self, footage_uri: str, duration_s: float, context: str = ""
+    ) -> ScanResult:
         payload = json.loads((self.fixtures_dir / "demo_scene.json").read_text())
         return parse_scan_payload(payload)
 
     async def audit_scan(
-        self, footage_uri: str, duration_s: float, found_labels: list[str]
+        self,
+        footage_uri: str,
+        duration_s: float,
+        found_labels: list[str],
+        context: str = "",
     ) -> ScanResult:
         path = self.fixtures_dir / "demo_scene_audit.json"
         if not path.exists():

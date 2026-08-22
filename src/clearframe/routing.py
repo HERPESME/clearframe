@@ -77,6 +77,64 @@ _COMMERCIAL = {UseContext.ADVERTISING, UseContext.SPONSORED}
 # complaint; association is.
 _ADVERSE = {DepictionTone.UNFLATTERING, DepictionTone.DISPARAGING}
 
+# Categories where a sponsor's own mark can appear.
+_BRAND_CATEGORIES = {
+    ClearanceCategory.TRADEMARK,
+    ClearanceCategory.TEXT_ON_SCREEN,
+}
+
+
+def _sponsor_authorised(
+    element: TriagedElement, knowledge: KnowledgeBase, sponsors: list[str]
+) -> ResearchRoute | None:
+    """The sponsor's own mark, appearing in the thing they are paying for.
+
+    This is not an unlicensed use, and treating it as one produced the worst
+    output the router has generated: a Parallel Task run and the disposition
+    "approach Domino's Pizza, Inc." handed to the agency whose client
+    commissioned the advert.
+
+    It is not suppressed either — a dossier that silently omits the hero
+    product is incomplete, and the production agreement still has to reach the
+    declared territories and media. That is a coverage question, and this is
+    how it gets asked.
+    """
+    if not sponsors or element.category not in _BRAND_CATEGORIES:
+        return None
+    # Authorisation covers showing the mark, not disparaging it.
+    if element.depiction in _ADVERSE:
+        return None
+
+    found = knowledge.find_mark(element.label)
+    if found is None:
+        return None
+
+    for name in sponsors:
+        sponsor = knowledge.find_mark(name)
+        if sponsor is None:
+            continue
+        if found.owner != sponsor.owner and found.parent != sponsor.parent:
+            continue
+        return ResearchRoute(
+            element_id=element.id,
+            tier=ResearchTier.LOCAL,
+            owner=found.owner,
+            posture=LicensingPosture.PERMISSIVE,
+            rationale=(
+                f"'{name}' is a declared sponsor of this production, so {found.owner}'s "
+                "mark appearing in it is authorised by contract rather than a use "
+                "needing clearance. Researching who owns it would spend a deep run to "
+                "arrive back at the client."
+            ),
+            basis="Authorised by the production or sponsorship agreement",
+            disposition=(
+                f"No clearance request. Confirm the {name} agreement covers the "
+                "declared territories, media and term — an authorised mark shown "
+                "outside the granted scope is still a gap."
+            ),
+        )
+    return None
+
 # --- vocabularies ----------------------------------------------------------
 
 # A person with no name. There is no rights holder to research: the clearance
@@ -468,6 +526,7 @@ def route(
     corroboration: Corroboration | None = None,
     escalate_material: bool = True,
     use_context: UseContext = UseContext.EXPRESSIVE,
+    sponsors: list[str] | None = None,
 ) -> ResearchRoute:
     """Decide how one finding gets resolved. Deterministic and reproducible."""
     if corroboration is not None and corroboration.verdict is IdentityVerdict.CONFLICTED:
@@ -482,6 +541,10 @@ def route(
             basis="Identity conflict",
             disposition="A human resolves identity before any research runs.",
         )
+    authorised = _sponsor_authorised(element, knowledge, sponsors or [])
+    if authorised is not None:
+        return authorised
+
     chosen = _ROUTERS[element.category](element, knowledge, corroboration, use_context)
 
     # An adverse depiction changes the question being asked. Ownership is known
@@ -560,11 +623,17 @@ def route_all(
     corroboration: dict[str, Corroboration] | None = None,
     escalate_material: bool = True,
     use_context: UseContext = UseContext.EXPRESSIVE,
+    sponsors: list[str] | None = None,
 ) -> dict[str, ResearchRoute]:
     corroboration = corroboration or {}
     return {
         el.id: route(
-            el, knowledge, corroboration.get(el.id), escalate_material, use_context
+            el,
+            knowledge,
+            corroboration.get(el.id),
+            escalate_material,
+            use_context,
+            sponsors,
         )
         for el in elements
     }

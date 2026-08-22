@@ -42,7 +42,11 @@ class PreviewStage:
         use_context = ctx.state.production.use_context
         knowledge = load_knowledge()
         routes = route_all(
-            elements, knowledge, ctx.state.corroboration, use_context=use_context
+            elements,
+            knowledge,
+            ctx.state.corroboration,
+            use_context=use_context,
+            sponsors=ctx.state.production.sponsors,
         )
         ctx.state.routes = routes
 
