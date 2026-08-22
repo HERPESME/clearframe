@@ -164,10 +164,16 @@ def assess_all_exposures(
     if not findings:
         return []
     checked = territories or ["US"]
+    # Tie-break on regime strictness, not on list order. MINOR is deliberately
+    # not scaled by jurisdiction, so every territory scores 100 and a plain
+    # `max` reports whichever came first — which on a live US/DE/IN release
+    # named "State right of publicity" for a child. The severity was right and
+    # the regime was misleading, which is worse than useless: it points the
+    # producer at the wrong instrument.
     worst = [
         max(
             (assess_exposure(f, t) for t in checked),
-            key=lambda a: a.score,
+            key=lambda a: (a.score, _regime_factor(a.territory)),
         )
         for f in findings
     ]

@@ -117,3 +117,21 @@ def test_summary_counts_by_band_and_names_the_worst():
 def test_nothing_found_summarises_cleanly():
     s = summarise_exposures([])
     assert s["total"] == 0 and s["worst_kind"] is None
+
+
+def test_a_tie_on_severity_still_reports_the_strictest_regime():
+    """Found by reading a live run. MINOR is deliberately not scaled by
+    jurisdiction, so every territory scored 100 and `max` returned whichever
+    came first — reporting "State right of publicity" for a child in a release
+    that included Germany and India. The severity was right and the regime was
+    misleading, which is worse than useless: it names the wrong instrument."""
+    a = assess_all_exposures([ex(ExposureKind.MINOR)], ["US", "DE", "IN"])[0]
+    assert a.score == 100
+    assert a.territory == "DE", a.territory
+    assert "GDPR" in a.regime
+
+
+def test_the_strictest_regime_wins_regardless_of_territory_order():
+    for order in (["US", "DE"], ["DE", "US"], ["IN", "US"], ["US", "IN"]):
+        a = assess_all_exposures([ex(ExposureKind.MINOR)], order)[0]
+        assert a.territory != "US", order
