@@ -114,3 +114,57 @@ async def test_pipeline_corroborates_and_blocks_the_disputed_element(tmp_path):
     # the disputed identity is never researched, and never enumerated either
     assert state.research["e8"].status == "incomplete"
     assert "e8" not in state.candidates
+
+
+# ------------------------------------------ regression: the false conflict
+def _bayer_element():
+    return TriagedElement(
+        id="e1",
+        label="Bayer Aspirin",
+        element_type=ElementType.LOGO,
+        description="Bayer cross on the tin",
+        time_ranges=[TimeRange(start_s=0.0, end_s=30.0)],
+        prominence=Prominence(
+            screen_time_s=9.0, frame_coverage=0.2, centrality=0.7, plot_integral=True
+        ),
+        category=ClearanceCategory.TRADEMARK,
+    )
+
+
+def test_a_legal_suffix_must_not_defeat_agreement():
+    """From a live run on a 1950s Bayer spot. Video Intelligence returned
+    'Bayer Corporation' three times at ~0.87, but {bayer, aspirin} against
+    {bayer, corporation} scores 0.5 — under threshold — so correct agreement was
+    rejected and one spurious hit made the identity CONFLICTED. Research was
+    then blocked on the only confidently identified brand in the clip."""
+    hits = [
+        DetectorHit(label="Bayer Corporation", confidence=0.88),
+        DetectorHit(label="Bayer Corporation", confidence=0.85),
+        DetectorHit(label="Bayer Corporation", confidence=0.89),
+        DetectorHit(label="Wake Forest Demon Deacons", confidence=0.94),
+    ]
+    result = assess(_bayer_element(), hits, "cloud-video-intelligence")
+
+    assert result.verdict is IdentityVerdict.CORROBORATED
+    assert result.detected_label == "Bayer Corporation"
+    assert blocks_research(result) is False
+
+
+def test_one_confident_false_positive_does_not_outvote_agreement():
+    """A busy frame makes a closed-vocabulary detector emit several labels.
+    Some of them disagreeing is normal; it is only a conflict when NONE agree."""
+    hits = [
+        DetectorHit(label="Bayer", confidence=0.6),
+        DetectorHit(label="Something Else Entirely", confidence=0.99),
+    ]
+    assert (
+        assess(_bayer_element(), hits, "d").verdict is IdentityVerdict.CORROBORATED
+    )
+
+
+def test_a_genuine_disagreement_is_still_a_conflict():
+    """The guardrail this fix must not weaken."""
+    hits = [DetectorHit(label="Kappa", confidence=0.8)]
+    result = assess(_bayer_element(), hits, "d")
+    assert result.verdict is IdentityVerdict.CONFLICTED
+    assert blocks_research(result) is True

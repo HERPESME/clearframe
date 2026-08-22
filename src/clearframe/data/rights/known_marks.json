@@ -1429,6 +1429,106 @@
    "sector": "industrial",
    "posture": "standard",
    "posture_evidence": "Sued Disney over bulldozer depiction in George of the Jungle 2 (Caterpillar v. Walt Disney, C.D. Ill. 2003) and lost — depicting a product is not trademark infringement absent confusion."
+  },
+  {
+   "label": "Bayer",
+   "owner": "Bayer AG",
+   "parent": "Bayer AG",
+   "aliases": [
+    "bayer aspirin",
+    "bayer cross"
+   ],
+   "sector": "pharma",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Jell-O",
+   "owner": "The Kraft Heinz Company",
+   "parent": "The Kraft Heinz Company",
+   "aliases": [
+    "jello",
+    "jell o"
+   ],
+   "sector": "food",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Lipton",
+   "owner": "Unilever PLC",
+   "parent": "Unilever PLC",
+   "aliases": [],
+   "sector": "beverage",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Playtex",
+   "owner": "Edgewell Personal Care Company",
+   "parent": "Edgewell Personal Care Company",
+   "aliases": [],
+   "sector": "consumer",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Alka-Seltzer",
+   "owner": "Bayer AG",
+   "parent": "Bayer AG",
+   "aliases": [
+    "alka seltzer"
+   ],
+   "sector": "pharma",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Tide",
+   "owner": "The Procter & Gamble Company",
+   "parent": "The Procter & Gamble Company",
+   "aliases": [],
+   "sector": "consumer",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Colgate",
+   "owner": "Colgate-Palmolive Company",
+   "parent": "Colgate-Palmolive Company",
+   "aliases": [],
+   "sector": "consumer",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Gillette",
+   "owner": "The Procter & Gamble Company",
+   "parent": "The Procter & Gamble Company",
+   "aliases": [],
+   "sector": "consumer",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Dove",
+   "owner": "Unilever PLC",
+   "parent": "Unilever PLC",
+   "aliases": [],
+   "sector": "consumer",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Nescafé",
+   "owner": "Nestlé S.A.",
+   "parent": "Nestlé S.A.",
+   "aliases": [
+    "nescafe"
+   ],
+   "sector": "beverage",
+   "posture": "unknown",
+   "posture_evidence": ""
   }
  ]
 }

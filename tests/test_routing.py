@@ -301,3 +301,38 @@ def test_attributable_artwork_still_needs_a_deep_run():
     assert r.tier is ResearchTier.DEEP
     assert r.enumerate_candidates is False  # attributable — no enumeration needed
     assert "Ringgold" in r.basis
+
+
+# ------------------------------------------------------------ useful articles
+@pytest.mark.parametrize(
+    "label", ["Flower Vase", "Second Flower Vase", "Plain wooden chair", "Table lamp"]
+)
+def test_useful_articles_are_not_works_of_authorship(label):
+    """Found on a live run: a 1950s Bayer spot produced 'Flower Vase' and
+    'Second Flower Vase' as ARTWORK and both went to deep rights research."""
+    r = route(el(label, ClearanceCategory.COPYRIGHT_ART), KB)
+    assert r.tier is ResearchTier.STATUTE
+    assert "17 U.S.C. §101" in r.basis
+
+
+@pytest.mark.parametrize(
+    "label",
+    [
+        "Landscape Painting",
+        "Framed photograph on the wall",
+        "Concert poster",
+        "Bronze sculpture in the lobby",
+        "Painted mural",
+    ],
+)
+def test_authored_images_are_never_downgraded_as_useful_articles(label):
+    """Ringgold v. BET turned on a poster hanging on a wall. Quietly
+    downgrading authored images is the failure this product exists to prevent."""
+    r = route(el(label, ClearanceCategory.COPYRIGHT_ART), KB)
+    assert r.tier is ResearchTier.DEEP
+
+
+def test_a_designer_piece_is_not_swept_up_by_the_utilitarian_rule():
+    """'Eames lounge chair' names a design; only wholly generic labels qualify."""
+    r = route(el("Eames lounge chair", ClearanceCategory.COPYRIGHT_ART), KB)
+    assert r.tier is ResearchTier.DEEP
