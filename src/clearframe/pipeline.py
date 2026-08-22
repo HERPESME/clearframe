@@ -23,6 +23,7 @@ ANALYSIS_STAGES = (
     "triage",
     "corroborate",
     "drift",
+    "preview",
     "research",
     "freshness",
     "risk",
@@ -92,6 +93,7 @@ def build_demo_pipeline(max_research: int | None = None) -> list[Stage]:
     from clearframe.stages.coverage import CoverageStage
     from clearframe.stages.drift_stage import DriftStage
     from clearframe.stages.freshness import FreshnessStage
+    from clearframe.stages.preview import PreviewStage
     from clearframe.stages.script import ScriptStage
     from clearframe.stages.territory_stage import TerritoryStage
 
@@ -103,6 +105,7 @@ def build_demo_pipeline(max_research: int | None = None) -> list[Stage]:
         TriageStage(),
         CorroborateStage(),
         DriftStage(),
+        PreviewStage(),
         ResearchStage(max_research=max_research),
         FreshnessStage(),
         RiskStage(),

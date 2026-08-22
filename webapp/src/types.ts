@@ -232,6 +232,19 @@ export interface PipelineEvent {
   count?: number;
   total_est_cost_usd?: number;
   deep_runs?: number;
+  awaiting_research?: number;
+  resolved_now?: number;
+  findings?: {
+    element_id: string;
+    label: string;
+    category: string;
+    band: string;
+    score: number;
+    tier: string;
+    identity: string | null;
+    start_s: number | null;
+    awaiting_research: boolean;
+  }[];
   routes?: Record<string, number>;
   tier?: string;
 }

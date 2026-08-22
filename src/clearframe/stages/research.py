@@ -165,7 +165,10 @@ class ResearchStage:
         kb = load_knowledge()
         by_id = {el.id: el for el in elements}
 
-        routes = route_all(elements, kb, ctx.state.corroboration)
+        # `preview` already routed everything so the producer could see the
+        # rungs before the expensive one started. Reuse those decisions rather
+        # than recomputing: identical inputs, but a single recorded answer.
+        routes = ctx.state.routes or route_all(elements, kb, ctx.state.corroboration)
 
         # A CONFLICTED identity is routed BLOCKED by the router; keep the
         # explicit check so the invariant holds even if routing changes.

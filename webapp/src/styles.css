@@ -662,6 +662,13 @@ button {
   border-color: var(--low);
 }
 
+/* Preliminary-report rows are banded by provisional risk — an upper bound that
+   can only fall once ownership research lands, never rise. */
+.row-chip.band.CRITICAL { color: var(--critical); border-color: var(--critical); }
+.row-chip.band.HIGH { color: var(--high); border-color: var(--high); }
+.row-chip.band.MEDIUM { color: var(--amber); border-color: var(--amber); }
+.row-chip.band.LOW { color: var(--low); border-color: var(--low); }
+
 .mission-foot {
   text-align: center;
   margin-top: 30px;

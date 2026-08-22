@@ -1,0 +1,93 @@
+"""Stage: emit the complete footage-derived report before research begins.
+
+Measured on a live 30-second clip: script through drift completed in about 90
+seconds, and the run took 9m43s. The extra eight minutes were Parallel Task
+runs on the two or three findings whose ownership genuinely needed an open-web
+investigation — irreducible, and correct to spend.
+
+But everything an editor needs to start working is already known at 90 seconds:
+what is in the footage, when, where in frame, how exposed the production is by
+prominence, which jurisdiction bands it worst, and what must be done about the
+findings that need no research at all. The only missing column is who owns it.
+
+So the report ships at 90 seconds and ownership arrives behind it. Risk here is
+`provisional` — the same arithmetic as the final score with the posture factor
+pinned at its worst case, so it is an upper bound that can only fall once
+research lands, never a reassuring guess that later turns out worse.
+
+This stage also fixes the routes, so the answer to "which rung is this going
+to" is available before the expensive rung starts. Research reuses them.
+"""
+
+from clearframe.knowledge import load_knowledge
+from clearframe.models import PreviewFinding, ResearchTier
+from clearframe.pipeline import PipelineContext
+from clearframe.routing import route_all, summarise_routes
+from clearframe.scoring import band_for, provisional_score
+from clearframe.territory import assess as assess_territory
+
+
+class PreviewStage:
+    name = "preview"
+
+    async def run(self, ctx: PipelineContext) -> None:
+        elements = ctx.state.elements
+        if not elements:
+            ctx.emit({"type": "preview_ready", "count": 0, "findings": []})
+            return
+
+        routes = route_all(elements, load_knowledge(), ctx.state.corroboration)
+        ctx.state.routes = routes
+
+        territories = ctx.state.production.release_territories or []
+        findings: list[PreviewFinding] = []
+        for el in elements:
+            score = provisional_score(el)
+            band = band_for(score)
+            corroboration = ctx.state.corroboration.get(el.id)
+            route = routes[el.id]
+            findings.append(
+                PreviewFinding(
+                    element_id=el.id,
+                    label=el.label,
+                    category=el.category,
+                    time_ranges=el.time_ranges,
+                    bbox=el.bbox,
+                    at_s=el.at_s,
+                    provisional_score=score,
+                    provisional_band=band,
+                    identity=corroboration.verdict if corroboration else None,
+                    territory=[assess_territory(el, band, t) for t in territories],
+                    route_tier=route.tier,
+                    disposition=route.disposition,
+                    awaiting_research=route.tier
+                    in (ResearchTier.SEARCH, ResearchTier.DEEP),
+                )
+            )
+
+        findings.sort(key=lambda f: f.provisional_score, reverse=True)
+        ctx.state.preview = findings
+
+        summary = summarise_routes(routes)
+        ctx.emit(
+            {
+                "type": "preview_ready",
+                "count": len(findings),
+                "awaiting_research": sum(1 for f in findings if f.awaiting_research),
+                "resolved_now": len(summary["resolved_without_research"]),
+                "findings": [
+                    {
+                        "element_id": f.element_id,
+                        "label": f.label,
+                        "category": f.category.value,
+                        "band": f.provisional_band.value,
+                        "score": f.provisional_score,
+                        "tier": f.route_tier.value,
+                        "identity": f.identity.value if f.identity else None,
+                        "start_s": f.time_ranges[0].start_s if f.time_ranges else None,
+                        "awaiting_research": f.awaiting_research,
+                    }
+                    for f in findings
+                ],
+            }
+        )

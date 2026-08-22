@@ -18,7 +18,8 @@ const INITIAL_AGENTS: AgentCard[] = [
   { key: "audit", name: "E&O Auditor", role: "Gemini · second-pass review", status: "idle", line: "Standing by" },
   { key: "triage", name: "Triage", role: "deterministic rules", status: "idle", line: "Standing by" },
   { key: "corroborate", name: "Identity Corroborator", role: "logo catalogue · second opinion", status: "idle", line: "Standing by" },
-  { key: "planner", name: "Budget Planner", role: "research allocation", status: "idle", line: "Standing by" },
+  { key: "preview", name: "Preliminary Report", role: "footage-derived · no research", status: "idle", line: "Standing by" },
+  { key: "planner", name: "Budget Planner", role: "escalation ladder", status: "idle", line: "Standing by" },
   { key: "research", name: "Rights Researchers", role: "Parallel Task API · fan-out", status: "idle", line: "Standing by" },
   { key: "signals", name: "Live Signals", role: "Parallel Search · real time", status: "idle", line: "Standing by" },
   { key: "risk", name: "Risk Engine", role: "reproducible scoring", status: "idle", line: "Standing by" },
@@ -33,6 +34,11 @@ const HOLDING_LABEL: Record<CourtHolding, string> = {
   escalate: "ESCALATE",
 };
 
+const fmtTime = (s: number | null | undefined) => {
+  if (s === null || s === undefined) return "--:--";
+  return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+};
+
 interface RowItem {
   id: string;
   text: string;
@@ -42,6 +48,7 @@ interface RowItem {
 
 export function MissionControl({ onComplete }: { onComplete: () => void }) {
   const [agents, setAgents] = useState<AgentCard[]>(INITIAL_AGENTS);
+  const [previewRows, setPreviewRows] = useState<RowItem[]>([]);
   const [researchRows, setResearchRows] = useState<RowItem[]>([]);
   const [courtRows, setCourtRows] = useState<RowItem[]>([]);
   const [idRows, setIdRows] = useState<RowItem[]>([]);
@@ -182,6 +189,22 @@ export function MissionControl({ onComplete }: { onComplete: () => void }) {
             patch("court", { status: "done", line: "All rulings issued" });
           }
           break;
+        case "preview_ready": {
+          const awaiting = e.awaiting_research ?? 0;
+          patch("preview", {
+            status: "done",
+            line: `${e.count ?? 0} findings timestamped and banded · ${e.resolved_now ?? 0} already actionable · ${awaiting} awaiting ownership`,
+          });
+          setPreviewRows(
+            (e.findings ?? []).map((f) => ({
+              id: f.element_id,
+              text: `${fmtTime(f.start_s)}  ${f.label}`,
+              chip: f.band,
+              chipClass: `band ${f.band}`,
+            })),
+          );
+          break;
+        }
         case "research_planned": {
           const r = e.routes ?? {};
           const free = (r.LOCAL ?? 0) + (r.STATUTE ?? 0);
@@ -262,6 +285,16 @@ export function MissionControl({ onComplete }: { onComplete: () => void }) {
             </div>
             <div className="agent-role">{a.role}</div>
             <div className="agent-line">{a.line}</div>
+            {a.key === "preview" && previewRows.length > 0 && (
+              <div className="agent-rows">
+                {previewRows.map((r) => (
+                  <div key={r.id} className="agent-row">
+                    <span className="row-text">{r.text}</span>
+                    {r.chip && <span className={`row-chip ${r.chipClass ?? ""}`}>{r.chip}</span>}
+                  </div>
+                ))}
+              </div>
+            )}
             {a.key === "research" && researchRows.length > 0 && (
               <div className="agent-rows">
                 {researchRows.map((r) => (
