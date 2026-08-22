@@ -170,9 +170,12 @@ def test_unattributed_material_artwork_is_exactly_what_deep_research_is_for():
     assert "Falkner" in r.basis
 
 
-def test_unfingerprinted_music_earns_a_deep_run():
+def test_unfingerprinted_music_with_only_a_description_is_not_researched():
+    """Superseded the earlier expectation that this earned a deep run. Two live
+    runs proved a description returns either nothing or a confident wrong
+    answer, and both cost minutes."""
     r = route(el("Upbeat electronic music", ClearanceCategory.MUSIC_SYNC), KB)
-    assert r.tier is ResearchTier.DEEP
+    assert r.tier is ResearchTier.STATUTE
 
 
 def test_fingerprinted_music_only_needs_posture_and_contact():
@@ -335,4 +338,39 @@ def test_authored_images_are_never_downgraded_as_useful_articles(label):
 def test_a_designer_piece_is_not_swept_up_by_the_utilitarian_rule():
     """'Eames lounge chair' names a design; only wholly generic labels qualify."""
     r = route(el("Eames lounge chair", ClearanceCategory.COPYRIGHT_ART), KB)
+    assert r.tier is ResearchTier.DEEP
+
+
+# ---------------------------------------- descriptions are not identities
+@pytest.mark.parametrize("label", ["Father", "Grandmother", "Presenter", "Elderly man"])
+def test_people_named_only_by_their_role_need_a_release_not_research(label):
+    """From a live run: 'Father' and 'Grandmother' were dispatched to rights
+    research and returned nothing, while 'Young Boy' and 'Little Girl'
+    correctly went to release forms — the same people, sorted by an accident
+    of vocabulary."""
+    r = route(el(label, ClearanceCategory.RIGHT_OF_PUBLICITY), KB)
+    assert r.tier is ResearchTier.STATUTE
+    assert "release" in r.disposition.lower()
+
+
+@pytest.mark.parametrize("label", ["Instrumental Score", "Background music", "Upbeat pop"])
+def test_unidentified_music_is_not_researched_from_its_description(label):
+    """Researching a description is not merely fruitless. On real footage
+    'Upbeat Electronic Music' returned a plausible owner with fourteen
+    citations for a recording that was actually 'Blinding Lights'."""
+    r = route(el(label, ClearanceCategory.MUSIC_SYNC), KB)
+    assert r.tier is ResearchTier.STATUTE
+    assert "cue sheet" in r.disposition.lower()
+
+
+def test_named_but_unfingerprinted_music_still_earns_a_deep_run():
+    r = route(el("Bohemian Rhapsody", ClearanceCategory.MUSIC_SYNC), KB)
+    assert r.tier is ResearchTier.DEEP
+
+
+def test_unidentifiable_artwork_still_gets_the_expensive_attempt():
+    """Deliberately asymmetric with music: Falkner and Ringgold both turned on
+    unattributed images, and FindAll enumeration is a real answer for art in a
+    way it is not for a recording."""
+    r = route(el("Painting", ClearanceCategory.COPYRIGHT_ART), KB)
     assert r.tier is ResearchTier.DEEP

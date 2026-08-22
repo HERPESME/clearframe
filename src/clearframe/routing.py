@@ -37,6 +37,7 @@ appear in the dossier as a documented position — never as a silent skip.
 Pure code, no I/O, no LLM. Same contract as `scoring.py` and `territory.py`.
 """
 
+from clearframe.audio import is_generic_label
 from clearframe.knowledge import KnowledgeBase
 from clearframe.matching import tokens
 from clearframe.scoring import provisional_score
@@ -76,6 +77,22 @@ _ANONYMOUS = {
     "spectator", "spectators", "patron", "patrons", "customer", "customers",
     "unknown", "face", "faces", "person", "people", "man", "woman", "men",
     "women", "guy", "girl", "boy", "child", "kid", "figure", "silhouette",
+    # Relationship and role labels. A scan describing the cast by their part
+    # ("Father", "Grandmother", "Presenter") has named nobody: there is no
+    # rights holder behind a role. Found on a live run where "Father" and
+    # "Grandmother" were dispatched to rights research and returned nothing,
+    # while "Young Boy" and "Little Girl" correctly went to release forms —
+    # the same people, sorted by an accident of vocabulary.
+    "father", "mother", "dad", "mom", "mum", "parent", "grandmother",
+    "grandfather", "grandma", "grandpa", "son", "daughter", "brother",
+    "sister", "husband", "wife", "family", "baby", "infant", "toddler",
+    "teen", "teenager", "adult", "elderly", "senior", "young", "old",
+    "presenter", "host", "hostess", "announcer", "narrator", "spokesperson",
+    "spokesman", "spokeswoman", "actor", "actors", "actress", "cast",
+    "performer", "model", "dancer", "singer", "musician", "worker", "waiter",
+    "waitress", "clerk", "cashier", "driver", "doctor", "nurse", "teacher",
+    "student", "shopper", "diner", "guest", "visitor", "neighbour", "neighbor",
+    "couple", "group", "portrait", "headshot", "profile",
 }
 
 # Graphics the production made itself. Its own copyright; nothing to clear.
@@ -273,11 +290,26 @@ def _route_music(el: TriagedElement, corroboration: Corroboration | None) -> Res
                 "most common music clearance failure."
             ),
         )
+    if is_generic_label(el.label):
+        return _statute(
+            el,
+            "The scan described this music rather than naming it, and acoustic "
+            "fingerprinting found no match — so there is no work to research. "
+            "Researching a description is not merely fruitless: on real footage "
+            "'Upbeat Electronic Music' returned a plausible owner with fourteen "
+            "citations for a recording that was actually 'Blinding Lights'. A "
+            "confident wrong answer is worse than an admitted gap.",
+            "No identified work — research requires an identity to research",
+            "Identify the recording before clearing it: production music records "
+            "and the composer or library agreement will name it, or re-run "
+            "fingerprinting over a segment where the cue is not buried under "
+            "dialogue. Do NOT file a cue sheet from a description.",
+        )
     return _deep(
         el,
-        "Music is the category productions reliably lose, and this recording is "
-        "unidentified — no fingerprint match. Publisher and master chains are "
-        "genuinely multi-hop, which is exactly what a deep run is for.",
+        "Music is the category productions reliably lose. The recording carries a "
+        "title but no fingerprint match, so publisher and master chains still need "
+        "tracing — genuinely multi-hop, which is what a deep run is for.",
         basis="NMPA v. Fullscreen (2013); Bridgeport v. Dimension Films, 410 F.3d 792 (6th Cir. 2005)",
     )
 
@@ -302,6 +334,11 @@ def _route_art(el: TriagedElement) -> ResearchRoute:
             "Record a de minimis position in the E&O file. Carriers do not accept "
             "fair use in place of clearance, so the memo must be written down, not assumed.",
         )
+    # Deliberately NOT mirrored from the music rule above. A bare "Painting"
+    # is as unidentifiable as "Instrumental Score", but the stakes are not
+    # symmetric: Falkner and Ringgold both turned on unattributed images, and
+    # FindAll enumeration is a real answer for art in a way it is not for a
+    # recording. Art gets the expensive attempt; music does not.
     if _any_token(el.label, _UNATTRIBUTED):
         return _deep(
             el,
