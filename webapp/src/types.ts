@@ -49,6 +49,17 @@ export interface SponsorConflict {
   note: string;
 }
 
+export interface PlatformOutcome {
+  element_id: string;
+  platform: string;
+  action: string;
+  confidence: string;
+  detected_by: string;
+  consequence: string;
+  remedy: string;
+  revenue_impact: string;
+}
+
 export interface AssessedExposure {
   id: string;
   kind: string;
@@ -308,6 +319,7 @@ export interface ProductionState {
   routes: Record<string, ResearchRoute>;
   sponsor_conflicts: SponsorConflict[];
   assessed_exposures: AssessedExposure[];
+  platform_outcomes: PlatformOutcome[];
   freshness: Record<string, FreshnessSignal[]>;
   territory_risk: Record<string, TerritoryRisk[]>;
   territories: string[];
