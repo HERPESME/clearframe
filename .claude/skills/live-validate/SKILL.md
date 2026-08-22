@@ -100,6 +100,24 @@ The same `--live` run exercises research automatically. Verify: Basis citations 
 
 Capture real responses from the salted demo scene and replace the hand-written fixtures in `src/clearframe/integrations/fixtures/` so demo mode replays genuine API output. Keep element ids/labels aligned with `demo_scene.json` expectations in tests, or update tests deliberately.
 
+## Step 5b — validate the ladder and fingerprinting (Phase 9)
+
+- **Fingerprinting**: needs `AUDD_API_TOKEN` (or the legacy `AUDIO_API_KEY`) and
+  an *activated* AudD trial — a well-formed token on an inactive account returns
+  error 900. Run any clip with music and check `state/*.json` → `audio_matches`
+  and `corroboration.<music id>.verdict` = `FINGERPRINTED`. If the video model
+  gave only a description, the element label should have been REWRITTEN to the
+  fingerprinted title; that rewrite is what reaches the cue sheet.
+- **Ladder**: check `routes` in the state. On real creator footage most findings
+  should land on `STATUTE` (faces, own captions) and only one or two on `DEEP`.
+  If everything is `DEEP`, the knowledge base is not loading — check
+  `data/rights/` shipped with the install.
+- **Cost**: `research_planned` now emits `deep_runs` and `routes`. Deep runs are
+  the only line item that costs real money; SEARCH is $0.005 each.
+- **ffmpeg**: comes from `imageio-ffmpeg` inside the venv. Confirm with
+  `python -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())"`.
+  A bare `ffmpeg` on PATH is NOT what the code uses.
+
 ## Step 5 — validate the newer surfaces
 
 - **Corroboration**: needs `videointelligence.googleapis.com`. Run any clip live and

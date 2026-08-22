@@ -42,11 +42,71 @@ that cannot invent a brand outside it.
 
 | Verdict | Meaning | Effect |
 | --- | --- | --- |
+| `FINGERPRINTED` | an acoustic fingerprint **measured** the recording | research proceeds; this is what a cue sheet needs |
 | `CORROBORATED` | two independent detectors named the same thing | research proceeds |
-| `SINGLE_SOURCE` | only the video model saw it (murals, tattoos, music are outside any catalogue) | research proceeds, flagged in the dossier |
+| `SINGLE_SOURCE` | only the video model saw it (murals and tattoos are outside any catalogue) | research proceeds, flagged in the dossier |
 | `CONFLICTED` | the detectors named **different** things | **research is blocked** — a human resolves identity first |
 
+For music the second opinion is not an opinion at all. Gemini listening to a
+track and naming it produced "Upbeat Electronic Music" on real footage; rights
+research faithfully researched that phrase and returned a plausible owner with
+fourteen citations. The recording was "Blinding Lights". So music identity comes
+from **acoustic fingerprinting** — spectral peak hashing against a recording
+database, a measurement rather than an impression — and a fingerprint outranks a
+catalogue match. A description like "upbeat electronic music" is an *absence* of
+identity, not a competing claim, so the fingerprint replaces it outright. That
+matters because the title flows into an ASCAP/BMI cue sheet, which is a legal
+filing to a performing-rights organisation.
+
+### We don't spend twenty minutes learning who owns Coca-Cola
+
+Recall is this product's safety claim, so ClearFrame detects everything. But
+detecting everything and *deep-researching* everything are different things, and
+conflating them made a 21.8-second clip take twenty minutes: sixteen deep
+research runs, six returning no owner, seven of them human faces — and no amount
+of web research produces a release form.
+
+Findings now descend an escalation ladder and stop at the first rung that can
+actually answer the question their category poses:
+
+| Rung | Resolver | Latency | Cost | Answers |
+| --- | --- | --- | --- | --- |
+| `LOCAL` | local rights table (151 marks) | 0 ms | $0 | who owns a famous mark |
+| `STATUTE` | settled law | 0 ms | $0 | de minimis, release forms, our own captions |
+| `SEARCH` | **Parallel Search** | ~2 s | $0.005 | licensing posture, contact, live enforcement |
+| `DEEP` | **Parallel Task** | minutes | $0.01–0.30 | genuinely unknown ownership chains |
+
+The routing table is derived from the litigation record rather than from our
+category list, and the record inverts the usual intuition: brand owners mostly
+*lose* against productions (*Rogers v. Grimaldi*, *Caterpillar v. Disney*,
+*Wham-O v. Paramount*) while music publishers reliably win. So a famous logo
+gets a two-second lookup and a song gets the deep run. And for trademark the
+variable that decides risk is **depiction**, not identity — NBC digitally erased
+In-Sink-Erator from *Heroes* only because the scene was unflattering — which is
+why a catalogued mark still gets a live posture check instead of being waved
+through on a static table.
+
+Ownership is asserted locally because it is a corporate fact that does not change
+between runs. **Posture deliberately is not**: whether a rights holder is suing
+people this quarter is exactly what a static table cannot know, so it is left
+unknown and escalated to a live search. A table that guessed at posture would
+repeat the failure mode fingerprinting just fixed.
+
+Nothing is dropped. A finding resolved for free is a *documented position* — the
+dossier prints "Resolved without rights research (N of M)" with the authority and
+the required action for each, because E&O carriers do not accept fair use offered
+in place of clearance and distributors reject incidental use asserted without
+documentation.
+
 ### Am I already covered?
+
+A song is the hard case: it needs **two** licences from two different companies —
+synchronisation for the composition (publisher) and master use for the recording
+(label). Holding one and shipping on it is the most common music clearance
+failure there is, so music coverage is *assembled* rather than chosen, and a
+track reads `COVERED` only when both halves are held, in territory, in term and
+in media.
+
 
 Every other tool answers *"who owns this and what would it cost"*. A director
 asks the opposite question first. Upload your clearance register — the licence
@@ -161,7 +221,9 @@ Run everything yourself: `./scripts/smoke.sh` verifies the full lifecycle across
 - **Deterministic risk scoring** — pure code, reproducible from stored inputs; no LLM in the scoring path.
 - **Server-side role gating** — only `legal`/`producer` record decisions, enforced in the review service, not the UI.
 - **Append-only audit trail** — every decision (including revisions) and dossier generation is logged and printed in the dossier.
-- **Research spend cap** — `CLEARFRAME_MAX_RESEARCH` (default 25) bounds the Parallel fan-out; overflow surfaces as RESEARCH INCOMPLETE, never silently dropped.
+- **Research spend cap** — `CLEARFRAME_MAX_RESEARCH` (default 25) bounds the *deep* Parallel fan-out; overflow surfaces as RESEARCH INCOMPLETE, never silently dropped. The free rungs are never capped: dropping them would lose findings for no saving.
+- **Every route is recorded** — which rung answered a finding, under what authority, and what the producer must do about it. A faster report that quietly examines less is the failure mode this design exists to avoid.
+- **Licence matching ignores corporate furniture** — "Music", "Group", "Records" are shared by half the industry; matching on them once reported a festival-only cue licence as covering a major-label master. Being wrong in the *covered* direction is the one failure the ledger must not have.
 - **Gemini safety settings** — explicit `BLOCK_ONLY_HIGH` thresholds on the scan config.
 - **Honest failure states** — unidentifiable rights holders escalate; unscanned footage ranges are listed in the report as not covered; a disputed identity is never researched rather than researched wrongly.
 - **Independent corroboration** — identity is confirmed by two different kinds of detector, and disagreement blocks the expensive, consequential step.
@@ -217,7 +279,9 @@ claude mcp add --transport http clearframe https://clearframe-mcp-220710110855.u
 src/clearframe/
   models.py scoring.py triage.py remediation.py dossier.py   # core domain (no cloud deps)
   corroboration.py territory.py freshness.py matching.py     # verification engines (pure code)
-  pipeline.py stages/            # deterministic 6-stage orchestrator
+  routing.py knowledge.py audio.py licensing.py              # cost/latency policy + rights knowledge
+  data/rights/                   # marks, litigation, counterparties, term rules (JSON)
+  pipeline.py stages/            # deterministic 12-stage orchestrator
   integrations/                  # Gemini + Parallel clients (live & fixture) + recorded fixtures
   exporters/                     # dossier HTML, EDL, CSV markers, cue sheet
   adk/                           # Google ADK SequentialAgent wrapper

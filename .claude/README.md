@@ -5,10 +5,17 @@ project context, conventions, the status tracker vs the hackathon resources guid
 and the agreed roadmap. Read it first — especially "Live-mode gotchas" and
 "Environment facts", which record what already went wrong so it doesn't twice.
 
-Current shape: a deterministic **12-stage** pipeline, **161 tests**, a 7-section
+Current shape: a deterministic **12-stage** pipeline, **231 tests**, a 7-section
 smoke script, three transports (CLI / web / MCP with 11 tools), and two Cloud Run
-services. Live validation, MCP, and webapp expansion are DONE; audio verification
-and cloud wiring (Firestore/Pub-Sub/IAP) are the open fronts.
+services. Live validation, MCP, webapp expansion and audio fingerprinting are
+DONE. Open fronts: two-phase reporting, scene chunking for feature-length
+footage, and cloud wiring (Firestore/Pub-Sub/IAP).
+
+The two modules to read first when touching cost or latency are `routing.py`
+(the escalation ladder — which rung answers each finding) and `knowledge.py`
+(the local rights table). The governing rule is that a rung must be able to
+answer the question its category poses; the honesty rule is that a finding
+resolved for free is a documented position, never a silent skip.
 
 ## Skills (`.claude/skills/`)
 
@@ -39,8 +46,13 @@ and cloud wiring (Firestore/Pub-Sub/IAP) are the open fronts.
 - **What this machine has configured** (project, enabled APIs, `.env` contents,
   Python version, missing ffmpeg) — `CLAUDE.md` → "Environment facts".
 - **Competitive positioning** and the one-line pitch — `CLAUDE.md`.
+- **Why each finding was routed the way it was** — `routing.py`'s module
+  docstring carries the litigation reasoning; `data/rights/litigation.json`
+  carries the cases themselves.
 - **Per-phase design rationale** — `docs/superpowers/plans/`. Phases 7 and 8 share
-  `2026-08-22-clearframe-phase7-verified-clearance.md`.
+  `2026-08-22-clearframe-phase7-verified-clearance.md`; Phase 9 (the latency
+  phase) is `2026-08-22-clearframe-phase9-triage-ladder.md`, whose "What changed
+  during implementation" section records three places the plan was wrong.
 
 ## Plugins
 
