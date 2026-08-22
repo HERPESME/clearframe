@@ -12,6 +12,12 @@ reproducible from stored inputs, never an LLM. Output is decision support and
 carries the same "confirm with counsel" caveat as the rest of the dossier.
 """
 
+import json
+from functools import lru_cache
+from pathlib import Path
+
+from pydantic import BaseModel
+
 from clearframe.models import (
     ClearanceCategory,
     RiskBand,
@@ -21,52 +27,178 @@ from clearframe.models import (
 
 _BAND_ORDER = (RiskBand.LOW, RiskBand.MEDIUM, RiskBand.HIGH, RiskBand.CRITICAL)
 
-# Freedom of panorama for works permanently sited in a public place.
-#   "broad"  - covers artworks/sculpture as well as buildings
-#   "buildings_only" - architecture only; artwork remains exposed
-#   "narrow" - exception exists but excludes commercial exploitation
-TERRITORY_RULES: dict[str, dict[str, str]] = {
-    "US": {
-        "name": "United States",
-        "panorama": "buildings_only",
-        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only",
-        "publicity": "strong",
-    },
-    "GB": {
-        "name": "United Kingdom",
-        "panorama": "broad",
-        "authority": "CDPA 1988 s.62 — buildings, sculptures and works of artistic craftsmanship on public display",
-        "publicity": "moderate",
-    },
-    "DE": {
-        "name": "Germany",
-        "panorama": "broad",
-        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places",
-        "publicity": "strong",
-    },
-    "FR": {
-        "name": "France",
-        "panorama": "narrow",
-        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons",
-        "publicity": "strong",
-    },
-    "JP": {
-        "name": "Japan",
-        "panorama": "broad",
-        "authority": "Copyright Act art. 46 — artistic works permanently installed in open places",
-        "publicity": "moderate",
-    },
-    "IN": {
-        "name": "India",
-        "panorama": "broad",
-        "authority": "Copyright Act s.52(1)(s)-(t) — sculpture/architecture permanently situated in a public place",
-        "publicity": "moderate",
-    },
+# Jurisdiction rules now live in data/jurisdictions.json so the table can grow
+# without touching the banding arithmetic. TERRITORY_RULES keeps its original
+# shape and values — `assess` below is calibrated on them and must not move.
+#
+# Freedom of panorama for works permanently sited in a public place:
+#   "broad"           - covers artworks/sculpture as well as buildings
+#   "buildings_only"  - architecture only; artwork remains exposed
+#   "narrow"          - exception exists but excludes commercial exploitation
+#   "none"            - no exception at all (Italy, which additionally requires
+#                       Ministry authorisation for images of cultural property)
+DATA_PATH = Path(__file__).parent / "data" / "jurisdictions.json"
+
+
+@lru_cache(maxsize=1)
+def load_jurisdictions(data_path: str | None = None) -> dict:
+    return json.loads(Path(data_path or DATA_PATH).read_text())
+
+
+def _rules() -> dict[str, dict[str, str]]:
+    doc = load_jurisdictions()
+    return {j["code"]: {k: v for k, v in j.items() if k != "code"} for j in doc["jurisdictions"]}
+
+
+TERRITORY_RULES: dict[str, dict[str, str]] = _rules()
+
+
+class Defence(BaseModel):
+    """A defence that may or may not exist in this jurisdiction.
+
+    `available: False` is the useful half. A skit maker who knows parody is a
+    statutory defence in the UK and simply absent in India has learned
+    something no single global answer could tell them.
+    """
+
+    territory: str
+    name: str
+    available: bool
+    authority: str
+    note: str = ""
+
+
+# Which body of law actually governs each category, per jurisdiction. The one
+# that surprises people: RIGHT_OF_PUBLICITY is a US commercial-appropriation
+# concept. Elsewhere an identifiable face is personal data, with a different
+# remedy — blur or a lawful basis, not a licence.
+_COPYRIGHT = "Copyright"
+_REGIME_BY_CATEGORY = {
+    ClearanceCategory.MUSIC_SYNC: _COPYRIGHT,
+    ClearanceCategory.COPYRIGHT_ART: _COPYRIGHT,
+    ClearanceCategory.TRADEMARK: "Trade marks and unfair competition",
+    ClearanceCategory.TEXT_ON_SCREEN: "Trade marks and unfair competition",
+    ClearanceCategory.LOCATION: "Property, trade dress and location agreements",
 }
 
-DEFAULT_TERRITORIES = ("US",)
 
-# Panorama analysis only bears on works fixed in the physical environment.
+def governing_regime(category: ClearanceCategory, territory: str) -> str:
+    """Which body of law decides this finding here."""
+    if category is not ClearanceCategory.RIGHT_OF_PUBLICITY:
+        return _REGIME_BY_CATEGORY.get(category, _COPYRIGHT)
+    rule = TERRITORY_RULES.get(territory)
+    if rule is None:
+        return "Personal data or personality rights (jurisdiction not on file)"
+    return rule["personal_data"]
+
+
+_PARODY_AVAILABLE = {"fair_use", "fair_dealing", "statutory"}
+_INCIDENTAL_AVAILABLE = {"broad", "narrow"}
+
+
+def defences_for(element: TriagedElement, territory: str) -> list[Defence]:
+    """Every defence this jurisdiction does — and does not — offer this finding.
+
+    Returns an empty list for an unknown territory rather than guessing: an
+    invented defence is the most dangerous output this module could produce.
+    """
+    rule = TERRITORY_RULES.get(territory)
+    if rule is None:
+        return []
+
+    out: list[Defence] = [
+        Defence(
+            territory=territory,
+            name="Parody / caricature",
+            available=rule["parody"] in _PARODY_AVAILABLE,
+            authority=rule["parody_authority"],
+            note=(
+                ""
+                if rule["parody"] in _PARODY_AVAILABLE
+                else "No statutory parody exception here. Any parody argument runs "
+                "through criticism, review or free expression instead — an argument "
+                "to be made, not a safe harbour to rely on."
+            ),
+        ),
+        Defence(
+            territory=territory,
+            name="Fair use (open-ended)",
+            available=rule["exceptions_model"] == "open",
+            authority=rule["exceptions_authority"],
+            note=(
+                ""
+                if rule["exceptions_model"] == "open"
+                else "Closed list: a use that is not on the statutory list is "
+                "infringing however reasonable it looks. A fair-use memo written "
+                "for the US does not travel here."
+            ),
+        ),
+        Defence(
+            territory=territory,
+            name="Incidental inclusion",
+            available=rule["incidental_inclusion"] in _INCIDENTAL_AVAILABLE,
+            authority=rule["incidental_authority"],
+            note=(
+                "No statutory incidental-inclusion exception; de minimis is "
+                "judge-made and fact-specific."
+                if rule["incidental_inclusion"] == "case_law"
+                else ""
+            ),
+        ),
+    ]
+
+    if element.category in (ClearanceCategory.COPYRIGHT_ART, ClearanceCategory.LOCATION):
+        out.append(
+            Defence(
+                territory=territory,
+                name="Freedom of panorama",
+                available=rule["panorama"] in ("broad", "narrow"),
+                authority=rule["authority"],
+                note=(
+                    "No panorama exception at all, and commercial use of images of "
+                    "cultural property needs separate Ministry authorisation."
+                    if rule["panorama"] == "none"
+                    else "Covers architecture only — artwork on a building is not "
+                    "exempt (this is what Falkner v. GM turned on)."
+                    if rule["panorama"] == "buildings_only"
+                    else ""
+                ),
+            )
+        )
+        out.append(
+            Defence(
+                territory=territory,
+                name="Moral rights (a risk, not a defence)",
+                available=False,
+                authority=rule["moral_authority"],
+                note=(
+                    "Perpetual and inalienable here: the author can object to "
+                    "treatment of the work even after selling the copyright, and "
+                    "heirs can assert it without time limit."
+                    if rule["moral_rights"] == "perpetual"
+                    else "Attribution and integrity rights persist alongside the "
+                    "economic rights."
+                ),
+            )
+        )
+
+    if element.category is ClearanceCategory.RIGHT_OF_PUBLICITY:
+        out.append(
+            Defence(
+                territory=territory,
+                name="Personal data / personality regime",
+                available=False,
+                authority=rule["personal_data"],
+                note=(
+                    "The remedy here is consent or a blur, not a licence — a "
+                    "different instrument from the US right of publicity."
+                ),
+            )
+        )
+
+    return out
+
+
 _PANORAMA_CATEGORIES = {ClearanceCategory.COPYRIGHT_ART, ClearanceCategory.LOCATION}
 
 

@@ -174,6 +174,21 @@ without documentation. {{ d.summary.get('deep_research_runs', 0) }} finding(s) r
   </div>
   {% endif %}
 
+  {% set rows = d.defences.get(e.element.id, []) %}
+  {% if rows %}
+  <div class="section">
+    <h4>Defences by jurisdiction</h4>
+    <table>
+    {% for r in rows %}
+      <tr><td><strong>{{ r.territory }}</strong></td>
+      <td>{{ 'available' if r.available else 'NOT available' }}</td>
+      <td>{{ r.name }}</td>
+      <td class="meta">{{ r.authority }}{% if r.note %} — {{ r.note }}{% endif %}</td></tr>
+    {% endfor %}
+    </table>
+  </div>
+  {% endif %}
+
   <div class="section">
     <h4>Rights research</h4>
     {% if not incomplete(e.research) %}
