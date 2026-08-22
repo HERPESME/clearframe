@@ -160,3 +160,97 @@ async def test_video_scan_still_uses_the_video_schema():
     result = await client.scan("gs://b/clip.mp4", 10.0)
     assert seen["schema"] == SCAN_RESPONSE_SCHEMA
     assert len(result.detections) == 2
+
+
+# ------------------------------------------------- transient transport retry
+class _FlakyModels:
+    """Fails with a transport error `fail_times` times, then succeeds."""
+
+    def __init__(self, exc, fail_times: int, payload: str):
+        self.exc = exc
+        self.remaining = fail_times
+        self.payload = payload
+        self.calls = 0
+
+    def generate_content(self, model, contents, config):
+        self.calls += 1
+        if self.remaining > 0:
+            self.remaining -= 1
+            raise self.exc
+        return type("R", (), {"text": self.payload})()
+
+
+class _FlakyClient:
+    def __init__(self, models):
+        self.models = models
+
+
+def _scan_payload() -> str:
+    import json
+
+    return json.dumps(
+        {
+            "elements": [
+                {
+                    "id": "e1",
+                    "label": "Bayer Aspirin",
+                    "element_type": "LOGO",
+                    "description": "tin on the counter",
+                    "time_ranges": [{"start_s": 1.0, "end_s": 6.0}],
+                    "prominence": {
+                        "screen_time_s": 5.0,
+                        "frame_coverage": 0.2,
+                        "centrality": 0.6,
+                        "plot_integral": False,
+                    },
+                }
+            ],
+            "unscanned_ranges": [],
+        }
+    )
+
+
+@pytest.mark.asyncio
+async def test_a_reset_mid_upload_does_not_lose_the_run(monkeypatch):
+    """A live run died at `httpx.ReadError: [Errno 54] Connection reset by
+    peer` during the video upload and took the whole pipeline with it —
+    including the Video Intelligence and fingerprint work running alongside.
+    Footage goes up inline, so the scan is the largest request we make and the
+    likeliest to meet a reset."""
+    import httpx
+
+    models = _FlakyModels(
+        httpx.ReadError("[Errno 54] Connection reset by peer"), 2, _scan_payload()
+    )
+    client = LiveGeminiClient(
+        project="p",
+        location="l",
+        client_factory=lambda: _FlakyClient(models),
+        transport_backoff_s=0.0,
+    )
+    monkeypatch.setattr(
+        "clearframe.integrations.gemini_live._video_part", lambda uri: "VIDEO"
+    )
+
+    result = await client.scan("clip.mp4", 30.0)
+    assert [d.label for d in result.detections] == ["Bayer Aspirin"]
+    assert models.calls == 3
+
+
+@pytest.mark.asyncio
+async def test_a_deterministic_failure_is_not_retried(monkeypatch):
+    """Retrying a 400 or a safety block spends money to fail identically."""
+    models = _FlakyModels(ValueError("400 Invalid argument"), 99, "")
+    client = LiveGeminiClient(
+        project="p",
+        location="l",
+        client_factory=lambda: _FlakyClient(models),
+        transport_backoff_s=0.0,
+    )
+    monkeypatch.setattr(
+        "clearframe.integrations.gemini_live._video_part", lambda uri: "VIDEO"
+    )
+
+    with pytest.raises(Exception):
+        await client.scan("clip.mp4", 30.0)
+    assert models.calls == 1

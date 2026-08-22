@@ -1,0 +1,2255 @@
+{
+  "production": {
+    "id": "prod-1",
+    "title": "Bayer aspirin spot",
+    "footage_uri": "testdata/clips/ctvc_BAYER_512kb.mp4",
+    "fps": 24.0,
+    "duration_s": 30.0,
+    "script_uri": null,
+    "release_territories": [
+      "US",
+      "DE",
+      "FR"
+    ],
+    "distribution": [
+      "THEATRICAL",
+      "STREAMING"
+    ],
+    "has_media": false
+  },
+  "stage_status": {
+    "script": "complete",
+    "scan": "complete",
+    "triage": "complete",
+    "corroborate": "complete",
+    "drift": "complete",
+    "preview": "complete",
+    "research": "complete",
+    "freshness": "complete",
+    "risk": "complete",
+    "territory": "complete",
+    "coverage": "complete",
+    "remediation": "complete",
+    "court": "complete",
+    "review": "complete"
+  },
+  "detections": [
+    {
+      "id": "1",
+      "label": "Painting",
+      "element_type": "ARTWORK",
+      "description": "A framed landscape painting is visible on the wall in the dining room scene.",
+      "time_ranges": [
+        {
+          "start_s": 0.0,
+          "end_s": 2.2
+        },
+        {
+          "start_s": 7.4,
+          "end_s": 10.3
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 5.1,
+        "frame_coverage": 0.1,
+        "centrality": 0.2,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null
+    },
+    {
+      "id": "2",
+      "label": "Bayer Aspirin",
+      "element_type": "LOGO",
+      "description": "The brand name and logo for Bayer Aspirin are shown on a product box and bottle.",
+      "time_ranges": [
+        {
+          "start_s": 17.5,
+          "end_s": 20.3
+        },
+        {
+          "start_s": 25.5,
+          "end_s": 29.3
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 6.6,
+        "frame_coverage": 0.45,
+        "centrality": 0.7,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null
+    },
+    {
+      "id": "3",
+      "label": "Bayer Works Wonders",
+      "element_type": "TEXT",
+      "description": "The slogan 'BAYER WORKS WONDERS' is displayed on screen over the product shot.",
+      "time_ranges": [
+        {
+          "start_s": 27.2,
+          "end_s": 29.3
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 2.1,
+        "frame_coverage": 0.15,
+        "centrality": 0.5,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null
+    },
+    {
+      "id": "4",
+      "label": "Instrumental Score",
+      "element_type": "MUSIC",
+      "description": "A light, instrumental musical score plays throughout the advertisement.",
+      "time_ranges": [
+        {
+          "start_s": 0.0,
+          "end_s": 29.3
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 29.3,
+        "frame_coverage": 0.0,
+        "centrality": 0.0,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null
+    },
+    {
+      "id": "face-01",
+      "label": "Grandmother",
+      "element_type": "FACE",
+      "description": "A close-up of an older woman with white hair and cat-eye glasses, presumably the grandmother, at a family dinner.",
+      "time_ranges": [
+        {
+          "start_s": 2.1,
+          "end_s": 3.5
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 1.4,
+        "frame_coverage": 0.4,
+        "centrality": 0.8,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null
+    },
+    {
+      "id": "face-02",
+      "label": "Father",
+      "element_type": "FACE",
+      "description": "A man in a white shirt and tie, presumably the father, is shown eating dinner, looking stressed, and later taking aspirin for a headache.",
+      "time_ranges": [
+        {
+          "start_s": 7.5,
+          "end_s": 9.0
+        },
+        {
+          "start_s": 16.5,
+          "end_s": 17.8
+        },
+        {
+          "start_s": 21.8,
+          "end_s": 25.2
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 6.2,
+        "frame_coverage": 0.3,
+        "centrality": 0.8,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null
+    },
+    {
+      "id": "face-03",
+      "label": "Young Boy (Bobby)",
+      "element_type": "FACE",
+      "description": "A young boy at the dinner table, referred to as 'Bobby', is shown eating and later hiding under the table after a vase is broken.",
+      "time_ranges": [
+        {
+          "start_s": 3.7,
+          "end_s": 6.0
+        },
+        {
+          "start_s": 13.5,
+          "end_s": 16.2
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 5.0,
+        "frame_coverage": 0.25,
+        "centrality": 0.7,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null
+    },
+    {
+      "id": "face-04",
+      "label": "Little Girl",
+      "element_type": "FACE",
+      "description": "A small child, presumably a girl, who knocks over a vase of flowers while running in the dining room, contributing to the chaotic scene.",
+      "time_ranges": [
+        {
+          "start_s": 9.5,
+          "end_s": 10.8
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 1.3,
+        "frame_coverage": 0.15,
+        "centrality": 0.5,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null
+    },
+    {
+      "id": "text-01",
+      "label": "Fast Pain Relief",
+      "element_type": "TEXT",
+      "description": "The words 'Fast Pain Relief' are visible on the Bayer Aspirin box.",
+      "time_ranges": [
+        {
+          "start_s": 17.9,
+          "end_s": 18.9
+        },
+        {
+          "start_s": 25.5,
+          "end_s": 26.8
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 2.3,
+        "frame_coverage": 0.1,
+        "centrality": 0.6,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null
+    }
+  ],
+  "elements": [
+    {
+      "id": "1",
+      "label": "Painting",
+      "element_type": "ARTWORK",
+      "description": "A framed landscape painting is visible on the wall in the dining room scene.",
+      "time_ranges": [
+        {
+          "start_s": 0.0,
+          "end_s": 2.2
+        },
+        {
+          "start_s": 7.4,
+          "end_s": 10.3
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 5.1,
+        "frame_coverage": 0.1,
+        "centrality": 0.2,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "category": "COPYRIGHT_ART"
+    },
+    {
+      "id": "2",
+      "label": "Bayer Aspirin",
+      "element_type": "LOGO",
+      "description": "The brand name and logo for Bayer Aspirin are shown on a product box and bottle.",
+      "time_ranges": [
+        {
+          "start_s": 17.5,
+          "end_s": 20.3
+        },
+        {
+          "start_s": 25.5,
+          "end_s": 29.3
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 6.6,
+        "frame_coverage": 0.45,
+        "centrality": 0.7,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null,
+      "category": "TRADEMARK"
+    },
+    {
+      "id": "3",
+      "label": "Bayer Works Wonders",
+      "element_type": "TEXT",
+      "description": "The slogan 'BAYER WORKS WONDERS' is displayed on screen over the product shot.",
+      "time_ranges": [
+        {
+          "start_s": 27.2,
+          "end_s": 29.3
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 2.1,
+        "frame_coverage": 0.15,
+        "centrality": 0.5,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null,
+      "category": "TEXT_ON_SCREEN"
+    },
+    {
+      "id": "4",
+      "label": "Instrumental Score",
+      "element_type": "MUSIC",
+      "description": "A light, instrumental musical score plays throughout the advertisement.",
+      "time_ranges": [
+        {
+          "start_s": 0.0,
+          "end_s": 29.3
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 29.3,
+        "frame_coverage": 0.0,
+        "centrality": 0.0,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "category": "MUSIC_SYNC"
+    },
+    {
+      "id": "face-01",
+      "label": "Grandmother",
+      "element_type": "FACE",
+      "description": "A close-up of an older woman with white hair and cat-eye glasses, presumably the grandmother, at a family dinner.",
+      "time_ranges": [
+        {
+          "start_s": 2.1,
+          "end_s": 3.5
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 1.4,
+        "frame_coverage": 0.4,
+        "centrality": 0.8,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "category": "RIGHT_OF_PUBLICITY"
+    },
+    {
+      "id": "face-02",
+      "label": "Father",
+      "element_type": "FACE",
+      "description": "A man in a white shirt and tie, presumably the father, is shown eating dinner, looking stressed, and later taking aspirin for a headache.",
+      "time_ranges": [
+        {
+          "start_s": 7.5,
+          "end_s": 9.0
+        },
+        {
+          "start_s": 16.5,
+          "end_s": 17.8
+        },
+        {
+          "start_s": 21.8,
+          "end_s": 25.2
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 6.2,
+        "frame_coverage": 0.3,
+        "centrality": 0.8,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null,
+      "category": "RIGHT_OF_PUBLICITY"
+    },
+    {
+      "id": "face-03",
+      "label": "Young Boy (Bobby)",
+      "element_type": "FACE",
+      "description": "A young boy at the dinner table, referred to as 'Bobby', is shown eating and later hiding under the table after a vase is broken.",
+      "time_ranges": [
+        {
+          "start_s": 3.7,
+          "end_s": 6.0
+        },
+        {
+          "start_s": 13.5,
+          "end_s": 16.2
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 5.0,
+        "frame_coverage": 0.25,
+        "centrality": 0.7,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null,
+      "category": "RIGHT_OF_PUBLICITY"
+    },
+    {
+      "id": "face-04",
+      "label": "Little Girl",
+      "element_type": "FACE",
+      "description": "A small child, presumably a girl, who knocks over a vase of flowers while running in the dining room, contributing to the chaotic scene.",
+      "time_ranges": [
+        {
+          "start_s": 9.5,
+          "end_s": 10.8
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 1.3,
+        "frame_coverage": 0.15,
+        "centrality": 0.5,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null,
+      "category": "RIGHT_OF_PUBLICITY"
+    },
+    {
+      "id": "text-01",
+      "label": "Fast Pain Relief",
+      "element_type": "TEXT",
+      "description": "The words 'Fast Pain Relief' are visible on the Bayer Aspirin box.",
+      "time_ranges": [
+        {
+          "start_s": 17.9,
+          "end_s": 18.9
+        },
+        {
+          "start_s": 25.5,
+          "end_s": 26.8
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 2.3,
+        "frame_coverage": 0.1,
+        "centrality": 0.6,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "category": "TEXT_ON_SCREEN"
+    }
+  ],
+  "research": {
+    "face-03": {
+      "element_id": "face-03",
+      "owner": null,
+      "owner_confidence": "low",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [
+        {
+          "field": "clearance_route",
+          "url": "",
+          "excerpt": "Right of publicity — cleared by consent, not by ownership research",
+          "reasoning": "An unnamed individual has no discoverable rights holder. Research cannot produce the instrument this needs. Required action: Obtain a personal release, or blur. If shot in a public place under a crowd notice, file the notice against this finding.",
+          "confidence": "high"
+        }
+      ],
+      "status": "complete"
+    },
+    "face-04": {
+      "element_id": "face-04",
+      "owner": null,
+      "owner_confidence": "low",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [
+        {
+          "field": "clearance_route",
+          "url": "",
+          "excerpt": "Right of publicity — cleared by consent, not by ownership research",
+          "reasoning": "An unnamed individual has no discoverable rights holder. Research cannot produce the instrument this needs. Required action: Obtain a personal release, or blur. If shot in a public place under a crowd notice, file the notice against this finding.",
+          "confidence": "high"
+        }
+      ],
+      "status": "complete"
+    },
+    "text-01": {
+      "element_id": "text-01",
+      "owner": null,
+      "owner_confidence": "low",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [],
+      "status": "incomplete"
+    },
+    "3": {
+      "element_id": "3",
+      "owner": "Bayer AG",
+      "owner_confidence": "high",
+      "licensing_contact": null,
+      "licensing_posture": "standard",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [
+        {
+          "field": "owner",
+          "url": "",
+          "excerpt": "Bayer AG",
+          "reasoning": "Resolved from the local rights knowledge base.",
+          "confidence": "high"
+        },
+        {
+          "field": "licensing_posture",
+          "url": "http://stock.periscopefilm.com/xd38614e-1960s-bayer-aspirin-tv-commercial-headache-medicine-bayer-works-wonders",
+          "excerpt": "For more information visit http://www.PeriscopeFilm.com XD38614e 1960s BAYER ASPIRIN TV COMMERCIAL HEADACHE MEDICINE \"BAYER WORKS WONDERS\" This sweet 1960s ad for Bayer Aspirin promotes the use of the product to reduce fever and pain, with the tagline \"Bayer Works Wonders\". The plot of the ad features a sick mother, who receives get well cards from her children, delivered by the family dog.\nThis film is part of the Periscope Film LLC archive, one of the largest historic military, transportation, and aviation stock footage collections in the USA. Entirely film backed, this material is available for licensing in 24p HD, 2k and 4k.\nXD38614e 1960s BAYER ASPIRIN TV COMMERCIAL HEADACHE MEDICINE \"BAYER WORKS WONDERS\" This sweet 1960s ad for Bayer Aspirin promotes the use of the product to reduce fever and pain, with the tagline \"Bayer Works Wonders\". The plot of the ad features a sick mother, who receives get well cards from her children, delivered by the family dog. We encourage viewers to add comments and, especially, to provide additional information about our videos by adding a comment! See something interesting? Tell people what it is and what they can see by writing something for example: \"01:00:12:00 — President Roosevelt is seen meeting with Winston Churchill at the Quebec Conference.\" This film is part of the Periscope Film LLC archive, one of the largest historic military, transportation, and aviation stock footage collections in the USA. Entirely film backed, this material is available for licensing in 24p HD, 2k and 4k.\nThis film is part of the Periscope Film LLC archive, one of the largest historic military, transportation, and aviation stock footage collections in the USA.\nThis film is part of the Periscope Film LLC archive, one of the largest historic military, transportation, and aviation stock footage collections in the USA. Entirely film backed, this material is available for licensing in 24p HD, 2k and 4k. For more information visit http://www.PeriscopeFilm.com",
+          "reasoning": "Live Parallel Search result on the rights holder.",
+          "confidence": "medium"
+        },
+        {
+          "field": "licensing_posture",
+          "url": "https://www.itnonline.com/content/bayer-receives-fda-clearance-ct-injection-system",
+          "excerpt": "The ITN Product Buyer’s Guide is the **one-stop shop** to secure product information as well as details of **where to buy** .\n\nSearch Buyer's Guide\n\nProduct Category",
+          "reasoning": "Live Parallel Search result on the rights holder.",
+          "confidence": "medium"
+        },
+        {
+          "field": "licensing_posture",
+          "url": "https://www.bayer.com/en/us/news-stories/license-and-collaboration-in-precision-oncology",
+          "excerpt": "com/products/cookie-consent/)",
+          "reasoning": "Live Parallel Search result on the rights holder.",
+          "confidence": "medium"
+        },
+        {
+          "field": "licensing_posture",
+          "url": "https://www.law360.com/companies/bayer-ag",
+          "excerpt": "## Sign up now for free access to this content\n\nEmail (NOTE: Free email domains not supported)\n\nFirst Name\n\nLast Name\n\nJob Title\n\nPassword (at least 8 characters required)\n\nConfirm Password\n\nSelect at least one primary interest:\n\n...\n\nYou’ll be able to update your communication preferences via the unsubscribe link provided within our communications.  \n  \nWe take your privacy seriously. Please see our Privacy Policy .\n\nRELX Group Lexis Nexis",
+          "reasoning": "Live Parallel Search result on the rights holder.",
+          "confidence": "medium"
+        }
+      ],
+      "status": "complete"
+    },
+    "face-01": {
+      "element_id": "face-01",
+      "owner": null,
+      "owner_confidence": "low",
+      "licensing_contact": null,
+      "licensing_posture": "litigious",
+      "litigation_history": [
+        "Entertainment Trademarks for Film and Television"
+      ],
+      "estimated_license_cost_band": null,
+      "basis": [
+        {
+          "field": "licensing_posture",
+          "url": "https://www.copyright.com/",
+          "excerpt": "com/CopyrightClear) [Subscribe to Copyright Clearance Center's RSS Feed](https://www.copyright.com/rss-feeds/)\n\n* [Terms & Conditions](https://www.copyright.com/terms-conditions/)\n* [Privacy Policy](https://www.copyright.com/privacy-policy/)\n* [Cookie Policy](https://www.copyright.com/use-cookies-site/)\n\nMaterials available on copyright.com are protected by the copyright laws of the United States and other countries.",
+          "reasoning": "Live Parallel Search result on the rights holder.",
+          "confidence": "medium"
+        },
+        {
+          "field": "licensing_posture",
+          "url": "https://grannynannies.com/Licensing",
+          "excerpt": "Granny NANNIES Licensing Opportunity - Call 800-316-2669 for more information about licensing the rights to your own Senior Home Care Company.",
+          "reasoning": "Live Parallel Search result on the rights holder.",
+          "confidence": "medium"
+        },
+        {
+          "field": "licensing_posture",
+          "url": "https://fmmis.getarchive.net/media/grandmother-i-1cc17a",
+          "excerpt": "Get Archive LLC does not require users to purchase permission for use of any of the content, however, upon request, GetArchive can provide rights clearance with levels of indemnification coverage range from $15,000 USD up to $1,000,000 USD.\n\nRequest Clearance\n\ncopyright\n\nCopyright info\n\nPublic Domain\n\n## Future Museum Studio\n\nDeveloped by [GetArchive](https://getarchive.net/) , 2015-2026",
+          "reasoning": "Live Parallel Search result on the rights holder.",
+          "confidence": "medium"
+        },
+        {
+          "field": "licensing_posture",
+          "url": "http://deepfocuslaw.com/entertainment-trademarks.html",
+          "excerpt": "Entertainment Trademarks As per the terms of your agreement, while you are entitled to maintain ownership of this location, you no longer have the right to call it McDonald's, McDonald or any other such variation so as to create confusion or infringe upon the McDonald's trademark which is now the exclusive intellectual property of Mr. ... Trademark Registration Package Search and protect one of your brand's most Attorney responses to non-substantive USPTO [LEARN MORE AND START NOW](https://deepfocuslaw.com/client-inquiry.html) A trademark owned by someone else can appear in an independent film script and need to be cleared before use onscreen to avoid potential liability. ... Guiding filmmakers who want to depict logos and other third-party trademarks onscreen is also a large part of our trademark law practice. We evaluate trademark usage in narrative and documentary productions to obtain errors and omissions insurance, avoid claims of trade libel and trademark dilution. The firm also advises on whether use of a trademark qualifies as permissible \"fair use\" and finds ways to strengthen trademark fair use defenses against infringement claims while preserving the filmmaker's creative intent.",
+          "reasoning": "Enforcement signal found by live Parallel Search.",
+          "confidence": "medium"
+        }
+      ],
+      "status": "complete"
+    },
+    "4": {
+      "element_id": "4",
+      "owner": null,
+      "owner_confidence": "low",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [],
+      "status": "incomplete"
+    },
+    "2": {
+      "element_id": "2",
+      "owner": "Bayer AG",
+      "owner_confidence": "high",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [],
+      "status": "incomplete"
+    },
+    "face-02": {
+      "element_id": "face-02",
+      "owner": null,
+      "owner_confidence": "low",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [],
+      "status": "incomplete"
+    },
+    "1": {
+      "element_id": "1",
+      "owner": null,
+      "owner_confidence": "low",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [],
+      "status": "incomplete"
+    }
+  },
+  "risk": {
+    "1": {
+      "element_id": "1",
+      "score": 17,
+      "band": "LOW",
+      "factors": {
+        "screen_time_norm": 0.51,
+        "prominence_score": 0.274,
+        "category_weight": 0.9,
+        "posture_factor": 0.7
+      },
+      "de_minimis": false
+    },
+    "2": {
+      "element_id": "2",
+      "score": 36,
+      "band": "MEDIUM",
+      "factors": {
+        "screen_time_norm": 0.66,
+        "prominence_score": 0.639,
+        "category_weight": 0.8,
+        "posture_factor": 0.7
+      },
+      "de_minimis": false
+    },
+    "3": {
+      "element_id": "3",
+      "score": 14,
+      "band": "LOW",
+      "factors": {
+        "screen_time_norm": 0.21,
+        "prominence_score": 0.329,
+        "category_weight": 0.6,
+        "posture_factor": 0.7
+      },
+      "de_minimis": false
+    },
+    "4": {
+      "element_id": "4",
+      "score": 28,
+      "band": "MEDIUM",
+      "factors": {
+        "screen_time_norm": 1.0,
+        "prominence_score": 0.4,
+        "category_weight": 1.0,
+        "posture_factor": 0.7
+      },
+      "de_minimis": false
+    },
+    "face-01": {
+      "element_id": "face-01",
+      "score": 30,
+      "band": "MEDIUM",
+      "factors": {
+        "screen_time_norm": 0.14,
+        "prominence_score": 0.336,
+        "category_weight": 0.9,
+        "posture_factor": 1.0
+      },
+      "de_minimis": false
+    },
+    "face-02": {
+      "element_id": "face-02",
+      "score": 38,
+      "band": "MEDIUM",
+      "factors": {
+        "screen_time_norm": 0.62,
+        "prominence_score": 0.598,
+        "category_weight": 0.9,
+        "posture_factor": 0.7
+      },
+      "de_minimis": false
+    },
+    "face-03": {
+      "element_id": "face-03",
+      "score": 32,
+      "band": "MEDIUM",
+      "factors": {
+        "screen_time_norm": 0.5,
+        "prominence_score": 0.515,
+        "category_weight": 0.9,
+        "posture_factor": 0.7
+      },
+      "de_minimis": false
+    },
+    "face-04": {
+      "element_id": "face-04",
+      "score": 19,
+      "band": "LOW",
+      "factors": {
+        "screen_time_norm": 0.13,
+        "prominence_score": 0.297,
+        "category_weight": 0.9,
+        "posture_factor": 0.7
+      },
+      "de_minimis": false
+    },
+    "text-01": {
+      "element_id": "text-01",
+      "score": 10,
+      "band": "LOW",
+      "factors": {
+        "screen_time_norm": 0.23,
+        "prominence_score": 0.242,
+        "category_weight": 0.6,
+        "posture_factor": 0.7
+      },
+      "de_minimis": false
+    }
+  },
+  "remediation": {
+    "1": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Painting' in 2 shot(s), 01:00:00:00-01:00:02:05. Estimated VFX cost $800-$2500/shot at 10% frame coverage.",
+        "est_cost_band": "$800-$2500/shot"
+      }
+    ],
+    "2": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Bayer Aspirin' in 2 shot(s), 01:00:17:12-01:00:20:07. Estimated VFX cost $800-$2500/shot at 45% frame coverage.",
+        "est_cost_band": "$800-$2500/shot"
+      }
+    ],
+    "3": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Bayer Works Wonders' in 1 shot(s), 01:00:27:05-01:00:29:07. Estimated VFX cost $800-$2500/shot at 15% frame coverage.",
+        "est_cost_band": "$800-$2500/shot"
+      }
+    ],
+    "4": [
+      {
+        "kind": "license",
+        "summary": "License from rights holder (unidentified)",
+        "detail": "To: [no contact found — escalate to music supervisor]\nSubject: License request — \"Instrumental Score\" appearing in \"Bayer aspirin spot\"\n\nDear rights holder,\n\nWe are producing \"Bayer aspirin spot\", an independent film currently in post-production.\nYour property \"Instrumental Score\" appears in our footage at timecode 01:00:00:00-01:00:29:07\n(A light, instrumental musical score plays throughout the advertisement.). We would like to license this use for worldwide distribution across\nall media, in perpetuity.\n\nResearch indicates a typical license range of unknown. Could you confirm\navailability, terms, and your quote for this use?\n\nWe are happy to provide the relevant footage excerpt for review.\n\nKind regards,\n\"Bayer aspirin spot\" clearance team\n",
+        "est_cost_band": null
+      }
+    ],
+    "face-01": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Grandmother' in 1 shot(s), 01:00:02:02-01:00:03:12. Estimated VFX cost $800-$2500/shot at 40% frame coverage.",
+        "est_cost_band": "$800-$2500/shot"
+      }
+    ],
+    "face-02": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Father' in 3 shot(s), 01:00:07:12-01:00:09:00. Estimated VFX cost $800-$2500/shot at 30% frame coverage.",
+        "est_cost_band": "$800-$2500/shot"
+      }
+    ],
+    "face-03": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Young Boy (Bobby)' in 2 shot(s), 01:00:03:17-01:00:06:00. Estimated VFX cost $800-$2500/shot at 25% frame coverage.",
+        "est_cost_band": "$800-$2500/shot"
+      }
+    ],
+    "face-04": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Little Girl' in 1 shot(s), 01:00:09:12-01:00:10:19. Estimated VFX cost $800-$2500/shot at 15% frame coverage.",
+        "est_cost_band": "$800-$2500/shot"
+      }
+    ],
+    "text-01": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Fast Pain Relief' in 2 shot(s), 01:00:17:22-01:00:18:22. Estimated VFX cost $800-$2500/shot at 10% frame coverage.",
+        "est_cost_band": "$800-$2500/shot"
+      }
+    ]
+  },
+  "decisions": {
+    "1": {
+      "element_id": "1",
+      "action": "escalate",
+      "reviewer": "auto-demo",
+      "role": "legal",
+      "note": "Rights holder could not be identified; escalate to counsel."
+    },
+    "2": {
+      "element_id": "2",
+      "action": "escalate",
+      "reviewer": "auto-demo",
+      "role": "legal",
+      "note": "Rights holder could not be identified; escalate to counsel."
+    },
+    "3": {
+      "element_id": "3",
+      "action": "approve_risk",
+      "reviewer": "auto-demo",
+      "role": "legal",
+      "note": "Low risk accepted per de-minimis/low-prominence policy."
+    },
+    "4": {
+      "element_id": "4",
+      "action": "escalate",
+      "reviewer": "auto-demo",
+      "role": "legal",
+      "note": "Rights holder could not be identified; escalate to counsel."
+    },
+    "face-01": {
+      "element_id": "face-01",
+      "action": "license",
+      "reviewer": "auto-demo",
+      "role": "legal",
+      "note": "Pursue license via drafted outreach."
+    },
+    "face-02": {
+      "element_id": "face-02",
+      "action": "escalate",
+      "reviewer": "auto-demo",
+      "role": "legal",
+      "note": "Rights holder could not be identified; escalate to counsel."
+    },
+    "face-03": {
+      "element_id": "face-03",
+      "action": "license",
+      "reviewer": "auto-demo",
+      "role": "legal",
+      "note": "Pursue license via drafted outreach."
+    },
+    "face-04": {
+      "element_id": "face-04",
+      "action": "approve_risk",
+      "reviewer": "auto-demo",
+      "role": "legal",
+      "note": "Low risk accepted per de-minimis/low-prominence policy."
+    },
+    "text-01": {
+      "element_id": "text-01",
+      "action": "escalate",
+      "reviewer": "auto-demo",
+      "role": "legal",
+      "note": "Detectors disagree on what this element is; identity must be resolved before clearance."
+    }
+  },
+  "unscanned_ranges": [],
+  "audit_log": [
+    {
+      "at": "2026-08-22T14:26:37.499412+00:00",
+      "actor": "auto-demo",
+      "role": "legal",
+      "event": "decision",
+      "detail": "1:escalate"
+    },
+    {
+      "at": "2026-08-22T14:26:37.499412+00:00",
+      "actor": "auto-demo",
+      "role": "legal",
+      "event": "decision",
+      "detail": "2:escalate"
+    },
+    {
+      "at": "2026-08-22T14:26:37.499412+00:00",
+      "actor": "auto-demo",
+      "role": "legal",
+      "event": "decision",
+      "detail": "3:approve_risk"
+    },
+    {
+      "at": "2026-08-22T14:26:37.499412+00:00",
+      "actor": "auto-demo",
+      "role": "legal",
+      "event": "decision",
+      "detail": "4:escalate"
+    },
+    {
+      "at": "2026-08-22T14:26:37.499412+00:00",
+      "actor": "auto-demo",
+      "role": "legal",
+      "event": "decision",
+      "detail": "face-01:license"
+    },
+    {
+      "at": "2026-08-22T14:26:37.499412+00:00",
+      "actor": "auto-demo",
+      "role": "legal",
+      "event": "decision",
+      "detail": "face-02:escalate"
+    },
+    {
+      "at": "2026-08-22T14:26:37.499412+00:00",
+      "actor": "auto-demo",
+      "role": "legal",
+      "event": "decision",
+      "detail": "face-03:license"
+    },
+    {
+      "at": "2026-08-22T14:26:37.499412+00:00",
+      "actor": "auto-demo",
+      "role": "legal",
+      "event": "decision",
+      "detail": "face-04:approve_risk"
+    },
+    {
+      "at": "2026-08-22T14:26:37.499412+00:00",
+      "actor": "auto-demo",
+      "role": "legal",
+      "event": "decision",
+      "detail": "text-01:escalate"
+    },
+    {
+      "at": "2026-08-22T14:26:37.499412+00:00",
+      "actor": "system",
+      "role": "system",
+      "event": "dossier_generated",
+      "detail": ""
+    },
+    {
+      "at": "2026-08-22T14:26:37.499412+00:00",
+      "actor": "system",
+      "role": "system",
+      "event": "watch_created",
+      "detail": "1:local-1"
+    },
+    {
+      "at": "2026-08-22T14:26:37.499412+00:00",
+      "actor": "system",
+      "role": "system",
+      "event": "watch_created",
+      "detail": "2:local-2"
+    },
+    {
+      "at": "2026-08-22T14:26:37.499412+00:00",
+      "actor": "system",
+      "role": "system",
+      "event": "watch_created",
+      "detail": "4:local-4"
+    },
+    {
+      "at": "2026-08-22T14:26:37.499412+00:00",
+      "actor": "system",
+      "role": "system",
+      "event": "watch_created",
+      "detail": "face-01:local-face-01"
+    },
+    {
+      "at": "2026-08-22T14:26:37.499412+00:00",
+      "actor": "system",
+      "role": "system",
+      "event": "watch_created",
+      "detail": "face-03:local-face-03"
+    }
+  ],
+  "court": {
+    "2": {
+      "element_id": "2",
+      "holding": "escalate",
+      "confidence": "high",
+      "reasoning": "While the Advocate correctly argues the use is likely defensible under the Rogers v. Grimaldi test, as prominence alone does not typically render a use 'explicitly misleading,' the Counsel's brief highlights critical practical risks that cannot be ignored. The sheer prominence of the use (6.6 seconds, 45% screen coverage) makes it a near certainty to draw the attention of Bayer AG, a well-funded potential litigant. The cost of defending a trademark infringement or dilution lawsuit, even if ultimately successful, would be immense and could far exceed the production cost of altering the shot via VFX. Furthermore, the Counsel's point about potential tarnishment is a major variable; if the context is negative, the legal risk increases substantially. This is not a low-risk, incidental use like in Louis Vuitton v. Warner Bros. Given the high visibility of the mark and the significant financial exposure of litigation versus the contained cost of a VFX fix, the decision is no longer purely legal but a business risk assessment. Therefore, the issue must be escalated to senior producers to weigh the creative desire for authenticity against the substantial financial risk.",
+      "briefs": [
+        {
+          "side": "counsel",
+          "argument": "The on-screen use of the 'Bayer Aspirin' trademark constitutes a significant legal risk under the Lanham Act (15 U.S.C. § 1125(a)). The primary concern is trademark infringement based on a 'likelihood of confusion.' Given the mark's prominence—6.6 seconds of screen time, 45% coverage, and its integral role in the plot—a court could find that the use creates a false impression that Bayer AG sponsored, approved, or is affiliated with the production. While expressive works are afforded some latitude under the First Amendment, the use must satisfy the two-prong test from Rogers v. Grimaldi. Although the use is likely 'artistically relevant' (prong one) because it is plot-integral, it is vulnerable under the second prong, which asks if the use is 'explicitly misleading.' The sheer scale and duration of the exposure go beyond mere set dressing and could be interpreted as an explicit, and thus misleading, endorsement. Furthermore, as 'Bayer' is a famous mark, the production is exposed to a claim of trademark dilution by tarnishment under 15 U.S.C. § 1125(c) if the product is depicted in a negative or unsavory context. Given that Bayer AG's posture is unknown, we cannot assume permission. To mitigate the high risk of a costly infringement lawsuit, the trademark must be licensed, or its appearance must be removed or altered to be non-identifiable.",
+          "precedents": [
+            {
+              "case_name": "Rogers v. Grimaldi",
+              "citation": "875 F.2d 994 (2d Cir. 1989)",
+              "holding": "The use of a trademark in the title of an artistic work is not a violation of the Lanham Act if the use is (1) artistically relevant to the underlying work and (2) is not explicitly misleading as to the source or content of the work.",
+              "relevance": "This case establishes the governing legal standard. While our use is 'artistically relevant' due to being plot-integral, its high prominence (6.6s, 45% coverage) creates a substantial risk of it being deemed 'explicitly misleading' about Bayer's sponsorship, thereby failing the second prong of the Rogers test.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Louis Vuitton Malletier S.A. v. Warner Bros. Entertainment Inc.",
+              "citation": "868 F. Supp. 2d 172 (S.D.N.Y. 2012)",
+              "holding": "The studio's use of a knock-off Louis Vuitton bag in 'The Hangover: Part II' was not infringing because the use was brief, served a realistic and comedic purpose, and was not explicitly misleading as consumers would not assume sponsorship from such a use.",
+              "relevance": "This case illustrates what a low-risk, incidental use looks like. Our use is the opposite: it is not brief or incidental, but prominent and plot-integral. This factual distinction makes our case much riskier and strengthens the argument that our use crosses the line from realism into creating a misleading association with the brand owner.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Mattel, Inc. v. MCA Records, Inc.",
+              "citation": "296 F.3d 894 (9th Cir. 2002)",
+              "holding": "The use of the 'Barbie' trademark in the song 'Barbie Girl' was a non-infringing nominative fair use because the song was about Barbie and her cultural significance, and it did not explicitly mislead consumers into believing Mattel sponsored the song.",
+              "relevance": "This case protected a nominative, parodic use of a trademark. Our use is neither nominative (using the mark to refer to the product itself) in a protected sense nor a parody. Without the shield of parody or commentary, a straightforward, prominent depiction of a product is more likely to be found misleading regarding sponsorship, making our use legally distinct and more dangerous than the one in the 'Barbie Girl' case.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        },
+        {
+          "side": "advocate",
+          "argument": "The strongest good-faith defense for the use of the 'Bayer Aspirin' trademark is under the Rogers v. Grimaldi test, which protects the use of trademarks in expressive works. The use is 'plot_integral,' establishing its artistic relevance to the production—the first prong of the Rogers test. Using a real-world product like Bayer Aspirin adds a layer of authenticity and is necessary for the narrative. The second prong, that the use is not 'explicitly misleading' as to source or sponsorship, is also met, as the product is used contextually within the story and there is no indication of endorsement by Bayer AG. While a de minimis defense is unavailable due to the high prominence (6.6s, 45% coverage), the artistic necessity justifies this focus. The primary weakness of this defense is that a rights holder could argue such significant on-screen prominence implicitly creates a false association, even if not explicitly stated. However, case law strongly supports the right of creators to depict real-world brands to create a realistic setting, provided the use is artistically motivated and not a pretext for commercial advantage.",
+          "precedents": [
+            {
+              "case_name": "Rogers v. Grimaldi",
+              "citation": "875 F.2d 994 (2d Cir. 1989)",
+              "holding": "The use of a trademark in the title of an artistic work is protected by the First Amendment and does not violate the Lanham Act unless the use has no artistic relevance to the underlying work, or, if it has some artistic relevance, it explicitly misleads as to the source or content of the work.",
+              "relevance": "This is the seminal case establishing the two-part test for using trademarks in expressive works. Our use is in the body of an artistic work, is plot-integral (artistically relevant), and is not explicitly misleading about Bayer's sponsorship, directly aligning our defense with this foundational precedent.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Louis Vuitton Malletier S.A. v. Warner Bros. Entm't Inc.",
+              "citation": "868 F. Supp. 2d 172 (S.D.N.Y. 2012)",
+              "holding": "Warner Bros.' use of a knock-off Louis Vuitton bag in the film 'The Hangover Part II' was not trademark infringement because the use was artistically relevant and did not explicitly mislead consumers. The court affirmed that filmmakers are not required to create a 'brand-free' universe.",
+              "relevance": "This case is highly analogous. It affirmed the use of a famous brand's product as a plot-relevant prop within a film. It directly supports our argument that depicting a real-world brand like Bayer Aspirin is permissible to achieve realism and narrative goals, even when the brand is clearly identified.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Mattel, Inc. v. MCA Records, Inc.",
+              "citation": "296 F.3d 894 (9th Cir. 2002)",
+              "holding": "The use of the 'Barbie' trademark in Aqua's song 'Barbie Girl' was deemed non-infringing nominative fair use as a parody. The court held that the song was a form of social commentary and did not imply sponsorship by Mattel.",
+              "relevance": "This case expands the application of the Rogers test, showing that using a trademark to comment on or as part of a cultural landscape is protected. Our use of Bayer Aspirin, a culturally ubiquitous product, for narrative purposes fits within this framework of using brands as part of artistic and social expression.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        }
+      ]
+    },
+    "4": {
+      "element_id": "4",
+      "holding": "clear_required",
+      "confidence": "high",
+      "reasoning": "The arguments overwhelmingly favor removing and replacing the music. The use is a 29.3-second synchronization in a commercial, which is a legally significant duration that is not 'de minimis,' as established by precedents like Ringgold. The core of copyright law requires a synchronization license for this type of use (ABKCO Music). The fact that the rights holder is an 'orphan work' is a practical problem, not a legal defense; as De Acosta confirms, innocent intent does not protect against infringement liability. The fair use argument presented by the advocate is acknowledged as 'tenuous' and relies entirely on a sympathetic reading of the fourth factor, which is a massive risk given the commercial nature of the use. The practical cost-benefit analysis is clear: the cost of licensing a replacement track or commissioning a work-for-hire is a predictable, manageable expense. This pales in comparison to the unquantifiable risk of litigation, which includes statutory damages up to $150,000, legal fees, and a potential injunction that could derail the entire advertising campaign. For a producer, the prudent and only defensible business decision is to incur the minor cost of replacement to avoid the potentially catastrophic legal and financial exposure.",
+      "briefs": [
+        {
+          "side": "counsel",
+          "argument": "The use of the 'Instrumental Score' for 29.3 seconds, even as background music, constitutes a significant legal risk and must be addressed. Under U.S. Copyright Law, a musical composition is protected from the moment of its creation (17 U.S.C. § 102(a)(2)). Using this score in the 'Bayer aspirin spot' implicates the copyright owner's exclusive right to reproduce the work, which includes synchronizing it with visual images (17 U.S.C. § 106(1)). The fact that the rights holder could not be identified creates an 'orphan work' scenario, which does not grant a license or create a safe harbor from an infringement claim. Should the owner surface post-release, they could sue for copyright infringement, seeking an injunction to pull the commercial off the air (17 U.S.C. § 502) and demand statutory damages up to $150,000 for willful infringement (17 U.S.C. § 504(c)), or actual damages and our profits. The significant duration of the use makes a 'de minimis' defense untenable. The only prudent course of action is to either obtain a synchronization license or, failing that, remove and replace the score with a properly licensed alternative from a music library or a work-for-hire composer.",
+          "precedents": [
+            {
+              "case_name": "ABKCO Music, Inc. v. Stellar Records, Inc.",
+              "citation": "96 F.3d 60 (2d Cir. 1996)",
+              "holding": "The court held that a compulsory license under the Copyright Act does not permit the reproduction of a musical work in conjunction with a visual image (in this case, displaying lyrics for karaoke). A separate synchronization license is required for any such audiovisual use.",
+              "relevance": "This case firmly establishes that combining a musical work with a visual element, as we are doing with the score and the aspirin commercial, requires a specific 'sync' license from the copyright holder. Our use is a classic example of synchronization that falls squarely outside any compulsory license scheme.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Bridgeport Music, Inc. v. Dimension Films",
+              "citation": "410 F.3d 792 (6th Cir. 2005)",
+              "holding": "For sound recordings, the court found that any unauthorized sampling constitutes infringement, creating a bright-line rule: 'Get a license or do not sample.'",
+              "relevance": "While our use is of a musical composition, not a sound recording sample, this case is instructive. It shows a judicial trend toward a very strict interpretation of licensing requirements. A court taking a similar hard-line view would find our use of a 29.3-second piece of music, far from a trivial snippet, to be a clear infringement requiring a license.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "De Acosta v. Brown",
+              "citation": "146 F.2d 408 (2d Cir. 1944)",
+              "holding": "The court affirmed that innocent intent is not a defense to copyright infringement. An infringer is liable regardless of whether they knew the work was protected by copyright or who the owner was.",
+              "relevance": "This precedent is directly applicable to our 'orphan work' problem. Our inability to identify the rights holder for the 'Instrumental Score' does not protect us from liability. If the owner later comes forward, our 'innocent' use provides no defense, and we will be fully liable for infringement.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        },
+        {
+          "side": "advocate",
+          "argument": "The strongest good-faith defense for the use of the instrumental score is fair use, though the argument is tenuous and carries significant risk. A defense of 'de minimis' or 'incidental use' would fail, as 29.3 seconds is a substantial duration synchronized to the action, making the music's use intentional and integral, not trivial or accidental. The core of the defense rests on the fourth fair use factor: the effect on the potential market. While the use is commercial, non-transformative, and involves a creative work—all factors weighing heavily against fair use—the fact that the rights holder could not be identified after a diligent search is critical. We can argue that the use did not cause market harm because there was no accessible market to participate in. A license could not be sought and a fee could not be paid to the undiscoverable owner. This 'orphan work' status, while not a statutory defense, practically rebuts the presumption of market harm that typically accompanies a commercial use. However, this defense is weak on the first three factors and relies entirely on a court's sympathy to the practical realities of using orphan works.",
+          "precedents": [
+            {
+              "case_name": "Campbell v. Acuff-Rose Music, Inc.",
+              "citation": "510 U.S. 569 (1994)",
+              "holding": "All four factors of fair use must be explored and weighed together, not treated in isolation. A commercial use is not a per se bar to a finding of fair use, and the fourth factor focuses on whether the use 'usurps' the market for the original.",
+              "relevance": "This case provides the foundational framework for the four-factor analysis. It allows for a holistic argument where the profound weakness of the fourth factor (market harm) due to the work's 'orphan' status can be argued to outweigh the other, less favorable factors.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Ringgold v. Black Entertainment Television, Inc.",
+              "citation": "126 F.3d 70 (2d Cir. 1997)",
+              "holding": "The court ruled that the appearance of a copyrighted poster for a cumulative 26.75 seconds in the background of a television show was not de minimis and required a full fair use analysis.",
+              "relevance": "This precedent is cited to candidly acknowledge the weakness of a 'de minimis' defense. With the music featured for 29.3 seconds, Ringgold establishes that the use is legally significant and must be defended under the more complex and uncertain fair use doctrine.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Sony Corp. of America v. Universal City Studios, Inc.",
+              "citation": "464 U.S. 417 (1984)",
+              "holding": "For a commercial use, the likelihood of market harm may be presumed. However, this presumption can be rebutted if the user shows the use is not likely to cause such harm.",
+              "relevance": "The use in a Bayer commercial is clearly commercial, triggering this presumption of market harm. The argument must then focus entirely on rebutting this presumption by demonstrating that a diligent, good-faith search for the rights holder was fruitless, meaning no license could be purchased and no direct market harm occurred.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        }
+      ]
+    },
+    "face-01": {
+      "element_id": "face-01",
+      "holding": "clear_required",
+      "confidence": "high",
+      "reasoning": "The core issue is the nature of the use: a commercial advertisement. This context severely undermines the Advocate's 'de minimis' defense, which is based on the 'Preston' precedent involving an expressive work (a film). Courts afford far less leeway to purely commercial speech. The Counsel's argument is more persuasive because statutes like California Civil Code § 3344 directly target the unauthorized use of a likeness in advertising and, critically, allow for the recovery of attorney's fees, making litigation attractive to a potential plaintiff. From a practical standpoint, the risk is asymmetrical. The cost of a VFX fix or a reshoot is a finite, manageable production expense. In contrast, the potential cost of litigation includes damages, the advertiser's profits, and, most damagingly, a possible injunction that could halt a multi-million dollar ad campaign for a major client like Bayer. The catastrophic business risk of an injunction far outweighs the cost of removing or altering the shot. Given that consent was not obtained and cannot be obtained, the only prudent course of action is to require clearance by removing or obscuring the individual.",
+      "briefs": [
+        {
+          "side": "counsel",
+          "argument": "The on-screen element 'Grandmother' presents a significant legal risk under the right of publicity. The use of this individual's likeness, however brief, within a commercial for Bayer aspirin constitutes a clear commercial appropriation. The inability to identify and locate the individual to secure a license is a critical failure in the clearance process; it does not mitigate risk, but rather confirms that the use is unauthorized. Any identifiable person, not just a celebrity, has the right to control the commercial use of their identity. The 1.4 seconds of screen time at 40% coverage is sufficient for the individual to be recognizable by herself, family, or acquaintances, which is the threshold for a claim. Proceeding with this element exposes the production and Bayer to potential litigation, including claims for injunctive relief to halt the ad's distribution, and monetary damages. Given that consent has not been obtained, the element must be removed or altered to render the individual completely unidentifiable.",
+          "precedents": [
+            {
+              "case_name": "Motschenbacher v. R.J. Reynolds Tobacco Co.",
+              "citation": "498 F.2d 821 (9th Cir. 1974)",
+              "holding": "The court held that a person's likeness can be appropriated for commercial purposes even if their face is not clearly visible, as long as other elements in the image make them identifiable. The plaintiff, a famous race car driver, was held to have a valid claim when a photograph of his distinctively marked car was used in an ad.",
+              "relevance": "This case establishes that full facial recognizability is not required for a right of publicity claim. The 'Grandmother's' appearance, even if brief or partially obscured, is likely sufficient to be identifiable to those who know her, creating liability for the commercial appropriation of her likeness.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "White v. Samsung Electronics America, Inc.",
+              "citation": "971 F.2d 1395 (9th Cir. 1992)",
+              "holding": "The court ruled that the right of publicity is not limited to the appropriation of a name or direct likeness, but extends to any appropriation of a person's identity. In this case, a robot dressed in a wig and gown, posed on a 'Wheel of Fortune'-like set, was found to have appropriated Vanna White's identity.",
+              "relevance": "This precedent broadens the scope of what constitutes 'identity.' It reinforces that the use of the 'Grandmother' element is a direct appropriation of her identity for commercial advantage, regardless of her celebrity status. The key factor is the evocation of a specific person for commercial gain without permission.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "California Civil Code § 3344",
+              "citation": "Cal. Civ. Code § 3344",
+              "holding": "This statute provides a cause of action and statutory damages for the knowing use of another's name, voice, signature, photograph, or likeness for purposes of advertising or selling goods without prior consent.",
+              "relevance": "This statute creates direct statutory liability for using the 'Grandmother's' likeness in the Bayer ad without consent. Our inability to identify the person means consent was not obtained, exposing the production to statutory damages (at least $750), actual damages, and potentially the plaintiff's attorney's fees.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        },
+        {
+          "side": "advocate",
+          "argument": "The strongest defense against a potential right of publicity claim for the 'Grandmother' is that the use is de minimis and incidental. Her appearance lasts a mere 1.4 seconds and is not integral to the plot of the commercial, meaning she is essentially a background element. The purpose of the commercial is to sell Bayer aspirin, not to capitalize on this specific individual's identity or create a false impression of endorsement. Her image is used generically, akin to a person in a crowd shot. While the commercial nature of the spot is a weakness for the defense—as commercial speech receives less First Amendment protection—the sheer brevity and non-essential nature of the appearance strongly suggest it is a trivial use that the law would not recognize as a commercial appropriation. Defenses like Rogers v. Grimaldi are inapplicable here, as that test applies to expressive works, not purely commercial speech like an advertisement.",
+          "precedents": [
+            {
+              "case_name": "Preston v. Martin Bregman Prods., Inc.",
+              "citation": "765 F. Supp. 1138 (S.D.N.Y. 1991)",
+              "holding": "The court ruled that the brief, 4.5-second appearance of a woman in the opening montage of the film 'Sea of Love' was a 'de minimis' and 'incidental' use that was not actionable under New York's right of privacy statute. The court found the use was too fleeting and her role too insignificant to constitute a commercial appropriation of her likeness.",
+              "relevance": "This case provides a strong foundation for the defense. The use of the 'Grandmother' is even more fleeting (1.4 seconds) than the plaintiff's appearance in 'Preston' (4.5 seconds). Similar to 'Preston', the 'Grandmother' is a non-celebrity, her appearance is not central to the narrative, and her image is used in a way that is incidental to the main purpose of the work. This precedent establishes that even within a commercial project, a trivial and incidental appearance does not trigger a right of publicity violation.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        }
+      ]
+    },
+    "face-03": {
+      "element_id": "face-03",
+      "holding": "clear_required",
+      "confidence": "high",
+      "reasoning": "The arguments from both sides converge on the conclusion that this use carries a high legal risk. The use is for a commercial advertisement, which is the exact scenario right of publicity laws, such as California Civil Code § 3344, are designed to address. The primary defense of 'incidental use' is exceptionally weak, as the advocate's own precedents show it is typically reserved for expressive works (films, books), not purely commercial speech like an aspirin ad. The 'Hoffman' case demonstrates that courts are unlikely to accept this defense for product advertising. Given the boy's 'plot-integral' role, the use is not de minimis. From a practical standpoint, the cost of potential litigation, statutory damages, and disgorgement of profits far exceeds the cost of a reshoot or using VFX to alter the boy's appearance. As the rights holder cannot be located to obtain a license, the only prudent course of action is to remove or alter the element.",
+      "briefs": [
+        {
+          "side": "counsel",
+          "argument": "The on-screen appearance of 'Young Boy (Bobby)' constitutes a significant legal risk under the right of publicity. This common law and statutory right protects individuals from the unauthorized commercial appropriation of their name, image, or likeness. Using the boy's image in a commercial for Bayer aspirin is a clear commercial use intended to increase sales. The character's prominence (5.0s screen time, 25% coverage, integral to the plot) heightens the risk and potential damages, as a court would likely find the use to be a meaningful and deliberate appropriation. The fact that the rights holder could not be identified does not mitigate this risk; it confirms that we have not obtained the necessary license. If the individual or his estate later identifies himself, the production would be liable for damages, which could include the defendant's profits, and potentially punitive damages. To mitigate this clear liability, the element must be licensed, removed, or altered to be non-identifiable.",
+          "precedents": [
+            {
+              "case_name": "California Civil Code § 3344",
+              "citation": "Cal. Civ. Code § 3344",
+              "holding": "Any person who knowingly uses another's name, voice, signature, photograph, or likeness, in any manner, on or in products, merchandise, or goods, or for purposes of advertising or selling, without such person's prior consent, shall be liable for any damages sustained.",
+              "relevance": "This statute provides a direct cause of action for the unauthorized use of a person's likeness in advertising. Our use of the boy's image to promote Bayer aspirin falls squarely within the statute's prohibitions, creating statutory liability for damages and profits from the unauthorized use.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "White v. Samsung Elecs. Am., Inc.",
+              "citation": "971 F.2d 1395 (9th Cir. 1992)",
+              "holding": "The court held that the common law right of publicity is not limited to the appropriation of a name or likeness, but also protects against the appropriation of a person's identity, which can be evoked without using their actual image.",
+              "relevance": "This case establishes a broad interpretation of what constitutes an individual's 'likeness' or 'identity.' If a robotic caricature can lead to liability, the direct and intentional use of an actual person's image, as is the case with 'Young Boy (Bobby),' presents an even clearer and more significant risk of a successful right of publicity claim.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Zacchini v. Scripps-Howard Broadcasting Co.",
+              "citation": "433 U.S. 562 (1977)",
+              "holding": "The U.S. Supreme Court ruled that the First Amendment does not protect a media outlet from liability when it broadcasts a performer's entire act without consent, as this constitutes an appropriation of the economic value of the performance.",
+              "relevance": "This Supreme Court precedent establishes that the right of publicity can outweigh First Amendment considerations in cases of commercial appropriation. It affirms the principle that an individual has a right to control the commercial exploitation of their own image and identity, reinforcing the legal risk of broadcasting the boy's likeness without permission.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        },
+        {
+          "side": "advocate",
+          "argument": "The strongest, though admittedly weak, defense for the use of 'Young Boy (Bobby)' is incidental use. The appearance, while described as 'plot-integral' to the spot, is fleeting at only five seconds. The argument is that the boy is not famous, his specific identity is not being exploited, and he is used generically to represent a child in a family scenario to whom a parent can now attend thanks to the product. The focus of the advertisement is Bayer aspirin, not the boy himself. His use is ancillary to the primary commercial message. However, this defense is significantly weakened by the commercial nature of the work—a direct product advertisement—and the fact that his role is integral to the spot's narrative. Courts are reluctant to extend incidental use protection to images that are a central feature of an advertisement. Other defenses are inapplicable: the use is too substantial (5s, 25% coverage, plot integral) to be considered 'de minimis'. The 'Rogers v. Grimaldi' test does not apply because an aspirin commercial is commercial speech, not an artistic or expressive work. While a good-faith search for the rights holder was conducted, this is a mitigating factor regarding damages, not a legal defense to the violation itself. The risk of a successful claim remains high.",
+          "precedents": [
+            {
+              "case_name": "Preston v. Martin Bregman Prods., Inc.",
+              "citation": "765 F. Supp. 116 (S.D.N.Y. 1991)",
+              "holding": "The court held that the 4.5-second, out-of-focus appearance of a plaintiff in the opening credits of the film 'Sea of Love' was too fleeting and incidental to be actionable under New York's right of publicity statute.",
+              "relevance": "This case supports the argument that a brief appearance (here, five seconds) may be considered incidental. However, its value is limited as it concerns an expressive work (a film), which receives greater First Amendment protection than a television commercial, which is considered commercial speech.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Groden v. Random House, Inc.",
+              "citation": "61 F.3d 1045 (2d Cir. 1995)",
+              "holding": "The Second Circuit held that the use of a critic's name and photo in an advertisement for a book refuting his theories was an incidental use, as the ad's purpose was to describe the book's content, and such use was necessary.",
+              "relevance": "This precedent establishes the viability of the incidental use doctrine in the context of advertising. We would argue by analogy that the boy's image is incidental to the ad's main purpose of selling aspirin. However, the 'Groden' use was to advertise a constitutionally protected work (a book), whereas our use advertises a commercial product, a critical distinction that weakens our position.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Hoffman v. Capital Cities/ABC, Inc.",
+              "citation": "255 F.3d 1180 (9th Cir. 2001)",
+              "holding": "The Ninth Circuit found that a magazine's unauthorized use of a digitally altered image of actor Dustin Hoffman to advertise clothing was a violation of his right of publicity, classifying the use as unprotected commercial speech that created a false endorsement.",
+              "relevance": "This case highlights the significant weakness of our defense. It shows that courts treat use of a person's likeness to sell a product, even in a creative or editorial-style format, as commercial speech subject to right of publicity claims. This precedent suggests a court would likely view the 'Bayer aspirin spot' as purely commercial, making the incidental use defense very difficult to sustain.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "research_plan": {
+    "4": {
+      "element_id": "4",
+      "processor": "pro",
+      "rationale": "Music rights split across composition and master with publisher chains; needs deep research.",
+      "est_cost_usd": 0.1
+    },
+    "2": {
+      "element_id": "2",
+      "processor": "base",
+      "rationale": "Standard single-owner lookup expected; escalate tier manually if research returns incomplete.",
+      "est_cost_usd": 0.01
+    },
+    "face-02": {
+      "element_id": "face-02",
+      "processor": "base",
+      "rationale": "Standard single-owner lookup expected; escalate tier manually if research returns incomplete.",
+      "est_cost_usd": 0.01
+    },
+    "1": {
+      "element_id": "1",
+      "processor": "base",
+      "rationale": "Standard single-owner lookup expected; escalate tier manually if research returns incomplete.",
+      "est_cost_usd": 0.01
+    }
+  },
+  "script_mentions": [],
+  "drift": null,
+  "candidates": {
+    "1": [
+      {
+        "name": "jules custom artwork",
+        "kind": "artist",
+        "url": "https://au.linkedin.com/in/jules-custom-artwork-2a41441b",
+        "note": "have been an artist my entire life, from fine art to advertising to the entertainment…"
+      },
+      {
+        "name": "Bayer AG",
+        "kind": "Possible brand/commercial attribution source for the Bayer aspirin spot; not verified as the copyright holder of the painting",
+        "url": "https://www.bayer.com/en/about-us",
+        "note": "Bayer AG is the Bayer life-science company headquartered in Leverkusen, Germany. The Bayer brand is directly associated with the Bayer Aspirin commercial, making Bayer AG a plausible attribution lead for the film, but the available evidence does not establish that it owns copyright in the painting appearing in the spot."
+      },
+      {
+        "name": "Maria Mollohan artist",
+        "kind": "artist",
+        "url": "https://www.linkedin.com/in/maria-mollohan-artist-54a2641a9",
+        "note": "Multidisciplinary Artist | Printmaker | Prop /Buyer & Set Dec for Film. Experienced in…"
+      },
+      {
+        "name": "Bridgeman Images",
+        "kind": "licensing agency",
+        "url": "http://bridgemanimages.com/en-US",
+        "note": "Bridgeman Images is a rights-managed art, culture, and historic-image licensing agency that works with museums, galleries, collections, and artists. It is therefore a plausible rights-holder or attribution source for artwork appearing in the Bayer aspirin spot, although the available evidence does not specifically identify Bridgeman Images as the rights holder of the painting in that film."
+      },
+      {
+        "name": "Shutterstock, Inc.",
+        "kind": "licensing agency",
+        "url": "http://shutterstock.com/about",
+        "note": "Shutterstock, Inc. is a global technology company offering a creative platform for visual content and licensing. It is a plausible attribution or licensing lead for artwork appearing in the Bayer aspirin spot, but the available evidence does not establish Shutterstock as the rights holder of the specific painting."
+      },
+      {
+        "name": "Georgia Steel: Vocalist, Tributes, Body Artist",
+        "kind": "artist",
+        "url": "https://ca.linkedin.com/in/georgia-steel-vocalist-tributes-body-artist-30aa9b16",
+        "note": "Work Experience: Professional Model 1979-1994 Film, Stage, & Voice Actor…"
+      },
+      {
+        "name": "Pamela Brown Artist and book auther",
+        "kind": "artist",
+        "url": "https://www.linkedin.com/in/pamela-brown-artist-and-book-auther-025b882a",
+        "note": "Created with film maker, designers, culinary and many many graphic artist through out the…"
+      },
+      {
+        "name": "Getty Images Holdings, Inc.",
+        "kind": "Rights-clearance and licensing agency; not confirmed as the specific rights holder of the painting in the Bayer aspirin spot.",
+        "url": "https://www.gettyimages.com/about-us",
+        "note": "Getty Images is an organization and a visual-content licensing business that provides rights and clearance services for copyrighted material. It is a plausible attribution or licensing source for the painting, but the available evidence does not specifically identify Getty Images as the rights holder of the painting appearing in the Bayer aspirin spot."
+      },
+      {
+        "name": "Painting Painting",
+        "kind": "artist",
+        "url": "https://www.linkedin.com/in/painting-painting-943bb6129",
+        "note": ""
+      },
+      {
+        "name": "Enticia Artist",
+        "kind": "artist",
+        "url": "https://www.linkedin.com/in/enticia-artist-9a170a45/",
+        "note": "For many years I worked in retail management and advertising publishing. A self taught…"
+      }
+    ]
+  },
+  "watches": {
+    "1": {
+      "element_id": "1",
+      "monitor_id": "local-1",
+      "query": "Identification or attribution of 'Painting': new registry entries, press, or databases naming the artist/owner.",
+      "frequency": "weekly"
+    },
+    "2": {
+      "element_id": "2",
+      "monitor_id": "local-2",
+      "query": "Identification or attribution of 'Bayer Aspirin': new registry entries, press, or databases naming the artist/owner.",
+      "frequency": "weekly"
+    },
+    "4": {
+      "element_id": "4",
+      "monitor_id": "local-4",
+      "query": "Identification or attribution of 'Instrumental Score': new registry entries, press, or databases naming the artist/owner.",
+      "frequency": "weekly"
+    },
+    "face-01": {
+      "element_id": "face-01",
+      "monitor_id": "local-face-01",
+      "query": "New litigation, trademark/copyright filings, enforcement actions, or licensing-policy changes by None affecting film/TV depiction of 'Grandmother'.",
+      "frequency": "weekly"
+    },
+    "face-03": {
+      "element_id": "face-03",
+      "monitor_id": "local-face-03",
+      "query": "New litigation, trademark/copyright filings, enforcement actions, or licensing-policy changes by None affecting film/TV depiction of 'Young Boy (Bobby)'.",
+      "frequency": "weekly"
+    }
+  },
+  "alerts": [],
+  "corroboration": {
+    "1": {
+      "element_id": "1",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers COPYRIGHT_ART; identity rests on the video model alone."
+    },
+    "2": {
+      "element_id": "2",
+      "verdict": "CORROBORATED",
+      "detector": "cloud-video-intelligence",
+      "detected_label": "Bayer Corporation",
+      "confidence": 0.88635296,
+      "note": "cloud-video-intelligence independently identified 'Bayer Corporation' in the same window at 89% confidence."
+    },
+    "3": {
+      "element_id": "3",
+      "verdict": "CORROBORATED",
+      "detector": "cloud-video-intelligence",
+      "detected_label": "Bayer Corporation",
+      "confidence": 0.88635296,
+      "note": "cloud-video-intelligence independently identified 'Bayer Corporation' in the same window at 89% confidence."
+    },
+    "4": {
+      "element_id": "4",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "audd-fingerprint",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "Acoustic fingerprinting returned no match. Not a contradiction — the recording may be library, original or absent from the database — but the title rests on the video model alone and must not be filed to a PRO without human confirmation."
+    },
+    "face-01": {
+      "element_id": "face-01",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers RIGHT_OF_PUBLICITY; identity rests on the video model alone."
+    },
+    "face-02": {
+      "element_id": "face-02",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers RIGHT_OF_PUBLICITY; identity rests on the video model alone."
+    },
+    "face-03": {
+      "element_id": "face-03",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers RIGHT_OF_PUBLICITY; identity rests on the video model alone."
+    },
+    "face-04": {
+      "element_id": "face-04",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers RIGHT_OF_PUBLICITY; identity rests on the video model alone."
+    },
+    "text-01": {
+      "element_id": "text-01",
+      "verdict": "CONFLICTED",
+      "detector": "cloud-video-intelligence",
+      "detected_label": "Wake Forest Demon Deacons",
+      "confidence": 0.93581915,
+      "note": "Identity dispute: the video model read 'Fast Pain Relief' but cloud-video-intelligence read 'Bayer Corporation, Wake Forest Demon Deacons' in the same window. Resolve before researching — researching the wrong rights holder produces a false clearance."
+    }
+  },
+  "freshness": {
+    "3": [
+      {
+        "element_id": "3",
+        "owner": "Bayer AG",
+        "title": "Bayer Ag and Bayer Corporation, Plaintiffs-appellees, v. ...",
+        "url": "http://law.justia.com/cases/federal/appellate-courts/F3/340/1367/588033",
+        "excerpt": "Bayer AG and Bayer Corporation (\"Bayer\") filed a complaint seeking declaratory judgment of invalidity, unenforceability, and non-infringement of the Housey",
+        "material": true
+      },
+      {
+        "element_id": "3",
+        "owner": "Bayer AG",
+        "title": "Case: 4:23-cv-00083-JAR Doc. #: 44 Filed: 12/19/24 Page: 1 of 8 PageID #: <pageID> UNITED STATES DISTRICT COURT EASTERN DISTRICT",
+        "url": "https://www.govinfo.gov/content/pkg/USCOURTS-moed-4_23-cv-00083/pdf/USCOURTS-moed-4_23-cv-00083-1.pdf",
+        "excerpt": "### Based on Irions’ admissions, the Court must agree that Bayer is entitled to summary\n\n### judgment. Irions does not contest the validity of Bayer’s patents, which are presumed valid.\n\n### 35 U.S.C. § 282(a). Nor does Irions challenge the enforceability of the TSAs. Irions admits that\n\n### he infringed the patents and breached the terms of the TSAs and TUGs by saving and replanting\n\n### Bayer’s patented seeds and applying unauthorized herbicide. Accordingly, the Court will grant\n\n### summary judgment in favor of Bayer.\n\n### Bayer requests liquidated damages under § 3(e) of the 2020-2021 TSAs",
+        "material": true
+      }
+    ]
+  },
+  "territory_risk": {
+    "1": [
+      {
+        "element_id": "1",
+        "territory": "US",
+        "band": "LOW",
+        "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+      },
+      {
+        "element_id": "1",
+        "territory": "DE",
+        "band": "LOW",
+        "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+      },
+      {
+        "element_id": "1",
+        "territory": "FR",
+        "band": "MEDIUM",
+        "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+      }
+    ],
+    "2": [
+      {
+        "element_id": "2",
+        "territory": "US",
+        "band": "MEDIUM",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; United States tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "2",
+        "territory": "DE",
+        "band": "MEDIUM",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; Germany tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "2",
+        "territory": "FR",
+        "band": "MEDIUM",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; France tracks the baseline band.",
+        "authority": ""
+      }
+    ],
+    "3": [
+      {
+        "element_id": "3",
+        "territory": "US",
+        "band": "LOW",
+        "rationale": "TEXT_ON_SCREEN exposure does not vary by panorama rule; United States tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "3",
+        "territory": "DE",
+        "band": "LOW",
+        "rationale": "TEXT_ON_SCREEN exposure does not vary by panorama rule; Germany tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "3",
+        "territory": "FR",
+        "band": "LOW",
+        "rationale": "TEXT_ON_SCREEN exposure does not vary by panorama rule; France tracks the baseline band.",
+        "authority": ""
+      }
+    ],
+    "4": [
+      {
+        "element_id": "4",
+        "territory": "US",
+        "band": "MEDIUM",
+        "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; United States tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "4",
+        "territory": "DE",
+        "band": "MEDIUM",
+        "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; Germany tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "4",
+        "territory": "FR",
+        "band": "MEDIUM",
+        "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; France tracks the baseline band.",
+        "authority": ""
+      }
+    ],
+    "face-01": [
+      {
+        "element_id": "face-01",
+        "territory": "US",
+        "band": "HIGH",
+        "rationale": "United States enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+      },
+      {
+        "element_id": "face-01",
+        "territory": "DE",
+        "band": "HIGH",
+        "rationale": "Germany enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+      },
+      {
+        "element_id": "face-01",
+        "territory": "FR",
+        "band": "HIGH",
+        "rationale": "France enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+      }
+    ],
+    "face-02": [
+      {
+        "element_id": "face-02",
+        "territory": "US",
+        "band": "HIGH",
+        "rationale": "United States enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+      },
+      {
+        "element_id": "face-02",
+        "territory": "DE",
+        "band": "HIGH",
+        "rationale": "Germany enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+      },
+      {
+        "element_id": "face-02",
+        "territory": "FR",
+        "band": "HIGH",
+        "rationale": "France enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+      }
+    ],
+    "face-03": [
+      {
+        "element_id": "face-03",
+        "territory": "US",
+        "band": "HIGH",
+        "rationale": "United States enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+      },
+      {
+        "element_id": "face-03",
+        "territory": "DE",
+        "band": "HIGH",
+        "rationale": "Germany enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+      },
+      {
+        "element_id": "face-03",
+        "territory": "FR",
+        "band": "HIGH",
+        "rationale": "France enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+      }
+    ],
+    "face-04": [
+      {
+        "element_id": "face-04",
+        "territory": "US",
+        "band": "MEDIUM",
+        "rationale": "United States enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+      },
+      {
+        "element_id": "face-04",
+        "territory": "DE",
+        "band": "MEDIUM",
+        "rationale": "Germany enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+      },
+      {
+        "element_id": "face-04",
+        "territory": "FR",
+        "band": "MEDIUM",
+        "rationale": "France enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+      }
+    ],
+    "text-01": [
+      {
+        "element_id": "text-01",
+        "territory": "US",
+        "band": "LOW",
+        "rationale": "TEXT_ON_SCREEN exposure does not vary by panorama rule; United States tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "text-01",
+        "territory": "DE",
+        "band": "LOW",
+        "rationale": "TEXT_ON_SCREEN exposure does not vary by panorama rule; Germany tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "text-01",
+        "territory": "FR",
+        "band": "LOW",
+        "rationale": "TEXT_ON_SCREEN exposure does not vary by panorama rule; France tracks the baseline band.",
+        "authority": ""
+      }
+    ]
+  },
+  "territories": [
+    "US",
+    "DE",
+    "FR"
+  ],
+  "coverage": {},
+  "audio_matches": [],
+  "routes": {
+    "1": {
+      "element_id": "1",
+      "tier": "DEEP",
+      "rationale": "For artwork, 'who owns this' IS the question, and a two-second search cannot answer it: a poster's rights can sit with the band, the label, the photographer or the designer. Ownership chains for authored images are multi-hop by nature, which is what a deep run is for.",
+      "basis": "Ringgold v. Black Entertainment Television, 126 F.3d 70 (2d Cir. 1997) — recognisable background artwork is not de minimis",
+      "disposition": "",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.01,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "2": {
+      "element_id": "2",
+      "tier": "DEEP",
+      "rationale": "Escalated to deep research: provisional exposure is 51, at or above the HIGH band. Ownership resolved locally (Bayer AG); a live search establishes current licensing posture and the contact route. Posture is the variable a static table cannot know, and for trademark it is the variable that decides risk — brand owners sue over unflattering depiction, not presence. A finding this prominent needs a licensing contact, a cost band and citations an underwriter can follow — which only a deep run produces.",
+      "basis": "",
+      "disposition": "Confirm posture, then approach Bayer AG if depiction is unflattering.",
+      "owner": "Bayer AG",
+      "posture": null,
+      "est_cost_usd": 0.01,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "3": {
+      "element_id": "3",
+      "tier": "SEARCH",
+      "rationale": "Ownership resolved locally (Bayer AG); a live search establishes current licensing posture and the contact route. Posture is the variable a static table cannot know, and for trademark it is the variable that decides risk — brand owners sue over unflattering depiction, not presence.",
+      "basis": "",
+      "disposition": "Confirm posture, then approach Bayer AG if depiction is unflattering.",
+      "owner": "Bayer AG",
+      "posture": null,
+      "est_cost_usd": 0.005,
+      "est_latency_s": 2.0,
+      "enumerate_candidates": false
+    },
+    "4": {
+      "element_id": "4",
+      "tier": "DEEP",
+      "rationale": "Music is the category productions reliably lose, and this recording is unidentified — no fingerprint match. Publisher and master chains are genuinely multi-hop, which is exactly what a deep run is for.",
+      "basis": "NMPA v. Fullscreen (2013); Bridgeport v. Dimension Films, 410 F.3d 792 (6th Cir. 2005)",
+      "disposition": "",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.1,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "face-01": {
+      "element_id": "face-01",
+      "tier": "SEARCH",
+      "rationale": "A named individual is cleared through their representation, so the useful answer is a current agent or estate contact — not a rights lookup.",
+      "basis": "",
+      "disposition": "Obtain a likeness release via the individual's agent or estate.",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.005,
+      "est_latency_s": 2.0,
+      "enumerate_candidates": false
+    },
+    "face-02": {
+      "element_id": "face-02",
+      "tier": "DEEP",
+      "rationale": "Escalated to deep research: provisional exposure is 54, at or above the HIGH band. A named individual is cleared through their representation, so the useful answer is a current agent or estate contact — not a rights lookup. A finding this prominent needs a licensing contact, a cost band and citations an underwriter can follow — which only a deep run produces.",
+      "basis": "",
+      "disposition": "Obtain a likeness release via the individual's agent or estate.",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.01,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "face-03": {
+      "element_id": "face-03",
+      "tier": "STATUTE",
+      "rationale": "An unnamed individual has no discoverable rights holder. Research cannot produce the instrument this needs.",
+      "basis": "Right of publicity — cleared by consent, not by ownership research",
+      "disposition": "Obtain a personal release, or blur. If shot in a public place under a crowd notice, file the notice against this finding.",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.0,
+      "est_latency_s": 0.0,
+      "enumerate_candidates": false
+    },
+    "face-04": {
+      "element_id": "face-04",
+      "tier": "STATUTE",
+      "rationale": "An unnamed individual has no discoverable rights holder. Research cannot produce the instrument this needs.",
+      "basis": "Right of publicity — cleared by consent, not by ownership research",
+      "disposition": "Obtain a personal release, or blur. If shot in a public place under a crowd notice, file the notice against this finding.",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.0,
+      "est_latency_s": 0.0,
+      "enumerate_candidates": false
+    },
+    "text-01": {
+      "element_id": "text-01",
+      "tier": "BLOCKED",
+      "rationale": "Two independent detectors named different things. Research asks 'who owns THIS', and we do not yet agree on what THIS is — researching would attribute rights to the wrong holder.",
+      "basis": "Identity conflict",
+      "disposition": "A human resolves identity before any research runs.",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.0,
+      "est_latency_s": 0.0,
+      "enumerate_candidates": false
+    }
+  },
+  "preview": [
+    {
+      "element_id": "face-02",
+      "label": "Father",
+      "category": "RIGHT_OF_PUBLICITY",
+      "time_ranges": [
+        {
+          "start_s": 7.5,
+          "end_s": 9.0
+        },
+        {
+          "start_s": 16.5,
+          "end_s": 17.8
+        },
+        {
+          "start_s": 21.8,
+          "end_s": 25.2
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 54,
+      "provisional_band": "HIGH",
+      "identity": "SINGLE_SOURCE",
+      "territory": [
+        {
+          "element_id": "face-02",
+          "territory": "US",
+          "band": "CRITICAL",
+          "rationale": "United States enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "face-02",
+          "territory": "DE",
+          "band": "CRITICAL",
+          "rationale": "Germany enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "face-02",
+          "territory": "FR",
+          "band": "CRITICAL",
+          "rationale": "France enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "Obtain a likeness release via the individual's agent or estate.",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "2",
+      "label": "Bayer Aspirin",
+      "category": "TRADEMARK",
+      "time_ranges": [
+        {
+          "start_s": 17.5,
+          "end_s": 20.3
+        },
+        {
+          "start_s": 25.5,
+          "end_s": 29.3
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 51,
+      "provisional_band": "HIGH",
+      "identity": "CORROBORATED",
+      "territory": [
+        {
+          "element_id": "2",
+          "territory": "US",
+          "band": "HIGH",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; United States tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "2",
+          "territory": "DE",
+          "band": "HIGH",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; Germany tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "2",
+          "territory": "FR",
+          "band": "HIGH",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; France tracks the baseline band.",
+          "authority": ""
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "Confirm posture, then approach Bayer AG if depiction is unflattering.",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "face-03",
+      "label": "Young Boy (Bobby)",
+      "category": "RIGHT_OF_PUBLICITY",
+      "time_ranges": [
+        {
+          "start_s": 3.7,
+          "end_s": 6.0
+        },
+        {
+          "start_s": 13.5,
+          "end_s": 16.2
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 46,
+      "provisional_band": "HIGH",
+      "identity": "SINGLE_SOURCE",
+      "territory": [
+        {
+          "element_id": "face-03",
+          "territory": "US",
+          "band": "CRITICAL",
+          "rationale": "United States enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "face-03",
+          "territory": "DE",
+          "band": "CRITICAL",
+          "rationale": "Germany enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "face-03",
+          "territory": "FR",
+          "band": "CRITICAL",
+          "rationale": "France enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        }
+      ],
+      "route_tier": "STATUTE",
+      "disposition": "Obtain a personal release, or blur. If shot in a public place under a crowd notice, file the notice against this finding.",
+      "awaiting_research": false
+    },
+    {
+      "element_id": "4",
+      "label": "Instrumental Score",
+      "category": "MUSIC_SYNC",
+      "time_ranges": [
+        {
+          "start_s": 0.0,
+          "end_s": 29.3
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 40,
+      "provisional_band": "MEDIUM",
+      "identity": "SINGLE_SOURCE",
+      "territory": [
+        {
+          "element_id": "4",
+          "territory": "US",
+          "band": "MEDIUM",
+          "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; United States tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "4",
+          "territory": "DE",
+          "band": "MEDIUM",
+          "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; Germany tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "4",
+          "territory": "FR",
+          "band": "MEDIUM",
+          "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; France tracks the baseline band.",
+          "authority": ""
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "face-01",
+      "label": "Grandmother",
+      "category": "RIGHT_OF_PUBLICITY",
+      "time_ranges": [
+        {
+          "start_s": 2.1,
+          "end_s": 3.5
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 30,
+      "provisional_band": "MEDIUM",
+      "identity": "SINGLE_SOURCE",
+      "territory": [
+        {
+          "element_id": "face-01",
+          "territory": "US",
+          "band": "HIGH",
+          "rationale": "United States enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "face-01",
+          "territory": "DE",
+          "band": "HIGH",
+          "rationale": "Germany enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "face-01",
+          "territory": "FR",
+          "band": "HIGH",
+          "rationale": "France enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        }
+      ],
+      "route_tier": "SEARCH",
+      "disposition": "Obtain a likeness release via the individual's agent or estate.",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "face-04",
+      "label": "Little Girl",
+      "category": "RIGHT_OF_PUBLICITY",
+      "time_ranges": [
+        {
+          "start_s": 9.5,
+          "end_s": 10.8
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 27,
+      "provisional_band": "MEDIUM",
+      "identity": "SINGLE_SOURCE",
+      "territory": [
+        {
+          "element_id": "face-04",
+          "territory": "US",
+          "band": "HIGH",
+          "rationale": "United States enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "face-04",
+          "territory": "DE",
+          "band": "HIGH",
+          "rationale": "Germany enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "face-04",
+          "territory": "FR",
+          "band": "HIGH",
+          "rationale": "France enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        }
+      ],
+      "route_tier": "STATUTE",
+      "disposition": "Obtain a personal release, or blur. If shot in a public place under a crowd notice, file the notice against this finding.",
+      "awaiting_research": false
+    },
+    {
+      "element_id": "1",
+      "label": "Painting",
+      "category": "COPYRIGHT_ART",
+      "time_ranges": [
+        {
+          "start_s": 0.0,
+          "end_s": 2.2
+        },
+        {
+          "start_s": 7.4,
+          "end_s": 10.3
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 25,
+      "provisional_band": "MEDIUM",
+      "identity": "SINGLE_SOURCE",
+      "territory": [
+        {
+          "element_id": "1",
+          "territory": "US",
+          "band": "MEDIUM",
+          "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "1",
+          "territory": "DE",
+          "band": "LOW",
+          "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "1",
+          "territory": "FR",
+          "band": "HIGH",
+          "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "3",
+      "label": "Bayer Works Wonders",
+      "category": "TEXT_ON_SCREEN",
+      "time_ranges": [
+        {
+          "start_s": 27.2,
+          "end_s": 29.3
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 20,
+      "provisional_band": "MEDIUM",
+      "identity": "CORROBORATED",
+      "territory": [
+        {
+          "element_id": "3",
+          "territory": "US",
+          "band": "MEDIUM",
+          "rationale": "TEXT_ON_SCREEN exposure does not vary by panorama rule; United States tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "3",
+          "territory": "DE",
+          "band": "MEDIUM",
+          "rationale": "TEXT_ON_SCREEN exposure does not vary by panorama rule; Germany tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "3",
+          "territory": "FR",
+          "band": "MEDIUM",
+          "rationale": "TEXT_ON_SCREEN exposure does not vary by panorama rule; France tracks the baseline band.",
+          "authority": ""
+        }
+      ],
+      "route_tier": "SEARCH",
+      "disposition": "Confirm posture, then approach Bayer AG if depiction is unflattering.",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "text-01",
+      "label": "Fast Pain Relief",
+      "category": "TEXT_ON_SCREEN",
+      "time_ranges": [
+        {
+          "start_s": 17.9,
+          "end_s": 18.9
+        },
+        {
+          "start_s": 25.5,
+          "end_s": 26.8
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 15,
+      "provisional_band": "LOW",
+      "identity": "CONFLICTED",
+      "territory": [
+        {
+          "element_id": "text-01",
+          "territory": "US",
+          "band": "LOW",
+          "rationale": "TEXT_ON_SCREEN exposure does not vary by panorama rule; United States tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "text-01",
+          "territory": "DE",
+          "band": "LOW",
+          "rationale": "TEXT_ON_SCREEN exposure does not vary by panorama rule; Germany tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "text-01",
+          "territory": "FR",
+          "band": "LOW",
+          "rationale": "TEXT_ON_SCREEN exposure does not vary by panorama rule; France tracks the baseline band.",
+          "authority": ""
+        }
+      ],
+      "route_tier": "BLOCKED",
+      "disposition": "A human resolves identity before any research runs.",
+      "awaiting_research": false
+    }
+  ],
+  "detector_hits": [
+    {
+      "label": "Wake Forest Demon Deacons",
+      "confidence": 0.93581915,
+      "start_s": null,
+      "end_s": null,
+      "bbox": {
+        "ymin": 0.067086875,
+        "xmin": 0.0012322962,
+        "ymax": 0.96971565,
+        "xmax": 0.971197
+      }
+    },
+    {
+      "label": "Bayer Corporation",
+      "confidence": 0.8822456,
+      "start_s": null,
+      "end_s": null,
+      "bbox": {
+        "ymin": 0.44922262,
+        "xmin": 0.51399845,
+        "ymax": 0.66251594,
+        "xmax": 0.7203755
+      }
+    },
+    {
+      "label": "Bayer Corporation",
+      "confidence": 0.85277337,
+      "start_s": null,
+      "end_s": null,
+      "bbox": {
+        "ymin": 0.34368527,
+        "xmin": 0.3034997,
+        "ymax": 0.5102682,
+        "xmax": 0.48861593
+      }
+    },
+    {
+      "label": "Bayer Corporation",
+      "confidence": 0.88635296,
+      "start_s": null,
+      "end_s": null,
+      "bbox": {
+        "ymin": 0.4363392,
+        "xmin": 0.38861772,
+        "ymax": 0.6500965,
+        "xmax": 0.627653
+      }
+    }
+  ]
+}
