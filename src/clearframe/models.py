@@ -8,6 +8,11 @@ from pydantic import BaseModel, Field, model_validator
 
 class ElementType(str, Enum):
     LOGO = "LOGO"
+    # A drawn, animated or rendered character. Deliberately distinct from
+    # FACE: a fictional character has no right of publicity — there is nobody
+    # to consent — and the right that DOES exist is copyright in the design,
+    # owned by the studio and cleared by a licence.
+    CHARACTER = "CHARACTER"
     ARTWORK = "ARTWORK"
     MUSIC = "MUSIC"
     FACE = "FACE"
