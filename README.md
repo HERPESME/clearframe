@@ -281,7 +281,7 @@ src/clearframe/
   corroboration.py territory.py freshness.py matching.py     # verification engines (pure code)
   routing.py knowledge.py audio.py licensing.py              # cost/latency policy + rights knowledge
   data/rights/                   # marks, litigation, counterparties, term rules (JSON)
-  pipeline.py stages/            # deterministic 12-stage orchestrator
+  pipeline.py stages/            # deterministic 13-stage orchestrator
   integrations/                  # Gemini + Parallel clients (live & fixture) + recorded fixtures
   exporters/                     # dossier HTML, EDL, CSV markers, cue sheet
   adk/                           # Google ADK SequentialAgent wrapper

@@ -93,7 +93,7 @@ list_licences · check_coverage · generate_dossier`. Keep
 ## Tests + smoke
 
 ```bash
-.venv/bin/pytest -q     # 231 tests; must be green before any commit
+.venv/bin/pytest -q     # 262 tests; must be green before any commit
 bash scripts/smoke.sh   # 7 sections: CLI, web, SSE, webhook, verification, ledger, MCP
 ```
 

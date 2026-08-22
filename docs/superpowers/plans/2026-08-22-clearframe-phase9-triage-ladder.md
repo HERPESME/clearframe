@@ -1,8 +1,21 @@
 # ClearFrame Phase 9 — The Escalation Ladder
 
 **Status:** Implemented 2026-08-22 (branch `feat/corroboration-search-territory`).
-231 tests, smoke green. Tasks 1, 2, 3, 5 and 7 shipped; 4, 6 and 8 remain (see
-"What is deliberately not done yet" at the end).
+262 tests, smoke green. Tasks 1–5 and 7 shipped; 6 and 8 remain.
+
+**Measured on live footage** (`testdata/clips/ctvc_BAYER_512kb.mp4` — a 30s
+public-domain spot, 9 findings, territories US/DE/FR):
+
+| | Before | After |
+| --- | --- | --- |
+| Time to a complete timestamped risk report | 583 s (nothing sooner) | **78 s** |
+| Time to full ownership research | 583 s | **336 s** |
+| Parallel Task runs | 4 (all returning UNKNOWN) | 2 |
+| Findings reported | 9 | 9 |
+
+The remaining wall clock is Parallel Task's own run time on the findings that
+genuinely need it, not pipeline overhead. Script through drift completes in
+~78 s with Gemini, Video Intelligence and acoustic fingerprinting concurrent.
 
 **Problem.** A 21.8s clip took ~20 minutes. Measured cause: 16 Parallel deep-research
 Task runs, 6 of which returned no owner at all. Category mix was 7
@@ -205,7 +218,7 @@ Archives, Blender open movies (CC-BY), and NASA footage. Extend
 | 1 | `imageio-ffmpeg` + `integrations/audio_client.py` (protocol + fixture + live AudD); `AUDIO_API_KEY` → `AUDD_API_TOKEN` | **done** |
 | 2 | `data/rights/*.json` + `knowledge.py` loader | **done** |
 | 3 | `routing.py` — the ladder, pure code, auditable like `planner.py`; `planner.py` becomes L4-only | **done** |
-| 4 | Two-phase emit: report at L2, enrich over SSE | open |
+| 4 | Two-phase emit: report at L2, enrich over SSE | **done** |
 | 5 | Latency fixes (poll interval, concurrent Court, concurrent scan/VI/audio) | **done** |
 | 6 | Depiction-context signal in `SCAN_PROMPT` + scan schema | open |
 | 7 | `LicenceGrant.rights_type` + expanded ledger + corpus | **done** |
@@ -237,6 +250,41 @@ look wrong:
    regardless of category, because only a deep run produces a licensing contact,
    a cost band and citations an underwriter can follow.
 
+## What the live runs found that no fixture could
+
+Five defects surfaced only against real detector output and a real network.
+This is the argument for running live before believing a green suite.
+
+1. **A legal suffix defeated identity agreement.** Video Intelligence returned
+   "Bayer Corporation" three times at ~0.87 confidence, but `{bayer, aspirin}`
+   against `{bayer, corporation}` scores 1/2 = 0.5, under the 0.6 threshold.
+   Correct agreement was rejected, one spurious "Wake Forest Demon Deacons" hit
+   made the identity CONFLICTED, and research was blocked on the only
+   confidently identified brand in the clip. A **false** conflict is worse than
+   no corroboration: it stops the pipeline on a correct answer, in the headline
+   feature. `matching` now has three matchers with three tolerances.
+
+2. **Useful articles were deep-researched.** "Flower Vase" and "Second Flower
+   Vase" came back as ARTWORK and both got Task runs. 17 U.S.C. §101 protects a
+   useful article only as to separable artistic features, so there is no author
+   to find. The rule is deliberately narrow — paintings, posters, photographs,
+   sculptures and murals are excluded at any prominence.
+
+3. **People named by their role were researched.** "Father" and "Grandmother"
+   got research runs and returned nothing, while "Young Boy" and "Little Girl"
+   correctly went to release forms — the same people, sorted by an accident of
+   vocabulary.
+
+4. **Music was researched from its description.** "Instrumental Score" burned a
+   deep run to return UNKNOWN — and that is the *better* of the two outcomes,
+   since "Upbeat Electronic Music" previously returned a plausible owner with
+   fourteen citations for a recording that was actually "Blinding Lights".
+
+5. **A TCP reset killed an entire run.** `httpx.ReadError: [Errno 54]
+   Connection reset by peer` during the inline video upload took the pipeline
+   down and lost the Video Intelligence and fingerprint work running alongside
+   it. Transport failures now retry; deterministic ones do not.
+
 ## Defects found and fixed while building
 
 - **False licence matches from corporate name tokens.** `find_licences` matched
@@ -252,9 +300,6 @@ look wrong:
 
 ## What is deliberately not done yet
 
-- **Two-phase emit (task 4).** `scoring.provisional_score` exists for it; the
-  SSE emit is not wired. This is the remaining *perceived*-latency win: a
-  complete timestamped risk report at ~45s with ownership arriving behind it.
 - **Depiction-context signal (task 6).** The research says brand risk turns on
   *how* a mark is shown. Gemini can report it from footage already sent, free.
 - **Scene chunking (task 8).** Needed for feature-length footage, both for
