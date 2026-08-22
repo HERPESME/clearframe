@@ -1,0 +1,56 @@
+{
+  "production": {
+    "id": "upload",
+    "title": "Bayer spot — UI upload test",
+    "footage_uri": "out-ui/media/upload/footage.mp4",
+    "fps": 24.0,
+    "duration_s": 0.0,
+    "script_uri": null,
+    "release_territories": [
+      "US",
+      "DE",
+      "IN"
+    ],
+    "use_context": "ADVERTISING",
+    "sponsors": [
+      "Bayer"
+    ],
+    "platform": "youtube",
+    "distribution": [
+      "STREAMING"
+    ],
+    "has_media": true
+  },
+  "stage_status": {
+    "script": "complete"
+  },
+  "detections": [],
+  "elements": [],
+  "research": {},
+  "risk": {},
+  "remediation": {},
+  "decisions": {},
+  "unscanned_ranges": [],
+  "audit_log": [],
+  "court": {},
+  "research_plan": {},
+  "script_mentions": [],
+  "drift": null,
+  "candidates": {},
+  "watches": {},
+  "alerts": [],
+  "corroboration": {},
+  "freshness": {},
+  "territory_risk": {},
+  "territories": [],
+  "coverage": {},
+  "audio_matches": [],
+  "routes": {},
+  "sponsor_conflicts": [],
+  "platform_outcomes": [],
+  "defences": {},
+  "exposures": [],
+  "assessed_exposures": [],
+  "preview": [],
+  "detector_hits": []
+}
