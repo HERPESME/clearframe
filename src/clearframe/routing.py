@@ -107,6 +107,36 @@ _GENERIC_PLACE = {
     "landscape", "countryside", "highway", "intersection", "crosswalk",
 }
 
+# Useful articles. 17 U.S.C. §101 protects a useful article's design only to the
+# extent of pictorial, graphic or sculptural features separable from its utility
+# — Star Athletica v. Varsity Brands, 580 U.S. 405 (2017). A plain vase, a chair,
+# a lamp is not a work of authorship and there is nobody to clear with.
+#
+# Found on a live run: a 1950s Bayer spot produced "Flower Vase" and "Second
+# Flower Vase" as ARTWORK, and both were dispatched to deep rights research.
+#
+# Deliberately narrow. Paintings, posters, photographs, sculptures and murals
+# are NOT here at any prominence: Ringgold v. BET turned on a poster hanging on
+# a wall, and quietly downgrading authored images is the failure this product
+# exists to prevent.
+_UTILITARIAN = {
+    "vase", "vases", "pot", "pots", "planter", "plant", "plants", "flower",
+    "flowers", "bouquet", "furniture", "chair", "chairs", "sofa", "couch",
+    "table", "tables", "desk", "lamp", "lamps", "shelf", "shelves", "curtain",
+    "curtains", "blind", "blinds", "rug", "carpet", "cushion", "cushions",
+    "pillow", "pillows", "blanket", "towel", "dish", "dishes", "plate",
+    "plates", "bowl", "bowls", "cup", "cups", "mug", "glass", "glasses",
+    "cutlery", "utensil", "utensils", "tray", "jug", "kettle", "pan", "pot",
+    "clock", "mirror", "candle", "candles", "ornament", "vessel", "basket",
+    "crockery", "tableware", "glassware", "houseplant", "fern", "orchid",
+    # qualifiers that do not make an object distinctive
+    "second", "third", "another", "additional", "further", "other", "more",
+    "small", "large", "plain", "simple", "blank", "unmarked", "undecorated",
+    "generic", "background", "foreground", "white", "black", "wooden", "wood",
+    "ceramic", "metal", "silver", "brass", "empty", "set", "dressing", "prop",
+    "props", "decor", "decorative", "decoration", "arrangement", "display",
+}
+
 # Art whose author is not on the face of the work. The Falkner profile.
 _UNATTRIBUTED = {
     "unknown", "unidentified", "unattributed", "unsigned", "anonymous",
@@ -253,6 +283,17 @@ def _route_music(el: TriagedElement, corroboration: Corroboration | None) -> Res
 
 
 def _route_art(el: TriagedElement) -> ResearchRoute:
+    if _all_tokens(el.label, _UTILITARIAN):
+        return _statute(
+            el,
+            "A useful article, not a work of authorship. There is no author to "
+            "identify and no rights holder to clear with — researching it spends "
+            "a deep run to discover that a vase is a vase.",
+            "17 U.S.C. §101 (useful articles); Star Athletica v. Varsity Brands, "
+            "580 U.S. 405 (2017) — protection extends only to separable artistic features",
+            "No action, unless the piece carries separable artwork or a designer "
+            "mark, in which case reclassify it and re-run.",
+        )
     if is_de_minimis(el.prominence):
         return _statute(
             el,

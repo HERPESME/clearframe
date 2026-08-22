@@ -19,7 +19,7 @@ catalogue. The three verdicts drive real behaviour downstream:
 Deterministic and reproducible, like the rest of the scoring path.
 """
 
-from clearframe.matching import labels_match
+from clearframe.matching import marks_match
 from clearframe.models import (
     ClearanceCategory,
     Corroboration,
@@ -64,7 +64,7 @@ def assess(
     in_scope = [
         h for h in hits if h.confidence >= MIN_CONFIDENCE and _overlaps(element, h)
     ]
-    agreeing = [h for h in in_scope if labels_match(element.label, h.label)]
+    agreeing = [h for h in in_scope if marks_match(element.label, h.label)]
 
     if agreeing:
         best = max(agreeing, key=lambda h: h.confidence)
