@@ -49,6 +49,19 @@ export interface SponsorConflict {
   note: string;
 }
 
+export interface AssessedExposure {
+  id: string;
+  kind: string;
+  description: string;
+  time_ranges: TimeRange[];
+  territory: string;
+  regime: string;
+  score: number;
+  band: string;
+  rationale: string;
+  remedy: string;
+}
+
 export type ResearchTier =
   | "LOCAL"
   | "STATUTE"
@@ -294,6 +307,7 @@ export interface ProductionState {
   corroboration: Record<string, Corroboration>;
   routes: Record<string, ResearchRoute>;
   sponsor_conflicts: SponsorConflict[];
+  assessed_exposures: AssessedExposure[];
   freshness: Record<string, FreshnessSignal[]>;
   territory_risk: Record<string, TerritoryRisk[]>;
   territories: string[];

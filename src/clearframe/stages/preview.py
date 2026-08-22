@@ -20,6 +20,7 @@ to" is available before the expensive rung starts. Research reuses them.
 """
 
 from clearframe.conflicts import find_sponsor_conflicts
+from clearframe.exposure import assess_all_exposures, summarise_exposures
 from clearframe.platform import detectability, load_platforms, platform_for, project_all
 from clearframe.knowledge import load_knowledge
 from clearframe.models import PreviewFinding, ResearchTier
@@ -111,6 +112,25 @@ class PreviewStage:
                             "remedy": o.remedy,
                         }
                         for o in actionable
+                    ],
+                }
+            )
+
+        assessed = assess_all_exposures(ctx.state.exposures, territories)
+        ctx.state.assessed_exposures = assessed
+        if assessed:
+            ctx.emit(
+                {
+                    "type": "exposures_assessed",
+                    **summarise_exposures(assessed),
+                    "findings": [
+                        {
+                            "id": a.id,
+                            "kind": a.kind.value,
+                            "band": a.band.value,
+                            "remedy": a.remedy,
+                        }
+                        for a in assessed
                     ],
                 }
             )
