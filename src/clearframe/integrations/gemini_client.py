@@ -12,6 +12,7 @@ from typing import Protocol
 from pydantic import BaseModel, ValidationError
 
 from clearframe.models import (
+    BBox,
     DetectedElement,
     ExposureFinding,
     ScriptMention,
@@ -28,7 +29,10 @@ SCAN_PROMPT = (
     "LOCATION, TEXT), a one-sentence description, every time range in which it "
     "appears (seconds), and prominence estimates: total screen time in seconds, "
     "fraction of frame covered (0-1), how central it is to the composition (0-1), "
-    "and whether it is integral to the plot. "
+    "and whether it is integral to the plot. Give a `bbox` for anything with a "
+    "visible position in frame, as [ymin, xmin, ymax, xmax] normalised 0-1000, "
+    "at the moment the element is most clearly visible — this drives the box "
+    "drawn over the footage in review. Omit bbox for audio. "
     "For brands, businesses, places and people, also report how the element is "
     "PORTRAYED as `depiction`: FAVOURABLE (shown positively, reads as an "
     "endorsement), NEUTRAL (simply present), UNFLATTERING (associated with "
@@ -183,6 +187,12 @@ SCAN_RESPONSE_SCHEMA: dict = {
                             "required": ["start_s", "end_s"],
                         },
                     },
+                    "bbox": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "minItems": 4,
+                        "maxItems": 4,
+                    },
                     "depiction": {
                         "type": "string",
                         "enum": ["FAVOURABLE", "NEUTRAL", "UNFLATTERING", "DISPARAGING"],
@@ -259,10 +269,52 @@ class ScanResult(BaseModel):
     exposures: list[ExposureFinding] = []
 
 
+def parse_bbox(raw) -> BBox | None:
+    """Gemini's box -> our normalised BBox, or None if it is unusable.
+
+    Accepts [ymin, xmin, ymax, xmax] in Gemini's documented 0-1000 scale, the
+    same list already normalised 0-1, or a dict. Anything else — wrong arity,
+    inverted, zero-area, prose — yields None.
+
+    Returning None rather than raising is the point. A malformed rectangle must
+    cost the box, never the detection: losing a real finding over a UI nicety
+    would trade away the product's whole safety claim.
+    """
+    if raw is None:
+        return None
+    if isinstance(raw, dict):
+        try:
+            values = [float(raw[k]) for k in ("ymin", "xmin", "ymax", "xmax")]
+        except (KeyError, TypeError, ValueError):
+            return None
+    elif isinstance(raw, (list, tuple)) and len(raw) == 4:
+        try:
+            values = [float(v) for v in raw]
+        except (TypeError, ValueError):
+            return None
+    else:
+        return None
+
+    # Some model versions answer 0-1 rather than 0-1000. Dividing an
+    # already-normalised box again collapses it into the top-left corner,
+    # which renders as a dot and reads as a bug in the player.
+    if any(abs(v) > 1.0 for v in values):
+        values = [v / 1000.0 for v in values]
+    ymin, xmin, ymax, xmax = (max(0.0, min(1.0, v)) for v in values)
+
+    try:
+        return BBox(ymin=ymin, xmin=xmin, ymax=ymax, xmax=xmax)
+    except ValidationError:
+        return None  # inverted or zero-area
+
+
 def parse_scan_payload(payload: dict) -> ScanResult:
     detections: list[DetectedElement] = []
     skipped = 0
     for entry in payload.get("elements") or []:
+        if isinstance(entry, dict):
+            # Parsed separately so a bad rectangle cannot fail the element.
+            entry = {**entry, "bbox": parse_bbox(entry.get("bbox"))}
         try:
             detections.append(DetectedElement.model_validate(entry))
         except ValidationError:
