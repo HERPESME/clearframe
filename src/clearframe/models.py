@@ -418,6 +418,36 @@ class Production(BaseModel):
     has_media: bool = False
 
 
+class PreviewFinding(BaseModel):
+    """One finding as it stands BEFORE any rights research has run.
+
+    Everything here is derivable from the footage alone — what it is, when it
+    appears, where in frame, how exposed the production is by prominence, and
+    which jurisdiction bands it worst. The only thing missing is who owns it.
+
+    That distinction is worth a stage of its own. On a live 30-second clip the
+    footage-derived picture was complete at ~90 seconds while the run took 9m43s,
+    because deep ownership research on the two or three findings that genuinely
+    need it is minutes long by nature. Making an editor wait for the slowest
+    rights lookup before seeing which shots to pull is a UI decision, not a
+    technical constraint.
+    """
+
+    element_id: str
+    label: str
+    category: ClearanceCategory
+    time_ranges: list[TimeRange]
+    bbox: BBox | None = None
+    at_s: float | None = None
+    provisional_score: int
+    provisional_band: RiskBand
+    identity: IdentityVerdict | None = None
+    territory: list[TerritoryRisk] = Field(default_factory=list)
+    route_tier: ResearchTier
+    disposition: str = ""
+    awaiting_research: bool = False
+
+
 class ProductionState(BaseModel):
     production: Production
     stage_status: dict[str, str] = Field(default_factory=dict)
@@ -443,4 +473,5 @@ class ProductionState(BaseModel):
     coverage: dict[str, Coverage] = Field(default_factory=dict)
     audio_matches: list[AudioMatch] = Field(default_factory=list)
     routes: dict[str, ResearchRoute] = Field(default_factory=dict)
+    preview: list[PreviewFinding] = Field(default_factory=list)
     detector_hits: list[DetectorHit] = Field(default_factory=list)

@@ -133,6 +133,20 @@ CUE=$(grep -c 'Blinding Lights — The Weeknd' "$OUT/cue_sheet.csv")
 curl -sf "$BASE/api/productions/demo" | $PY -c "
 import json, sys
 s = json.load(sys.stdin)
+p = s['preview']
+assert len(p) == len(s['elements']), 'every finding must be in the preliminary report'
+assert all(f['time_ranges'] and f['provisional_band'] for f in p), p[:1]
+assert [f['provisional_score'] for f in p] == sorted(
+    [f['provisional_score'] for f in p], reverse=True), 'preview must rank by exposure'
+# provisional risk is an upper bound: it can only fall once research lands
+assert all(f['provisional_score'] >= s['risk'][f['element_id']]['score'] for f in p)
+assert any(not f['awaiting_research'] and f['disposition'] for f in p)
+"
+check $? "preliminary report is complete and banded before research runs"
+
+curl -sf "$BASE/api/productions/demo" | $PY -c "
+import json, sys
+s = json.load(sys.stdin)
 tiers = {k: v['tier'] for k, v in s['routes'].items()}
 assert tiers['e2'] == 'SEARCH', tiers['e2']    # Coca-Cola: owner local, posture live
 assert tiers['e6'] == 'STATUTE', tiers['e6']   # background face: release form

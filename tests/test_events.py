@@ -13,11 +13,22 @@ async def test_pipeline_emits_stage_and_agent_events(tmp_path):
     ctx.listener = events.append
     await Pipeline(build_demo_pipeline()).run(ctx)
     types = [e["type"] for e in events]
-    assert types.count("stage_start") == 12
-    assert types.count("stage_complete") == 12
+    assert types.count("stage_start") == 13
+    assert types.count("stage_complete") == 13
     assert "script_mentions" in types and "drift_computed" in types
     assert "scan_found" in types and "audit_found" in types
     assert "research_planned" in types
+
+    # The complete footage-derived report lands BEFORE research starts. On live
+    # footage that is ~90s into a run whose deep rights lookups take minutes.
+    preview = next(e for e in events if e["type"] == "preview_ready")
+    assert preview["count"] == 8
+    assert types.index("preview_ready") < types.index("research_planned")
+    assert all(
+        f["band"] and f["tier"] and f["start_s"] is not None
+        for f in preview["findings"]
+    )
+    assert preview["resolved_now"] >= 1
     # 8 findings routed down the ladder: 5 deep + 1 search are dispatched;
     # the background face resolves by statute and the disputed identity (e8)
     # is never dispatched at all.
