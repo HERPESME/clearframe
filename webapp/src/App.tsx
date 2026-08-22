@@ -48,6 +48,16 @@ export default function App() {
     setRoleState(r);
   };
 
+  // The way back. Without it a loaded production was terminal: the hero only
+  // renders when `state` is null, so the upload panel became unreachable and
+  // the only escape was reloading the browser.
+  const newProduction = () => {
+    setState(null);
+    setMission(false);
+    setShowUpload(true);
+    setError(null);
+  };
+
   const loadDemo = async () => {
     setError(null);
     try {
@@ -207,6 +217,7 @@ export default function App() {
     const v = corroboration?.[el.id]?.verdict;
     return v === "CORROBORATED" || v === "FINGERPRINTED";
   });
+  const isDemo = production.id === "demo";
   const byId = Object.fromEntries(elements.map((el) => [el.id, el]));
   // Only the outcomes a platform would actually act on automatically. The
   // manual-complaint rows are real but far less likely, and putting them in a
@@ -236,9 +247,13 @@ export default function App() {
   return (
     <>
       <header className="topbar">
-        <span className="brand">
+        <button
+          className="brand brand-home"
+          onClick={newProduction}
+          title="Back to the start — clear this production and choose another"
+        >
           CLEAR<b>FRAME</b>
-        </span>
+        </button>
         {mode === "demo" && (
           <span
             className="mode-chip"
@@ -270,11 +285,21 @@ export default function App() {
         <button
           className="roles"
           style={{ padding: "5px 12px", background: "transparent", color: "var(--muted)" }}
-          onClick={loadDemo}
-          title="Run the pipeline again from scratch"
+          onClick={newProduction}
+          title="Clear this production and upload another"
         >
-          Re-run
+          + New
         </button>
+        {isDemo && (
+          <button
+            className="roles"
+            style={{ padding: "5px 12px", background: "transparent", color: "var(--muted)" }}
+            onClick={loadDemo}
+            title="Run the demo pipeline again from scratch"
+          >
+            Re-run demo
+          </button>
+        )}
       </header>
 
       {production.has_media && (
