@@ -1,18 +1,157 @@
-"""Stage 3: planned, capped, concurrent rights-research fan-out.
+"""Stage: dispatch each finding to the cheapest rung that can answer it.
 
-The Budget Planner assigns each element a Parallel processor tier with a
-recorded rationale; a spend cap (`max_research`) bounds the fan-out on long
-footage (budget to the most prominent elements first). Overflow surfaces
-honestly as RESEARCH_INCOMPLETE instead of being silently dropped.
+Before the ladder this stage sent every element to Parallel's Task API. On a
+21.8-second clip that was sixteen deep runs, six of which returned no owner,
+and twenty minutes of wall clock. Seven of the sixteen were human faces, and
+no amount of web research produces a release form.
+
+`routing.py` decides the rung; this stage carries it out:
+
+  LOCAL    answer synthesised from the local rights table       0 ms   $0
+  STATUTE  answer is a documented legal position, not a lookup  0 ms   $0
+  SEARCH   Parallel Search — posture, contact, live citations   ~2 s   $0.005
+  DEEP     Parallel Task — full ownership investigation         minutes
+
+Two properties are load-bearing:
+
+* Cheap rungs still produce a real `ResearchResult` with citations, because
+  E&O carriers do not accept fair use offered in place of clearance. A finding
+  resolved for free is a documented position, never a silent skip.
+* SEARCH and DEEP fan out concurrently and SEARCH does not wait behind DEEP,
+  so posture for the cheap findings lands seconds into the stage while the
+  handful of deep runs are still going.
 """
 
 import asyncio
 
 from clearframe.corroboration import blocks_research
+from clearframe.freshness import is_material
 from clearframe.integrations.parallel_client import _incomplete
-from clearframe.models import ClearanceCategory
+from clearframe.knowledge import load_knowledge
+from clearframe.models import (
+    BasisCitation,
+    ClearanceCategory,
+    LicensingPosture,
+    ResearchResult,
+    ResearchRoute,
+    ResearchTier,
+    TriagedElement,
+    WebFinding,
+)
 from clearframe.pipeline import PipelineContext
-from clearframe.planner import plan_research
+from clearframe.planner import EST_COST, plan_research
+from clearframe.routing import route_all, summarise_routes
+
+ENUMERABLE = {
+    ClearanceCategory.COPYRIGHT_ART,
+    ClearanceCategory.TRADEMARK,
+    ClearanceCategory.MUSIC_SYNC,
+}
+
+
+def _local_result(el: TriagedElement, r: ResearchRoute, verified_on: str) -> ResearchResult:
+    return ResearchResult(
+        element_id=el.id,
+        owner=r.owner,
+        owner_confidence="high",
+        licensing_contact=None,
+        licensing_posture=r.posture or LicensingPosture.UNKNOWN,
+        litigation_history=[r.basis] if r.basis else [],
+        estimated_license_cost_band=None,
+        basis=[
+            BasisCitation(
+                field="owner",
+                url="",
+                excerpt=r.basis,
+                reasoning=(
+                    f"Local rights knowledge base, verified {verified_on}. Ownership "
+                    "is a corporate fact that does not change between pipeline runs."
+                ),
+                confidence="high",
+            )
+        ],
+        status="complete",
+    )
+
+
+def _statute_result(el: TriagedElement, r: ResearchRoute) -> ResearchResult:
+    """A finding resolved by law rather than by lookup.
+
+    Marked complete because the investigation IS finished: we determined that
+    research is not the instrument this needs. What to do about it lives on the
+    route's `disposition` and is printed in the dossier, so nothing disappears.
+    """
+    return ResearchResult(
+        element_id=el.id,
+        owner=None,
+        owner_confidence="low",
+        licensing_contact=None,
+        licensing_posture=LicensingPosture.UNKNOWN,
+        litigation_history=[],
+        estimated_license_cost_band=None,
+        basis=[
+            BasisCitation(
+                field="clearance_route",
+                url="",
+                excerpt=r.basis,
+                reasoning=f"{r.rationale} Required action: {r.disposition}",
+                confidence="high",
+            )
+        ],
+        status="complete",
+    )
+
+
+def _search_result(
+    el: TriagedElement, r: ResearchRoute, findings: list[WebFinding]
+) -> ResearchResult:
+    material = [f for f in findings if is_material(f)]
+    if material:
+        posture = LicensingPosture.LITIGIOUS
+    elif findings:
+        posture = LicensingPosture.STANDARD
+    else:
+        posture = LicensingPosture.UNKNOWN
+
+    basis: list[BasisCitation] = []
+    if r.owner:
+        basis.append(
+            BasisCitation(
+                field="owner",
+                url="",
+                excerpt=r.owner,
+                reasoning="Resolved from the local rights knowledge base.",
+                confidence="high",
+            )
+        )
+    basis.extend(
+        BasisCitation(
+            field="licensing_posture",
+            url=f.url,
+            excerpt=f.excerpt,
+            reasoning=(
+                "Enforcement signal found by live Parallel Search."
+                if is_material(f)
+                else "Live Parallel Search result on the rights holder."
+            ),
+            confidence="medium",
+        )
+        for f in findings[:4]
+    )
+
+    return ResearchResult(
+        element_id=el.id,
+        owner=r.owner,
+        owner_confidence="high" if r.owner else "low",
+        licensing_contact=None,
+        licensing_posture=posture,
+        litigation_history=[f.title for f in material][:4],
+        estimated_license_cost_band=None,
+        basis=basis,
+        # Without an owner AND without a single search result there is nothing
+        # to stand on; say so rather than reporting an empty answer as done.
+        status="complete" if (r.owner or findings) else "incomplete",
+    )
 
 
 class ResearchStage:
@@ -23,78 +162,149 @@ class ResearchStage:
 
     async def run(self, ctx: PipelineContext) -> None:
         elements = ctx.state.elements
-        plan = plan_research(elements)
+        kb = load_knowledge()
+        by_id = {el.id: el for el in elements}
+
+        routes = route_all(elements, kb, ctx.state.corroboration)
+
+        # A CONFLICTED identity is routed BLOCKED by the router; keep the
+        # explicit check so the invariant holds even if routing changes.
+        for el in elements:
+            if blocks_research(ctx.state.corroboration.get(el.id)):
+                routes[el.id] = routes[el.id].model_copy(
+                    update={"tier": ResearchTier.BLOCKED}
+                )
+                ctx.emit(
+                    {
+                        "type": "research_blocked",
+                        "element_id": el.id,
+                        "label": el.label,
+                        "reason": "identity conflict",
+                    }
+                )
+
+        deep_ids = [eid for eid, r in routes.items() if r.tier is ResearchTier.DEEP]
+        # The spend cap applies only to the expensive rung; the cheap ones are
+        # free and must never be dropped for budget.
+        ranked = sorted(
+            deep_ids, key=lambda i: by_id[i].prominence.screen_time_s, reverse=True
+        )
+        funded, overflow = ranked[: self.max_research], ranked[self.max_research :]
+
+        plan = plan_research([by_id[i] for i in funded])
         ctx.state.research_plan = plan
+        for eid in funded:
+            routes[eid] = routes[eid].model_copy(
+                update={"est_cost_usd": EST_COST[plan[eid].processor]}
+            )
+        for eid in overflow:
+            routes[eid] = routes[eid].model_copy(
+                update={
+                    "tier": ResearchTier.BLOCKED,
+                    "rationale": (
+                        "Beyond the research spend cap for this run. Reported as "
+                        "RESEARCH INCOMPLETE rather than silently dropped."
+                    ),
+                }
+            )
+
+        ctx.state.routes = routes
+        summary = summarise_routes(routes)
         ctx.emit(
             {
                 "type": "research_planned",
-                "total_est_cost_usd": round(sum(p.est_cost_usd for p in plan.values()), 2),
+                "total_est_cost_usd": round(summary["est_cost_usd"], 2),
+                "deep_runs": summary["deep_runs"],
+                "routes": summary["counts"],
             }
         )
 
-        # A disputed identity must not be researched: the whole point of
-        # research is "who owns THIS", and we do not yet agree on what THIS is.
-        blocked = [
-            el for el in elements if blocks_research(ctx.state.corroboration.get(el.id))
-        ]
-        for el in blocked:
+        research: dict[str, ResearchResult] = {}
+
+        # ---- free rungs: instant, no network -----------------------------
+        for eid, r in routes.items():
+            el = by_id[eid]
+            if r.tier is ResearchTier.LOCAL:
+                research[eid] = _local_result(el, r, kb.verified_on)
+            elif r.tier is ResearchTier.STATUTE:
+                research[eid] = _statute_result(el, r)
+            elif r.tier is ResearchTier.BLOCKED:
+                research[eid] = _incomplete(eid)
+            if eid in research:
+                ctx.emit(
+                    {
+                        "type": "research_resolved",
+                        "element_id": eid,
+                        "label": el.label,
+                        "tier": r.tier.value,
+                        "owner": research[eid].owner,
+                    }
+                )
+
+        # ---- paid rungs: SEARCH and DEEP fan out together ----------------
+        async def _do_search(eid: str) -> tuple[str, ResearchResult]:
+            el, r = by_id[eid], routes[eid]
             ctx.emit(
-                {
-                    "type": "research_blocked",
-                    "element_id": el.id,
-                    "label": el.label,
-                    "reason": "identity conflict",
-                }
+                {"type": "research_start", "element_id": eid, "label": el.label,
+                 "processor": "search"}
             )
+            objective = (
+                f"Current licensing posture, enforcement behaviour and rights-clearance "
+                f"contact for '{el.label}'"
+                + (f", owned by {r.owner}" if r.owner else "")
+                + ", as it appears on screen in a film or television production."
+            )
+            findings = await ctx.parallel.search(
+                objective, [el.label, f"{r.owner or el.label} licensing clearance"],
+                max_results=5,
+            )
+            return eid, _search_result(el, r, findings)
 
-        researchable = [el for el in elements if el not in blocked]
-        ranked = sorted(
-            researchable, key=lambda el: el.prominence.screen_time_s, reverse=True
-        )
-        funded = ranked[: self.max_research]
-        skipped = ranked[self.max_research :] + blocked
-
-        async def _one(el):
+        async def _do_deep(eid: str) -> tuple[str, ResearchResult]:
+            el = by_id[eid]
             ctx.emit(
-                {
-                    "type": "research_start",
-                    "element_id": el.id,
-                    "label": el.label,
-                    "processor": plan[el.id].processor,
-                }
+                {"type": "research_start", "element_id": eid, "label": el.label,
+                 "processor": plan[eid].processor}
             )
             result = await ctx.parallel.research(
-                el, ctx.state.production.title, processor=plan[el.id].processor
+                el, ctx.state.production.title, processor=plan[eid].processor
             )
+            # Ownership known locally must survive a deep run that came back empty.
+            if result.owner is None and routes[eid].owner:
+                result = result.model_copy(
+                    update={"owner": routes[eid].owner, "owner_confidence": "high"}
+                )
+            return eid, result
+
+        search_ids = [eid for eid, r in routes.items() if r.tier is ResearchTier.SEARCH]
+        paid = await asyncio.gather(
+            *(_do_search(i) for i in search_ids), *(_do_deep(i) for i in funded)
+        )
+        for eid, result in paid:
+            research[eid] = result
             ctx.emit(
                 {
                     "type": "research_done",
-                    "element_id": el.id,
+                    "element_id": eid,
                     "status": result.status,
                     "owner": result.owner,
                 }
             )
-            return result
 
-        results = await asyncio.gather(*(_one(el) for el in funded))
-        research = {el.id: res for el, res in zip(funded, results)}
-        for el in skipped:
-            research[el.id] = _incomplete(el.id)
+        for el in elements:
+            research.setdefault(el.id, _incomplete(el.id))
         ctx.state.research = research
 
-        # FindAll enumeration: when deep research can't identify an owner of an
-        # IP-bearing element, enumerate candidate rights holders (recall-first)
-        # instead of leaving a dead end.
-        enumerable = {
-            ClearanceCategory.COPYRIGHT_ART,
-            ClearanceCategory.TRADEMARK,
-            ClearanceCategory.MUSIC_SYNC,
-        }
+        # ---- FindAll: enumerate candidates where ownership stayed open ----
         for el in elements:
-            if research[el.id].status != "incomplete" or el.category not in enumerable:
+            r = routes[el.id]
+            if r.tier is ResearchTier.BLOCKED:
                 continue
-            if blocks_research(ctx.state.corroboration.get(el.id)):
-                continue  # resolve identity first; enumerating a disputed mark is noise
+            wants = r.enumerate_candidates or research[el.id].status == "incomplete"
+            if not wants or el.category not in ENUMERABLE:
+                continue
+            if research[el.id].owner:
+                continue
             candidates = await ctx.parallel.find_all(el, ctx.state.production.title)
             if candidates:
                 ctx.state.candidates[el.id] = candidates

@@ -35,7 +35,12 @@ _TEMPLATE = Template(
   .decision.pending { background: #fbeeee; border-color: #e3cfcf; }
   .unscanned { background: #fbeeee; border: 1px solid #e3cfcf; padding: 10px 14px; font-size: 13px; margin-bottom: 24px; }
   .verdict { display:inline-block; padding:2px 10px; border-radius:10px; font-size:11px; font-family:Helvetica,Arial,sans-serif; letter-spacing:.5px; color:#fff; }
-  .v-FINGERPRINTED { background:#2980b9; } .v-CORROBORATED { background:#27ae60; } .v-SINGLE_SOURCE { background:#7f8c8d; } .v-CONFLICTED { background:#c0392b; }
+  .v-FINGERPRINTED { background:#2980b9; } .v-CORROBORATED { background:#27ae60; }
+  .route { display:inline-block; padding:2px 10px; border-radius:10px; font-size:11px; font-family:Helvetica,Arial,sans-serif; letter-spacing:.5px; color:#fff; background:#34495e; }
+  .r-LOCAL { background:#16a085; } .r-STATUTE { background:#8e44ad; } .r-SEARCH { background:#2980b9; }
+  .r-DEEP { background:#d35400; } .r-BLOCKED { background:#7f8c8d; }
+  .routing { background:#f4f1fa; border:1px solid #d9d2ea; padding:10px 14px; margin:18px 0 24px; font-size:13px; }
+  .routing td, .routing th { padding:3px 10px 3px 0; text-align:left; font-size:12px; } .v-SINGLE_SOURCE { background:#7f8c8d; } .v-CONFLICTED { background:#c0392b; }
   table.terr { border-collapse: collapse; margin: 6px 0 2px; font-size: 12px; }
   table.terr td, table.terr th { border: 1px solid #ddd; padding: 4px 10px; text-align: left; }
   table.terr th { background: #f5f5f5; }
@@ -66,6 +71,24 @@ _TEMPLATE = Template(
 <td>{{ d.summary.get('coverage_not_covered', 0) }}</td></tr>
 </table>
 
+{% set free = d.entries|selectattr('route')|selectattr('route.tier.value','in',['LOCAL','STATUTE'])|list %}
+{% if free %}
+<div class="routing">
+<strong>Resolved without rights research ({{ free|length }} of {{ d.entries|length }}):</strong>
+these findings were answered by settled law or by verified local ownership rather than by an
+open-web investigation. They are reported in full, with authority, because E&amp;O carriers do not
+accept fair use offered in place of clearance and distributors reject incidental use asserted
+without documentation. {{ d.summary.get('deep_research_runs', 0) }} finding(s) required deep research.
+<table>
+<tr><th>Finding</th><th>Route</th><th>Authority</th><th>Required action</th></tr>
+{% for e in free %}
+<tr><td>{{ e.element.label }}</td><td><span class="route r-{{ e.route.tier.value }}">{{ e.route.tier.value }}</span></td>
+<td>{{ e.route.basis }}</td><td>{{ e.route.disposition }}</td></tr>
+{% endfor %}
+</table>
+</div>
+{% endif %}
+
 {% if d.territories %}
 <div class="meta" style="margin:-18px 0 24px;">Release territories assessed:
 <strong>{{ d.territories|join(', ') }}</strong> — clearance exposure is jurisdictional and is banded per territory below.</div>
@@ -85,11 +108,21 @@ _TEMPLATE = Template(
   {% if e.risk.de_minimis %}<span class="chip" style="background:#95a5a6">DE MINIMIS</span>{% endif %}
   {% if e.corroboration %}<span class="verdict v-{{ e.corroboration.verdict.value }}">{{ e.corroboration.verdict.value|replace('_',' ') }}</span>{% endif %}
   {% if e.coverage %}<span class="cov cov-{{ e.coverage.status.value }}">{{ e.coverage.status.value|replace('_',' ') }}</span>{% endif %}
+  {% if e.route %}<span class="route r-{{ e.route.tier.value }}">{{ e.route.tier.value }}</span>{% endif %}
   <div class="tcs">Appears:
     {% for r in e.element.time_ranges %}{{ tc(r.start_s) }}–{{ tc(r.end_s) }}{% if not loop.last %}, {% endif %}{% endfor %}
     · {{ e.element.description }}</div>
   <div class="factors">Score factors:
     {% for k, v in e.risk.factors.items() %}{{ k }}={{ v }}{% if not loop.last %} · {% endif %}{% endfor %}</div>
+
+  {% if e.route %}
+  <div class="section">
+    <h4>How this was resolved</h4>
+    <div>{{ e.route.rationale }}</div>
+    {% if e.route.basis %}<div class="meta"><strong>Authority:</strong> {{ e.route.basis }}</div>{% endif %}
+    {% if e.route.disposition %}<div><strong>Required action:</strong> {{ e.route.disposition }}</div>{% endif %}
+  </div>
+  {% endif %}
 
   <div class="section">
     <h4>Rights research</h4>

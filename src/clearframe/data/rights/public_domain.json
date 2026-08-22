@@ -1,0 +1,31 @@
+{
+ "note": "US public-domain term rules as data. Verified against Public Domain Day 2026 reporting; MUST be re-verified each 1 January, when the windows advance.",
+ "verified_on": "2026-08-22",
+ "source": "https://www.charleston-hub.com/2025/12/january-1-2026-is-public-domain-day-works-from-1930-are-open-to-all-as-are-sound-recordings-from-1925/",
+ "jurisdiction": "US",
+ "rules": [
+  {
+   "kind": "published_work",
+   "public_domain_through_year": 1930,
+   "authority": "Works published in the US in 1930 or earlier entered the public domain on 1 January 2026 (95-year term for pre-1978 published works).",
+   "advances_annually": true
+  },
+  {
+   "kind": "sound_recording",
+   "public_domain_through_year": 1925,
+   "authority": "Music Modernization Act rolling schedule: recordings published in 1925 or earlier entered the public domain on 1 January 2026 (100 years).",
+   "advances_annually": true
+  },
+  {
+   "kind": "us_government_work",
+   "public_domain_through_year": null,
+   "authority": "17 U.S.C. §105 — works of the US Government are not subject to copyright protection.",
+   "advances_annually": false
+  }
+ ],
+ "caveats": [
+  "A composition and its recording expire on DIFFERENT schedules; a 1930 song can still have an in-copyright 1965 recording.",
+  "Public domain in the US does not imply public domain elsewhere: most of Europe uses life of the author plus 70 years.",
+  "A public-domain film can still contain live trademarks — the test corpus in scripts/fetch_test_clips.sh exists to demonstrate exactly this."
+ ]
+}

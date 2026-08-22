@@ -1,0 +1,162 @@
+{
+ "note": "Institutional counterparties. Lets a fingerprint hit or an attributed artwork resolve straight to a posture and a licensing route.",
+ "verified_on": "2026-08-22",
+ "holders": [
+  {
+   "name": "Universal Music Publishing Group",
+   "kind": "music_publisher",
+   "posture": "litigious",
+   "note": "Largest publisher by share; sync must be cleared alongside the master.",
+   "aliases": [
+    "umpg",
+    "universal music publishing"
+   ]
+  },
+  {
+   "name": "Sony Music Publishing",
+   "kind": "music_publisher",
+   "posture": "litigious",
+   "note": "Formerly Sony/ATV. Composition side of a two-licence clearance.",
+   "aliases": [
+    "sony/atv",
+    "sony atv"
+   ]
+  },
+  {
+   "name": "Warner Chappell Music",
+   "kind": "music_publisher",
+   "posture": "litigious",
+   "note": "Composition rights; separate from Warner Music Group's master rights.",
+   "aliases": [
+    "warner/chappell"
+   ]
+  },
+  {
+   "name": "Kobalt Music Group",
+   "kind": "music_publisher",
+   "posture": "standard",
+   "note": "Administrator for a large independent writer roster.",
+   "aliases": []
+  },
+  {
+   "name": "BMG Rights Management",
+   "kind": "music_publisher",
+   "posture": "standard",
+   "note": "Combined publishing and recording rights.",
+   "aliases": [
+    "bmg"
+   ]
+  },
+  {
+   "name": "Universal Music Group",
+   "kind": "record_label",
+   "posture": "litigious",
+   "note": "Master-use side. A sync licence from the publisher does NOT cover the recording.",
+   "aliases": [
+    "umg",
+    "republic records",
+    "interscope"
+   ]
+  },
+  {
+   "name": "Sony Music Entertainment",
+   "kind": "record_label",
+   "posture": "litigious",
+   "note": "Master-use rights.",
+   "aliases": [
+    "columbia records",
+    "rca records"
+   ]
+  },
+  {
+   "name": "Warner Music Group",
+   "kind": "record_label",
+   "posture": "litigious",
+   "note": "Master-use rights.",
+   "aliases": [
+    "wmg",
+    "atlantic records"
+   ]
+  },
+  {
+   "name": "Getty Images",
+   "kind": "stock_agency",
+   "posture": "litigious",
+   "note": "Operates automated image-match enforcement and issues demand letters at scale.",
+   "aliases": [
+    "getty"
+   ]
+  },
+  {
+   "name": "Shutterstock",
+   "kind": "stock_agency",
+   "posture": "standard",
+   "note": "Licence terms are model-specific; editorial images exclude commercial use.",
+   "aliases": []
+  },
+  {
+   "name": "Associated Press",
+   "kind": "news_agency",
+   "posture": "standard",
+   "note": "Archival news footage requires a separate licence per use.",
+   "aliases": [
+    "ap"
+   ]
+  },
+  {
+   "name": "Reuters",
+   "kind": "news_agency",
+   "posture": "standard",
+   "note": "Archival news footage licensing.",
+   "aliases": []
+  },
+  {
+   "name": "Artists Rights Society",
+   "kind": "visual_arts_collecting",
+   "posture": "litigious",
+   "note": "Represents 130,000+ visual artists and estates in the US; the usual counterparty for fine art on screen.",
+   "aliases": [
+    "ars"
+   ]
+  },
+  {
+   "name": "Design and Artists Copyright Society",
+   "kind": "visual_arts_collecting",
+   "posture": "standard",
+   "note": "UK visual-arts collecting society.",
+   "aliases": [
+    "dacs"
+   ]
+  },
+  {
+   "name": "ASCAP",
+   "kind": "pro",
+   "posture": "standard",
+   "note": "US performing-rights organisation; receives the cue sheet.",
+   "aliases": []
+  },
+  {
+   "name": "BMI",
+   "kind": "pro",
+   "posture": "standard",
+   "note": "US performing-rights organisation; receives the cue sheet.",
+   "aliases": []
+  },
+  {
+   "name": "PRS for Music",
+   "kind": "pro",
+   "posture": "standard",
+   "note": "UK performing-rights organisation.",
+   "aliases": [
+    "prs"
+   ]
+  },
+  {
+   "name": "GEMA",
+   "kind": "pro",
+   "posture": "standard",
+   "note": "German collecting society; note Germany has no fair use.",
+   "aliases": []
+  }
+ ]
+}
