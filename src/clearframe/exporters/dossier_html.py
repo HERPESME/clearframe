@@ -42,6 +42,10 @@ _TEMPLATE = Template(
   .signal { font-size: 12px; margin: 4px 0 4px 12px; }
   .signal.material { border-left: 3px solid #c0392b; padding-left: 8px; }
   .conflict-note { background:#fbeeee; border:1px solid #e3cfcf; padding:8px 12px; font-size:12px; margin-top:6px; }
+  .cov { display:inline-block; padding:2px 10px; border-radius:10px; font-size:11px; font-family:Helvetica,Arial,sans-serif; letter-spacing:.5px; color:#fff; }
+  .cov-COVERED { background:#27ae60; } .cov-PARTIAL { background:#e67e22; }
+  .cov-NOT_COVERED { background:#c0392b; } .cov-UNKNOWN { background:#7f8c8d; }
+  .gap { background:#fdf3e7; border:1px solid #e8d3b8; padding:8px 12px; font-size:12px; margin-top:6px; }
 </style>
 </head>
 <body>
@@ -52,11 +56,14 @@ _TEMPLATE = Template(
 
 <table class="summary">
 <tr><th>CRITICAL</th><th>HIGH</th><th>MEDIUM</th><th>LOW</th><th>Incomplete research</th><th>Pending decisions</th>
-<th>Identity corroborated</th><th>Identity disputed</th><th>Live enforcement signals</th></tr>
+<th>Identity corroborated</th><th>Identity disputed</th><th>Live enforcement signals</th>
+<th>Already licensed</th><th>Licence gaps</th><th>Unlicensed</th></tr>
 <tr><td>{{ d.summary['CRITICAL'] }}</td><td>{{ d.summary['HIGH'] }}</td><td>{{ d.summary['MEDIUM'] }}</td>
 <td>{{ d.summary['LOW'] }}</td><td>{{ d.summary['incomplete_research'] }}</td><td>{{ d.summary['pending_decisions'] }}</td>
 <td>{{ d.summary.get('identity_corroborated', 0) }}</td><td>{{ d.summary.get('identity_conflicts', 0) }}</td>
-<td>{{ d.summary.get('material_freshness_signals', 0) }}</td></tr>
+<td>{{ d.summary.get('material_freshness_signals', 0) }}</td>
+<td>{{ d.summary.get('coverage_covered', 0) }}</td><td>{{ d.summary.get('coverage_partial', 0) }}</td>
+<td>{{ d.summary.get('coverage_not_covered', 0) }}</td></tr>
 </table>
 
 {% if d.territories %}
@@ -77,6 +84,7 @@ _TEMPLATE = Template(
   <span class="chip" style="background: {{ band_hex[e.risk.band.value] }}">{{ e.risk.band.value }} · {{ e.risk.score }}</span>
   {% if e.risk.de_minimis %}<span class="chip" style="background:#95a5a6">DE MINIMIS</span>{% endif %}
   {% if e.corroboration %}<span class="verdict v-{{ e.corroboration.verdict.value }}">{{ e.corroboration.verdict.value|replace('_',' ') }}</span>{% endif %}
+  {% if e.coverage %}<span class="cov cov-{{ e.coverage.status.value }}">{{ e.coverage.status.value|replace('_',' ') }}</span>{% endif %}
   <div class="tcs">Appears:
     {% for r in e.element.time_ranges %}{{ tc(r.start_s) }}–{{ tc(r.end_s) }}{% if not loop.last %}, {% endif %}{% endfor %}
     · {{ e.element.description }}</div>
@@ -121,6 +129,18 @@ _TEMPLATE = Template(
       {% endfor %}
       </div>
     {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if e.coverage %}
+  <div class="section">
+    <h4>Rights already held</h4>
+    <div class="{{ 'gap' if e.coverage.gaps else '' }}">
+      {{ e.coverage.note }}
+      {% if e.coverage.gaps %}
+        <ul style="margin:6px 0 0 18px;">{% for g in e.coverage.gaps %}<li>{{ g }}</li>{% endfor %}</ul>
+      {% endif %}
+    </div>
   </div>
   {% endif %}
 

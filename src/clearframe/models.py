@@ -278,6 +278,45 @@ class TerritoryRisk(BaseModel):
     authority: str
 
 
+class LicenceGrant(BaseModel):
+    """A clearance the production ALREADY holds.
+
+    ClearFrame's research answers "who owns this and what would it cost".
+    The ledger answers the question a director actually asks first: "am I
+    already covered?" Matching is by rights holder, then checked for the three
+    gaps that sink real productions — territory, term, and media scope. The
+    last one gutted WKRP in Cincinnati: music cleared for broadcast, never for
+    home video or streaming.
+    """
+
+    id: str
+    rights_holder: str
+    work: str = ""
+    scope: str = ""
+    territories: list[str] = Field(default_factory=lambda: ["WORLDWIDE"])
+    media: list[str] = Field(default_factory=lambda: ["ALL"])
+    starts: str = ""
+    expires: str | None = None
+    reference: str = ""
+    notes: str = ""
+
+
+class CoverageStatus(str, Enum):
+    COVERED = "COVERED"
+    PARTIAL = "PARTIAL"
+    NOT_COVERED = "NOT_COVERED"
+    UNKNOWN = "UNKNOWN"
+
+
+class Coverage(BaseModel):
+    element_id: str
+    status: CoverageStatus
+    licence_id: str | None = None
+    rights_holder: str | None = None
+    gaps: list[str] = Field(default_factory=list)
+    note: str = ""
+
+
 class Production(BaseModel):
     id: str
     title: str
@@ -286,6 +325,9 @@ class Production(BaseModel):
     duration_s: float
     script_uri: str | None = None
     release_territories: list[str] = Field(default_factory=lambda: ["US"])
+    distribution: list[str] = Field(
+        default_factory=lambda: ["THEATRICAL", "STREAMING"]
+    )
 
 
 class ProductionState(BaseModel):
@@ -310,3 +352,4 @@ class ProductionState(BaseModel):
     freshness: dict[str, list[FreshnessSignal]] = Field(default_factory=dict)
     territory_risk: dict[str, list[TerritoryRisk]] = Field(default_factory=dict)
     territories: list[str] = Field(default_factory=list)
+    coverage: dict[str, Coverage] = Field(default_factory=dict)

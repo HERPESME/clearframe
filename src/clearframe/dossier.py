@@ -5,6 +5,8 @@ from pydantic import BaseModel
 from clearframe.models import (
     AuditEvent,
     Corroboration,
+    Coverage,
+    CoverageStatus,
     CourtOpinion,
     Decision,
     FreshnessSignal,
@@ -43,6 +45,7 @@ class DossierEntry(BaseModel):
     corroboration: Corroboration | None = None
     freshness: list[FreshnessSignal] = []
     territory: list[TerritoryRisk] = []
+    coverage: Coverage | None = None
 
 
 class ClearanceDossier(BaseModel):
@@ -68,6 +71,7 @@ def build_dossier(state: ProductionState, generated_at: str) -> ClearanceDossier
             corroboration=state.corroboration.get(el.id),
             freshness=state.freshness.get(el.id, []),
             territory=state.territory_risk.get(el.id, []),
+            coverage=state.coverage.get(el.id),
         )
         for el in state.elements
     ]
@@ -95,6 +99,10 @@ def build_dossier(state: ProductionState, generated_at: str) -> ClearanceDossier
     summary["material_freshness_signals"] = sum(
         1 for e in entries for s in e.freshness if s.material
     )
+    for status in CoverageStatus:
+        summary[f"coverage_{status.value.lower()}"] = sum(
+            1 for e in entries if e.coverage is not None and e.coverage.status is status
+        )
 
     return ClearanceDossier(
         production=state.production,
@@ -114,7 +122,19 @@ def auto_decisions(state: ProductionState) -> dict[str, Decision]:
         research = state.research.get(el.id)
         risk = state.risk[el.id]
         corroboration = state.corroboration.get(el.id)
-        if corroboration is not None and corroboration.verdict is IdentityVerdict.CONFLICTED:
+        coverage = state.coverage.get(el.id)
+        if coverage is not None and coverage.status is CoverageStatus.COVERED:
+            action, note = (
+                "approve_risk",
+                f"Already licensed — {coverage.note}",
+            )
+        elif coverage is not None and coverage.status is CoverageStatus.PARTIAL:
+            action, note = (
+                "license",
+                "Licence on file does not reach this use: "
+                + "; ".join(coverage.gaps),
+            )
+        elif corroboration is not None and corroboration.verdict is IdentityVerdict.CONFLICTED:
             action, note = (
                 "escalate",
                 "Detectors disagree on what this element is; identity must be resolved before clearance.",

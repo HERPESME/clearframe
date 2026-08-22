@@ -1,6 +1,6 @@
 """Deterministic pipeline orchestrator: fixed stage order, resumable, persisted per stage."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Protocol
 
@@ -12,7 +12,7 @@ from clearframe.integrations.vision_client import (
     FixtureVisionClient,
 )
 from clearframe.models import Production, ProductionState
-from clearframe.store import LocalJsonStore
+from clearframe.store import LicenceStore, LocalJsonStore
 
 FIXTURES_DIR = Path(__file__).parent / "integrations" / "fixtures"
 
@@ -26,6 +26,7 @@ ANALYSIS_STAGES = (
     "freshness",
     "risk",
     "territory",
+    "coverage",
     "remediation",
     "court",
 )
@@ -39,6 +40,7 @@ class PipelineContext:
     store: LocalJsonStore
     court: "CourtClient | None" = None
     corroborator: "CorroborationClient | None" = None
+    licences: list = field(default_factory=list)
     listener: "Callable[[dict], None] | None" = None
 
     def emit(self, event: dict) -> None:
@@ -85,6 +87,7 @@ def build_demo_pipeline(max_research: int | None = None) -> list[Stage]:
 
     from clearframe.stages.corroborate import CorroborateStage
     from clearframe.stages.court import CourtStage
+    from clearframe.stages.coverage import CoverageStage
     from clearframe.stages.drift_stage import DriftStage
     from clearframe.stages.freshness import FreshnessStage
     from clearframe.stages.script import ScriptStage
@@ -102,6 +105,7 @@ def build_demo_pipeline(max_research: int | None = None) -> list[Stage]:
         FreshnessStage(),
         RiskStage(),
         TerritoryStage(),
+        CoverageStage(),
         RemediationStage(),
         CourtStage(),
     ]
@@ -137,6 +141,7 @@ def build_context(cfg, production: Production, out_root: Path) -> PipelineContex
         store=LocalJsonStore(Path(out_root) / "state"),
         court=court,
         corroborator=corroborator,
+        licences=LicenceStore(Path(out_root) / "state").load(),
     )
 
 
@@ -156,4 +161,5 @@ def demo_context(out_root: Path) -> PipelineContext:
         store=LocalJsonStore(Path(out_root) / "state"),
         court=FixtureCourtClient(FIXTURES_DIR),
         corroborator=FixtureVisionClient(FIXTURES_DIR),
+        licences=LicenceStore(Path(out_root) / "state").seed_demo(),
     )

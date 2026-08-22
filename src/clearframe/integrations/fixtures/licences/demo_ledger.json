@@ -1,0 +1,149 @@
+{
+  "_comment": "Sample rights ledger — the clearances a production already holds. Shaped like a real clearance department's licence register: holder, scope, territories, media, term. The demo deliberately contains one clean grant, one with a territory+media gap, one expired, and several well-known holders with no matching finding (so the ledger is useful against your own footage too).",
+  "licences": [
+    {
+      "id": "LIC-001",
+      "rights_holder": "The Coca-Cola Company",
+      "work": "Coca-Cola trade dress and script logo",
+      "scope": "Product placement / incidental depiction",
+      "territories": ["WORLDWIDE"],
+      "media": ["ALL"],
+      "starts": "2025-03-01",
+      "expires": null,
+      "reference": "CC-PLACEMENT-2025-0412",
+      "notes": "Perpetual placement agreement negotiated during pre-production."
+    },
+    {
+      "id": "LIC-002",
+      "rights_holder": "Universal Music Publishing Group",
+      "work": "Blinding Lights (composition)",
+      "scope": "Synchronisation licence (composition only; master licensed separately)",
+      "territories": ["US"],
+      "media": ["THEATRICAL"],
+      "starts": "2026-01-15",
+      "expires": "2027-06-30",
+      "reference": "UMPG-SYNC-2026-8871",
+      "notes": "Festival/theatrical only. Streaming and non-US territories were quoted but never executed."
+    },
+    {
+      "id": "LIC-003",
+      "rights_holder": "Domino Recording Co.",
+      "work": "Arctic Monkeys tour poster artwork",
+      "scope": "Artwork reproduction in set dressing",
+      "territories": ["WORLDWIDE"],
+      "media": ["ALL"],
+      "starts": "2025-11-01",
+      "expires": "2029-11-01",
+      "reference": "DOM-ART-2025-114",
+      "notes": "Covers on-screen depiction of the framed poster."
+    },
+    {
+      "id": "LIC-004",
+      "rights_holder": "Local broadcast affiliate (KXBC-7)",
+      "work": "News broadcast footage",
+      "scope": "Third-party footage licence",
+      "territories": ["WORLDWIDE"],
+      "media": ["ALL"],
+      "starts": "2024-02-01",
+      "expires": "2025-12-31",
+      "reference": "KXBC-FOOTAGE-2024-33",
+      "notes": "Lapsed before delivery — renew or replace the shot."
+    },
+    {
+      "id": "LIC-005",
+      "rights_holder": "Adidas AG",
+      "work": "Three-stripe mark, apparel and accessories",
+      "scope": "Wardrobe depiction",
+      "territories": ["WORLDWIDE"],
+      "media": ["ALL"],
+      "starts": "2025-09-01",
+      "expires": null,
+      "reference": "ADI-WARDROBE-2025-07",
+      "notes": "On file, but a finding must be positively identified as Adidas before this grant can be relied on."
+    },
+    {
+      "id": "LIC-006",
+      "rights_holder": "PepsiCo, Inc.",
+      "work": "Pepsi and Lay's trade dress",
+      "scope": "Product placement",
+      "territories": ["US", "GB", "DE"],
+      "media": ["THEATRICAL", "STREAMING"],
+      "starts": "2026-01-01",
+      "expires": "2028-01-01",
+      "reference": "PEP-PLACE-2026-0221",
+      "notes": ""
+    },
+    {
+      "id": "LIC-007",
+      "rights_holder": "Apple Inc.",
+      "work": "Apple hardware and marks",
+      "scope": "Incidental depiction of devices",
+      "territories": ["WORLDWIDE"],
+      "media": ["ALL"],
+      "starts": "2025-06-01",
+      "expires": null,
+      "reference": "APL-DEPICT-2025-19",
+      "notes": "Standard depiction terms; no antagonist usage."
+    },
+    {
+      "id": "LIC-008",
+      "rights_holder": "Sony Music Entertainment",
+      "work": "Master recordings, catalogue A",
+      "scope": "Master use licence",
+      "territories": ["WORLDWIDE"],
+      "media": ["THEATRICAL", "STREAMING", "BROADCAST"],
+      "starts": "2026-02-01",
+      "expires": "2031-02-01",
+      "reference": "SME-MASTER-2026-441",
+      "notes": ""
+    },
+    {
+      "id": "LIC-009",
+      "rights_holder": "Warner Chappell Music",
+      "work": "Publishing catalogue, selected cues",
+      "scope": "Synchronisation licence",
+      "territories": ["WORLDWIDE"],
+      "media": ["ALL"],
+      "starts": "2026-03-01",
+      "expires": "2036-03-01",
+      "reference": "WCM-SYNC-2026-77",
+      "notes": ""
+    },
+    {
+      "id": "LIC-010",
+      "rights_holder": "Red Bull GmbH",
+      "work": "Red Bull marks and can trade dress",
+      "scope": "Product placement with brand approval",
+      "territories": ["WORLDWIDE"],
+      "media": ["ALL"],
+      "starts": "2025-08-15",
+      "expires": "2030-08-15",
+      "reference": "RB-PLACE-2025-556",
+      "notes": "Brand approval required on final cut."
+    },
+    {
+      "id": "LIC-011",
+      "rights_holder": "Starbucks Corporation",
+      "work": "Siren logo and cup trade dress",
+      "scope": "Incidental depiction",
+      "territories": ["US", "CA"],
+      "media": ["THEATRICAL"],
+      "starts": "2026-01-01",
+      "expires": "2027-01-01",
+      "reference": "SBX-DEPICT-2026-02",
+      "notes": "North America theatrical only."
+    },
+    {
+      "id": "LIC-012",
+      "rights_holder": "The LEGO Group",
+      "work": "LEGO brick trade dress and minifigure",
+      "scope": "Depiction of product in scene",
+      "territories": ["WORLDWIDE"],
+      "media": ["ALL"],
+      "starts": "2025-05-01",
+      "expires": null,
+      "reference": "LEGO-DEPICT-2025-88",
+      "notes": ""
+    }
+  ]
+}

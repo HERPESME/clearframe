@@ -111,8 +111,8 @@ def create_app(out_root: Path) -> FastAPI:
     @app.get("/api/productions")
     def list_productions():
         out = []
-        for path in sorted(store.root.glob("*.json")):
-            state = store.load(path.stem)
+        for pid in store.production_ids():
+            state = store.load(pid)
             out.append(
                 {
                     "id": state.production.id,
@@ -244,17 +244,17 @@ def create_app(out_root: Path) -> FastAPI:
         # Parallel Monitor webhook: an outside-world change on a watched finding
         # reopens review so the dossier can't go silently stale.
         async with state_lock:
-            for path in sorted(store.root.glob("*.json")):
+            for pid in store.production_ids():
                 reopened = record_watch_alert(
                     store,
-                    path.stem,
+                    pid,
                     body.monitor_id,
                     body.summary,
                     body.source_url,
                     at=datetime.now(timezone.utc).isoformat(),
                 )
                 if reopened is not None:
-                    return {"reopened_element": reopened, "production_id": path.stem}
+                    return {"reopened_element": reopened, "production_id": pid}
         raise HTTPException(status_code=404, detail=f"No watch for monitor {body.monitor_id}")
 
     @app.get("/api/productions/{pid}/artifacts/{name}")

@@ -13,8 +13,8 @@ async def test_pipeline_emits_stage_and_agent_events(tmp_path):
     ctx.listener = events.append
     await Pipeline(build_demo_pipeline()).run(ctx)
     types = [e["type"] for e in events]
-    assert types.count("stage_start") == 11
-    assert types.count("stage_complete") == 11
+    assert types.count("stage_start") == 12
+    assert types.count("stage_complete") == 12
     assert "script_mentions" in types and "drift_computed" in types
     assert "scan_found" in types and "audit_found" in types
     assert "research_planned" in types
@@ -23,6 +23,7 @@ async def test_pipeline_emits_stage_and_agent_events(tmp_path):
     assert types.count("research_blocked") == 1
     assert "corroboration_done" in types and "identity_conflict" in types
     assert "territory_assessed" in types and "freshness_checked" in types
+    assert "coverage_checked" in types and "coverage_gap" in types
     assert types.count("case_ruled") == 5
     ruled = [e for e in events if e["type"] == "case_ruled"]
     assert any(e["holding"] == "clear_required" for e in ruled)
