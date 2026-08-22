@@ -46,6 +46,29 @@ that cannot invent a brand outside it.
 | `SINGLE_SOURCE` | only the video model saw it (murals, tattoos, music are outside any catalogue) | research proceeds, flagged in the dossier |
 | `CONFLICTED` | the detectors named **different** things | **research is blocked** — a human resolves identity first |
 
+### Am I already covered?
+
+Every other tool answers *"who owns this and what would it cost"*. A director
+asks the opposite question first. Upload your clearance register — the licence
+list a clearance department already keeps — as CSV or JSON, and every finding is
+matched against it:
+
+| State | Meaning |
+| --- | --- |
+| `COVERED` | a matching grant reaches this use |
+| `PARTIAL` | a grant exists but misses **territory**, **term** or **media** — the gap is named |
+| `NOT_COVERED` | holder identified, nothing on file |
+| `UNKNOWN` | ownership or identity unresolved, so coverage is unknowable |
+
+The media check is the *WKRP in Cincinnati* problem: music cleared for broadcast
+and never for home video gutted that show's soundtrack on streaming decades later.
+
+```csv
+rights_holder,work,scope,territories,media,starts,expires,reference
+Bayer AG,Bayer cross logo,Archival depiction,WORLDWIDE,ALL,2025-01-01,,BAY-2025-01
+Kraft Heinz Company,Jell-O trade dress,Product depiction,US|CA,THEATRICAL,2026-01-01,2027-12-31,KHC-14
+```
+
 ### Clearance is jurisdictional
 
 Distributors buy territories separately, and the same frame is not equally
@@ -71,6 +94,27 @@ Every contested finding (MEDIUM risk and up) is argued by two opposing agents: *
 - Deep research is a snapshot; the **Parallel Search API** adds a live pass over every identified rights holder ("has this company started enforcing since we researched them?"). Priced per request rather than per Task run, so it is affordable to re-run on demand from the review screen — the **Check live signals** button.
 - Risk scores are pure code (`src/clearframe/scoring.py`): reproducible from stored inputs, never an LLM guess.
 
+## Bring your own footage
+
+The review app takes an upload, plays it back, and draws every detection's box
+on the frame it appears on — labelled with what it is, whether two detectors
+agreed, and whether it is already licensed. Clicking a finding scrubs to it.
+
+```bash
+./scripts/fetch_test_clips.sh          # 6 public-domain spots, ~2MB each
+```
+
+Those come from [archive.org/details/ctvc](https://archive.org/details/ctvc)
+(Creative Commons public domain) and are dense with still-live marks — Bayer,
+Jell-O, Lipton, Texaco, Playtex, Volkswagen. The films are free; the trademarks
+in them are not, which is precisely the gap ClearFrame exists to flag. The
+script also writes `ground_truth.json` so detection recall can be scored rather
+than eyeballed. `docs/sample-rights-ledger.csv` is a matching register that
+produces covered, gapped and unlicensed states against those clips.
+
+Footage upload requires live mode: demo mode replays recorded fixtures, so it
+refuses uploads rather than returning the demo scene's findings as yours.
+
 ## Quickstart — demo mode (zero credentials, zero network)
 
 ```bash
@@ -95,7 +139,8 @@ The whole clearance department is also an **MCP server** — any MCP client (Gem
 ```bash
 python -m clearframe.mcp --out out   # stdio transport
 # tools: run_clearance · get_status · list_findings · get_finding · record_decision
-#        verify_identities · territory_report · check_freshness · generate_dossier
+#        verify_identities · territory_report · check_freshness
+#        list_licences · check_coverage · generate_dossier
 ```
 
 Role gating and the append-only audit trail apply identically across all three transports (CLI, web app, MCP) — one shared review service owns the rules. See [docs/deploy.md](docs/deploy.md) for client registration.

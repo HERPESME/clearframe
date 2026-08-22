@@ -106,3 +106,79 @@ band or an identity verdict.
   third-party key (ACRCloud/AudD). Next phase.
 - **Video player + real frame stills.** `FramePosition` renders the box
   geometry without footage; real thumbnails need ffmpeg and an upload path.
+
+---
+
+# Phase 8 — Bring your own footage + rights ledger
+
+**Status:** Implemented 2026-08-22, same branch.
+
+Three features requested after Phase 7, in dependency order.
+
+## 1. Footage upload
+
+`POST /api/productions` (multipart) stores the clip under `<out>/media/{pid}/`,
+creates the Production with the chosen territories and distribution media, and
+streams the pipeline over the existing SSE channel. 512MB cap enforced while
+streaming; extension whitelist (`.mp4/.m4v/.mov/.webm`); the uploaded filename
+is discarded and replaced with `footage<ext>` so nothing path-traversal-shaped
+reaches the filesystem.
+
+**Demo mode refuses with 409.** It replays fixtures, so analysing an upload
+would hand back Golden Hour's findings as if they were the user's footage.
+Saying so is better than a silent lie.
+
+## 2. Video player with box overlay
+
+`GET /api/productions/{pid}/media` serves the clip. `VideoPlayer` overlays an
+SVG whose viewBox is `0 0 1 1`, so the normalized detection boxes map straight
+onto the video element (which fills its box at `width:100%; height:auto`).
+Boxes appear only while the playhead is inside a finding's time range; each
+carries a label with the identity verdict and coverage state. Clicking a
+finding card scrubs the player to a beat before it appears.
+
+Productions without media (the demo scene) fall back to the `FramePosition`
+schematic — the geometry without the footage.
+
+## 3. Rights ledger
+
+`licensing.py` matches each finding's researched owner against the licence
+register using the same token-overlap rule as drift and corroboration, then
+checks the three gaps that sink real productions: **territory**, **term**, and
+**media scope**.
+
+States: `COVERED` / `PARTIAL` (gaps enumerated) / `NOT_COVERED` / `UNKNOWN`.
+UNKNOWN is used whenever ownership or identity is unresolved — the demo's
+Adidas duffel has a matching grant on file (LIC-005) but a disputed identity,
+so it reads UNKNOWN rather than falsely covered. A licence cannot cover a
+finding we cannot name.
+
+Ledgers upload as CSV or JSON (`POST /api/licences`, role-gated to
+legal/producer), merge or replace, and surface through MCP as `list_licences`
+and `check_coverage`. Auto-approve honours the ledger: COVERED accepts on that
+basis; PARTIAL routes to license with the gap named.
+
+## Test corpus
+
+`scripts/fetch_test_clips.sh` pulls six ~2MB public-domain commercials from
+archive.org/details/ctvc (Bayer, Jell-O, Lipton, Texaco, Playtex, Volkswagen)
+plus a hand-written `ground_truth.json`. The films are public domain; the marks
+in them are still live and still owned — the exact gap the product exists to
+flag. `docs/sample-rights-ledger.csv` produces covered / gapped / unlicensed
+states against that corpus.
+
+## Defects fixed
+
+- Uploaded ledgers without an `id` column were numbered by row position, which
+  silently overwrote existing entries on merge (`assign_ids`).
+- The state directory now also holds `licences.json`, which raw
+  `glob("*.json")` calls tried to parse as production state
+  (`LocalJsonStore.production_ids()`).
+
+## Still not done
+
+- **Audio fingerprinting.** Music is detected, categorised, weighted highest
+  (1.0) and routed to the deepest research tier — but identification is a
+  language model listening and naming a track, and `CORROBORATABLE` excludes
+  MUSIC_SYNC so every song is permanently SINGLE_SOURCE. That title flows into
+  an ASCAP/BMI cue sheet, which is a legal filing. Needs an ACRCloud/AudD key.

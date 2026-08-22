@@ -119,7 +119,41 @@ grep -q "Territory exposure" "$OUT/dossier.html"; check $? "dossier reports terr
 grep -q "Identity verification" "$OUT/dossier.html"; check $? "dossier reports identity verification"
 grep -q "CONFLICTED" "$OUT/markers.csv"; check $? "NLE markers carry the identity verdict"
 
-echo "━━ 6. MCP server (stdio)"
+echo "━━ 6. Rights ledger + upload surfaces"
+LEDGER=$(curl -sf "$BASE/api/licences" | $PY -c "import json,sys; print(len(json.load(sys.stdin)['licences']))")
+[ "$LEDGER" -ge 10 ]; check $? "demo rights ledger seeded ($LEDGER licences)"
+
+curl -sf "$BASE/api/productions/demo" | $PY -c "
+import json, sys
+s = json.load(sys.stdin)
+c = {k: v['status'] for k, v in s['coverage'].items()}
+assert c['e2'] == 'COVERED', c['e2']
+assert c['e1'] == 'PARTIAL', c['e1']
+assert c['e3'] == 'NOT_COVERED', c['e3']
+assert c['e8'] == 'UNKNOWN', c['e8']
+gaps = s['coverage']['e1']['gaps']
+assert any('territory' in g for g in gaps) and any('media' in g for g in gaps), gaps
+"
+check $? "coverage: covered / gap / unlicensed / unknown all reachable"
+
+CODE=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/api/licences" \
+  -H 'X-ClearFrame-Role: editor' -F 'file=@docs/sample-rights-ledger.csv')
+[ "$CODE" = "403" ]; check $? "ledger upload role-gated (editor 403)"
+
+has '"stored"' -X POST "$BASE/api/licences" -H 'X-ClearFrame-Role: legal' \
+  -F 'file=@docs/sample-rights-ledger.csv' -F 'replace=false'
+check $? "CSV rights ledger uploads and merges"
+
+CODE=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/api/productions" \
+  -F 'file=@docs/sample-rights-ledger.csv' -F 'title=X')
+[ "$CODE" = "409" ]; check $? "demo mode refuses footage upload honestly (409)"
+
+[ "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/api/productions/demo/media")" = "404" ]
+check $? "media endpoint 404s when no footage stored"
+
+grep -q "Rights already held" "$OUT/dossier.html"; check $? "dossier reports rights already held"
+
+echo "━━ 7. MCP server (stdio)"
 MCP_OUT=$(printf '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"smoke","version":"0"}}}\n' \
   | $PY -m clearframe.mcp --out "$OUT" 2>/dev/null)
 printf '%s' "$MCP_OUT" | grep -q '"clearframe"'
