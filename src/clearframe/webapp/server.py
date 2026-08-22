@@ -311,7 +311,7 @@ def create_app(out_root: Path) -> FastAPI:
             # that, so a 49-second clip declared itself zero seconds long and
             # got a single audio fingerprint sample at the head. A caller who
             # supplies a duration is trusted; otherwise ffmpeg decides.
-            duration_s=duration_s or probe_duration_s(dest),
+            duration_s=duration_s or probe_duration_s(target),
             release_territories=[t.strip().upper() for t in territories.split(",") if t.strip()]
             or ["US"],
             distribution=[d.strip().upper() for d in distribution.split(",") if d.strip()],

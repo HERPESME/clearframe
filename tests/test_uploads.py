@@ -64,6 +64,83 @@ def test_live_mode_without_credentials_is_actionable(client, monkeypatch):
     assert "GOOGLE_CLOUD_PROJECT" in resp.json()["detail"]
 
 
+def test_a_live_upload_actually_builds_a_production(client, monkeypatch):
+    """The success path. Every other footage test bails out BEFORE the
+    Production is constructed — wrong mode, wrong file type, missing
+    credentials — so the construction itself was never executed by the suite.
+
+    A `NameError` on that line therefore survived 392 green tests and only
+    surfaced when a human clicked upload. This test executes the line.
+    """
+    monkeypatch.setenv("CLEARFRAME_MODE", "live")
+    monkeypatch.setenv("GOOGLE_CLOUD_PROJECT", "proj")
+    monkeypatch.setenv("PARALLEL_API_KEY", "key")
+
+    started: dict = {}
+
+    def _capture(cfg, production, out_root):
+        # build_context is synchronous. Capture the production, then hand back
+        # a fixture-backed context so the request completes without touching a
+        # real API — the point is to execute the construction, not the pipeline.
+        started["production"] = production
+        from clearframe.pipeline import demo_context
+
+        ctx = demo_context(out_root)
+        ctx.state.production = production
+        return ctx
+
+    monkeypatch.setattr("clearframe.webapp.server.build_context", _capture)
+
+    resp = client.post(
+        "/api/productions",
+        files={"file": ("clip.mp4", b"\x00" * 4096, "video/mp4")},
+        data={
+            "title": "Live Clip",
+            "territories": "US,DE",
+            "distribution": "STREAMING",
+            "use_context": "ADVERTISING",
+            "sponsors": "Bayer",
+            "platform": "youtube",
+        },
+    )
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["production_id"] == "upload"
+
+    p = started["production"]
+    assert p.title == "Live Clip"
+    assert p.release_territories == ["US", "DE"]
+    assert p.use_context.value == "ADVERTISING"
+    assert p.sponsors == ["Bayer"]
+    assert p.platform == "youtube"
+    assert p.has_media is True
+    # Not a real video, so the probe cannot read a duration — it must degrade
+    # to 0.0 rather than raising, which is the whole point of that contract.
+    assert p.duration_s == 0.0
+
+
+def test_a_supplied_duration_is_trusted_over_the_probe(client, monkeypatch):
+    monkeypatch.setenv("CLEARFRAME_MODE", "live")
+    monkeypatch.setenv("GOOGLE_CLOUD_PROJECT", "proj")
+    monkeypatch.setenv("PARALLEL_API_KEY", "key")
+    started: dict = {}
+
+    def _capture(cfg, production, out_root):
+        started["production"] = production
+        from clearframe.pipeline import demo_context
+
+        ctx = demo_context(out_root)
+        ctx.state.production = production
+        return ctx
+
+    monkeypatch.setattr("clearframe.webapp.server.build_context", _capture)
+    client.post(
+        "/api/productions",
+        files={"file": ("clip.mp4", b"\x00" * 4096, "video/mp4")},
+        data={"title": "X", "duration_s": "42.5"},
+    )
+    assert started["production"].duration_s == 42.5
+
+
 # --------------------------------------------------------------- ledger
 def test_demo_ledger_is_seeded(client):
     body = client.get("/api/licences").json()
