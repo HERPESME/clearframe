@@ -1,20 +1,19 @@
 {
   "production": {
     "id": "upload",
-    "title": "Bayer smoke",
+    "title": "Untitled Production",
     "footage_uri": "out-live-ui/media/upload/footage.mp4",
     "fps": 24.0,
-    "duration_s": 30.0,
+    "duration_s": 49.53,
     "script_uri": null,
     "release_territories": [
       "US",
-      "DE"
+      "DE",
+      "FR"
     ],
-    "use_context": "ADVERTISING",
-    "sponsors": [
-      "Bayer"
-    ],
-    "platform": "youtube",
+    "use_context": "EXPRESSIVE",
+    "sponsors": [],
+    "platform": "none",
     "distribution": [
       "THEATRICAL",
       "STREAMING"
@@ -22,10 +21,676 @@
     "has_media": true
   },
   "stage_status": {
-    "script": "complete"
+    "script": "complete",
+    "scan": "complete",
+    "triage": "complete",
+    "corroborate": "complete",
+    "drift": "complete",
+    "preview": "complete"
   },
-  "detections": [],
-  "elements": [],
+  "detections": [
+    {
+      "id": "pizza_hut_logo_1",
+      "label": "Pizza Hut",
+      "element_type": "LOGO",
+      "description": "The Pizza Hut logo is visible on the side of a delivery scooter's box.",
+      "time_ranges": [
+        {
+          "start_s": 0.0,
+          "end_s": 2.6
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 2.6,
+        "frame_coverage": 0.05,
+        "centrality": 0.5,
+        "plot_integral": true
+      },
+      "bbox": {
+        "ymin": 0.303,
+        "xmin": 0.441,
+        "ymax": 0.435,
+        "xmax": 0.591
+      },
+      "at_s": 0.0,
+      "depiction": "NEUTRAL"
+    },
+    {
+      "id": "pizza_hut_logo_2",
+      "label": "Pizza Hut",
+      "element_type": "LOGO",
+      "description": "A second Pizza Hut logo is visible on the back of a delivery scooter's box.",
+      "time_ranges": [
+        {
+          "start_s": 0.0,
+          "end_s": 2.6
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 2.6,
+        "frame_coverage": 0.04,
+        "centrality": 0.3,
+        "plot_integral": true
+      },
+      "bbox": {
+        "ymin": 0.3,
+        "xmin": 0.628,
+        "ymax": 0.425,
+        "xmax": 0.761
+      },
+      "at_s": 0.0,
+      "depiction": "NEUTRAL"
+    },
+    {
+      "id": "delivery_person",
+      "label": "Pizza Delivery Person",
+      "element_type": "CHARACTER",
+      "description": "An animated character of a pizza delivery person with brown hair, wearing a red and black uniform and a cap.",
+      "time_ranges": [
+        {
+          "start_s": 1.0,
+          "end_s": 8.5
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 7.5,
+        "frame_coverage": 0.4,
+        "centrality": 0.8,
+        "plot_integral": true
+      },
+      "bbox": {
+        "ymin": 0.033,
+        "xmin": 0.045,
+        "ymax": 0.998,
+        "xmax": 0.639
+      },
+      "at_s": 3.5,
+      "depiction": null
+    },
+    {
+      "id": "pizza_hut_box_logo",
+      "label": "Pizza Hut",
+      "element_type": "LOGO",
+      "description": "The Pizza Hut logo is visible on a pizza box held by characters.",
+      "time_ranges": [
+        {
+          "start_s": 3.0,
+          "end_s": 5.0
+        },
+        {
+          "start_s": 18.2,
+          "end_s": 19.8
+        },
+        {
+          "start_s": 24.3,
+          "end_s": 27.5
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 6.8,
+        "frame_coverage": 0.05,
+        "centrality": 0.4,
+        "plot_integral": true
+      },
+      "bbox": {
+        "ymin": 0.544,
+        "xmin": 0.288,
+        "ymax": 0.643,
+        "xmax": 0.545
+      },
+      "at_s": 19.0,
+      "depiction": "NEUTRAL"
+    },
+    {
+      "id": "cc",
+      "label": "C.C.",
+      "element_type": "CHARACTER",
+      "description": "An animated female character with long green hair and golden eyes, wearing a white outfit.",
+      "time_ranges": [
+        {
+          "start_s": 5.0,
+          "end_s": 8.5
+        },
+        {
+          "start_s": 18.2,
+          "end_s": 19.8
+        },
+        {
+          "start_s": 22.8,
+          "end_s": 27.5
+        },
+        {
+          "start_s": 35.0,
+          "end_s": 49.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 23.8,
+        "frame_coverage": 0.4,
+        "centrality": 0.8,
+        "plot_integral": true
+      },
+      "bbox": {
+        "ymin": 0.0,
+        "xmin": 0.012,
+        "ymax": 0.999,
+        "xmax": 0.692
+      },
+      "at_s": 41.5,
+      "depiction": null
+    },
+    {
+      "id": "arthur_the_cat",
+      "label": "Arthur",
+      "element_type": "CHARACTER",
+      "description": "A purple cat with a bandaged leg and a black spot around one eye.",
+      "time_ranges": [
+        {
+          "start_s": 8.8,
+          "end_s": 11.2
+        },
+        {
+          "start_s": 20.3,
+          "end_s": 22.8
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 4.9,
+        "frame_coverage": 0.15,
+        "centrality": 0.6,
+        "plot_integral": true
+      },
+      "bbox": {
+        "ymin": 0.479,
+        "xmin": 0.121,
+        "ymax": 0.863,
+        "xmax": 0.526
+      },
+      "at_s": 21.3,
+      "depiction": null
+    },
+    {
+      "id": "lelouch",
+      "label": "Lelouch vi Britannia",
+      "element_type": "CHARACTER",
+      "description": "An animated male character with dark hair and purple eyes, wearing a black school uniform with gold trim.",
+      "time_ranges": [
+        {
+          "start_s": 14.8,
+          "end_s": 17.8
+        },
+        {
+          "start_s": 23.0,
+          "end_s": 27.8
+        },
+        {
+          "start_s": 35.2,
+          "end_s": 41.0
+        },
+        {
+          "start_s": 45.8,
+          "end_s": 47.5
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 15.3,
+        "frame_coverage": 0.4,
+        "centrality": 0.8,
+        "plot_integral": true
+      },
+      "bbox": {
+        "ymin": 0.0,
+        "xmin": 0.304,
+        "ymax": 0.757,
+        "xmax": 0.999
+      },
+      "at_s": 15.5,
+      "depiction": null
+    },
+    {
+      "id": "wall_artwork_1",
+      "label": "Framed Painting",
+      "element_type": "ARTWORK",
+      "description": "A framed oval painting on a purple wall, depicting what appears to be a floral or plant design in a traditional style.",
+      "time_ranges": [
+        {
+          "start_s": 23.0,
+          "end_s": 27.5
+        },
+        {
+          "start_s": 35.0,
+          "end_s": 41.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 10.5,
+        "frame_coverage": 0.03,
+        "centrality": 0.2,
+        "plot_integral": false
+      },
+      "bbox": {
+        "ymin": 0.094,
+        "xmin": 0.587,
+        "ymax": 0.286,
+        "xmax": 0.771
+      },
+      "at_s": 35.8,
+      "depiction": null
+    },
+    {
+      "id": "nunnally",
+      "label": "Nunnally vi Britannia",
+      "element_type": "CHARACTER",
+      "description": "An animated female character with long brown hair, wearing a green and white dress, sitting in a futuristic wheelchair with her eyes closed.",
+      "time_ranges": [
+        {
+          "start_s": 28.8,
+          "end_s": 35.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 6.2,
+        "frame_coverage": 0.5,
+        "centrality": 0.8,
+        "plot_integral": true
+      },
+      "bbox": {
+        "ymin": 0.0,
+        "xmin": 0.282,
+        "ymax": 1.0,
+        "xmax": 0.999
+      },
+      "at_s": 30.0,
+      "depiction": null
+    },
+    {
+      "id": "background_music_1",
+      "label": "Atmospheric Score",
+      "element_type": "MUSIC",
+      "description": "A subtle, non-diegetic atmospheric musical score plays throughout the scene.",
+      "time_ranges": [
+        {
+          "start_s": 0.0,
+          "end_s": 49.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 49.0,
+        "frame_coverage": 0.0,
+        "centrality": 0.0,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": null
+    },
+    {
+      "id": "ashford_insignia_01",
+      "label": "Ashford Academy Insignia",
+      "element_type": "LOGO",
+      "description": "A gold insignia, representing the fictional Ashford Academy, is visible on the collar of Lelouch's school uniform.",
+      "time_ranges": [
+        {
+          "start_s": 14.7,
+          "end_s": 17.8
+        },
+        {
+          "start_s": 23.2,
+          "end_s": 27.5
+        },
+        {
+          "start_s": 35.4,
+          "end_s": 41.0
+        },
+        {
+          "start_s": 45.9,
+          "end_s": 47.1
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 13.9,
+        "frame_coverage": 0.0007,
+        "centrality": 0.6,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": null
+    },
+    {
+      "id": "red_r_logo_01",
+      "label": "Red 'R' Logo",
+      "element_type": "LOGO",
+      "description": "A small, red, stylized letter 'R' is visible on the side of the Pizza Hut delivery person's hat. This is part of the Pizza Hut branding in the series.",
+      "time_ranges": [
+        {
+          "start_s": 3.0,
+          "end_s": 8.5
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 5.5,
+        "frame_coverage": 0.0002,
+        "centrality": 0.5,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": null
+    }
+  ],
+  "elements": [
+    {
+      "id": "pizza_hut_logo_1",
+      "label": "Pizza Hut",
+      "element_type": "LOGO",
+      "description": "The Pizza Hut logo is visible on the side of a delivery scooter's box.",
+      "time_ranges": [
+        {
+          "start_s": 0.0,
+          "end_s": 2.6
+        },
+        {
+          "start_s": 0.0,
+          "end_s": 2.6
+        },
+        {
+          "start_s": 3.0,
+          "end_s": 5.0
+        },
+        {
+          "start_s": 18.2,
+          "end_s": 19.8
+        },
+        {
+          "start_s": 24.3,
+          "end_s": 27.5
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 12.0,
+        "frame_coverage": 0.05,
+        "centrality": 0.5,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": null,
+      "category": "TRADEMARK"
+    },
+    {
+      "id": "delivery_person",
+      "label": "Pizza Delivery Person",
+      "element_type": "CHARACTER",
+      "description": "An animated character of a pizza delivery person with brown hair, wearing a red and black uniform and a cap.",
+      "time_ranges": [
+        {
+          "start_s": 1.0,
+          "end_s": 8.5
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 7.5,
+        "frame_coverage": 0.4,
+        "centrality": 0.8,
+        "plot_integral": true
+      },
+      "bbox": {
+        "ymin": 0.033,
+        "xmin": 0.045,
+        "ymax": 0.998,
+        "xmax": 0.639
+      },
+      "at_s": 3.5,
+      "depiction": null,
+      "category": "COPYRIGHT_ART"
+    },
+    {
+      "id": "cc",
+      "label": "C.C.",
+      "element_type": "CHARACTER",
+      "description": "An animated female character with long green hair and golden eyes, wearing a white outfit.",
+      "time_ranges": [
+        {
+          "start_s": 5.0,
+          "end_s": 8.5
+        },
+        {
+          "start_s": 18.2,
+          "end_s": 19.8
+        },
+        {
+          "start_s": 22.8,
+          "end_s": 27.5
+        },
+        {
+          "start_s": 35.0,
+          "end_s": 49.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 23.8,
+        "frame_coverage": 0.4,
+        "centrality": 0.8,
+        "plot_integral": true
+      },
+      "bbox": {
+        "ymin": 0.0,
+        "xmin": 0.012,
+        "ymax": 0.999,
+        "xmax": 0.692
+      },
+      "at_s": 41.5,
+      "depiction": null,
+      "category": "COPYRIGHT_ART"
+    },
+    {
+      "id": "arthur_the_cat",
+      "label": "Arthur",
+      "element_type": "CHARACTER",
+      "description": "A purple cat with a bandaged leg and a black spot around one eye.",
+      "time_ranges": [
+        {
+          "start_s": 8.8,
+          "end_s": 11.2
+        },
+        {
+          "start_s": 20.3,
+          "end_s": 22.8
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 4.9,
+        "frame_coverage": 0.15,
+        "centrality": 0.6,
+        "plot_integral": true
+      },
+      "bbox": {
+        "ymin": 0.479,
+        "xmin": 0.121,
+        "ymax": 0.863,
+        "xmax": 0.526
+      },
+      "at_s": 21.3,
+      "depiction": null,
+      "category": "COPYRIGHT_ART"
+    },
+    {
+      "id": "lelouch",
+      "label": "Lelouch vi Britannia",
+      "element_type": "CHARACTER",
+      "description": "An animated male character with dark hair and purple eyes, wearing a black school uniform with gold trim.",
+      "time_ranges": [
+        {
+          "start_s": 14.8,
+          "end_s": 17.8
+        },
+        {
+          "start_s": 23.0,
+          "end_s": 27.8
+        },
+        {
+          "start_s": 35.2,
+          "end_s": 41.0
+        },
+        {
+          "start_s": 45.8,
+          "end_s": 47.5
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 15.3,
+        "frame_coverage": 0.4,
+        "centrality": 0.8,
+        "plot_integral": true
+      },
+      "bbox": {
+        "ymin": 0.0,
+        "xmin": 0.304,
+        "ymax": 0.757,
+        "xmax": 0.999
+      },
+      "at_s": 15.5,
+      "depiction": null,
+      "category": "COPYRIGHT_ART"
+    },
+    {
+      "id": "wall_artwork_1",
+      "label": "Framed Painting",
+      "element_type": "ARTWORK",
+      "description": "A framed oval painting on a purple wall, depicting what appears to be a floral or plant design in a traditional style.",
+      "time_ranges": [
+        {
+          "start_s": 23.0,
+          "end_s": 27.5
+        },
+        {
+          "start_s": 35.0,
+          "end_s": 41.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 10.5,
+        "frame_coverage": 0.03,
+        "centrality": 0.2,
+        "plot_integral": false
+      },
+      "bbox": {
+        "ymin": 0.094,
+        "xmin": 0.587,
+        "ymax": 0.286,
+        "xmax": 0.771
+      },
+      "at_s": 35.8,
+      "depiction": null,
+      "category": "COPYRIGHT_ART"
+    },
+    {
+      "id": "nunnally",
+      "label": "Nunnally vi Britannia",
+      "element_type": "CHARACTER",
+      "description": "An animated female character with long brown hair, wearing a green and white dress, sitting in a futuristic wheelchair with her eyes closed.",
+      "time_ranges": [
+        {
+          "start_s": 28.8,
+          "end_s": 35.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 6.2,
+        "frame_coverage": 0.5,
+        "centrality": 0.8,
+        "plot_integral": true
+      },
+      "bbox": {
+        "ymin": 0.0,
+        "xmin": 0.282,
+        "ymax": 1.0,
+        "xmax": 0.999
+      },
+      "at_s": 30.0,
+      "depiction": null,
+      "category": "COPYRIGHT_ART"
+    },
+    {
+      "id": "background_music_1",
+      "label": "Atmospheric Score",
+      "element_type": "MUSIC",
+      "description": "A subtle, non-diegetic atmospheric musical score plays throughout the scene.",
+      "time_ranges": [
+        {
+          "start_s": 0.0,
+          "end_s": 49.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 49.0,
+        "frame_coverage": 0.0,
+        "centrality": 0.0,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": null,
+      "category": "MUSIC_SYNC"
+    },
+    {
+      "id": "ashford_insignia_01",
+      "label": "Ashford Academy Insignia",
+      "element_type": "LOGO",
+      "description": "A gold insignia, representing the fictional Ashford Academy, is visible on the collar of Lelouch's school uniform.",
+      "time_ranges": [
+        {
+          "start_s": 14.7,
+          "end_s": 17.8
+        },
+        {
+          "start_s": 23.2,
+          "end_s": 27.5
+        },
+        {
+          "start_s": 35.4,
+          "end_s": 41.0
+        },
+        {
+          "start_s": 45.9,
+          "end_s": 47.1
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 13.9,
+        "frame_coverage": 0.0007,
+        "centrality": 0.6,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": null,
+      "category": "TRADEMARK"
+    },
+    {
+      "id": "red_r_logo_01",
+      "label": "Red 'R' Logo",
+      "element_type": "LOGO",
+      "description": "A small, red, stylized letter 'R' is visible on the side of the Pizza Hut delivery person's hat. This is part of the Pizza Hut branding in the series.",
+      "time_ranges": [
+        {
+          "start_s": 3.0,
+          "end_s": 8.5
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 5.5,
+        "frame_coverage": 0.0002,
+        "centrality": 0.5,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": null,
+      "category": "TRADEMARK"
+    }
+  ],
   "research": {},
   "risk": {},
   "remediation": {},
@@ -39,18 +704,903 @@
   "candidates": {},
   "watches": {},
   "alerts": [],
-  "corroboration": {},
+  "corroboration": {
+    "pizza_hut_logo_1": {
+      "element_id": "pizza_hut_logo_1",
+      "verdict": "CORROBORATED",
+      "detector": "cloud-video-intelligence",
+      "detected_label": "Pizza Hut",
+      "confidence": 0.89441067,
+      "note": "cloud-video-intelligence independently identified 'Pizza Hut' in the same window at 89% confidence."
+    },
+    "delivery_person": {
+      "element_id": "delivery_person",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers COPYRIGHT_ART; identity rests on the video model alone."
+    },
+    "cc": {
+      "element_id": "cc",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers COPYRIGHT_ART; identity rests on the video model alone."
+    },
+    "arthur_the_cat": {
+      "element_id": "arthur_the_cat",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers COPYRIGHT_ART; identity rests on the video model alone."
+    },
+    "lelouch": {
+      "element_id": "lelouch",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers COPYRIGHT_ART; identity rests on the video model alone."
+    },
+    "wall_artwork_1": {
+      "element_id": "wall_artwork_1",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers COPYRIGHT_ART; identity rests on the video model alone."
+    },
+    "nunnally": {
+      "element_id": "nunnally",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers COPYRIGHT_ART; identity rests on the video model alone."
+    },
+    "background_music_1": {
+      "element_id": "background_music_1",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "audd-fingerprint",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "Acoustic fingerprinting returned no match. Not a contradiction — the recording may be library, original or absent from the database — but the title rests on the video model alone and must not be filed to a PRO without human confirmation."
+    },
+    "ashford_insignia_01": {
+      "element_id": "ashford_insignia_01",
+      "verdict": "CONFLICTED",
+      "detector": "cloud-video-intelligence",
+      "detected_label": "Pizza Hut",
+      "confidence": 0.89441067,
+      "note": "Identity dispute: the video model read 'Ashford Academy Insignia' but cloud-video-intelligence read 'Akron Zips, Arizona State Sun Devils, MPLA, Pizza Hut' in the same window. Resolve before researching — researching the wrong rights holder produces a false clearance."
+    },
+    "red_r_logo_01": {
+      "element_id": "red_r_logo_01",
+      "verdict": "CONFLICTED",
+      "detector": "cloud-video-intelligence",
+      "detected_label": "Pizza Hut",
+      "confidence": 0.89441067,
+      "note": "Identity dispute: the video model read 'Red 'R' Logo' but cloud-video-intelligence read 'Akron Zips, Arizona State Sun Devils, MPLA, Pizza Hut' in the same window. Resolve before researching — researching the wrong rights holder produces a false clearance."
+    }
+  },
   "freshness": {},
   "territory_risk": {},
   "territories": [],
   "coverage": {},
   "audio_matches": [],
-  "routes": {},
+  "routes": {
+    "pizza_hut_logo_1": {
+      "element_id": "pizza_hut_logo_1",
+      "tier": "DEEP",
+      "rationale": "Escalated to deep research: provisional exposure is 49, at or above the HIGH band. Ownership resolved locally (Yum! Brands, Inc.); a live search establishes current licensing posture and the contact route. Posture is the variable a static table cannot know, and for trademark it is the variable that decides risk — brand owners sue over unflattering depiction, not presence. A finding this prominent needs a licensing contact, a cost band and citations an underwriter can follow — which only a deep run produces.",
+      "basis": "",
+      "disposition": "Confirm posture, then approach Yum! Brands, Inc. if depiction is unflattering.",
+      "owner": "Yum! Brands, Inc.",
+      "posture": null,
+      "est_cost_usd": 0.0,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "delivery_person": {
+      "element_id": "delivery_person",
+      "tier": "DEEP",
+      "rationale": "For artwork, 'who owns this' IS the question, and a two-second search cannot answer it: a poster's rights can sit with the band, the label, the photographer or the designer. Ownership chains for authored images are multi-hop by nature, which is what a deep run is for.",
+      "basis": "Ringgold v. Black Entertainment Television, 126 F.3d 70 (2d Cir. 1997) — recognisable background artwork is not de minimis",
+      "disposition": "",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.0,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "cc": {
+      "element_id": "cc",
+      "tier": "DEEP",
+      "rationale": "For artwork, 'who owns this' IS the question, and a two-second search cannot answer it: a poster's rights can sit with the band, the label, the photographer or the designer. Ownership chains for authored images are multi-hop by nature, which is what a deep run is for.",
+      "basis": "Ringgold v. Black Entertainment Television, 126 F.3d 70 (2d Cir. 1997) — recognisable background artwork is not de minimis",
+      "disposition": "",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.0,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "arthur_the_cat": {
+      "element_id": "arthur_the_cat",
+      "tier": "DEEP",
+      "rationale": "For artwork, 'who owns this' IS the question, and a two-second search cannot answer it: a poster's rights can sit with the band, the label, the photographer or the designer. Ownership chains for authored images are multi-hop by nature, which is what a deep run is for.",
+      "basis": "Ringgold v. Black Entertainment Television, 126 F.3d 70 (2d Cir. 1997) — recognisable background artwork is not de minimis",
+      "disposition": "",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.0,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "lelouch": {
+      "element_id": "lelouch",
+      "tier": "DEEP",
+      "rationale": "For artwork, 'who owns this' IS the question, and a two-second search cannot answer it: a poster's rights can sit with the band, the label, the photographer or the designer. Ownership chains for authored images are multi-hop by nature, which is what a deep run is for.",
+      "basis": "Ringgold v. Black Entertainment Television, 126 F.3d 70 (2d Cir. 1997) — recognisable background artwork is not de minimis",
+      "disposition": "",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.0,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "wall_artwork_1": {
+      "element_id": "wall_artwork_1",
+      "tier": "DEEP",
+      "rationale": "For artwork, 'who owns this' IS the question, and a two-second search cannot answer it: a poster's rights can sit with the band, the label, the photographer or the designer. Ownership chains for authored images are multi-hop by nature, which is what a deep run is for.",
+      "basis": "Ringgold v. Black Entertainment Television, 126 F.3d 70 (2d Cir. 1997) — recognisable background artwork is not de minimis",
+      "disposition": "",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.0,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "nunnally": {
+      "element_id": "nunnally",
+      "tier": "DEEP",
+      "rationale": "For artwork, 'who owns this' IS the question, and a two-second search cannot answer it: a poster's rights can sit with the band, the label, the photographer or the designer. Ownership chains for authored images are multi-hop by nature, which is what a deep run is for.",
+      "basis": "Ringgold v. Black Entertainment Television, 126 F.3d 70 (2d Cir. 1997) — recognisable background artwork is not de minimis",
+      "disposition": "",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.0,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "background_music_1": {
+      "element_id": "background_music_1",
+      "tier": "DEEP",
+      "rationale": "Music is the category productions reliably lose. The recording carries a title but no fingerprint match, so publisher and master chains still need tracing — genuinely multi-hop, which is what a deep run is for.",
+      "basis": "NMPA v. Fullscreen (2013); Bridgeport v. Dimension Films, 410 F.3d 792 (6th Cir. 2005)",
+      "disposition": "",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.0,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "ashford_insignia_01": {
+      "element_id": "ashford_insignia_01",
+      "tier": "BLOCKED",
+      "rationale": "Two independent detectors named different things. Research asks 'who owns THIS', and we do not yet agree on what THIS is — researching would attribute rights to the wrong holder.",
+      "basis": "Identity conflict",
+      "disposition": "A human resolves identity before any research runs.",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.0,
+      "est_latency_s": 0.0,
+      "enumerate_candidates": false
+    },
+    "red_r_logo_01": {
+      "element_id": "red_r_logo_01",
+      "tier": "BLOCKED",
+      "rationale": "Two independent detectors named different things. Research asks 'who owns THIS', and we do not yet agree on what THIS is — researching would attribute rights to the wrong holder.",
+      "basis": "Identity conflict",
+      "disposition": "A human resolves identity before any research runs.",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.0,
+      "est_latency_s": 0.0,
+      "enumerate_candidates": false
+    }
+  },
   "sponsor_conflicts": [],
-  "platform_outcomes": [],
+  "platform_outcomes": [
+    {
+      "element_id": "pizza_hut_logo_1",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:00–00:27. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "delivery_person",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:01–00:08. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "cc",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:05–00:49. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "arthur_the_cat",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:08–00:22. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "lelouch",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:14–00:47. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "wall_artwork_1",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:23–00:41. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "nunnally",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:28–00:35. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "background_music_1",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "unlikely",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform (theatrical, festival, broadcast delivery) runs no automated audio matching, so this surfaces only if a rights holder notices. That makes it less likely and more serious when it lands — there is no takedown to react to.",
+      "remedy": "Clear the recording, or replace the cue at 00:00–00:49.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "ashford_insignia_01",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:14–00:47. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "red_r_logo_01",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:03–00:08. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
+      "revenue_impact": ""
+    }
+  ],
   "defences": {},
   "exposures": [],
   "assessed_exposures": [],
-  "preview": [],
-  "detector_hits": []
+  "preview": [
+    {
+      "element_id": "cc",
+      "label": "C.C.",
+      "category": "COPYRIGHT_ART",
+      "time_ranges": [
+        {
+          "start_s": 5.0,
+          "end_s": 8.5
+        },
+        {
+          "start_s": 18.2,
+          "end_s": 19.8
+        },
+        {
+          "start_s": 22.8,
+          "end_s": 27.5
+        },
+        {
+          "start_s": 35.0,
+          "end_s": 49.0
+        }
+      ],
+      "bbox": {
+        "ymin": 0.0,
+        "xmin": 0.012,
+        "ymax": 0.999,
+        "xmax": 0.692
+      },
+      "at_s": 41.5,
+      "provisional_score": 70,
+      "provisional_band": "CRITICAL",
+      "identity": "SINGLE_SOURCE",
+      "depiction": null,
+      "territory": [
+        {
+          "element_id": "cc",
+          "territory": "US",
+          "band": "CRITICAL",
+          "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "cc",
+          "territory": "DE",
+          "band": "HIGH",
+          "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "cc",
+          "territory": "FR",
+          "band": "CRITICAL",
+          "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "lelouch",
+      "label": "Lelouch vi Britannia",
+      "category": "COPYRIGHT_ART",
+      "time_ranges": [
+        {
+          "start_s": 14.8,
+          "end_s": 17.8
+        },
+        {
+          "start_s": 23.0,
+          "end_s": 27.8
+        },
+        {
+          "start_s": 35.2,
+          "end_s": 41.0
+        },
+        {
+          "start_s": 45.8,
+          "end_s": 47.5
+        }
+      ],
+      "bbox": {
+        "ymin": 0.0,
+        "xmin": 0.304,
+        "ymax": 0.757,
+        "xmax": 0.999
+      },
+      "at_s": 15.5,
+      "provisional_score": 70,
+      "provisional_band": "CRITICAL",
+      "identity": "SINGLE_SOURCE",
+      "depiction": null,
+      "territory": [
+        {
+          "element_id": "lelouch",
+          "territory": "US",
+          "band": "CRITICAL",
+          "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "lelouch",
+          "territory": "DE",
+          "band": "HIGH",
+          "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "lelouch",
+          "territory": "FR",
+          "band": "CRITICAL",
+          "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "delivery_person",
+      "label": "Pizza Delivery Person",
+      "category": "COPYRIGHT_ART",
+      "time_ranges": [
+        {
+          "start_s": 1.0,
+          "end_s": 8.5
+        }
+      ],
+      "bbox": {
+        "ymin": 0.033,
+        "xmin": 0.045,
+        "ymax": 0.998,
+        "xmax": 0.639
+      },
+      "at_s": 3.5,
+      "provisional_score": 61,
+      "provisional_band": "HIGH",
+      "identity": "SINGLE_SOURCE",
+      "depiction": null,
+      "territory": [
+        {
+          "element_id": "delivery_person",
+          "territory": "US",
+          "band": "HIGH",
+          "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "delivery_person",
+          "territory": "DE",
+          "band": "MEDIUM",
+          "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "delivery_person",
+          "territory": "FR",
+          "band": "CRITICAL",
+          "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "nunnally",
+      "label": "Nunnally vi Britannia",
+      "category": "COPYRIGHT_ART",
+      "time_ranges": [
+        {
+          "start_s": 28.8,
+          "end_s": 35.0
+        }
+      ],
+      "bbox": {
+        "ymin": 0.0,
+        "xmin": 0.282,
+        "ymax": 1.0,
+        "xmax": 0.999
+      },
+      "at_s": 30.0,
+      "provisional_score": 59,
+      "provisional_band": "HIGH",
+      "identity": "SINGLE_SOURCE",
+      "depiction": null,
+      "territory": [
+        {
+          "element_id": "nunnally",
+          "territory": "US",
+          "band": "HIGH",
+          "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "nunnally",
+          "territory": "DE",
+          "band": "MEDIUM",
+          "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "nunnally",
+          "territory": "FR",
+          "band": "CRITICAL",
+          "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "pizza_hut_logo_1",
+      "label": "Pizza Hut",
+      "category": "TRADEMARK",
+      "time_ranges": [
+        {
+          "start_s": 0.0,
+          "end_s": 2.6
+        },
+        {
+          "start_s": 0.0,
+          "end_s": 2.6
+        },
+        {
+          "start_s": 3.0,
+          "end_s": 5.0
+        },
+        {
+          "start_s": 18.2,
+          "end_s": 19.8
+        },
+        {
+          "start_s": 24.3,
+          "end_s": 27.5
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 49,
+      "provisional_band": "HIGH",
+      "identity": "CORROBORATED",
+      "depiction": null,
+      "territory": [
+        {
+          "element_id": "pizza_hut_logo_1",
+          "territory": "US",
+          "band": "HIGH",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; United States tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "pizza_hut_logo_1",
+          "territory": "DE",
+          "band": "HIGH",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; Germany tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "pizza_hut_logo_1",
+          "territory": "FR",
+          "band": "HIGH",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; France tracks the baseline band.",
+          "authority": ""
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "Confirm posture, then approach Yum! Brands, Inc. if depiction is unflattering.",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "ashford_insignia_01",
+      "label": "Ashford Academy Insignia",
+      "category": "TRADEMARK",
+      "time_ranges": [
+        {
+          "start_s": 14.7,
+          "end_s": 17.8
+        },
+        {
+          "start_s": 23.2,
+          "end_s": 27.5
+        },
+        {
+          "start_s": 35.4,
+          "end_s": 41.0
+        },
+        {
+          "start_s": 45.9,
+          "end_s": 47.1
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 42,
+      "provisional_band": "MEDIUM",
+      "identity": "CONFLICTED",
+      "depiction": null,
+      "territory": [
+        {
+          "element_id": "ashford_insignia_01",
+          "territory": "US",
+          "band": "MEDIUM",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; United States tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "ashford_insignia_01",
+          "territory": "DE",
+          "band": "MEDIUM",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; Germany tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "ashford_insignia_01",
+          "territory": "FR",
+          "band": "MEDIUM",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; France tracks the baseline band.",
+          "authority": ""
+        }
+      ],
+      "route_tier": "BLOCKED",
+      "disposition": "A human resolves identity before any research runs.",
+      "awaiting_research": false
+    },
+    {
+      "element_id": "arthur_the_cat",
+      "label": "Arthur",
+      "category": "COPYRIGHT_ART",
+      "time_ranges": [
+        {
+          "start_s": 8.8,
+          "end_s": 11.2
+        },
+        {
+          "start_s": 20.3,
+          "end_s": 22.8
+        }
+      ],
+      "bbox": {
+        "ymin": 0.479,
+        "xmin": 0.121,
+        "ymax": 0.863,
+        "xmax": 0.526
+      },
+      "at_s": 21.3,
+      "provisional_score": 41,
+      "provisional_band": "MEDIUM",
+      "identity": "SINGLE_SOURCE",
+      "depiction": null,
+      "territory": [
+        {
+          "element_id": "arthur_the_cat",
+          "territory": "US",
+          "band": "MEDIUM",
+          "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "arthur_the_cat",
+          "territory": "DE",
+          "band": "LOW",
+          "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "arthur_the_cat",
+          "territory": "FR",
+          "band": "HIGH",
+          "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "wall_artwork_1",
+      "label": "Framed Painting",
+      "category": "COPYRIGHT_ART",
+      "time_ranges": [
+        {
+          "start_s": 23.0,
+          "end_s": 27.5
+        },
+        {
+          "start_s": 35.0,
+          "end_s": 41.0
+        }
+      ],
+      "bbox": {
+        "ymin": 0.094,
+        "xmin": 0.587,
+        "ymax": 0.286,
+        "xmax": 0.771
+      },
+      "at_s": 35.8,
+      "provisional_score": 40,
+      "provisional_band": "MEDIUM",
+      "identity": "SINGLE_SOURCE",
+      "depiction": null,
+      "territory": [
+        {
+          "element_id": "wall_artwork_1",
+          "territory": "US",
+          "band": "MEDIUM",
+          "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "wall_artwork_1",
+          "territory": "DE",
+          "band": "LOW",
+          "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "wall_artwork_1",
+          "territory": "FR",
+          "band": "HIGH",
+          "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "background_music_1",
+      "label": "Atmospheric Score",
+      "category": "MUSIC_SYNC",
+      "time_ranges": [
+        {
+          "start_s": 0.0,
+          "end_s": 49.0
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 40,
+      "provisional_band": "MEDIUM",
+      "identity": "SINGLE_SOURCE",
+      "depiction": null,
+      "territory": [
+        {
+          "element_id": "background_music_1",
+          "territory": "US",
+          "band": "MEDIUM",
+          "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; United States tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "background_music_1",
+          "territory": "DE",
+          "band": "MEDIUM",
+          "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; Germany tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "background_music_1",
+          "territory": "FR",
+          "band": "MEDIUM",
+          "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; France tracks the baseline band.",
+          "authority": ""
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "red_r_logo_01",
+      "label": "Red 'R' Logo",
+      "category": "TRADEMARK",
+      "time_ranges": [
+        {
+          "start_s": 3.0,
+          "end_s": 8.5
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 26,
+      "provisional_band": "MEDIUM",
+      "identity": "CONFLICTED",
+      "depiction": null,
+      "territory": [
+        {
+          "element_id": "red_r_logo_01",
+          "territory": "US",
+          "band": "MEDIUM",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; United States tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "red_r_logo_01",
+          "territory": "DE",
+          "band": "MEDIUM",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; Germany tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "red_r_logo_01",
+          "territory": "FR",
+          "band": "MEDIUM",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; France tracks the baseline band.",
+          "authority": ""
+        }
+      ],
+      "route_tier": "BLOCKED",
+      "disposition": "A human resolves identity before any research runs.",
+      "awaiting_research": false
+    }
+  ],
+  "detector_hits": [
+    {
+      "label": "Akron Zips",
+      "confidence": 0.8517093,
+      "start_s": null,
+      "end_s": null,
+      "bbox": {
+        "ymin": 0.1673435,
+        "xmin": 0.341609,
+        "ymax": 0.25051507,
+        "xmax": 0.3849396
+      }
+    },
+    {
+      "label": "MPLA",
+      "confidence": 0.872106,
+      "start_s": null,
+      "end_s": null,
+      "bbox": {
+        "ymin": 0.4778672,
+        "xmin": 0.7081476,
+        "ymax": 0.5300382,
+        "xmax": 0.7345322
+      }
+    },
+    {
+      "label": "Pizza Hut",
+      "confidence": 0.86182237,
+      "start_s": null,
+      "end_s": null,
+      "bbox": {
+        "ymin": 0.3467351,
+        "xmin": 0.7114962,
+        "ymax": 0.53394043,
+        "xmax": 0.80604774
+      }
+    },
+    {
+      "label": "Pizza Hut",
+      "confidence": 0.89441067,
+      "start_s": null,
+      "end_s": null,
+      "bbox": {
+        "ymin": 0.34538424,
+        "xmin": 0.52726895,
+        "ymax": 0.5452031,
+        "xmax": 0.64320976
+      }
+    },
+    {
+      "label": "Arizona State Sun Devils",
+      "confidence": 0.8562774,
+      "start_s": null,
+      "end_s": null,
+      "bbox": {
+        "ymin": 0.39061117,
+        "xmin": 0.72711176,
+        "ymax": 0.5016623,
+        "xmax": 0.7611461
+      }
+    }
+  ]
 }
