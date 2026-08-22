@@ -171,6 +171,16 @@ assert any('territory' in g for g in gaps) and any('media' in g for g in gaps), 
 "
 check $? "coverage: covered / gap / unlicensed / unknown all reachable"
 
+curl -sf "$BASE/api/productions/demo" | $PY -c "
+import json, sys
+s = json.load(sys.stdin)
+gaps = s['coverage']['e1']['gaps']
+# A song needs BOTH halves. The demo holds the composition licence only.
+assert any('master' in g.lower() and 'missing' in g.lower() for g in gaps), gaps
+assert any('territory' in g for g in gaps) and any('media' in g for g in gaps), gaps
+"
+check $? "music coverage requires both composition and master licences"
+
 CODE=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/api/licences" \
   -H 'X-ClearFrame-Role: editor' -F 'file=@docs/sample-rights-ledger.csv')
 [ "$CODE" = "403" ]; check $? "ledger upload role-gated (editor 403)"
