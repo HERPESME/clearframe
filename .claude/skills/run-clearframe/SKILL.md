@@ -5,7 +5,9 @@ description: Run, serve, test, or rebuild ClearFrame — demo pipeline CLI, revi
 
 # Running ClearFrame
 
-All commands from the repo root. The venv lives at `.venv/` (create with `python3 -m venv .venv && .venv/bin/pip install -e ".[dev,cloud]"` if missing).
+All commands from the repo root. The venv lives at `.venv/` (create with
+`python3 -m venv .venv && .venv/bin/pip install -e ".[dev,cloud]"` if missing;
+Python 3.14 resolves the cloud extra fine). Frontend deps: `cd webapp && npm ci`.
 
 ## Demo pipeline (no credentials)
 
@@ -13,6 +15,24 @@ All commands from the repo root. The venv lives at `.venv/` (create with `python
 .venv/bin/python -m clearframe run --demo --out out --auto-approve
 open out/dossier.html   # E&O report; also markers.edl/csv, cue_sheet.csv, dossier.json
 ```
+
+Demo scene is **8 elements**. Expect 1 CRITICAL, 1 identity `CONFLICTED` (the
+Adidas duffel the logo catalogue reads as Kappa — research is blocked for it),
+and coverage spanning COVERED / PARTIAL / NOT_COVERED / UNKNOWN.
+
+## Live run on your own footage
+
+```bash
+./scripts/fetch_test_clips.sh                 # 6 public-domain spots + ground truth
+set -a && source .env && set +a               # nothing auto-loads .env
+.venv/bin/python -m clearframe run --live \
+  --footage testdata/clips/ctvc_TEXACO_512kb.mp4 \
+  --title "Texaco spot" --duration-s 60 --territories US,DE,FR \
+  --out out-live --auto-approve
+```
+
+`--territories` (or `CLEARFRAME_TERRITORIES`) drives per-jurisdiction banding;
+without it live runs are US-only.
 
 Without `--auto-approve` the pipeline pauses at review (exercise the web app instead). A rerun with the same `--out` resumes persisted state — pass a fresh dir to start over.
 
@@ -22,6 +42,12 @@ Without `--auto-approve` the pipeline pauses at review (exercise the web app ins
 .venv/bin/python -m clearframe serve --out out --port 8000
 # http://127.0.0.1:8000 → "Load demo production" → review cards → Generate clearance dossier
 ```
+
+Upload footage from the hero screen ("Upload my own footage") — **live mode only**;
+demo mode returns a 409 rather than replaying fixtures as your results. Upload a
+rights ledger (CSV/JSON, `docs/sample-rights-ledger.csv` is a working sample) as
+legal/producer to get COVERED / gap states. "Check live signals" re-runs the
+Parallel Search pass on demand.
 
 The SPA is served from committed `webapp/dist`. After ANY change under `webapp/src/`:
 
@@ -47,11 +73,20 @@ Read the PNG to check the design (dark screening-room theme, risk-colored timeli
 .venv/bin/python -m clearframe.mcp --transport http --port 8080 --out out  # streamable HTTP at /mcp
 ```
 
+11 tools: `run_clearance · get_status · list_findings · get_finding ·
+record_decision · verify_identities · territory_report · check_freshness ·
+list_licences · check_coverage · generate_dossier`. Keep
+`tests/test_mcp_server.py::test_tools_are_registered` in step when adding one.
+
 ## Tests + smoke
 
 ```bash
-.venv/bin/pytest -q     # full suite; must be green before any commit
-./scripts/smoke.sh      # every transport end-to-end: CLI, web, SSE, webhook, MCP
+.venv/bin/pytest -q     # 161 tests; must be green before any commit
+bash scripts/smoke.sh   # 7 sections: CLI, web, SSE, webhook, verification, ledger, MCP
 ```
+
+When adding a smoke check, use its `has <needle> <curl args…>` helper. A bare
+`curl … | grep -q` races under `set -o pipefail`: grep exits on first match, curl
+dies of SIGPIPE (141), and the pipeline reports failure though the needle matched.
 
 Cloud-dependent tests auto-skip without the `cloud` extra. Live mode needs env vars — see the live-validate skill. Deployment — see the deploy-cloud skill.
