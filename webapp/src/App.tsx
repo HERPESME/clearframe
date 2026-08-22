@@ -197,9 +197,12 @@ export default function App() {
   const disputed = elements.filter(
     (el) => corroboration?.[el.id]?.verdict === "CONFLICTED",
   );
-  const corroborated = elements.filter(
-    (el) => corroboration?.[el.id]?.verdict === "CORROBORATED",
-  );
+  // FINGERPRINTED is a stronger verdict than CORROBORATED, not a separate
+  // outcome — both mean a second, independent system confirmed identity.
+  const corroborated = elements.filter((el) => {
+    const v = corroboration?.[el.id]?.verdict;
+    return v === "CORROBORATED" || v === "FINGERPRINTED";
+  });
   const covCount = (s: string) =>
     elements.filter((el) => coverage?.[el.id]?.status === s).length;
   const materialSignals = Object.values(freshness ?? {})

@@ -35,7 +35,7 @@ _TEMPLATE = Template(
   .decision.pending { background: #fbeeee; border-color: #e3cfcf; }
   .unscanned { background: #fbeeee; border: 1px solid #e3cfcf; padding: 10px 14px; font-size: 13px; margin-bottom: 24px; }
   .verdict { display:inline-block; padding:2px 10px; border-radius:10px; font-size:11px; font-family:Helvetica,Arial,sans-serif; letter-spacing:.5px; color:#fff; }
-  .v-CORROBORATED { background:#27ae60; } .v-SINGLE_SOURCE { background:#7f8c8d; } .v-CONFLICTED { background:#c0392b; }
+  .v-FINGERPRINTED { background:#2980b9; } .v-CORROBORATED { background:#27ae60; } .v-SINGLE_SOURCE { background:#7f8c8d; } .v-CONFLICTED { background:#c0392b; }
   table.terr { border-collapse: collapse; margin: 6px 0 2px; font-size: 12px; }
   table.terr td, table.terr th { border: 1px solid #ddd; padding: 4px 10px; text-align: left; }
   table.terr th { background: #f5f5f5; }

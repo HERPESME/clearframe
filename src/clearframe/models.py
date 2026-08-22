@@ -225,8 +225,13 @@ class IdentityVerdict(str, Enum):
     errors. It catches misses, not misidentifications. A misidentified brand
     routes research to the wrong rights holder and certifies a clearance that
     was never obtained, so identity gets its own corroborated/conflicted state.
+
+    FINGERPRINTED outranks CORROBORATED: an acoustic fingerprint is a
+    measurement over the audio itself (spectral peak hashing), not a
+    classifier's opinion about what something looks like.
     """
 
+    FINGERPRINTED = "FINGERPRINTED"
     CORROBORATED = "CORROBORATED"
     SINGLE_SOURCE = "SINGLE_SOURCE"
     CONFLICTED = "CONFLICTED"
@@ -249,6 +254,36 @@ class Corroboration(BaseModel):
     detected_label: str | None
     confidence: float = Field(ge=0, le=1)
     note: str
+
+
+class AudioProvenance(str, Enum):
+    """Is the matched recording backed by a real catalogue?
+
+    Fingerprint databases are crowd-fed. A knockoff re-upload can match the
+    right TITLE while carrying a junk artist and label. If no major catalogue
+    (Spotify / Apple Music / Deezer / MusicBrainz) backs the row, the title is
+    usable and the attribution is not — and attribution is what flows into an
+    ASCAP/BMI cue sheet, which is a legal filing.
+    """
+
+    VERIFIED = "VERIFIED"
+    UNVERIFIED = "UNVERIFIED"
+
+
+class AudioMatch(BaseModel):
+    """One acoustic fingerprint hit against a recording database."""
+
+    title: str
+    artist: str = ""
+    album: str = ""
+    label: str = ""
+    release_date: str = ""
+    isrc: str = ""
+    song_link: str = ""
+    at_s: float = 0.0
+    confidence: float = Field(default=0.0, ge=0, le=1)
+    provenance: AudioProvenance = AudioProvenance.UNVERIFIED
+    catalogues: list[str] = Field(default_factory=list)
 
 
 class WebFinding(BaseModel):
@@ -354,3 +389,5 @@ class ProductionState(BaseModel):
     territory_risk: dict[str, list[TerritoryRisk]] = Field(default_factory=dict)
     territories: list[str] = Field(default_factory=list)
     coverage: dict[str, Coverage] = Field(default_factory=dict)
+    audio_matches: list[AudioMatch] = Field(default_factory=list)
+    detector_hits: list[DetectorHit] = Field(default_factory=list)

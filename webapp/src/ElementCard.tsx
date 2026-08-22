@@ -25,6 +25,7 @@ const HOLDING_TEXT = {
 } as const;
 
 const VERDICT_TEXT = {
+  FINGERPRINTED: "ID FINGERPRINTED",
   CORROBORATED: "ID CORROBORATED",
   SINGLE_SOURCE: "ID SINGLE-SOURCE",
   CONFLICTED: "ID DISPUTED",
@@ -38,6 +39,8 @@ const COVERAGE_TEXT: Record<string, string> = {
 };
 
 const VERDICT_HELP = {
+  FINGERPRINTED:
+    "An acoustic fingerprint measured this recording against a database — spectral hashing over the audio itself, not a model's impression of it. This is the strongest identity ClearFrame can produce, and it is what a PRO cue sheet needs.",
   CORROBORATED:
     "A second, independent detector named the same thing. Identity is confirmed by two systems, not one model's guess.",
   SINGLE_SOURCE:

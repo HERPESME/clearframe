@@ -94,7 +94,14 @@ def build_dossier(state: ProductionState, generated_at: str) -> ClearanceDossier
         1
         for e in entries
         if e.corroboration is not None
-        and e.corroboration.verdict is IdentityVerdict.CORROBORATED
+        and e.corroboration.verdict
+        in (IdentityVerdict.CORROBORATED, IdentityVerdict.FINGERPRINTED)
+    )
+    summary["identity_fingerprinted"] = sum(
+        1
+        for e in entries
+        if e.corroboration is not None
+        and e.corroboration.verdict is IdentityVerdict.FINGERPRINTED
     )
     summary["material_freshness_signals"] = sum(
         1 for e in entries for s in e.freshness if s.material

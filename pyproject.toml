@@ -13,6 +13,9 @@ dependencies = [
     "mcp>=2.0",
     # multipart form parsing for footage + rights-ledger uploads
     "python-multipart>=0.0.9",
+    # Ships a static ffmpeg binary, so audio extraction for fingerprinting
+    # needs no system package on any platform (including Cloud Run).
+    "imageio-ffmpeg>=0.5",
 ]
 
 [project.optional-dependencies]

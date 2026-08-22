@@ -14,12 +14,16 @@ fail() { printf '  \033[31mFAIL\033[0m %s\n' "$1"; FAILURES=$((FAILURES + 1)); }
 check() { if [ "$1" -eq 0 ]; then pass "$2"; else fail "$2"; fi }
 
 # curl | grep races under pipefail (grep exits early -> curl gets SIGPIPE
-# -> 141 propagates). Buffer the body, then match.
+# -> 141 propagates). Buffer the body, then match WITHOUT a pipe: `grep -q`
+# stops reading at the first match, so even `printf "$body" | grep -q` takes
+# SIGPIPE once the body exceeds the 64KB pipe buffer. The dossier HTML crossed
+# that line and this check failed while matching perfectly. A here-string is
+# backed by a temp file, so there is no pipe and no race at any size.
 has() {  # has <needle> <curl args...>
   local needle="$1"; shift
   local body
   body=$(curl -s "$@") || return 1
-  printf '%s' "$body" | grep -q -- "$needle"
+  grep -q -- "$needle" <<<"$body"
 }
 
 cleanup() { pkill -f "clearframe serve" 2>/dev/null || true; }
@@ -111,6 +115,20 @@ assert bands == {'US': 'MEDIUM', 'DE': 'LOW', 'FR': 'HIGH'}, bands
 assert 'UrhG' in [t['authority'] for t in s['territory_risk']['e5']][1]
 "
 check $? "mural bands per territory US/DE/FR with cited authority"
+
+curl -sf "$BASE/api/productions/demo" | $PY -c "
+import json, sys
+s = json.load(sys.stdin)
+el = {e['id']: e for e in s['elements']}['e1']
+c = s['corroboration']['e1']
+assert c['verdict'] == 'FINGERPRINTED', c['verdict']
+assert el['label'] == 'Blinding Lights — The Weeknd', el['label']
+assert s['audio_matches'][0]['provenance'] == 'VERIFIED', s['audio_matches']
+"
+check $? "music identity promoted by fingerprint (description -> named work)"
+
+CUE=$(grep -c 'Blinding Lights — The Weeknd' "$OUT/cue_sheet.csv")
+[ "$CUE" = "1" ]; check $? "PRO cue sheet carries the fingerprinted title, not the description"
 
 has '"material_signals"' -X POST "$BASE/api/productions/demo/freshness"
 check $? "live Parallel Search freshness pass ran on demand"

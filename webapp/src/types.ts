@@ -33,7 +33,11 @@ export interface Element {
   at_s: number | null;
 }
 
-export type IdentityVerdict = "CORROBORATED" | "SINGLE_SOURCE" | "CONFLICTED";
+export type IdentityVerdict =
+  | "FINGERPRINTED"
+  | "CORROBORATED"
+  | "SINGLE_SOURCE"
+  | "CONFLICTED";
 
 export interface Corroboration {
   element_id: string;
@@ -194,6 +198,7 @@ export interface PipelineEvent {
   signals?: number;
   divergent?: number;
   territories?: number;
+  FINGERPRINTED?: number;
   CORROBORATED?: number;
   SINGLE_SOURCE?: number;
   CONFLICTED?: number;

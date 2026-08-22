@@ -2,9 +2,9 @@
   "elements": [
     {
       "id": "e1",
-      "label": "Blinding Lights - The Weeknd",
+      "label": "Upbeat electronic music",
       "element_type": "MUSIC",
-      "description": "Song clearly audible playing from a character's phone speaker; characters react to it.",
+      "description": "Synth-driven pop track audible under the dialogue, rising to dominate the mix in the final beat of the scene.",
       "time_ranges": [
         {
           "start_s": 12.0,

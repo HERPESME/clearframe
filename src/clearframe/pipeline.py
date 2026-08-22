@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Protocol
 
+from clearframe.integrations.audio_client import AudioIdClient, FixtureAudioClient
 from clearframe.integrations.court_client import CourtClient, FixtureCourtClient
 from clearframe.integrations.gemini_client import FixtureGeminiClient, GeminiClient
 from clearframe.integrations.parallel_client import FixtureParallelClient, ParallelClient
@@ -40,6 +41,7 @@ class PipelineContext:
     store: LocalJsonStore
     court: "CourtClient | None" = None
     corroborator: "CorroborationClient | None" = None
+    audio: "AudioIdClient | None" = None
     licences: list = field(default_factory=list)
     listener: "Callable[[dict], None] | None" = None
 
@@ -129,11 +131,21 @@ def build_context(cfg, production: Production, out_root: Path) -> PipelineContex
         from clearframe.integrations.vision_client import LiveVideoIntelligenceClient
 
         corroborator: CorroborationClient = LiveVideoIntelligenceClient()
+
+        # Fingerprinting is optional: without a token music stays SINGLE_SOURCE,
+        # which is the honest state, not a failure.
+        if cfg.audd_api_token:
+            from clearframe.integrations.audio_client import LiveAudDClient
+
+            audio: AudioIdClient | None = LiveAudDClient(api_token=cfg.audd_api_token)
+        else:
+            audio = None
     else:
         gemini = FixtureGeminiClient(FIXTURES_DIR)
         parallel = FixtureParallelClient(FIXTURES_DIR)
         court = FixtureCourtClient(FIXTURES_DIR)
         corroborator = FixtureVisionClient(FIXTURES_DIR)
+        audio = FixtureAudioClient(FIXTURES_DIR)
     return PipelineContext(
         state=ProductionState(production=production),
         gemini=gemini,
@@ -141,6 +153,7 @@ def build_context(cfg, production: Production, out_root: Path) -> PipelineContex
         store=LocalJsonStore(Path(out_root) / "state"),
         court=court,
         corroborator=corroborator,
+        audio=audio,
         licences=LicenceStore(Path(out_root) / "state").load(),
     )
 
@@ -161,5 +174,6 @@ def demo_context(out_root: Path) -> PipelineContext:
         store=LocalJsonStore(Path(out_root) / "state"),
         court=FixtureCourtClient(FIXTURES_DIR),
         corroborator=FixtureVisionClient(FIXTURES_DIR),
+        audio=FixtureAudioClient(FIXTURES_DIR),
         licences=LicenceStore(Path(out_root) / "state").seed_demo(),
     )

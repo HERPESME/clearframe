@@ -95,7 +95,7 @@ export function MissionControl({ onComplete }: { onComplete: () => void }) {
           });
           break;
         case "corroboration_done": {
-          const ok = e.CORROBORATED ?? 0;
+          const ok = (e.CORROBORATED ?? 0) + (e.FINGERPRINTED ?? 0);
           const bad = e.CONFLICTED ?? 0;
           patch("corroborate", {
             status: "done",
