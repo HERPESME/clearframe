@@ -107,3 +107,41 @@ def test_a_genuinely_invalid_element_is_still_skipped():
     broken = element()
     del broken["elements"][0]["label"]
     assert parse_scan_payload(broken).detections == []
+
+
+# ------------------------------------------------- the axis-order regression
+def test_the_schema_names_the_axes_rather_than_ordering_them():
+    """Found by drawing the stored box on a real frame: it floated in empty
+    wall while the object sat elsewhere. The schema was four ANONYMOUS numbers,
+    so the model had no structural cue and answered [xmin, ymin, xmax, ymax] —
+    the more common convention — despite the prompt saying otherwise. Word
+    order in a prompt is not a contract; a named field is."""
+    props = SCAN_RESPONSE_SCHEMA["properties"]["elements"]["items"]["properties"]
+    bbox = props["bbox"]
+    assert bbox["type"] == "object", "an ordered array leaves the axes ambiguous"
+    assert set(bbox["properties"]) == {"ymin", "xmin", "ymax", "xmax"}
+    assert set(bbox["required"]) == {"ymin", "xmin", "ymax", "xmax"}
+
+
+def test_a_named_box_cannot_be_transposed():
+    (d,) = parse_scan_payload(
+        element(bbox={"xmin": 300, "ymin": 440, "xmax": 440, "ymax": 600})
+    ).detections
+    assert d.bbox.xmin == pytest.approx(0.30)
+    assert d.bbox.ymin == pytest.approx(0.44)
+    assert d.bbox.xmax == pytest.approx(0.44)
+    assert d.bbox.ymax == pytest.approx(0.60)
+
+
+def test_the_legacy_array_form_is_still_accepted():
+    """Stored states from before the schema change must keep loading."""
+    (d,) = parse_scan_payload(element(bbox=[520, 410, 790, 550])).detections
+    assert d.bbox.ymin == pytest.approx(0.52)
+
+
+def test_at_s_is_required_so_a_box_is_tied_to_a_moment():
+    """A single box drawn across four separate appearances is wrong in at least
+    three of them. Knowing WHEN it was measured is what makes it drawable."""
+    props = SCAN_RESPONSE_SCHEMA["properties"]["elements"]["items"]["properties"]
+    assert "at_s" in props
+    assert "at_s" in SCAN_PROMPT or "at_s" in str(props["at_s"])

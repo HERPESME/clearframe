@@ -38,11 +38,21 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
   const onFrame = (e: React.SyntheticEvent<HTMLVideoElement>) =>
     setNow(e.currentTarget.currentTime);
 
-  const visible = elements.filter(
-    (el) =>
-      el.bbox &&
-      el.time_ranges.some((r) => now >= r.start_s && now <= r.end_s),
-  );
+  // A box is measured at ONE moment (`at_s`), so it is only true near that
+  // moment. Drawing it across every appearance put the Pizza Hut box on a wall
+  // three shots later — a confidently wrong rectangle, which is worse than no
+  // rectangle at all. Outside the window the finding still shows in the
+  // timeline and the card; only the overlay is withheld.
+  const BOX_WINDOW_S = 2.0;
+  const visible = elements.filter((el) => {
+    if (!el.bbox) return false;
+    if (el.at_s !== null && el.at_s !== undefined) {
+      return Math.abs(now - el.at_s) <= BOX_WINDOW_S;
+    }
+    // No timestamp reported: fall back to the old behaviour rather than
+    // hiding the box entirely, since older states have no at_s.
+    return el.time_ranges.some((r) => now >= r.start_s && now <= r.end_s);
+  });
 
   const COV_LABEL: Record<string, string> = {
     COVERED: "licensed",

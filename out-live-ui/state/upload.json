@@ -1,0 +1,2905 @@
+{
+  "production": {
+    "id": "upload",
+    "title": "Untitled Production",
+    "footage_uri": "out-live-ui/media/upload/footage.mp4",
+    "fps": 24.0,
+    "duration_s": 0.0,
+    "script_uri": null,
+    "release_territories": [
+      "US",
+      "DE",
+      "FR",
+      "JP"
+    ],
+    "use_context": "EXPRESSIVE",
+    "sponsors": [
+      "Dominos"
+    ],
+    "platform": "none",
+    "distribution": [
+      "THEATRICAL",
+      "STREAMING",
+      "BROADCAST"
+    ],
+    "has_media": true
+  },
+  "stage_status": {
+    "script": "complete",
+    "scan": "complete",
+    "triage": "complete",
+    "corroborate": "complete",
+    "drift": "complete",
+    "preview": "complete",
+    "research": "complete",
+    "freshness": "complete",
+    "risk": "complete",
+    "territory": "complete",
+    "coverage": "complete",
+    "remediation": "complete",
+    "court": "complete",
+    "review": "awaiting"
+  },
+  "detections": [
+    {
+      "id": "element_001",
+      "label": "Pizza Hut",
+      "element_type": "LOGO",
+      "description": "The Pizza Hut logo is visible on a delivery scooter's cargo box and on a pizza box being delivered.",
+      "time_ranges": [
+        {
+          "start_s": 0.0,
+          "end_s": 5.2
+        },
+        {
+          "start_s": 18.27,
+          "end_s": 20.0
+        },
+        {
+          "start_s": 22.9,
+          "end_s": 27.5
+        },
+        {
+          "start_s": 34.8,
+          "end_s": 40.6
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 12.33,
+        "frame_coverage": 0.02,
+        "centrality": 0.7,
+        "plot_integral": true
+      },
+      "bbox": {
+        "ymin": 0.297,
+        "xmin": 0.439,
+        "ymax": 0.442,
+        "xmax": 0.599
+      },
+      "at_s": null,
+      "depiction": "NEUTRAL"
+    },
+    {
+      "id": "element_002",
+      "label": "Framed floral artwork",
+      "element_type": "ARTWORK",
+      "description": "A framed piece of artwork depicting a floral arrangement in a vase hangs on the wall in the background.",
+      "time_ranges": [
+        {
+          "start_s": 22.9,
+          "end_s": 27.5
+        },
+        {
+          "start_s": 35.0,
+          "end_s": 40.8
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 10.4,
+        "frame_coverage": 0.005,
+        "centrality": 0.3,
+        "plot_integral": false
+      },
+      "bbox": {
+        "ymin": 0.229,
+        "xmin": 0.66,
+        "ymax": 0.319,
+        "xmax": 0.742
+      },
+      "at_s": null,
+      "depiction": null
+    },
+    {
+      "id": "face_001",
+      "label": "Pizza Hut delivery man",
+      "element_type": "FACE",
+      "description": "The face of a young male Pizza Hut delivery driver with brown hair and a dark cap. He is seen in profile and from the front.",
+      "time_ranges": [
+        {
+          "start_s": 3.0,
+          "end_s": 8.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 5.0,
+        "frame_coverage": 0.25,
+        "centrality": 0.7,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": "NEUTRAL"
+    },
+    {
+      "id": "face_002",
+      "label": "Green-haired woman",
+      "element_type": "FACE",
+      "description": "The face of a young woman with long, bright green hair and golden eyes.",
+      "time_ranges": [
+        {
+          "start_s": 5.0,
+          "end_s": 8.0
+        },
+        {
+          "start_s": 18.0,
+          "end_s": 20.0
+        },
+        {
+          "start_s": 22.0,
+          "end_s": 27.0
+        },
+        {
+          "start_s": 35.0,
+          "end_s": 49.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 24.0,
+        "frame_coverage": 0.3,
+        "centrality": 0.8,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": "NEUTRAL"
+    },
+    {
+      "id": "face_003",
+      "label": "Black-haired man",
+      "element_type": "FACE",
+      "description": "The face of a young man with black hair and purple eyes.",
+      "time_ranges": [
+        {
+          "start_s": 14.0,
+          "end_s": 17.0
+        },
+        {
+          "start_s": 23.0,
+          "end_s": 27.0
+        },
+        {
+          "start_s": 35.0,
+          "end_s": 41.0
+        },
+        {
+          "start_s": 45.0,
+          "end_s": 47.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 15.0,
+        "frame_coverage": 0.25,
+        "centrality": 0.8,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": "NEUTRAL"
+    },
+    {
+      "id": "face_004",
+      "label": "Woman in wheelchair",
+      "element_type": "FACE",
+      "description": "The face of a young woman with long, light brown hair, sitting in a wheelchair with her eyes closed.",
+      "time_ranges": [
+        {
+          "start_s": 29.0,
+          "end_s": 35.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 6.0,
+        "frame_coverage": 0.4,
+        "centrality": 0.9,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": "NEUTRAL"
+    },
+    {
+      "id": "music_001",
+      "label": "Incidental orchestral score",
+      "element_type": "MUSIC",
+      "description": "A light instrumental orchestral score plays in the background throughout the scene.",
+      "time_ranges": [
+        {
+          "start_s": 0.0,
+          "end_s": 49.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 49.0,
+        "frame_coverage": 0.0,
+        "centrality": 0.0,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": null
+    }
+  ],
+  "elements": [
+    {
+      "id": "element_001",
+      "label": "Pizza Hut",
+      "element_type": "LOGO",
+      "description": "The Pizza Hut logo is visible on a delivery scooter's cargo box and on a pizza box being delivered.",
+      "time_ranges": [
+        {
+          "start_s": 0.0,
+          "end_s": 5.2
+        },
+        {
+          "start_s": 18.27,
+          "end_s": 20.0
+        },
+        {
+          "start_s": 22.9,
+          "end_s": 27.5
+        },
+        {
+          "start_s": 34.8,
+          "end_s": 40.6
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 12.33,
+        "frame_coverage": 0.02,
+        "centrality": 0.7,
+        "plot_integral": true
+      },
+      "bbox": {
+        "ymin": 0.297,
+        "xmin": 0.439,
+        "ymax": 0.442,
+        "xmax": 0.599
+      },
+      "at_s": null,
+      "depiction": "NEUTRAL",
+      "category": "TRADEMARK"
+    },
+    {
+      "id": "element_002",
+      "label": "Framed floral artwork",
+      "element_type": "ARTWORK",
+      "description": "A framed piece of artwork depicting a floral arrangement in a vase hangs on the wall in the background.",
+      "time_ranges": [
+        {
+          "start_s": 22.9,
+          "end_s": 27.5
+        },
+        {
+          "start_s": 35.0,
+          "end_s": 40.8
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 10.4,
+        "frame_coverage": 0.005,
+        "centrality": 0.3,
+        "plot_integral": false
+      },
+      "bbox": {
+        "ymin": 0.229,
+        "xmin": 0.66,
+        "ymax": 0.319,
+        "xmax": 0.742
+      },
+      "at_s": null,
+      "depiction": null,
+      "category": "COPYRIGHT_ART"
+    },
+    {
+      "id": "face_001",
+      "label": "Pizza Hut delivery man",
+      "element_type": "FACE",
+      "description": "The face of a young male Pizza Hut delivery driver with brown hair and a dark cap. He is seen in profile and from the front.",
+      "time_ranges": [
+        {
+          "start_s": 3.0,
+          "end_s": 8.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 5.0,
+        "frame_coverage": 0.25,
+        "centrality": 0.7,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": "NEUTRAL",
+      "category": "RIGHT_OF_PUBLICITY"
+    },
+    {
+      "id": "face_002",
+      "label": "Green-haired woman",
+      "element_type": "FACE",
+      "description": "The face of a young woman with long, bright green hair and golden eyes.",
+      "time_ranges": [
+        {
+          "start_s": 5.0,
+          "end_s": 8.0
+        },
+        {
+          "start_s": 18.0,
+          "end_s": 20.0
+        },
+        {
+          "start_s": 22.0,
+          "end_s": 27.0
+        },
+        {
+          "start_s": 35.0,
+          "end_s": 49.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 24.0,
+        "frame_coverage": 0.3,
+        "centrality": 0.8,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": "NEUTRAL",
+      "category": "RIGHT_OF_PUBLICITY"
+    },
+    {
+      "id": "face_003",
+      "label": "Black-haired man",
+      "element_type": "FACE",
+      "description": "The face of a young man with black hair and purple eyes.",
+      "time_ranges": [
+        {
+          "start_s": 14.0,
+          "end_s": 17.0
+        },
+        {
+          "start_s": 23.0,
+          "end_s": 27.0
+        },
+        {
+          "start_s": 35.0,
+          "end_s": 41.0
+        },
+        {
+          "start_s": 45.0,
+          "end_s": 47.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 15.0,
+        "frame_coverage": 0.25,
+        "centrality": 0.8,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": "NEUTRAL",
+      "category": "RIGHT_OF_PUBLICITY"
+    },
+    {
+      "id": "face_004",
+      "label": "Woman in wheelchair",
+      "element_type": "FACE",
+      "description": "The face of a young woman with long, light brown hair, sitting in a wheelchair with her eyes closed.",
+      "time_ranges": [
+        {
+          "start_s": 29.0,
+          "end_s": 35.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 6.0,
+        "frame_coverage": 0.4,
+        "centrality": 0.9,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": "NEUTRAL",
+      "category": "RIGHT_OF_PUBLICITY"
+    },
+    {
+      "id": "music_001",
+      "label": "Incidental orchestral score",
+      "element_type": "MUSIC",
+      "description": "A light instrumental orchestral score plays in the background throughout the scene.",
+      "time_ranges": [
+        {
+          "start_s": 0.0,
+          "end_s": 49.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 49.0,
+        "frame_coverage": 0.0,
+        "centrality": 0.0,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": null,
+      "category": "MUSIC_SYNC"
+    }
+  ],
+  "research": {
+    "face_001": {
+      "element_id": "face_001",
+      "owner": null,
+      "owner_confidence": "low",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [
+        {
+          "field": "clearance_route",
+          "url": "",
+          "excerpt": "Right of publicity — cleared by consent, not by ownership research",
+          "reasoning": "An unnamed individual has no discoverable rights holder. Research cannot produce the instrument this needs. Required action: Obtain a personal release, or blur. If shot in a public place under a crowd notice, file the notice against this finding.",
+          "confidence": "high"
+        }
+      ],
+      "status": "complete"
+    },
+    "face_002": {
+      "element_id": "face_002",
+      "owner": null,
+      "owner_confidence": "low",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [
+        {
+          "field": "clearance_route",
+          "url": "",
+          "excerpt": "Right of publicity — cleared by consent, not by ownership research",
+          "reasoning": "An unnamed individual has no discoverable rights holder. Research cannot produce the instrument this needs. Required action: Obtain a personal release, or blur. If shot in a public place under a crowd notice, file the notice against this finding.",
+          "confidence": "high"
+        }
+      ],
+      "status": "complete"
+    },
+    "face_003": {
+      "element_id": "face_003",
+      "owner": null,
+      "owner_confidence": "low",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [
+        {
+          "field": "clearance_route",
+          "url": "",
+          "excerpt": "Right of publicity — cleared by consent, not by ownership research",
+          "reasoning": "An unnamed individual has no discoverable rights holder. Research cannot produce the instrument this needs. Required action: Obtain a personal release, or blur. If shot in a public place under a crowd notice, file the notice against this finding.",
+          "confidence": "high"
+        }
+      ],
+      "status": "complete"
+    },
+    "face_004": {
+      "element_id": "face_004",
+      "owner": null,
+      "owner_confidence": "low",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [
+        {
+          "field": "clearance_route",
+          "url": "",
+          "excerpt": "Right of publicity — cleared by consent, not by ownership research",
+          "reasoning": "An unnamed individual has no discoverable rights holder. Research cannot produce the instrument this needs. Required action: Obtain a personal release, or blur. If shot in a public place under a crowd notice, file the notice against this finding.",
+          "confidence": "high"
+        }
+      ],
+      "status": "complete"
+    },
+    "music_001": {
+      "element_id": "music_001",
+      "owner": null,
+      "owner_confidence": "low",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [],
+      "status": "incomplete"
+    },
+    "element_001": {
+      "element_id": "element_001",
+      "owner": "Yum! Brands, Inc.",
+      "owner_confidence": "high",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [],
+      "status": "incomplete"
+    },
+    "element_002": {
+      "element_id": "element_002",
+      "owner": null,
+      "owner_confidence": "low",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [],
+      "status": "incomplete"
+    }
+  },
+  "risk": {
+    "element_001": {
+      "element_id": "element_001",
+      "score": 36,
+      "band": "MEDIUM",
+      "factors": {
+        "screen_time_norm": 1.0,
+        "prominence_score": 0.646,
+        "category_weight": 0.8,
+        "posture_factor": 0.7,
+        "use_context_factor": 1.0,
+        "depiction_factor": 1.0
+      },
+      "de_minimis": false
+    },
+    "element_002": {
+      "element_id": "element_002",
+      "score": 29,
+      "band": "MEDIUM",
+      "factors": {
+        "screen_time_norm": 1.0,
+        "prominence_score": 0.462,
+        "category_weight": 0.9,
+        "posture_factor": 0.7,
+        "use_context_factor": 1.0,
+        "depiction_factor": 1.0
+      },
+      "de_minimis": false
+    },
+    "face_001": {
+      "element_id": "face_001",
+      "score": 26,
+      "band": "MEDIUM",
+      "factors": {
+        "screen_time_norm": 0.5,
+        "prominence_score": 0.415,
+        "category_weight": 0.9,
+        "posture_factor": 0.7,
+        "use_context_factor": 1.0,
+        "depiction_factor": 1.0
+      },
+      "de_minimis": false
+    },
+    "face_002": {
+      "element_id": "face_002",
+      "score": 47,
+      "band": "HIGH",
+      "factors": {
+        "screen_time_norm": 1.0,
+        "prominence_score": 0.75,
+        "category_weight": 0.9,
+        "posture_factor": 0.7,
+        "use_context_factor": 1.0,
+        "depiction_factor": 1.0
+      },
+      "de_minimis": false
+    },
+    "face_003": {
+      "element_id": "face_003",
+      "score": 46,
+      "band": "HIGH",
+      "factors": {
+        "screen_time_norm": 1.0,
+        "prominence_score": 0.735,
+        "category_weight": 0.9,
+        "posture_factor": 0.7,
+        "use_context_factor": 1.0,
+        "depiction_factor": 1.0
+      },
+      "de_minimis": false
+    },
+    "face_004": {
+      "element_id": "face_004",
+      "score": 40,
+      "band": "MEDIUM",
+      "factors": {
+        "screen_time_norm": 0.6,
+        "prominence_score": 0.64,
+        "category_weight": 0.9,
+        "posture_factor": 0.7,
+        "use_context_factor": 1.0,
+        "depiction_factor": 1.0
+      },
+      "de_minimis": false
+    },
+    "music_001": {
+      "element_id": "music_001",
+      "score": 35,
+      "band": "MEDIUM",
+      "factors": {
+        "screen_time_norm": 1.0,
+        "prominence_score": 0.5,
+        "category_weight": 1.0,
+        "posture_factor": 0.7,
+        "use_context_factor": 1.0,
+        "depiction_factor": 1.0
+      },
+      "de_minimis": false
+    }
+  },
+  "remediation": {
+    "element_001": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Pizza Hut' in 4 shot(s), 01:00:00:00-01:00:05:05. Estimated VFX cost $300-$800/shot at 2% frame coverage.",
+        "est_cost_band": "$300-$800/shot"
+      }
+    ],
+    "element_002": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Framed floral artwork' in 2 shot(s), 01:00:22:22-01:00:27:12. Estimated VFX cost $300-$800/shot at 0% frame coverage.",
+        "est_cost_band": "$300-$800/shot"
+      }
+    ],
+    "face_001": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Pizza Hut delivery man' in 1 shot(s), 01:00:03:00-01:00:08:00. Estimated VFX cost $800-$2500/shot at 25% frame coverage.",
+        "est_cost_band": "$800-$2500/shot"
+      }
+    ],
+    "face_002": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Green-haired woman' in 4 shot(s), 01:00:05:00-01:00:08:00. Estimated VFX cost $800-$2500/shot at 30% frame coverage.",
+        "est_cost_band": "$800-$2500/shot"
+      }
+    ],
+    "face_003": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Black-haired man' in 4 shot(s), 01:00:14:00-01:00:17:00. Estimated VFX cost $800-$2500/shot at 25% frame coverage.",
+        "est_cost_band": "$800-$2500/shot"
+      }
+    ],
+    "face_004": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Woman in wheelchair' in 1 shot(s), 01:00:29:00-01:00:35:00. Estimated VFX cost $800-$2500/shot at 40% frame coverage.",
+        "est_cost_band": "$800-$2500/shot"
+      }
+    ],
+    "music_001": [
+      {
+        "kind": "license",
+        "summary": "License from rights holder (unidentified)",
+        "detail": "To: [no contact found — escalate to music supervisor]\nSubject: License request — \"Incidental orchestral score\" appearing in \"Untitled Production\"\n\nDear rights holder,\n\nWe are producing \"Untitled Production\", an independent film currently in post-production.\nYour property \"Incidental orchestral score\" appears in our footage at timecode 01:00:00:00-01:00:49:00\n(A light instrumental orchestral score plays in the background throughout the scene.). We would like to license this use for worldwide distribution across\nall media, in perpetuity.\n\nResearch indicates a typical license range of unknown. Could you confirm\navailability, terms, and your quote for this use?\n\nWe are happy to provide the relevant footage excerpt for review.\n\nKind regards,\n\"Untitled Production\" clearance team\n",
+        "est_cost_band": null
+      }
+    ]
+  },
+  "decisions": {},
+  "unscanned_ranges": [],
+  "audit_log": [],
+  "court": {
+    "element_001": {
+      "element_id": "element_001",
+      "holding": "escalate",
+      "confidence": "high",
+      "reasoning": "The core of the dispute is the tension between the artistic defense under Rogers v. Grimaldi and the practical business risk of litigation from a major corporation. While the Advocate correctly notes the use is 'plot-integral' and therefore 'artistically relevant,' this only satisfies the first prong of the Rogers test. The Counsel's brief correctly identifies the greater dangers: the second prong of Rogers (is the use 'explicitly misleading' due to its 12.33-second prominence?) and, more critically, the risk of a trademark dilution by tarnishment claim under 15 U.S.C. § 1125(c). Because 'Pizza Hut' is a famous mark, any association with unsavory content could trigger a powerful and expensive lawsuit, a risk highlighted by the V Secret Catalogue precedent. From a practical standpoint, the potential cost of defending a lawsuit against Yum! Brands, Inc.—even if ultimately successful—is likely to be far greater than the cost of mitigation. Therefore, the risk is too significant to be considered 'defensible.' The matter must be escalated to the producer to weigh the cost of obtaining a license against the cost of removing the trademark via VFX or a reshoot.",
+      "briefs": [
+        {
+          "side": "counsel",
+          "argument": "The on-screen use of the 'Pizza Hut' trademark presents a significant clearance risk that warrants licensing, removal, or alteration. The use is not incidental; with 12.33 seconds of screen time and plot-integral status, it is prominent. This prominence creates a material risk of a trademark infringement claim under the Lanham Act, 15 U.S.C. § 1125(a), based on the likelihood that consumers will mistakenly believe Pizza Hut's owner, Yum! Brands, Inc., sponsored, endorsed, or is affiliated with the production. While an artistic relevance defense under the Rogers v. Grimaldi test may exist, the prominence of the use could be argued as 'explicitly misleading,' negating the defense. Furthermore, because 'Pizza Hut' is a famous mark, there is a substantial risk of a trademark dilution claim under 15 U.S.C. § 1125(c). If the portrayal is negative, unflattering, or associated with unsavory subject matter, Yum! Brands could pursue a powerful claim for dilution by tarnishment. Given the owner's litigation resources and the uncertainty of their posture, the most prudent course is to eliminate this legal risk by obtaining a license or removing the trademarked element.",
+          "precedents": [
+            {
+              "case_name": "Dallas Cowboys Cheerleaders, Inc. v. Pussycat Cinema, Ltd.",
+              "citation": "604 F.2d 200 (2d Cir. 1979)",
+              "holding": "The unauthorized use of a distinctive cheerleader uniform in a pornographic film constituted trademark infringement because it created a likelihood of confusion about the plaintiff's sponsorship or approval of the film.",
+              "relevance": "This case demonstrates that using a trademark (or trade dress) in a context the owner may find objectionable can lead to a successful infringement claim based on a false association. It highlights the risk our production faces if 'Pizza Hut' is portrayed in any negative or unflattering manner.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Rogers v. Grimaldi",
+              "citation": "875 F.2d 994 (2d Cir. 1989)",
+              "holding": "The use of a trademark in the title of an artistic work is protected by the First Amendment and does not violate the Lanham Act unless the use has no artistic relevance to the work or is explicitly misleading as to source or content.",
+              "relevance": "This case establishes the key legal test for using trademarks in creative works. While it provides a potential defense for our production because the use is plot-integral (and thus 'artistically relevant'), the prominence and nature of the depiction could be argued by Yum! Brands as being 'explicitly misleading' regarding sponsorship, thereby overcoming the defense and creating significant litigation risk.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "V Secret Catalogue, Inc. v. Moseley",
+              "citation": "605 F.3d 382 (6th Cir. 2010)",
+              "holding": "Under the Trademark Dilution Revision Act (TDRA), the use of 'Victor's Little Secret' for an adult novelty store was likely to tarnish the famous 'Victoria's Secret' mark by creating a sordid and unwholesome association.",
+              "relevance": "This precedent underscores the significant danger of a dilution by tarnishment claim under 15 U.S.C. § 1125(c). Because 'Pizza Hut' is a famous mark, any association with illegal, unsavory, or unwholesome activities in our production could be seen as tarnishing the brand's reputation, exposing the production to liability even without a showing of consumer confusion.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        },
+        {
+          "side": "advocate",
+          "argument": "The strongest good-faith defense for the use of the 'Pizza Hut' trademark is under the expressive works doctrine established in Rogers v. Grimaldi. The use is explicitly 'plot_integral,' which directly satisfies the first prong of the Rogers test: artistic relevance. The trademark is not used arbitrarily but is necessary for the narrative. The second prong—that the use is not 'explicitly misleading' as to source or sponsorship—is also met. A 12-second depiction of a real-world brand in a narrative film is unlikely to be perceived by audiences as an endorsement from Yum! Brands, Inc. Instead, audiences understand such uses as contributing to the film's realism. Defenses like de minimis or incidental use are weak here, precisely because the use is plot-integral and therefore not trivial or merely background. As long as the film does not create a false narrative of endorsement, this use constitutes protected artistic expression.",
+          "precedents": [
+            {
+              "case_name": "Rogers v. Grimaldi",
+              "citation": "875 F.2d 994 (2d Cir. 1989)",
+              "holding": "The use of a trademark in an artistic work is permissible if it is (1) artistically relevant to the work and (2) not explicitly misleading as to the source or content of the work.",
+              "relevance": "This is the seminal case establishing the legal test for using trademarks in expressive works. Our use of 'Pizza Hut' is artistically relevant because it is integral to the plot, and it does not explicitly mislead the audience into believing the film is sponsored by Pizza Hut.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Louis Vuitton Malletier S.A. v. Warner Bros. Entertainment Inc.",
+              "citation": "868 F. Supp. 2d 172 (S.D.N.Y. 2012)",
+              "holding": "The use of a Louis Vuitton-like bag in the film 'The Hangover Part II' was protected under Rogers because it was artistically relevant for comedic and character-development purposes and was not explicitly misleading.",
+              "relevance": "This case directly applies the Rogers test to the on-screen use of a famous brand within a major film. It affirmed that using a brand to define a character or a scene is an artistically relevant purpose, which directly supports our argument that a plot-integral use is protected.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Mattel, Inc. v. MCA Records, Inc.",
+              "citation": "296 F.3d 894 (9th Cir. 2002)",
+              "holding": "The song 'Barbie Girl,' which used Mattel's 'Barbie' trademark, was a parody protected by the First Amendment and did not constitute infringement because the title was relevant to the song's content and did not explicitly mislead consumers.",
+              "relevance": "This case reinforces that the Rogers test applies broadly to artistic works that comment on or use a brand as a cultural symbol. Our film's plot-integral use of 'Pizza Hut' similarly employs the brand as a cultural touchstone to build a realistic and expressive narrative, a use this precedent protects.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        }
+      ]
+    },
+    "element_002": {
+      "element_id": "element_002",
+      "holding": "clear_required",
+      "confidence": "high",
+      "reasoning": "The legal risk of leaving the 'Framed floral artwork' as-is is too significant. The advocate's primary defense, de minimis use, is weak. While the 10.4-second duration is less than the 26.75 seconds in the key negative precedent, Ringgold v. BET, it is not so fleeting as to guarantee a de minimis finding, especially for a recognizable creative work. The court in Ringgold established that even background use can be infringing if it usurps a potential licensing market, which is precisely the situation here. The fair use defense is even weaker, as the use is commercial, not transformative, and involves the entire creative work, directly harming the fourth factor (market effect). The 'orphan work' status exacerbates the problem; it does not mitigate it. An unknown rights holder could surface after release, seeking an injunction and statutory damages up to $150,000. From a practical standpoint, the cost of potential litigation and damages far exceeds the cost of a proactive fix. Since licensing is not possible due to the inability to identify the owner, the only prudent course of action is to digitally remove or alter the artwork to be unrecognizable, or, as a last resort, reshoot the scene. The risk is not defensible.",
+      "briefs": [
+        {
+          "side": "counsel",
+          "argument": "The use of the 'Framed floral artwork' in 'Untitled Production' constitutes a significant copyright infringement risk. Under 17 U.S.C. § 102(a), the artwork is presumptively protected by copyright. Its inclusion in the film, even as background set dressing, constitutes a reproduction and public display, which are exclusive rights of the copyright holder under 17 U.S.C. § 106. While the use is for 10.4 seconds and not integral to the plot, it is unlikely to be defensible as either 'de minimis' use or 'fair use'.\n\nThe 'de minimis' defense fails if the work is recognizable to the ordinary observer for more than a fleeting moment. Courts have found that even partially obscured background uses lasting mere seconds can be infringing, as in Ringgold v. BET. The 10.4-second duration presents a tangible risk that a court would find the use qualitatively and quantitatively sufficient to be actionable.\n\nA fair use defense under 17 U.S.C. § 107 would also likely fail. Analyzing the four factors: (1) The purpose is commercial and not transformative; the artwork is used for its original decorative purpose as set dressing. (2) The nature of the work is creative, which weighs against fair use. (3) The amount used is the entire work. (4) The use negatively affects the potential market for the artwork by usurping a licensing fee the artist would otherwise be entitled to negotiate. This fourth factor is often the most critical and strongly disfavors the production.\n\nThe fact that the rights holder could not be identified ('orphan work' status) does not mitigate the legal risk; it exacerbates it. The copyright owner could emerge after the film's release and seek an injunction, actual damages, or statutory damages up to $150,000 for willful infringement (17 U.S.C. § 504). Given these risks, the artwork must be licensed, digitally altered/removed, or the scene must be reshot.",
+          "precedents": [
+            {
+              "case_name": "Ringgold v. Black Entertainment Television, Inc.",
+              "citation": "126 F.3d 70 (2d Cir. 1997)",
+              "holding": "The use of a copyrighted poster as set dressing in a TV sitcom, visible for a total of 26.75 seconds in nine different shots, was not a 'de minimis' infringement and was not fair use.",
+              "relevance": "This is the seminal case for infringement of artwork used as set dressing. It establishes that background, non-plot-integral use can be infringing if the work is observable. The court specifically noted that such use usurps a licensing market, directly paralleling the risk faced by 'Untitled Production'.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Sandoval v. New Line Cinema Corp.",
+              "citation": "147 F.3d 215 (2d Cir. 1998)",
+              "holding": "The use of copyrighted photographs in the background of a scene in the movie 'Seven' was held to be 'de minimis' because the photos were out of focus, seen from a distance, and never fully observable to the viewer.",
+              "relevance": "This case defines the threshold for 'de minimis' use based on observability. It serves as a counterpoint to Ringgold, highlighting that the key question is whether the artwork is recognizable. For 'Untitled Production', the risk is that the floral artwork is more observable than the photos in Sandoval, thus failing the 'de minimis' test.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Gaylord v. United States",
+              "citation": "595 F.3d 1364 (Fed. Cir. 2010)",
+              "holding": "The U.S. Postal Service's use of a photograph depicting a copyrighted sculpture ('The Column') on a postage stamp was not fair use because the use was not transformative.",
+              "relevance": "This case reinforces that using a creative visual work for a different purpose (like a stamp, or by analogy, set dressing) without altering its essential character or meaning is not 'transformative' under the first fair use factor. This weakens any potential fair use argument for the decorative use of the floral artwork in the film.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        },
+        {
+          "side": "advocate",
+          "argument": "The strongest defense is that the use of the 'Framed floral artwork' is de minimis—so trivial that it does not constitute infringement. The artwork is visible for only 10.4 seconds, serves purely as background set dressing, is not a focal point of any scene, and holds no plot significance. This incidental inclusion is directly analogous to Gottlieb Development LLC v. Paramount Pictures Corp., where the background use of a pinball machine was found to be de minimis as it was merely part of the set's general ambiance. We must distinguish our case from Ringgold v. Black Entertainment Television, where a poster used for over 26 seconds was not de minimis; our use is less than half that duration and lacks the thematic relevance the poster had in that show. The primary weakness of the de minimis defense is that courts are often reluctant to apply it to a fully visible creative work, even in the background. Should the use be deemed more than de minimis, the alternative defense is fair use. While the commercial, non-transformative nature of the use weighs against fair use (Factor 1), the effect on the market for the artwork—the most important factor—is nil (Factor 4). The film will not serve as a substitute for the art. Our good-faith, but unsuccessful, effort to identify the rights holder demonstrates a lack of an available licensing market that we could have harmed.",
+          "precedents": [
+            {
+              "case_name": "Gottlieb Development LLC v. Paramount Pictures Corp.",
+              "citation": "590 F. Supp. 2d 625 (S.D.N.Y. 2008)",
+              "holding": "The court held that the background, partially-obscured, and fleeting appearance of a pinball machine in a film scene was a de minimis use and therefore not a copyright infringement.",
+              "relevance": "This case is highly analogous. It supports the argument that using a copyrighted item as indistinct background set dressing, which is not featured or clearly depicted, is legally trivial and not an infringement. The floral art serves the same function as the pinball machine.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Ringgold v. Black Entertainment Television, Inc.",
+              "citation": "126 F.3d 70 (2d Cir. 1997)",
+              "holding": "The Second Circuit ruled that the use of a copyrighted poster in the background of a TV sitcom for a total of 26.75 seconds was not de minimis. The court analyzed the observability, duration, and thematic importance of the work.",
+              "relevance": "This is a key counter-precedent that defines the limits of the de minimis defense for visual works. Our argument must distinguish its facts by emphasizing the much shorter duration (10.4s vs 26.75s) and the complete lack of thematic relevance, unlike the poster in Ringgold.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Sandoval v. New Line Cinema Corp.",
+              "citation": "147 F.3d 215 (2d Cir. 1998)",
+              "holding": "The court found the use of copyrighted photographs in the background of a movie to be de minimis. The photos appeared fleetingly and were out of focus, making them not 'observable' by the average viewer.",
+              "relevance": "This case strengthens the de minimis argument by focusing on observability. If the 'Framed floral artwork' is similarly out of focus or indistinct during its 10.4 seconds of screen time, this precedent provides a strong argument that the use is not a legally recognizable copy.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        }
+      ]
+    },
+    "face_001": {
+      "element_id": "face_001",
+      "holding": "clear_required",
+      "confidence": "high",
+      "reasoning": "While the Advocate presents a strong defense based on the incidental use doctrine, citing the factually similar precedent of Preston v. Martin Bregman Prods., that defense is weakened by a crucial fact: the individual occupies 25% of the screen. This prominence makes the person 'readily identifiable,' directly implicating statutes like California Civil Code § 3344 and moving the use away from the 'fleeting' or 'background' nature central to the incidental use defense. From a practical standpoint, the analysis shifts from 'could we win in court?' to 'what is the cost of the risk?' The potential costs of litigation—including legal fees, statutory damages, and negative publicity—far outweigh the predictable and finite cost of a VFX fix (e.g., blurring the face or a digital alteration). Since locating and obtaining a release from the unknown individual is not feasible, the most prudent and cost-effective course for the production is to alter the shot to eliminate the legal exposure entirely. Therefore, clearance is required.",
+      "briefs": [
+        {
+          "side": "counsel",
+          "argument": "The on-screen appearance of the 'Pizza Hut delivery man' constitutes a significant clearance risk under the right of publicity and statutory misappropriation of likeness. The use, while brief at 5.0 seconds, is prominent, covering 25% of the screen, which is sufficient for the individual to be 'readily identifiable' under key state laws like California Civil Code § 3344. Because the production is a commercial venture, this use of the individual's likeness without their consent is presumptively for a commercial purpose. The fact that the rights holder could not be identified does not mitigate the risk; it confirms that no release was obtained, leaving the production vulnerable to a future lawsuit should the individual recognize themselves. The use is not incidental or de minimis due to its prominence, nor is it protected by a 'public interest' or 'transformative use' defense as it occurs within a fictional, commercial context. To avoid potential litigation, statutory damages, and punitive damages, this element must be licensed by identifying and obtaining a release from the individual, or otherwise removed or altered to render the individual completely unidentifiable.",
+          "precedents": [
+            {
+              "case_name": "Downing v. Abercrombie & Fitch",
+              "citation": "265 F.3d 994 (9th Cir. 2001)",
+              "holding": "The unauthorized use of plaintiffs' photograph in a commercial catalog constituted misappropriation of likeness. The court rejected a First Amendment defense, finding the use did not contribute to a matter of public interest and was purely for commercial advantage.",
+              "relevance": "This case establishes that using an individual's likeness within a commercial product, where the use is not tied to a matter of public interest, is a violation of their publicity rights. The appearance of the delivery man in this fictional production serves a commercial purpose for the film, not a newsworthy or expressive one, placing it squarely within this precedent.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "California Civil Code § 3344",
+              "citation": "Cal. Civ. Code § 3344",
+              "holding": "This statute creates a cause of action for any person who knowingly uses another's name, voice, photograph, or likeness for advertising or commercial purposes without prior consent.",
+              "relevance": "This is a key statutory risk in a major production jurisdiction. The 5-second, 25% screen coverage makes the delivery person 'readily identifiable,' directly triggering potential liability under this statute for using their likeness in a commercial film without consent.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "New York Civil Rights Law §§ 50-51",
+              "citation": "N.Y. Civ. Rights Law §§ 50-51",
+              "holding": "Provides a cause of action for the unauthorized use of a living person's name, portrait, or picture for advertising or trade purposes. Use for 'trade purposes' includes use in a fictional film.",
+              "relevance": "Similar to California's law, this influential New York statute demonstrates the widespread legal prohibition against this type of use. It confirms that use within a fictional film is considered a 'trade purpose,' exposing the production to liability in another critical jurisdiction.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        },
+        {
+          "side": "advocate",
+          "argument": "The strongest defense against a potential right of publicity claim for the 'Pizza Hut delivery man' is the incidental use doctrine, supplemented by the de minimis non curat lex principle. The use is a textbook example of an incidental appearance that is not legally actionable. The individual appears for only five seconds, is not integral to the plot, and is presumably part of the background scenery intended to lend verisimilitude to the setting. Courts have consistently held that such fleeting and incidental uses of a person's likeness within a larger expressive work do not constitute commercial appropriation. The purpose of the use is not to capitalize on the identity of this specific person for the film's commercial benefit, but to depict a realistic moment. The defense is very strong given the brief duration and lack of plot relevance. The only weakness would be if the shot, despite its brevity, singles out the individual in a way that is embarrassing, defamatory, or presents them in a false light, but based on the provided facts, the incidental use defense should prevail.",
+          "precedents": [
+            {
+              "case_name": "Preston v. Martin Bregman Prods., Inc.",
+              "citation": "765 F. Supp. 116 (S.D.N.Y. 1991)",
+              "holding": "The court held that a 4.5-second, full-body shot of a plaintiff walking on a public street, used in the opening credits of the film 'Sea of Love,' was too 'fleeting and incidental' to be actionable under New York's right of privacy statute.",
+              "relevance": "This case is factually analogous. The 5-second appearance of the delivery person in 'Untitled Production' is a similarly brief and transitory inclusion within a larger work. As in 'Preston', the use is incidental to the scene's purpose of creating ambiance and is not an attempt to commercially exploit the specific individual's identity.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Sandoval v. New Line Cinema Corp.",
+              "citation": "147 F.3d 215 (2d Cir. 1998)",
+              "holding": "The Second Circuit affirmed that the use of an artist's copyrighted photos in the background of a scene in the film 'Seven', where they were dimly lit and visible for less than 30 seconds, was a de minimis use and therefore not actionable as copyright infringement.",
+              "relevance": "Although a copyright case, the de minimis principle articulated in 'Sandoval' is frequently applied to right of publicity claims. It stands for the proposition that a use can be so minor or trivial that it falls below the quantitative threshold of a legal violation. The 5-second appearance of the delivery person is a prime example of a de minimis use that does not appropriate any significant commercial or personal value from the individual's likeness.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Cerasano v. Sony Corp.",
+              "citation": "991 F. Supp. 343 (D.N.J. 1998)",
+              "holding": "A brief appearance by a homeless man in a documentary-style film was deemed incidental because he was part of the 'scenery' of the film's subject matter (a controversial psychiatric program), and his appearance was not for the purpose of commercially exploiting his identity.",
+              "relevance": "This case reinforces that individuals captured as part of a realistic environment are not subject to right of publicity claims if the use is not for commercial exploitation. The Pizza Hut delivery man is part of the 'scenery' of the production, and his appearance is subordinate to the overall expressive work, making the use incidental.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        }
+      ]
+    },
+    "face_002": {
+      "element_id": "face_002",
+      "holding": "clear_required",
+      "confidence": "high",
+      "reasoning": "The risk of a right of publicity claim, particularly under a statute like California Civil Code § 3344, is significant and straightforward. The use is commercial, substantial (24 seconds, plot-integral), and the subject is identifiable due to her distinctive appearance, as supported by precedents like White v. Samsung and Motschenbacher. The Advocate's transformative use defense, while plausible, is a highly fact-specific and uncertain affirmative defense. As the Hart v. EA case illustrates, courts may not find a use transformative if the depiction is too literal, and relying on this defense invites expensive and unpredictable litigation. From a practical standpoint, the potential cost of defending a lawsuit and the catastrophic risk of a distribution injunction far outweigh the definite costs of either digitally altering the subject's likeness, reshooting, or attempting to locate and license the individual. The legal uncertainty and severe potential consequences for the production make proceeding without clearance an unacceptable business risk.",
+      "briefs": [
+        {
+          "side": "counsel",
+          "argument": "The on-screen appearance of the 'Green-haired woman' presents a significant legal risk under the right of publicity. Despite our inability to identify the rights holder, the individual's likeness is clearly being used for a commercial purpose within 'Untitled Production'. The substantial screen time of 24 seconds, 30% screen coverage, and the fact that the character is integral to the plot all weigh heavily against any potential defense of incidental or de minimis use. An individual's right to control the commercial use of their identity, including their physical likeness, is well-established. Even if the person is not a celebrity, they have a right to not have their likeness appropriated for commercial gain without consent. The distinctive green hair makes the individual highly identifiable to herself, her friends, family, and community. Should this individual recognize herself, the production would be exposed to a lawsuit for misappropriation of likeness, seeking damages, and potentially an injunction against the film's distribution. Given that consent was not obtained, the risk is not theoretical. We must either (1) obtain a signed release from the individual, (2) digitally alter the likeness to render the person unidentifiable, or (3) remove the shots entirely to mitigate this liability.",
+          "precedents": [
+            {
+              "case_name": "White v. Samsung Electronics America, Inc.",
+              "citation": "971 F.2d 1395 (9th Cir. 1992)",
+              "holding": "The court held that the right of publicity is not limited to a person's name or direct likeness, but extends to the appropriation of their 'identity.' A robot dressed to evoke Vanna White's persona was found to be a violation.",
+              "relevance": "This case establishes a broad interpretation of 'identity.' The 'Green-haired woman's' overall appearance, including her distinctive hair, constitutes a protectable identity even without her name being used, making the use a potential violation.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Motschenbacher v. R. J. Reynolds Tobacco Co.",
+              "citation": "498 F.2d 821 (9th Cir. 1974)",
+              "holding": "A race car driver was deemed identifiable in an advertisement, even though his face was not visible, because of the distinctive decorations on his car. The court found this sufficient to constitute an appropriation of his likeness.",
+              "relevance": "This supports the argument that a person need not be famous or have their face clearly visible to be identifiable. The subject's unique features, like the green hair and significant screen presence, are enough to make her identifiable to her community, thereby triggering her right of publicity.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "California Civil Code § 3344",
+              "citation": "Cal. Civ. Code § 3344",
+              "holding": "This statute provides a cause of action against any person who knowingly uses another's name, voice, signature, photograph, or likeness, in any manner, for advertising or selling purposes without prior consent.",
+              "relevance": "As a key jurisdiction for entertainment production, this statute provides a direct legal basis for a claim against the production. The use of the woman's likeness in the film for commercial exhibition falls squarely within the statute's prohibitions, creating statutory liability for damages.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Zacchini v. Scripps-Howard Broadcasting Co.",
+              "citation": "433 U.S. 562 (1977)",
+              "holding": "The Supreme Court ruled that the First Amendment did not protect a news station that broadcast a performer's entire 'human cannonball' act without his permission, as it appropriated the economic value of his performance.",
+              "relevance": "This case highlights the primacy of an individual's economic interest in their own image and performance. Because the 'Green-haired woman' is integral to the plot, the production is appropriating the entire value of her on-screen presence for its own commercial benefit without compensation, which is precisely what the right of publicity is designed to prevent.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        },
+        {
+          "side": "advocate",
+          "argument": "The strongest good-faith defense for the use of the 'Green-haired woman' character rests on the First Amendment protection for expressive works, specifically the doctrine of transformative use. Defenses like 'de minimis' or 'incidental use' are inapplicable here; the character's 24 seconds of screen time and plot-integral nature make the use significant and intentional, not trivial or accidental. Our core argument is that the 'Untitled Production,' as an expressive work, has not merely appropriated a likeness for commercial advantage, but has transformed it into a component of a new, creative narrative. The character is integral to the story, and this artistic relevance is the first prong of the test established in Rogers v. Grimaldi. The second prong, that the use is not 'explicitly misleading,' is also met, as the production makes no claim that this individual endorses the film. The use is transformative because the character is situated within a fictional context, imbued with new meaning and expression that is separate from the person's own identity. This is distinct from cases where a likeness is used in a realistic simulation without significant creative changes. The inability to identify a rights holder after diligent research further underscores that the value of the use is in the character's contribution to the story, not in the commercial exploitation of a pre-existing public identity.",
+          "precedents": [
+            {
+              "case_name": "Rogers v. Grimaldi",
+              "citation": "875 F.2d 994 (2d Cir. 1989)",
+              "holding": "The use of a celebrity's name in the title of an artistic work is protected by the First Amendment as long as the use is artistically relevant to the work and is not explicitly misleading as to the source or content of the work.",
+              "relevance": "This case establishes the foundational two-part test for balancing First Amendment expressive rights against publicity and trademark rights. Our use of the 'Green-haired woman' is artistically relevant (plot-integral) and not explicitly misleading, fitting squarely within the protections articulated in Rogers.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Winter v. DC Comics",
+              "citation": "30 Cal. 4th 881 (2003)",
+              "holding": "Depicting musicians Johnny and Edgar Winter as villainous half-worm comic book characters was a transformative use, protecting DC Comics from a right of publicity claim. The court found the work was not a 'literal depiction' but a creative transformation of the plaintiffs' likenesses into characters in a fictional story.",
+              "relevance": "This is a key precedent for the transformative use defense in a right of publicity context. It directly supports our argument that by incorporating the 'Green-haired woman' as a fictional character within a new narrative, the production has transformed the likeness, and the use is therefore protected speech.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Hart v. Electronic Arts, Inc.",
+              "citation": "717 F.3d 141 (3d Cir. 2013)",
+              "holding": "The use of a college quarterback's realistic avatar in a football video game was not a transformative use because the game context did not sufficiently transform the player's likeness; the avatar was simply doing what the real person was known for doing (playing football).",
+              "relevance": "This case helps define the boundaries of the transformative use defense. It is relevant by way of contrast. Unlike the game in 'Hart,' our production does not place the 'Green-haired woman' in a realistic simulation of her own life. Instead, it creates a new, fictional narrative, which is the kind of creative transformation that 'Hart' implies would be protected and which 'Winter' explicitly protects.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        }
+      ]
+    },
+    "face_003": {
+      "element_id": "face_003",
+      "holding": "clear_required",
+      "confidence": "high",
+      "reasoning": "While the Advocate presents a plausible First Amendment defense based on transformative use, the practical risk for a producer is too significant. The core issue is that the defense would only be tested after a lawsuit is filed by the currently unknown individual. The use is substantial (15 seconds, plot-integral), making a de minimis defense impossible and strengthening a potential plaintiff's claim. The precedents cited by the Counsel (`White`, `Midler`) show that courts interpret publicity rights broadly, and the use in a commercial film fits squarely within the 'for trade purposes' category distinguished in `Nussenzweig`. From a practical cost-benefit perspective, the unknown but potentially catastrophic cost of post-release litigation (including legal fees, damages, and a possible injunction halting distribution) far outweighs the known, one-time cost of altering the footage via VFX or a reshoot. Eliminating the risk by removing or obscuring the individual's likeness is the only prudent business decision to ensure the project's financial security.",
+      "briefs": [
+        {
+          "side": "counsel",
+          "argument": "The use of the 'Black-haired man' in 'Untitled Production' constitutes a significant legal risk for violation of his right of publicity. The individual is on screen for 15 seconds, occupies 25% of the frame, and is integral to the plot, making the use far from incidental. Because this is a commercial production, the unauthorized use of his likeness for a commercial advantage directly implicates state-level right of publicity laws, which exist under both common law and statute in key jurisdictions like California (Cal. Civ. Code § 3344) and New York (N.Y. Civ. Rights Law §§ 50-51). The fact that our research could not identify the rights holder is not a legal defense; rather, it represents a failure to clear the rights, exposing the production to a potential lawsuit from an unknown plaintiff who may surface after distribution. Given the prominent and plot-integral nature of his appearance, a court is highly unlikely to consider this an incidental or de minimis use. To mitigate the risk of litigation, which could result in statutory damages, punitive damages, and injunctive relief, we must either secure a license from the individual, or alter/remove his appearance from the final cut.",
+          "precedents": [
+            {
+              "case_name": "White v. Samsung Electronics America, Inc.",
+              "citation": "971 F.2d 1395 (9th Cir. 1992)",
+              "holding": "The court held that the appropriation of a person's identity, and not just their specific name or likeness, could be grounds for a right of publicity claim. A robot dressed in a wig and gown intended to evoke Vanna White was deemed a potential violation.",
+              "relevance": "This case establishes a broad interpretation of 'likeness.' If a robot merely evoking a celebrity can constitute appropriation, the use of an actual, identifiable person's image, especially one integral to the plot, presents a much more direct and clearer case of appropriation of identity. It strengthens the argument that our use is a clear-cut violation.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Midler v. Ford Motor Co.",
+              "citation": "849 F.2d 460 (9th Cir. 1988)",
+              "holding": "The Ninth Circuit recognized a common law right of publicity claim where a 'sound-alike' singer was used in a commercial, holding that 'to imitate her voice is to pirate her identity.'",
+              "relevance": "Midler extended right of publicity protection beyond a person's visual likeness to other distinct aspects of their identity, like their voice. This principle underscores that the law protects the core commercial value of a person's identity. Our use of the man's visual identity, a far more direct form of appropriation than a sound-alike voice, falls squarely within the zone of protection defined by this precedent.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Nussenzweig v. DiCorcia",
+              "citation": "9 N.Y.3d 184 (2007)",
+              "holding": "The court found that the display and sale of a photograph of an individual taken without consent did not violate New York's right of privacy statute because the work was considered art, not 'for advertising or trade purposes.'",
+              "relevance": "This case is relevant because it defines the boundary we are on the wrong side of. Unlike the sale of a photograph as fine art, our use of the 'Black-haired man' is in a commercial narrative film and is integral to the plot. This use squarely qualifies as 'for trade purposes' under the New York statute and similar laws, making a right of publicity claim viable where it was not in Nussenzweig.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        },
+        {
+          "side": "advocate",
+          "argument": "The use of the 'Black-haired man' in 'Untitled Production,' while significant at 15 seconds and integral to the plot, is defensible under the First Amendment. We will not rely on de minimis or incidental use defenses, as the prominence and plot-integral nature of the appearance make these arguments weak. Instead, our primary defense is rooted in the principles of expressive works and transformative use. First, under the standard set in Rogers v. Grimaldi, the use of a person's likeness in an expressive work is protected if it is artistically relevant and does not explicitly mislead the public as to endorsement. Here, the individual is integral to the plot, establishing clear artistic relevance. The production does not suggest he endorses the work, thus satisfying the Rogers test. Second, the use is transformative, as articulated in Comedy III v. Saderup. We are not merely exploiting the individual's likeness for its own value; we are incorporating it into a new, larger narrative with a distinct message and meaning. The value for the audience comes from the story being told, not from the depiction of this specific (and unidentified) individual. While the inability to identify the rights holder presents a practical risk should they ever surface, the substantive legal defense for this expressive use is strong.",
+          "precedents": [
+            {
+              "case_name": "Rogers v. Grimaldi",
+              "citation": "875 F.2d 994 (2d Cir. 1989)",
+              "holding": "The use of a public figure's name in the title of an artistic work is permissible unless the title has no artistic relevance to the underlying work or, if it has some artistic relevance, it explicitly misleads as to the source or content of the work. This test is widely applied to right of publicity claims involving expressive works.",
+              "relevance": "This case provides the core two-part test for using a person's likeness within an expressive work. Since the individual is 'plot_integral,' their appearance is artistically relevant, and as long as there is no false endorsement, the use is constitutionally protected.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Comedy III Productions, Inc. v. Gary Saderup, Inc.",
+              "citation": "25 Cal. 4th 387 (2001)",
+              "holding": "When an artist is faced with a right of publicity challenge to his or her work, the artist may raise as an affirmative defense that the work is protected by the First Amendment because it is 'transformative.' A work is transformative if it adds new expression, meaning, or message, rather than merely being a literal depiction.",
+              "relevance": "This California Supreme Court case establishes the influential 'transformative use' defense. Our use is transformative because the individual's likeness is one component of a larger, original narrative, not the raw material and sole focus of the work itself.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "ETW Corp. v. Jireh Publishing, Inc.",
+              "citation": "332 F.3d 915 (6th Cir. 2003)",
+              "holding": "A painting depicting Tiger Woods's Masters victory was a transformative work protected by the First Amendment and did not violate his right of publicity. The work consisted of original expression and was more than a 'literal depiction' of the celebrity.",
+              "relevance": "This case demonstrates that even a work centered on a famous individual can be deemed transformative and protected. Our use, which integrates an unknown individual into a fictional plot, is even more clearly an act of creating a new, expressive work rather than exploiting a pre-existing identity.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        }
+      ]
+    },
+    "face_004": {
+      "element_id": "face_004",
+      "holding": "clear_required",
+      "confidence": "high",
+      "reasoning": "While the Advocate presents a strong First Amendment defense under the Rogers v. Grimaldi test, arguing the use is artistically relevant and not misleading, the practical risk for the production is too significant to ignore. The Counsel's position correctly identifies the core issue: a clearly recognizable individual (6 seconds, 40% coverage) has been used in a significant, plot-integral manner without consent. This creates a direct and unavoidable risk of a future right of publicity claim under statutes like California Civil Code § 3344. The fact that the individual is unidentified means a license cannot be obtained, creating a long-tail, unquantifiable liability. Although a First Amendment defense similar to the one in Sarver v. The Hurt Locker might ultimately prevail, the cost of litigating such a claim would be substantial, regardless of the outcome. In contrast, the cost to digitally alter the individual beyond recognition is a fixed, predictable production expense. From a practical risk-management perspective, the certain cost of a visual effects fix is far preferable to the uncertain but potentially catastrophic cost of a lawsuit that could include damages and, in the worst-case scenario, an injunction against distribution. The risk must be eliminated.",
+      "briefs": [
+        {
+          "side": "counsel",
+          "argument": "The on-screen use of the 'Woman in wheelchair' constitutes a significant legal risk under the common law right of publicity and state-specific privacy statutes. The prominence of the appearance—6.0 seconds of screen time at 40% coverage—makes the individual clearly recognizable, and its integral role in the plot defeats any potential defense of incidental or de minimis use. Although rights research failed to identify the subject, this amplifies the risk rather than mitigating it. An unidentified rights holder cannot grant a license, leaving the production vulnerable to a future lawsuit for commercial appropriation should the individual or her heirs later surface. Such a claim could result in costly litigation, statutory damages, and potentially an injunction against the distribution of 'Untitled Production'. Therefore, this element must be fully licensed, digitally altered beyond any possible recognition, or removed from the final cut.",
+          "precedents": [
+            {
+              "case_name": "White v. Samsung Electronics America, Inc.",
+              "citation": "971 F.2d 1395 (9th Cir. 1992)",
+              "holding": "The court held that the common law right of publicity protects against the appropriation of a person's identity, not just their specific name or likeness. A robotic figure intended to evoke Vanna White's identity was found to be an actionable appropriation.",
+              "relevance": "This case establishes a broad interpretation of 'likeness' that extends to a person's identity. It underscores that even if the image were altered, if it still evokes the specific, real individual, the production remains liable. This precedent argues for complete alteration beyond recognition, not just minor changes.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "California Civil Code § 3344",
+              "citation": "Cal. Civ. Code § 3344",
+              "holding": "This statute provides a cause of action for any person whose name, voice, signature, photograph, or likeness has been knowingly used for commercial purposes without prior consent. It allows for the recovery of actual damages, profits from the unauthorized use, and punitive damages.",
+              "relevance": "As a primary jurisdiction for entertainment production, this statute creates direct and significant financial liability. The use of the individual's image in a commercial film is a clear statutory violation, making a future claim for damages a concrete risk if the subject is ever identified.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Zacchini v. Scripps-Howard Broadcasting Co.",
+              "citation": "433 U.S. 562 (1977)",
+              "holding": "The Supreme Court ruled that the First Amendment does not protect a media outlet from liability when it broadcasts a performer's entire act without consent, as it poses a substantial threat to the economic value of the performance.",
+              "relevance": "This precedent demonstrates that the substantiality of the use is a key factor. The 6.0-second, plot-integral nature of this appearance is not a fleeting or incidental shot. It captures a significant and meaningful portion of the individual's presence, which, analogous to Zacchini's 'entire act', appropriates the value of their likeness in a way not protected by free expression defenses.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        },
+        {
+          "side": "advocate",
+          "argument": "The strongest defense against a potential right of publicity claim is that the use of this individual's likeness is protected by the First Amendment as an integral part of an expressive work. The use is not for commercial advertisement but serves an artistic purpose within the film's narrative, as evidenced by its plot-integral nature. Under the test established in Rogers v. Grimaldi and widely applied to right of publicity claims, a use is permissible if it is (1) artistically relevant to the work and (2) not explicitly misleading. Here, the use is clearly artistically relevant ('plot_integral'), and as the woman is unidentified, her appearance does not misleadingly imply any endorsement or affiliation. This is a transformative use, incorporating a real-world element into a new creative context, which is the hallmark of protected expression. A weaker, secondary defense is incidental use; however, the 6-second duration and plot importance challenge this. A de minimis defense is not viable given the screen time, coverage, and narrative significance. The fact that the rights holder could not be identified further supports the argument that the value of the use was for character portrayal or narrative realism, not to exploit a specific individual's persona.",
+          "precedents": [
+            {
+              "case_name": "Rogers v. Grimaldi",
+              "citation": "875 F.2d 994 (2d Cir. 1989)",
+              "holding": "The use of a celebrity's name in the title of an artistic work was protected by the First Amendment so long as the use had some artistic relevance and was not explicitly misleading as to the source or content of the work.",
+              "relevance": "This case established the 'Rogers test,' which has been broadly adopted to balance First Amendment expressive rights against right of publicity claims. Our use is artistically relevant to the plot and is not explicitly misleading, directly satisfying this protective standard for expressive works like film.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "ETW Corp. v. Jireh Publishing, Inc.",
+              "citation": "332 F.3d 915 (6th Cir. 2003)",
+              "holding": "An art print depicting golfer Tiger Woods was a protected expressive work under the First Amendment and did not violate his right of publicity. The court found a constitutional right to create and sell expressive works that include the likeness of a person.",
+              "relevance": "This case affirms that the First Amendment protects artistic depictions of individuals, even famous ones, against right of publicity claims. It strengthens our position by showing that if an artistic depiction of one of the world's most famous athletes is protected, the use of an unidentified person for a legitimate narrative purpose in a film is even more defensible.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Sarver v. The Hurt Locker, LLC",
+              "citation": "No. CV 10-9033-JHN (C.D. Cal. Nov. 8, 2011)",
+              "holding": "The film 'The Hurt Locker' was a constitutionally protected expressive work, and its depiction of events related to an Iraq War veteran was not a violation of his right of publicity. The court held that the film was transformative and concerned a matter of public interest.",
+              "relevance": "This case provides a direct example of a film prevailing over a right of publicity claim. It establishes that when a person's likeness or story is integral to an expressive work, especially one that touches upon broader themes or events, First Amendment protections are very strong. Our use is likewise integral to the film's artistic expression.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "research_plan": {
+    "music_001": {
+      "element_id": "music_001",
+      "processor": "pro",
+      "rationale": "Music rights split across composition and master with publisher chains; needs deep research.",
+      "est_cost_usd": 0.1
+    },
+    "element_001": {
+      "element_id": "element_001",
+      "processor": "base",
+      "rationale": "Standard single-owner lookup expected; escalate tier manually if research returns incomplete.",
+      "est_cost_usd": 0.01
+    },
+    "element_002": {
+      "element_id": "element_002",
+      "processor": "base",
+      "rationale": "Standard single-owner lookup expected; escalate tier manually if research returns incomplete.",
+      "est_cost_usd": 0.01
+    }
+  },
+  "script_mentions": [],
+  "drift": null,
+  "candidates": {},
+  "watches": {},
+  "alerts": [],
+  "corroboration": {
+    "element_001": {
+      "element_id": "element_001",
+      "verdict": "CORROBORATED",
+      "detector": "cloud-video-intelligence",
+      "detected_label": "Pizza Hut",
+      "confidence": 0.89441067,
+      "note": "cloud-video-intelligence independently identified 'Pizza Hut' in the same window at 89% confidence."
+    },
+    "element_002": {
+      "element_id": "element_002",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers COPYRIGHT_ART; identity rests on the video model alone."
+    },
+    "face_001": {
+      "element_id": "face_001",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers RIGHT_OF_PUBLICITY; identity rests on the video model alone."
+    },
+    "face_002": {
+      "element_id": "face_002",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers RIGHT_OF_PUBLICITY; identity rests on the video model alone."
+    },
+    "face_003": {
+      "element_id": "face_003",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers RIGHT_OF_PUBLICITY; identity rests on the video model alone."
+    },
+    "face_004": {
+      "element_id": "face_004",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers RIGHT_OF_PUBLICITY; identity rests on the video model alone."
+    },
+    "music_001": {
+      "element_id": "music_001",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "audd-fingerprint",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "Acoustic fingerprinting returned no match. Not a contradiction — the recording may be library, original or absent from the database — but the title rests on the video model alone and must not be filed to a PRO without human confirmation."
+    }
+  },
+  "freshness": {},
+  "territory_risk": {
+    "element_001": [
+      {
+        "element_id": "element_001",
+        "territory": "US",
+        "band": "MEDIUM",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; United States tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "element_001",
+        "territory": "DE",
+        "band": "MEDIUM",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; Germany tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "element_001",
+        "territory": "FR",
+        "band": "MEDIUM",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; France tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "element_001",
+        "territory": "JP",
+        "band": "MEDIUM",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; Japan tracks the baseline band.",
+        "authority": ""
+      }
+    ],
+    "element_002": [
+      {
+        "element_id": "element_002",
+        "territory": "US",
+        "band": "MEDIUM",
+        "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+      },
+      {
+        "element_id": "element_002",
+        "territory": "DE",
+        "band": "LOW",
+        "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+      },
+      {
+        "element_id": "element_002",
+        "territory": "FR",
+        "band": "HIGH",
+        "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+      },
+      {
+        "element_id": "element_002",
+        "territory": "JP",
+        "band": "LOW",
+        "rationale": "Japan recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+        "authority": "Copyright Act art. 46 — artistic works permanently installed in open places"
+      }
+    ],
+    "face_001": [
+      {
+        "element_id": "face_001",
+        "territory": "US",
+        "band": "HIGH",
+        "rationale": "United States enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+      },
+      {
+        "element_id": "face_001",
+        "territory": "DE",
+        "band": "HIGH",
+        "rationale": "Germany enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+      },
+      {
+        "element_id": "face_001",
+        "territory": "FR",
+        "band": "HIGH",
+        "rationale": "France enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+      },
+      {
+        "element_id": "face_001",
+        "territory": "JP",
+        "band": "MEDIUM",
+        "rationale": "RIGHT_OF_PUBLICITY exposure does not vary by panorama rule; Japan tracks the baseline band.",
+        "authority": ""
+      }
+    ],
+    "face_002": [
+      {
+        "element_id": "face_002",
+        "territory": "US",
+        "band": "CRITICAL",
+        "rationale": "United States enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+      },
+      {
+        "element_id": "face_002",
+        "territory": "DE",
+        "band": "CRITICAL",
+        "rationale": "Germany enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+      },
+      {
+        "element_id": "face_002",
+        "territory": "FR",
+        "band": "CRITICAL",
+        "rationale": "France enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+      },
+      {
+        "element_id": "face_002",
+        "territory": "JP",
+        "band": "HIGH",
+        "rationale": "RIGHT_OF_PUBLICITY exposure does not vary by panorama rule; Japan tracks the baseline band.",
+        "authority": ""
+      }
+    ],
+    "face_003": [
+      {
+        "element_id": "face_003",
+        "territory": "US",
+        "band": "CRITICAL",
+        "rationale": "United States enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+      },
+      {
+        "element_id": "face_003",
+        "territory": "DE",
+        "band": "CRITICAL",
+        "rationale": "Germany enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+      },
+      {
+        "element_id": "face_003",
+        "territory": "FR",
+        "band": "CRITICAL",
+        "rationale": "France enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+      },
+      {
+        "element_id": "face_003",
+        "territory": "JP",
+        "band": "HIGH",
+        "rationale": "RIGHT_OF_PUBLICITY exposure does not vary by panorama rule; Japan tracks the baseline band.",
+        "authority": ""
+      }
+    ],
+    "face_004": [
+      {
+        "element_id": "face_004",
+        "territory": "US",
+        "band": "HIGH",
+        "rationale": "United States enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+      },
+      {
+        "element_id": "face_004",
+        "territory": "DE",
+        "band": "HIGH",
+        "rationale": "Germany enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+      },
+      {
+        "element_id": "face_004",
+        "territory": "FR",
+        "band": "HIGH",
+        "rationale": "France enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+      },
+      {
+        "element_id": "face_004",
+        "territory": "JP",
+        "band": "MEDIUM",
+        "rationale": "RIGHT_OF_PUBLICITY exposure does not vary by panorama rule; Japan tracks the baseline band.",
+        "authority": ""
+      }
+    ],
+    "music_001": [
+      {
+        "element_id": "music_001",
+        "territory": "US",
+        "band": "MEDIUM",
+        "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; United States tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "music_001",
+        "territory": "DE",
+        "band": "MEDIUM",
+        "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; Germany tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "music_001",
+        "territory": "FR",
+        "band": "MEDIUM",
+        "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; France tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "music_001",
+        "territory": "JP",
+        "band": "MEDIUM",
+        "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; Japan tracks the baseline band.",
+        "authority": ""
+      }
+    ]
+  },
+  "territories": [
+    "US",
+    "DE",
+    "FR",
+    "JP"
+  ],
+  "coverage": {
+    "element_001": {
+      "element_id": "element_001",
+      "status": "UNKNOWN",
+      "licence_id": null,
+      "rights_holder": null,
+      "gaps": [],
+      "note": "Rights holder is not established, so the ledger cannot be checked. Coverage is unknowable until identity and ownership are resolved."
+    },
+    "element_002": {
+      "element_id": "element_002",
+      "status": "UNKNOWN",
+      "licence_id": null,
+      "rights_holder": null,
+      "gaps": [],
+      "note": "Rights holder is not established, so the ledger cannot be checked. Coverage is unknowable until identity and ownership are resolved."
+    },
+    "face_001": {
+      "element_id": "face_001",
+      "status": "UNKNOWN",
+      "licence_id": null,
+      "rights_holder": null,
+      "gaps": [],
+      "note": "Rights holder is not established, so the ledger cannot be checked. Coverage is unknowable until identity and ownership are resolved."
+    },
+    "face_002": {
+      "element_id": "face_002",
+      "status": "UNKNOWN",
+      "licence_id": null,
+      "rights_holder": null,
+      "gaps": [],
+      "note": "Rights holder is not established, so the ledger cannot be checked. Coverage is unknowable until identity and ownership are resolved."
+    },
+    "face_003": {
+      "element_id": "face_003",
+      "status": "UNKNOWN",
+      "licence_id": null,
+      "rights_holder": null,
+      "gaps": [],
+      "note": "Rights holder is not established, so the ledger cannot be checked. Coverage is unknowable until identity and ownership are resolved."
+    },
+    "face_004": {
+      "element_id": "face_004",
+      "status": "UNKNOWN",
+      "licence_id": null,
+      "rights_holder": null,
+      "gaps": [],
+      "note": "Rights holder is not established, so the ledger cannot be checked. Coverage is unknowable until identity and ownership are resolved."
+    },
+    "music_001": {
+      "element_id": "music_001",
+      "status": "UNKNOWN",
+      "licence_id": null,
+      "rights_holder": null,
+      "gaps": [],
+      "note": "Rights holder is not established, so the ledger cannot be checked. Coverage is unknowable until identity and ownership are resolved."
+    }
+  },
+  "audio_matches": [],
+  "routes": {
+    "element_001": {
+      "element_id": "element_001",
+      "tier": "DEEP",
+      "rationale": "Escalated to deep research: provisional exposure is 52, at or above the HIGH band. Ownership resolved locally (Yum! Brands, Inc.); a live search establishes current licensing posture and the contact route. Posture is the variable a static table cannot know, and for trademark it is the variable that decides risk — brand owners sue over unflattering depiction, not presence. A finding this prominent needs a licensing contact, a cost band and citations an underwriter can follow — which only a deep run produces.",
+      "basis": "",
+      "disposition": "Confirm posture, then approach Yum! Brands, Inc. if depiction is unflattering.",
+      "owner": "Yum! Brands, Inc.",
+      "posture": null,
+      "est_cost_usd": 0.01,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "element_002": {
+      "element_id": "element_002",
+      "tier": "DEEP",
+      "rationale": "For artwork, 'who owns this' IS the question, and a two-second search cannot answer it: a poster's rights can sit with the band, the label, the photographer or the designer. Ownership chains for authored images are multi-hop by nature, which is what a deep run is for.",
+      "basis": "Ringgold v. Black Entertainment Television, 126 F.3d 70 (2d Cir. 1997) — recognisable background artwork is not de minimis",
+      "disposition": "",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.01,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "face_001": {
+      "element_id": "face_001",
+      "tier": "STATUTE",
+      "rationale": "An unnamed individual has no discoverable rights holder. Research cannot produce the instrument this needs.",
+      "basis": "Right of publicity — cleared by consent, not by ownership research",
+      "disposition": "Obtain a personal release, or blur. If shot in a public place under a crowd notice, file the notice against this finding.",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.0,
+      "est_latency_s": 0.0,
+      "enumerate_candidates": false
+    },
+    "face_002": {
+      "element_id": "face_002",
+      "tier": "STATUTE",
+      "rationale": "An unnamed individual has no discoverable rights holder. Research cannot produce the instrument this needs.",
+      "basis": "Right of publicity — cleared by consent, not by ownership research",
+      "disposition": "Obtain a personal release, or blur. If shot in a public place under a crowd notice, file the notice against this finding.",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.0,
+      "est_latency_s": 0.0,
+      "enumerate_candidates": false
+    },
+    "face_003": {
+      "element_id": "face_003",
+      "tier": "STATUTE",
+      "rationale": "An unnamed individual has no discoverable rights holder. Research cannot produce the instrument this needs.",
+      "basis": "Right of publicity — cleared by consent, not by ownership research",
+      "disposition": "Obtain a personal release, or blur. If shot in a public place under a crowd notice, file the notice against this finding.",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.0,
+      "est_latency_s": 0.0,
+      "enumerate_candidates": false
+    },
+    "face_004": {
+      "element_id": "face_004",
+      "tier": "STATUTE",
+      "rationale": "An unnamed individual has no discoverable rights holder. Research cannot produce the instrument this needs.",
+      "basis": "Right of publicity — cleared by consent, not by ownership research",
+      "disposition": "Obtain a personal release, or blur. If shot in a public place under a crowd notice, file the notice against this finding.",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.0,
+      "est_latency_s": 0.0,
+      "enumerate_candidates": false
+    },
+    "music_001": {
+      "element_id": "music_001",
+      "tier": "DEEP",
+      "rationale": "Music is the category productions reliably lose. The recording carries a title but no fingerprint match, so publisher and master chains still need tracing — genuinely multi-hop, which is what a deep run is for.",
+      "basis": "NMPA v. Fullscreen (2013); Bridgeport v. Dimension Films, 410 F.3d 792 (6th Cir. 2005)",
+      "disposition": "",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.1,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    }
+  },
+  "sponsor_conflicts": [
+    {
+      "element_id": "element_001",
+      "label": "Pizza Hut",
+      "detected_owner": "Yum! Brands, Inc.",
+      "conflicts_with": "Dominos",
+      "sector": "qsr",
+      "note": "'Pizza Hut' (Yum! Brands, Inc.) is a qsr competitor of sponsor Dominos (Domino's Pizza, Inc.). Category exclusivity is standard in sponsorship contracts, so this may breach the deal even though the depiction itself is lawful. Check the exclusivity clause before delivery."
+    }
+  ],
+  "platform_outcomes": [
+    {
+      "element_id": "face_001",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "PRIVACY_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "An identifiable person can complain personally, through a route separate from copyright. In the EU and UK this is also personal data under GDPR, and in India under the DPDP Act — a different regime with a different remedy from the US right of publicity.",
+      "remedy": "Obtain a release, or blur the face at 00:03–00:08. Route if challenged: None — releases are checked at delivery.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "face_002",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "PRIVACY_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "An identifiable person can complain personally, through a route separate from copyright. In the EU and UK this is also personal data under GDPR, and in India under the DPDP Act — a different regime with a different remedy from the US right of publicity.",
+      "remedy": "Obtain a release, or blur the face at 00:05–00:49. Route if challenged: None — releases are checked at delivery.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "face_003",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "PRIVACY_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "An identifiable person can complain personally, through a route separate from copyright. In the EU and UK this is also personal data under GDPR, and in India under the DPDP Act — a different regime with a different remedy from the US right of publicity.",
+      "remedy": "Obtain a release, or blur the face at 00:14–00:47. Route if challenged: None — releases are checked at delivery.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "face_004",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "PRIVACY_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "An identifiable person can complain personally, through a route separate from copyright. In the EU and UK this is also personal data under GDPR, and in India under the DPDP Act — a different regime with a different remedy from the US right of publicity.",
+      "remedy": "Obtain a release, or blur the face at 00:29–00:35. Route if challenged: None — releases are checked at delivery.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "element_001",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:00–00:40. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "element_002",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:22–00:40. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "music_001",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "unlikely",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform (theatrical, festival, broadcast delivery) runs no automated audio matching, so this surfaces only if a rights holder notices. That makes it less likely and more serious when it lands — there is no takedown to react to.",
+      "remedy": "Clear the recording, or replace the cue at 00:00–00:49.",
+      "revenue_impact": ""
+    }
+  ],
+  "defences": {
+    "element_001": [
+      {
+        "territory": "US",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "Campbell v. Acuff-Rose Music, 510 U.S. 569 (1994) — parody may be fair use under §107",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Fair use (open-ended)",
+        "available": true,
+        "authority": "17 U.S.C. §107 — an open-ended four-factor standard, not a closed list",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "No statutory exception. De minimis is judge-made: Sandoval v. New Line (2d Cir. 1998) vs Ringgold v. BET (2d Cir. 1997)",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "DE",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "UrhG §51a — caricature, parody and pastiche, in force since 2021 (replacing free use under old §24)",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "UrhG §§44a-63a — an enumerated catalogue of permitted uses; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "DE",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "UrhG §57 — incidental works of minor significance alongside the actual subject",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "CPI art. L.122-5 4° — parodie, pastiche et caricature, subject to the rules of the genre",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "CPI art. L.122-5 — an exhaustive list of exceptions; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "FR",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "Théorie de l'accessoire — judge-made, narrow, and not a statutory exception",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "JP",
+        "name": "Parody / caricature",
+        "available": false,
+        "authority": "No statutory parody exception. The Parody Montage case (Supreme Court, 1980) treated unauthorised parody as infringement of the integrity right",
+        "note": "No statutory parody exception here. Any parody argument runs through criticism, review or free expression instead — an argument to be made, not a safe harbour to rely on."
+      },
+      {
+        "territory": "JP",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "Copyright Act arts. 30-50 — enumerated limitations only",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "JP",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "Copyright Act art. 30-2 — incidental inclusion when creating a photographic or audiovisual work",
+        "note": ""
+      }
+    ],
+    "element_002": [
+      {
+        "territory": "US",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "Campbell v. Acuff-Rose Music, 510 U.S. 569 (1994) — parody may be fair use under §107",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Fair use (open-ended)",
+        "available": true,
+        "authority": "17 U.S.C. §107 — an open-ended four-factor standard, not a closed list",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "No statutory exception. De minimis is judge-made: Sandoval v. New Line (2d Cir. 1998) vs Ringgold v. BET (2d Cir. 1997)",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "US",
+        "name": "Freedom of panorama",
+        "available": false,
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only",
+        "note": "Covers architecture only — artwork on a building is not exempt (this is what Falkner v. GM turned on)."
+      },
+      {
+        "territory": "US",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "17 U.S.C. §106A (VARA) — visual art only, attribution and integrity, waivable",
+        "note": "Attribution and integrity rights persist alongside the economic rights."
+      },
+      {
+        "territory": "DE",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "UrhG §51a — caricature, parody and pastiche, in force since 2021 (replacing free use under old §24)",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "UrhG §§44a-63a — an enumerated catalogue of permitted uses; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "DE",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "UrhG §57 — incidental works of minor significance alongside the actual subject",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Freedom of panorama",
+        "available": true,
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "UrhG §§12-14 — publication, attribution and integrity; inalienable, lasting as long as copyright",
+        "note": "Attribution and integrity rights persist alongside the economic rights."
+      },
+      {
+        "territory": "FR",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "CPI art. L.122-5 4° — parodie, pastiche et caricature, subject to the rules of the genre",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "CPI art. L.122-5 — an exhaustive list of exceptions; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "FR",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "Théorie de l'accessoire — judge-made, narrow, and not a statutory exception",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "FR",
+        "name": "Freedom of panorama",
+        "available": true,
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "CPI art. L.121-1 — droit moral is perpetual, inalienable and imprescriptible; it survives sale of the copyright",
+        "note": "Perpetual and inalienable here: the author can object to treatment of the work even after selling the copyright, and heirs can assert it without time limit."
+      },
+      {
+        "territory": "JP",
+        "name": "Parody / caricature",
+        "available": false,
+        "authority": "No statutory parody exception. The Parody Montage case (Supreme Court, 1980) treated unauthorised parody as infringement of the integrity right",
+        "note": "No statutory parody exception here. Any parody argument runs through criticism, review or free expression instead — an argument to be made, not a safe harbour to rely on."
+      },
+      {
+        "territory": "JP",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "Copyright Act arts. 30-50 — enumerated limitations only",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "JP",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "Copyright Act art. 30-2 — incidental inclusion when creating a photographic or audiovisual work",
+        "note": ""
+      },
+      {
+        "territory": "JP",
+        "name": "Freedom of panorama",
+        "available": true,
+        "authority": "Copyright Act art. 46 — artistic works permanently installed in open places",
+        "note": ""
+      },
+      {
+        "territory": "JP",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "Copyright Act arts. 18-20 — publication, attribution and integrity; personal to the author",
+        "note": "Attribution and integrity rights persist alongside the economic rights."
+      }
+    ],
+    "face_001": [
+      {
+        "territory": "US",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "Campbell v. Acuff-Rose Music, 510 U.S. 569 (1994) — parody may be fair use under §107",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Fair use (open-ended)",
+        "available": true,
+        "authority": "17 U.S.C. §107 — an open-ended four-factor standard, not a closed list",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "No statutory exception. De minimis is judge-made: Sandoval v. New Line (2d Cir. 1998) vs Ringgold v. BET (2d Cir. 1997)",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "US",
+        "name": "Personal data / personality regime",
+        "available": false,
+        "authority": "State right of publicity (commercial appropriation); no general federal data-protection regime for video",
+        "note": "The remedy here is consent or a blur, not a licence — a different instrument from the US right of publicity."
+      },
+      {
+        "territory": "DE",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "UrhG §51a — caricature, parody and pastiche, in force since 2021 (replacing free use under old §24)",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "UrhG §§44a-63a — an enumerated catalogue of permitted uses; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "DE",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "UrhG §57 — incidental works of minor significance alongside the actual subject",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Personal data / personality regime",
+        "available": false,
+        "authority": "GDPR plus KunstUrhG §22 — publication of a person's image generally requires consent",
+        "note": "The remedy here is consent or a blur, not a licence — a different instrument from the US right of publicity."
+      },
+      {
+        "territory": "FR",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "CPI art. L.122-5 4° — parodie, pastiche et caricature, subject to the rules of the genre",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "CPI art. L.122-5 — an exhaustive list of exceptions; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "FR",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "Théorie de l'accessoire — judge-made, narrow, and not a statutory exception",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "FR",
+        "name": "Personal data / personality regime",
+        "available": false,
+        "authority": "GDPR plus droit à l'image under Code civil art. 9 — consent is generally required",
+        "note": "The remedy here is consent or a blur, not a licence — a different instrument from the US right of publicity."
+      },
+      {
+        "territory": "JP",
+        "name": "Parody / caricature",
+        "available": false,
+        "authority": "No statutory parody exception. The Parody Montage case (Supreme Court, 1980) treated unauthorised parody as infringement of the integrity right",
+        "note": "No statutory parody exception here. Any parody argument runs through criticism, review or free expression instead — an argument to be made, not a safe harbour to rely on."
+      },
+      {
+        "territory": "JP",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "Copyright Act arts. 30-50 — enumerated limitations only",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "JP",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "Copyright Act art. 30-2 — incidental inclusion when creating a photographic or audiovisual work",
+        "note": ""
+      },
+      {
+        "territory": "JP",
+        "name": "Personal data / personality regime",
+        "available": false,
+        "authority": "APPI (Act on the Protection of Personal Information), plus a judge-made right of likeness",
+        "note": "The remedy here is consent or a blur, not a licence — a different instrument from the US right of publicity."
+      }
+    ],
+    "face_002": [
+      {
+        "territory": "US",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "Campbell v. Acuff-Rose Music, 510 U.S. 569 (1994) — parody may be fair use under §107",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Fair use (open-ended)",
+        "available": true,
+        "authority": "17 U.S.C. §107 — an open-ended four-factor standard, not a closed list",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "No statutory exception. De minimis is judge-made: Sandoval v. New Line (2d Cir. 1998) vs Ringgold v. BET (2d Cir. 1997)",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "US",
+        "name": "Personal data / personality regime",
+        "available": false,
+        "authority": "State right of publicity (commercial appropriation); no general federal data-protection regime for video",
+        "note": "The remedy here is consent or a blur, not a licence — a different instrument from the US right of publicity."
+      },
+      {
+        "territory": "DE",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "UrhG §51a — caricature, parody and pastiche, in force since 2021 (replacing free use under old §24)",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "UrhG §§44a-63a — an enumerated catalogue of permitted uses; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "DE",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "UrhG §57 — incidental works of minor significance alongside the actual subject",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Personal data / personality regime",
+        "available": false,
+        "authority": "GDPR plus KunstUrhG §22 — publication of a person's image generally requires consent",
+        "note": "The remedy here is consent or a blur, not a licence — a different instrument from the US right of publicity."
+      },
+      {
+        "territory": "FR",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "CPI art. L.122-5 4° — parodie, pastiche et caricature, subject to the rules of the genre",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "CPI art. L.122-5 — an exhaustive list of exceptions; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "FR",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "Théorie de l'accessoire — judge-made, narrow, and not a statutory exception",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "FR",
+        "name": "Personal data / personality regime",
+        "available": false,
+        "authority": "GDPR plus droit à l'image under Code civil art. 9 — consent is generally required",
+        "note": "The remedy here is consent or a blur, not a licence — a different instrument from the US right of publicity."
+      },
+      {
+        "territory": "JP",
+        "name": "Parody / caricature",
+        "available": false,
+        "authority": "No statutory parody exception. The Parody Montage case (Supreme Court, 1980) treated unauthorised parody as infringement of the integrity right",
+        "note": "No statutory parody exception here. Any parody argument runs through criticism, review or free expression instead — an argument to be made, not a safe harbour to rely on."
+      },
+      {
+        "territory": "JP",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "Copyright Act arts. 30-50 — enumerated limitations only",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "JP",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "Copyright Act art. 30-2 — incidental inclusion when creating a photographic or audiovisual work",
+        "note": ""
+      },
+      {
+        "territory": "JP",
+        "name": "Personal data / personality regime",
+        "available": false,
+        "authority": "APPI (Act on the Protection of Personal Information), plus a judge-made right of likeness",
+        "note": "The remedy here is consent or a blur, not a licence — a different instrument from the US right of publicity."
+      }
+    ],
+    "face_003": [
+      {
+        "territory": "US",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "Campbell v. Acuff-Rose Music, 510 U.S. 569 (1994) — parody may be fair use under §107",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Fair use (open-ended)",
+        "available": true,
+        "authority": "17 U.S.C. §107 — an open-ended four-factor standard, not a closed list",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "No statutory exception. De minimis is judge-made: Sandoval v. New Line (2d Cir. 1998) vs Ringgold v. BET (2d Cir. 1997)",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "US",
+        "name": "Personal data / personality regime",
+        "available": false,
+        "authority": "State right of publicity (commercial appropriation); no general federal data-protection regime for video",
+        "note": "The remedy here is consent or a blur, not a licence — a different instrument from the US right of publicity."
+      },
+      {
+        "territory": "DE",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "UrhG §51a — caricature, parody and pastiche, in force since 2021 (replacing free use under old §24)",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "UrhG §§44a-63a — an enumerated catalogue of permitted uses; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "DE",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "UrhG §57 — incidental works of minor significance alongside the actual subject",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Personal data / personality regime",
+        "available": false,
+        "authority": "GDPR plus KunstUrhG §22 — publication of a person's image generally requires consent",
+        "note": "The remedy here is consent or a blur, not a licence — a different instrument from the US right of publicity."
+      },
+      {
+        "territory": "FR",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "CPI art. L.122-5 4° — parodie, pastiche et caricature, subject to the rules of the genre",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "CPI art. L.122-5 — an exhaustive list of exceptions; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "FR",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "Théorie de l'accessoire — judge-made, narrow, and not a statutory exception",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "FR",
+        "name": "Personal data / personality regime",
+        "available": false,
+        "authority": "GDPR plus droit à l'image under Code civil art. 9 — consent is generally required",
+        "note": "The remedy here is consent or a blur, not a licence — a different instrument from the US right of publicity."
+      },
+      {
+        "territory": "JP",
+        "name": "Parody / caricature",
+        "available": false,
+        "authority": "No statutory parody exception. The Parody Montage case (Supreme Court, 1980) treated unauthorised parody as infringement of the integrity right",
+        "note": "No statutory parody exception here. Any parody argument runs through criticism, review or free expression instead — an argument to be made, not a safe harbour to rely on."
+      },
+      {
+        "territory": "JP",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "Copyright Act arts. 30-50 — enumerated limitations only",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "JP",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "Copyright Act art. 30-2 — incidental inclusion when creating a photographic or audiovisual work",
+        "note": ""
+      },
+      {
+        "territory": "JP",
+        "name": "Personal data / personality regime",
+        "available": false,
+        "authority": "APPI (Act on the Protection of Personal Information), plus a judge-made right of likeness",
+        "note": "The remedy here is consent or a blur, not a licence — a different instrument from the US right of publicity."
+      }
+    ],
+    "face_004": [
+      {
+        "territory": "US",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "Campbell v. Acuff-Rose Music, 510 U.S. 569 (1994) — parody may be fair use under §107",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Fair use (open-ended)",
+        "available": true,
+        "authority": "17 U.S.C. §107 — an open-ended four-factor standard, not a closed list",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "No statutory exception. De minimis is judge-made: Sandoval v. New Line (2d Cir. 1998) vs Ringgold v. BET (2d Cir. 1997)",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "US",
+        "name": "Personal data / personality regime",
+        "available": false,
+        "authority": "State right of publicity (commercial appropriation); no general federal data-protection regime for video",
+        "note": "The remedy here is consent or a blur, not a licence — a different instrument from the US right of publicity."
+      },
+      {
+        "territory": "DE",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "UrhG §51a — caricature, parody and pastiche, in force since 2021 (replacing free use under old §24)",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "UrhG §§44a-63a — an enumerated catalogue of permitted uses; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "DE",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "UrhG §57 — incidental works of minor significance alongside the actual subject",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Personal data / personality regime",
+        "available": false,
+        "authority": "GDPR plus KunstUrhG §22 — publication of a person's image generally requires consent",
+        "note": "The remedy here is consent or a blur, not a licence — a different instrument from the US right of publicity."
+      },
+      {
+        "territory": "FR",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "CPI art. L.122-5 4° — parodie, pastiche et caricature, subject to the rules of the genre",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "CPI art. L.122-5 — an exhaustive list of exceptions; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "FR",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "Théorie de l'accessoire — judge-made, narrow, and not a statutory exception",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "FR",
+        "name": "Personal data / personality regime",
+        "available": false,
+        "authority": "GDPR plus droit à l'image under Code civil art. 9 — consent is generally required",
+        "note": "The remedy here is consent or a blur, not a licence — a different instrument from the US right of publicity."
+      },
+      {
+        "territory": "JP",
+        "name": "Parody / caricature",
+        "available": false,
+        "authority": "No statutory parody exception. The Parody Montage case (Supreme Court, 1980) treated unauthorised parody as infringement of the integrity right",
+        "note": "No statutory parody exception here. Any parody argument runs through criticism, review or free expression instead — an argument to be made, not a safe harbour to rely on."
+      },
+      {
+        "territory": "JP",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "Copyright Act arts. 30-50 — enumerated limitations only",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "JP",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "Copyright Act art. 30-2 — incidental inclusion when creating a photographic or audiovisual work",
+        "note": ""
+      },
+      {
+        "territory": "JP",
+        "name": "Personal data / personality regime",
+        "available": false,
+        "authority": "APPI (Act on the Protection of Personal Information), plus a judge-made right of likeness",
+        "note": "The remedy here is consent or a blur, not a licence — a different instrument from the US right of publicity."
+      }
+    ],
+    "music_001": [
+      {
+        "territory": "US",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "Campbell v. Acuff-Rose Music, 510 U.S. 569 (1994) — parody may be fair use under §107",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Fair use (open-ended)",
+        "available": true,
+        "authority": "17 U.S.C. §107 — an open-ended four-factor standard, not a closed list",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "No statutory exception. De minimis is judge-made: Sandoval v. New Line (2d Cir. 1998) vs Ringgold v. BET (2d Cir. 1997)",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "DE",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "UrhG §51a — caricature, parody and pastiche, in force since 2021 (replacing free use under old §24)",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "UrhG §§44a-63a — an enumerated catalogue of permitted uses; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "DE",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "UrhG §57 — incidental works of minor significance alongside the actual subject",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "CPI art. L.122-5 4° — parodie, pastiche et caricature, subject to the rules of the genre",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "CPI art. L.122-5 — an exhaustive list of exceptions; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "FR",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "Théorie de l'accessoire — judge-made, narrow, and not a statutory exception",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "JP",
+        "name": "Parody / caricature",
+        "available": false,
+        "authority": "No statutory parody exception. The Parody Montage case (Supreme Court, 1980) treated unauthorised parody as infringement of the integrity right",
+        "note": "No statutory parody exception here. Any parody argument runs through criticism, review or free expression instead — an argument to be made, not a safe harbour to rely on."
+      },
+      {
+        "territory": "JP",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "Copyright Act arts. 30-50 — enumerated limitations only",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "JP",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "Copyright Act art. 30-2 — incidental inclusion when creating a photographic or audiovisual work",
+        "note": ""
+      }
+    ]
+  },
+  "exposures": [],
+  "assessed_exposures": [],
+  "preview": [
+    {
+      "element_id": "face_002",
+      "label": "Green-haired woman",
+      "category": "RIGHT_OF_PUBLICITY",
+      "time_ranges": [
+        {
+          "start_s": 5.0,
+          "end_s": 8.0
+        },
+        {
+          "start_s": 18.0,
+          "end_s": 20.0
+        },
+        {
+          "start_s": 22.0,
+          "end_s": 27.0
+        },
+        {
+          "start_s": 35.0,
+          "end_s": 49.0
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 68,
+      "provisional_band": "HIGH",
+      "identity": "SINGLE_SOURCE",
+      "depiction": "NEUTRAL",
+      "territory": [
+        {
+          "element_id": "face_002",
+          "territory": "US",
+          "band": "CRITICAL",
+          "rationale": "United States enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "face_002",
+          "territory": "DE",
+          "band": "CRITICAL",
+          "rationale": "Germany enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "face_002",
+          "territory": "FR",
+          "band": "CRITICAL",
+          "rationale": "France enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        },
+        {
+          "element_id": "face_002",
+          "territory": "JP",
+          "band": "HIGH",
+          "rationale": "RIGHT_OF_PUBLICITY exposure does not vary by panorama rule; Japan tracks the baseline band.",
+          "authority": ""
+        }
+      ],
+      "route_tier": "STATUTE",
+      "disposition": "Obtain a personal release, or blur. If shot in a public place under a crowd notice, file the notice against this finding.",
+      "awaiting_research": false
+    },
+    {
+      "element_id": "face_003",
+      "label": "Black-haired man",
+      "category": "RIGHT_OF_PUBLICITY",
+      "time_ranges": [
+        {
+          "start_s": 14.0,
+          "end_s": 17.0
+        },
+        {
+          "start_s": 23.0,
+          "end_s": 27.0
+        },
+        {
+          "start_s": 35.0,
+          "end_s": 41.0
+        },
+        {
+          "start_s": 45.0,
+          "end_s": 47.0
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 66,
+      "provisional_band": "HIGH",
+      "identity": "SINGLE_SOURCE",
+      "depiction": "NEUTRAL",
+      "territory": [
+        {
+          "element_id": "face_003",
+          "territory": "US",
+          "band": "CRITICAL",
+          "rationale": "United States enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "face_003",
+          "territory": "DE",
+          "band": "CRITICAL",
+          "rationale": "Germany enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "face_003",
+          "territory": "FR",
+          "band": "CRITICAL",
+          "rationale": "France enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        },
+        {
+          "element_id": "face_003",
+          "territory": "JP",
+          "band": "HIGH",
+          "rationale": "RIGHT_OF_PUBLICITY exposure does not vary by panorama rule; Japan tracks the baseline band.",
+          "authority": ""
+        }
+      ],
+      "route_tier": "STATUTE",
+      "disposition": "Obtain a personal release, or blur. If shot in a public place under a crowd notice, file the notice against this finding.",
+      "awaiting_research": false
+    },
+    {
+      "element_id": "face_004",
+      "label": "Woman in wheelchair",
+      "category": "RIGHT_OF_PUBLICITY",
+      "time_ranges": [
+        {
+          "start_s": 29.0,
+          "end_s": 35.0
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 58,
+      "provisional_band": "HIGH",
+      "identity": "SINGLE_SOURCE",
+      "depiction": "NEUTRAL",
+      "territory": [
+        {
+          "element_id": "face_004",
+          "territory": "US",
+          "band": "CRITICAL",
+          "rationale": "United States enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "face_004",
+          "territory": "DE",
+          "band": "CRITICAL",
+          "rationale": "Germany enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "face_004",
+          "territory": "FR",
+          "band": "CRITICAL",
+          "rationale": "France enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        },
+        {
+          "element_id": "face_004",
+          "territory": "JP",
+          "band": "HIGH",
+          "rationale": "RIGHT_OF_PUBLICITY exposure does not vary by panorama rule; Japan tracks the baseline band.",
+          "authority": ""
+        }
+      ],
+      "route_tier": "STATUTE",
+      "disposition": "Obtain a personal release, or blur. If shot in a public place under a crowd notice, file the notice against this finding.",
+      "awaiting_research": false
+    },
+    {
+      "element_id": "element_001",
+      "label": "Pizza Hut",
+      "category": "TRADEMARK",
+      "time_ranges": [
+        {
+          "start_s": 0.0,
+          "end_s": 5.2
+        },
+        {
+          "start_s": 18.27,
+          "end_s": 20.0
+        },
+        {
+          "start_s": 22.9,
+          "end_s": 27.5
+        },
+        {
+          "start_s": 34.8,
+          "end_s": 40.6
+        }
+      ],
+      "bbox": {
+        "ymin": 0.297,
+        "xmin": 0.439,
+        "ymax": 0.442,
+        "xmax": 0.599
+      },
+      "at_s": null,
+      "provisional_score": 52,
+      "provisional_band": "HIGH",
+      "identity": "CORROBORATED",
+      "depiction": "NEUTRAL",
+      "territory": [
+        {
+          "element_id": "element_001",
+          "territory": "US",
+          "band": "HIGH",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; United States tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "element_001",
+          "territory": "DE",
+          "band": "HIGH",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; Germany tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "element_001",
+          "territory": "FR",
+          "band": "HIGH",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; France tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "element_001",
+          "territory": "JP",
+          "band": "HIGH",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; Japan tracks the baseline band.",
+          "authority": ""
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "Confirm posture, then approach Yum! Brands, Inc. if depiction is unflattering.",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "music_001",
+      "label": "Incidental orchestral score",
+      "category": "MUSIC_SYNC",
+      "time_ranges": [
+        {
+          "start_s": 0.0,
+          "end_s": 49.0
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 50,
+      "provisional_band": "HIGH",
+      "identity": "SINGLE_SOURCE",
+      "depiction": null,
+      "territory": [
+        {
+          "element_id": "music_001",
+          "territory": "US",
+          "band": "HIGH",
+          "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; United States tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "music_001",
+          "territory": "DE",
+          "band": "HIGH",
+          "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; Germany tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "music_001",
+          "territory": "FR",
+          "band": "HIGH",
+          "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; France tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "music_001",
+          "territory": "JP",
+          "band": "HIGH",
+          "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; Japan tracks the baseline band.",
+          "authority": ""
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "element_002",
+      "label": "Framed floral artwork",
+      "category": "COPYRIGHT_ART",
+      "time_ranges": [
+        {
+          "start_s": 22.9,
+          "end_s": 27.5
+        },
+        {
+          "start_s": 35.0,
+          "end_s": 40.8
+        }
+      ],
+      "bbox": {
+        "ymin": 0.229,
+        "xmin": 0.66,
+        "ymax": 0.319,
+        "xmax": 0.742
+      },
+      "at_s": null,
+      "provisional_score": 42,
+      "provisional_band": "MEDIUM",
+      "identity": "SINGLE_SOURCE",
+      "depiction": null,
+      "territory": [
+        {
+          "element_id": "element_002",
+          "territory": "US",
+          "band": "MEDIUM",
+          "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "element_002",
+          "territory": "DE",
+          "band": "LOW",
+          "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "element_002",
+          "territory": "FR",
+          "band": "HIGH",
+          "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        },
+        {
+          "element_id": "element_002",
+          "territory": "JP",
+          "band": "LOW",
+          "rationale": "Japan recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+          "authority": "Copyright Act art. 46 — artistic works permanently installed in open places"
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "face_001",
+      "label": "Pizza Hut delivery man",
+      "category": "RIGHT_OF_PUBLICITY",
+      "time_ranges": [
+        {
+          "start_s": 3.0,
+          "end_s": 8.0
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 37,
+      "provisional_band": "MEDIUM",
+      "identity": "SINGLE_SOURCE",
+      "depiction": "NEUTRAL",
+      "territory": [
+        {
+          "element_id": "face_001",
+          "territory": "US",
+          "band": "HIGH",
+          "rationale": "United States enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "face_001",
+          "territory": "DE",
+          "band": "HIGH",
+          "rationale": "Germany enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "face_001",
+          "territory": "FR",
+          "band": "HIGH",
+          "rationale": "France enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        },
+        {
+          "element_id": "face_001",
+          "territory": "JP",
+          "band": "MEDIUM",
+          "rationale": "RIGHT_OF_PUBLICITY exposure does not vary by panorama rule; Japan tracks the baseline band.",
+          "authority": ""
+        }
+      ],
+      "route_tier": "STATUTE",
+      "disposition": "Obtain a personal release, or blur. If shot in a public place under a crowd notice, file the notice against this finding.",
+      "awaiting_research": false
+    }
+  ],
+  "detector_hits": [
+    {
+      "label": "Akron Zips",
+      "confidence": 0.8517093,
+      "start_s": null,
+      "end_s": null,
+      "bbox": {
+        "ymin": 0.1673435,
+        "xmin": 0.341609,
+        "ymax": 0.25051507,
+        "xmax": 0.3849396
+      }
+    },
+    {
+      "label": "MPLA",
+      "confidence": 0.872106,
+      "start_s": null,
+      "end_s": null,
+      "bbox": {
+        "ymin": 0.4778672,
+        "xmin": 0.7081476,
+        "ymax": 0.5300382,
+        "xmax": 0.7345322
+      }
+    },
+    {
+      "label": "Pizza Hut",
+      "confidence": 0.86182237,
+      "start_s": null,
+      "end_s": null,
+      "bbox": {
+        "ymin": 0.3467351,
+        "xmin": 0.7114962,
+        "ymax": 0.53394043,
+        "xmax": 0.80604774
+      }
+    },
+    {
+      "label": "Pizza Hut",
+      "confidence": 0.89441067,
+      "start_s": null,
+      "end_s": null,
+      "bbox": {
+        "ymin": 0.34538424,
+        "xmin": 0.52726895,
+        "ymax": 0.5452031,
+        "xmax": 0.64320976
+      }
+    },
+    {
+      "label": "Arizona State Sun Devils",
+      "confidence": 0.8562774,
+      "start_s": null,
+      "end_s": null,
+      "bbox": {
+        "ymin": 0.39061117,
+        "xmin": 0.72711176,
+        "ymax": 0.5016623,
+        "xmax": 0.7611461
+      }
+    }
+  ]
+}
