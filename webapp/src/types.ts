@@ -14,6 +14,13 @@ export interface Prominence {
   plot_integral: boolean;
 }
 
+export interface BBox {
+  ymin: number;
+  xmin: number;
+  ymax: number;
+  xmax: number;
+}
+
 export interface Element {
   id: string;
   label: string;
@@ -22,6 +29,36 @@ export interface Element {
   category: string;
   time_ranges: TimeRange[];
   prominence: Prominence;
+  bbox: BBox | null;
+  at_s: number | null;
+}
+
+export type IdentityVerdict = "CORROBORATED" | "SINGLE_SOURCE" | "CONFLICTED";
+
+export interface Corroboration {
+  element_id: string;
+  verdict: IdentityVerdict;
+  detector: string;
+  detected_label: string | null;
+  confidence: number;
+  note: string;
+}
+
+export interface FreshnessSignal {
+  element_id: string;
+  owner: string;
+  title: string;
+  url: string;
+  excerpt: string;
+  material: boolean;
+}
+
+export interface TerritoryRisk {
+  element_id: string;
+  territory: string;
+  band: RiskBand;
+  rationale: string;
+  authority: string;
 }
 
 export interface BasisCitation {
@@ -128,6 +165,14 @@ export interface ResearchPlan {
 
 export interface PipelineEvent {
   type: string;
+  detected_label?: string | null;
+  material?: number;
+  signals?: number;
+  divergent?: number;
+  territories?: number;
+  CORROBORATED?: number;
+  SINGLE_SOURCE?: number;
+  CONFLICTED?: number;
   stage?: string;
   element_id?: string;
   label?: string;
@@ -160,4 +205,8 @@ export interface ProductionState {
   candidates: Record<string, CandidateEntity[]>;
   watches: Record<string, ClearanceWatch>;
   alerts: WatchAlert[];
+  corroboration: Record<string, Corroboration>;
+  freshness: Record<string, FreshnessSignal[]>;
+  territory_risk: Record<string, TerritoryRisk[]>;
+  territories: string[];
 }

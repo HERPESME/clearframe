@@ -15,6 +15,8 @@ export default function App() {
   const [role, setRoleState] = useState<Role>("legal");
   const [activeId, setActiveId] = useState<string | null>(null);
   const [artifacts, setArtifacts] = useState<string[]>([]);
+  const [checking, setChecking] = useState(false);
+  const [freshNote, setFreshNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -81,6 +83,26 @@ export default function App() {
     [state],
   );
 
+  const checkFreshness = async () => {
+    if (!state) return;
+    setChecking(true);
+    setFreshNote(null);
+    setError(null);
+    try {
+      const r = await api.checkFreshness(state.production.id);
+      setState(await api.getProduction(state.production.id));
+      setFreshNote(
+        r.material_signals > 0
+          ? `${r.material_signals} enforcement signal${r.material_signals === 1 ? "" : "s"} across ${r.holders} rights holders`
+          : `No new enforcement activity across ${r.holders} rights holders`,
+      );
+    } catch {
+      setError("Live signal check failed.");
+    } finally {
+      setChecking(false);
+    }
+  };
+
   const generate = async () => {
     if (!state) return;
     setError(null);
@@ -145,10 +167,23 @@ export default function App() {
     candidates,
     watches,
     alerts,
+    corroboration,
+    freshness,
+    territory_risk,
+    territories,
   } = state;
   const unscriptedIds = new Set(drift?.unscripted_element_ids ?? []);
   const sorted = [...elements].sort((a, b) => risk[b.id].score - risk[a.id].score);
   const pending = elements.filter((el) => !decisions[el.id]);
+  const disputed = elements.filter(
+    (el) => corroboration?.[el.id]?.verdict === "CONFLICTED",
+  );
+  const corroborated = elements.filter(
+    (el) => corroboration?.[el.id]?.verdict === "CORROBORATED",
+  );
+  const materialSignals = Object.values(freshness ?? {})
+    .flat()
+    .filter((s) => s.material).length;
   const bandCounts = Object.fromEntries(
     BANDS.map((b) => [b, elements.filter((el) => risk[el.id].band === b).length]),
   );
@@ -243,9 +278,41 @@ export default function App() {
         <span className="chip">
           <span className="n">{pending.length}</span> awaiting decision
         </span>
+        {corroborated.length > 0 && (
+          <span
+            className="chip ok"
+            title="A second, independent detector confirmed these identifications."
+          >
+            <span className="n">{corroborated.length}</span> ID corroborated
+          </span>
+        )}
+        {disputed.length > 0 && (
+          <span
+            className="chip CRITICAL"
+            title="Detectors disagree on what these elements are. Research is blocked until a human resolves identity."
+          >
+            <span className="n">{disputed.length}</span> ID disputed
+          </span>
+        )}
+        {materialSignals > 0 && (
+          <span
+            className="chip HIGH"
+            title="Enforcement activity found by the live Parallel Search pass."
+          >
+            <span className="n">{materialSignals}</span> live enforcement signals
+          </span>
+        )}
         {drift && drift.unscripted_element_ids.length > 0 && (
           <span className="chip HIGH">
             <span className="n">{drift.unscripted_element_ids.length}</span> not in script
+          </span>
+        )}
+        {(territories ?? []).length > 0 && (
+          <span
+            className="chip"
+            title="Clearance is jurisdictional — each finding is banded per release territory."
+          >
+            territories: <span className="n">{territories.join(" · ")}</span>
           </span>
         )}
         {Object.keys(watches ?? {}).length > 0 && (
@@ -266,6 +333,9 @@ export default function App() {
             decision={decisions[el.id]}
             court={court?.[el.id]}
             plan={research_plan?.[el.id]}
+            corroboration={corroboration?.[el.id]}
+            freshness={freshness?.[el.id] ?? []}
+            territory={territory_risk?.[el.id] ?? []}
             unscripted={unscriptedIds.has(el.id)}
             candidates={candidates?.[el.id] ?? []}
             fps={production.fps}
@@ -287,7 +357,16 @@ export default function App() {
                 ? "All findings reviewed."
                 : `${pending.length} finding${pending.length === 1 ? "" : "s"} await review.`}
             </span>
+            {freshNote && <span className="fresh-note">{freshNote}</span>}
             <span className="spacer" />
+            <button
+              className="secondary"
+              onClick={checkFreshness}
+              disabled={checking}
+              title="Runs a live Parallel Search over every identified rights holder — deep research is a snapshot, this is right now."
+            >
+              {checking ? "Checking…" : "Check live signals"}
+            </button>
             <button className="generate" disabled={pending.length > 0} onClick={generate}>
               Generate clearance dossier
             </button>

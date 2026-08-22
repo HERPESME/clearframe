@@ -2,21 +2,40 @@ import { useState } from "react";
 import type {
   Action,
   CandidateEntity,
+  Corroboration,
   CourtOpinion,
   Decision,
   Element,
+  FreshnessSignal,
   RemediationOption,
   Research,
   ResearchPlan,
   Risk,
   Role,
+  TerritoryRisk,
 } from "./types";
+import { FramePosition } from "./FramePosition";
 import { tc } from "./timecode";
 
 const HOLDING_TEXT = {
   clear_required: "CLEAR REQUIRED",
   defensible: "DEFENSIBLE",
   escalate: "ESCALATE",
+} as const;
+
+const VERDICT_TEXT = {
+  CORROBORATED: "ID CORROBORATED",
+  SINGLE_SOURCE: "ID SINGLE-SOURCE",
+  CONFLICTED: "ID DISPUTED",
+} as const;
+
+const VERDICT_HELP = {
+  CORROBORATED:
+    "A second, independent detector named the same thing. Identity is confirmed by two systems, not one model's guess.",
+  SINGLE_SOURCE:
+    "Only the video model identified this. No closed-vocabulary detector covers it (murals, tattoos, music), so identity is unconfirmed — not contradicted.",
+  CONFLICTED:
+    "The detectors named DIFFERENT things. Rights research is blocked: researching a disputed mark would attribute rights to the wrong holder.",
 } as const;
 
 const ACTION_LABEL: Record<Action, string> = {
@@ -43,6 +62,9 @@ interface Props {
   decision: Decision | undefined;
   court: CourtOpinion | undefined;
   plan: ResearchPlan | undefined;
+  corroboration: Corroboration | undefined;
+  freshness: FreshnessSignal[];
+  territory: TerritoryRisk[];
   unscripted: boolean;
   candidates: CandidateEntity[];
   fps: number;
@@ -60,6 +82,9 @@ export function ElementCard({
   decision,
   court,
   plan,
+  corroboration,
+  freshness,
+  territory,
   unscripted,
   candidates,
   fps,
@@ -72,6 +97,10 @@ export function ElementCard({
   const [busy, setBusy] = useState(false);
   const canDecide = role === "legal" || role === "producer";
   const complete = research && research.status === "complete";
+  const disputed = corroboration?.verdict === "CONFLICTED";
+  const materialSignals = freshness.filter((s) => s.material);
+  const divergent =
+    territory.length > 0 && new Set(territory.map((t) => t.band)).size > 1;
 
   const decide = async (action: Action) => {
     setBusy(true);
@@ -97,6 +126,14 @@ export function ElementCard({
           {risk.band} · {risk.score}
         </span>
         {risk.de_minimis && <span className="badge dim">DE MINIMIS</span>}
+        {corroboration && (
+          <span
+            className={`badge verdict ${corroboration.verdict}`}
+            title={VERDICT_HELP[corroboration.verdict]}
+          >
+            {VERDICT_TEXT[corroboration.verdict]}
+          </span>
+        )}
         {unscripted && (
           <span
             className="badge unscripted"
@@ -111,17 +148,43 @@ export function ElementCard({
           </span>
         )}
       </div>
-      <div className="tc-line">
-        {element.time_ranges
-          .map((r) => `${tc(r.start_s, fps)}–${tc(r.end_s, fps)}`)
-          .join("  ·  ")}
+
+      <div className="card-body">
+        <div className="card-main">
+          <div className="tc-line">
+            {element.time_ranges
+              .map((r) => `${tc(r.start_s, fps)}–${tc(r.end_s, fps)}`)
+              .join("  ·  ")}
+          </div>
+          <div className="el-desc">{element.description}</div>
+          <div className="factors">
+            {Object.entries(risk.factors)
+              .map(([k, v]) => `${k} ${v}`)
+              .join("  ·  ")}
+          </div>
+        </div>
+        {element.bbox && (
+          <FramePosition
+            bbox={element.bbox}
+            atS={element.at_s}
+            fps={fps}
+            band={risk.band}
+          />
+        )}
       </div>
-      <div className="el-desc">{element.description}</div>
-      <div className="factors">
-        {Object.entries(risk.factors)
-          .map(([k, v]) => `${k} ${v}`)
-          .join("  ·  ")}
-      </div>
+
+      {disputed && (
+        <div className="conflict-banner">
+          <strong>IDENTITY DISPUTED — research blocked.</strong> {corroboration!.note}
+        </div>
+      )}
+
+      {corroboration && !disputed && (
+        <div className="sec">
+          <div className="sec-title">Identity verification</div>
+          <div className="kv">{corroboration.note}</div>
+        </div>
+      )}
 
       <div className="sec evidence">
         <div className="sec-title">Rights research</div>
@@ -154,8 +217,9 @@ export function ElementCard({
         ) : (
           <>
             <div className="incomplete">
-              RESEARCH INCOMPLETE — rights holder not established from open-web sources.
-              Manual investigation required.
+              {disputed
+                ? "NOT RESEARCHED — identity must be resolved first."
+                : "RESEARCH INCOMPLETE — rights holder not established from open-web sources. Manual investigation required."}
             </div>
             {candidates.length > 0 && (
               <div style={{ marginTop: 8 }}>
@@ -172,6 +236,57 @@ export function ElementCard({
           </>
         )}
       </div>
+
+      {freshness.length > 0 && (
+        <div className="sec">
+          <div className="sec-title">
+            Live rights-holder signals
+            <span className="sec-note"> · Parallel Search, checked at review time</span>
+          </div>
+          {materialSignals.length > 0 && (
+            <div className="kv signal-count">
+              {materialSignals.length} enforcement signal
+              {materialSignals.length === 1 ? "" : "s"} found since research ran
+            </div>
+          )}
+          {freshness.map((s, i) => (
+            <div className={`citation ${s.material ? "material" : ""}`} key={i}>
+              {s.material && <span className="sig-flag">ENFORCEMENT</span>}{" "}
+              <a href={s.url}>{s.title}</a>
+              <div>“{s.excerpt}”</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {territory.length > 0 && (
+        <div className="sec">
+          <div className="sec-title">
+            Territory exposure
+            {divergent && <span className="sec-note"> · varies by jurisdiction</span>}
+          </div>
+          <div className="terr-row">
+            {territory.map((t) => (
+              <span className={`terr-chip ${t.band}`} key={t.territory} title={t.rationale}>
+                {t.territory} · {t.band}
+              </span>
+            ))}
+          </div>
+          {divergent && (
+            <details className="option">
+              <summary>Why the band changes across territories</summary>
+              <div className="brief">
+                {territory.map((t) => (
+                  <div className="precedent" key={t.territory}>
+                    · <b>{t.territory}</b> — {t.rationale}
+                    {t.authority && <div className="pull-quote">{t.authority}</div>}
+                  </div>
+                ))}
+              </div>
+            </details>
+          )}
+        </div>
+      )}
 
       {court && (
         <div className="sec">

@@ -51,6 +51,11 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ element_id: elementId, action, note }),
     }),
+  checkFreshness: (pid: string) =>
+    request<{ checked: number; holders: number; material_signals: number }>(
+      `/api/productions/${pid}/freshness`,
+      { method: "POST" },
+    ),
   generateDossier: (pid: string) =>
     request<{ artifacts: string[] }>(`/api/productions/${pid}/dossier`, {
       method: "POST",

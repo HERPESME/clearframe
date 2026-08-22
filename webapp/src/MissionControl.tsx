@@ -17,9 +17,12 @@ const INITIAL_AGENTS: AgentCard[] = [
   { key: "scan", name: "Scene Scanner", role: "Gemini · video analysis", status: "idle", line: "Standing by" },
   { key: "audit", name: "E&O Auditor", role: "Gemini · second-pass review", status: "idle", line: "Standing by" },
   { key: "triage", name: "Triage", role: "deterministic rules", status: "idle", line: "Standing by" },
+  { key: "corroborate", name: "Identity Corroborator", role: "logo catalogue · second opinion", status: "idle", line: "Standing by" },
   { key: "planner", name: "Budget Planner", role: "research allocation", status: "idle", line: "Standing by" },
   { key: "research", name: "Rights Researchers", role: "Parallel Task API · fan-out", status: "idle", line: "Standing by" },
+  { key: "signals", name: "Live Signals", role: "Parallel Search · real time", status: "idle", line: "Standing by" },
   { key: "risk", name: "Risk Engine", role: "reproducible scoring", status: "idle", line: "Standing by" },
+  { key: "territory", name: "Territory Analyst", role: "per-jurisdiction exposure", status: "idle", line: "Standing by" },
   { key: "remediation", name: "Remediation Drafter", role: "license / blur / memo drafts", status: "idle", line: "Standing by" },
   { key: "court", name: "Clearance Court", role: "counsel v. advocate · judge", status: "idle", line: "Standing by" },
 ];
@@ -41,6 +44,7 @@ export function MissionControl({ onComplete }: { onComplete: () => void }) {
   const [agents, setAgents] = useState<AgentCard[]>(INITIAL_AGENTS);
   const [researchRows, setResearchRows] = useState<RowItem[]>([]);
   const [courtRows, setCourtRows] = useState<RowItem[]>([]);
+  const [idRows, setIdRows] = useState<RowItem[]>([]);
   const [finished, setFinished] = useState(false);
   const sourceRef = useRef<EventSource | null>(null);
 
@@ -64,6 +68,12 @@ export function MissionControl({ onComplete }: { onComplete: () => void }) {
           } else if (e.stage === "research") {
             patch("planner", { status: "active", line: "Allocating research budget…" });
             patch("research", { status: "active", line: "Dispatching researchers…" });
+          } else if (e.stage === "corroborate") {
+            patch("corroborate", { status: "active", line: "Cross-checking identities…" });
+          } else if (e.stage === "freshness") {
+            patch("signals", { status: "active", line: "Searching for enforcement activity…" });
+          } else if (e.stage === "territory") {
+            patch("territory", { status: "active", line: "Banding per territory…" });
           } else if (e.stage === "court") {
             patch("court", { status: "active", line: "Court is in session" });
           } else {
@@ -82,6 +92,56 @@ export function MissionControl({ onComplete }: { onComplete: () => void }) {
           patch("triage", {
             status: "done",
             line: `${(e as { unscripted?: number }).unscripted ?? 0} on-screen elements were never scripted`,
+          });
+          break;
+        case "corroboration_done": {
+          const ok = e.CORROBORATED ?? 0;
+          const bad = e.CONFLICTED ?? 0;
+          patch("corroborate", {
+            status: "done",
+            line: bad
+              ? `${ok} identities confirmed · ${bad} disputed`
+              : `${ok} identities independently confirmed`,
+          });
+          break;
+        }
+        case "identity_conflict":
+          setIdRows((rows) => [
+            ...rows,
+            {
+              id: `id-${e.element_id}`,
+              text: `${e.label} — detector read “${e.detected_label}”`,
+              chip: "DISPUTED",
+              chipClass: "clear_required",
+            },
+          ]);
+          break;
+        case "research_blocked":
+          setResearchRows((rows) => [
+            ...rows,
+            {
+              id: `blk-${e.element_id}`,
+              text: `${e.label} — not researched`,
+              chip: "ID DISPUTED",
+              chipClass: "warn",
+            },
+          ]);
+          break;
+        case "freshness_checked":
+          setResearchRows((rows) => [
+            ...rows,
+            {
+              id: `fresh-${e.element_id}`,
+              text: `↳ ${e.label}: ${e.material ?? 0} enforcement signal(s) live`,
+              chip: (e.material ?? 0) > 0 ? "ACTIVE" : "QUIET",
+              chipClass: (e.material ?? 0) > 0 ? "warn" : "ok",
+            },
+          ]);
+          break;
+        case "territory_assessed":
+          patch("territory", {
+            status: "done",
+            line: `${e.territories} territories · ${e.divergent} findings band differently`,
           });
           break;
         case "candidates_found":
@@ -112,6 +172,8 @@ export function MissionControl({ onComplete }: { onComplete: () => void }) {
             patch("triage", { status: "done", line: "Findings categorized & deduped" });
           } else if (e.stage === "research") {
             patch("research", { status: "done", line: "All research returned" });
+          } else if (e.stage === "freshness") {
+            patch("signals", { status: "done", line: "Live signal sweep complete" });
           } else if (e.stage === "risk") {
             patch("risk", { status: "done", line: "Every score reproducible" });
           } else if (e.stage === "remediation") {
@@ -185,6 +247,16 @@ export function MissionControl({ onComplete }: { onComplete: () => void }) {
             {a.key === "research" && researchRows.length > 0 && (
               <div className="agent-rows">
                 {researchRows.map((r) => (
+                  <div key={r.id} className="agent-row">
+                    <span className="row-text">{r.text}</span>
+                    {r.chip && <span className={`row-chip ${r.chipClass ?? ""}`}>{r.chip}</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+            {a.key === "corroborate" && idRows.length > 0 && (
+              <div className="agent-rows">
+                {idRows.map((r) => (
                   <div key={r.id} className="agent-row">
                     <span className="row-text">{r.text}</span>
                     {r.chip && <span className={`row-chip ${r.chipClass ?? ""}`}>{r.chip}</span>}

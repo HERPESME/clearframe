@@ -845,3 +845,71 @@ button {
     font-size: 18px;
   }
 }
+
+/* ---- identity corroboration, live signals, territory ------------------ */
+.badge.verdict { letter-spacing: .4px; }
+.badge.verdict.CORROBORATED { background: rgba(39,174,96,.16); color: var(--low); border-color: rgba(39,174,96,.45); }
+.badge.verdict.SINGLE_SOURCE { background: rgba(127,140,141,.16); color: var(--muted); border-color: rgba(127,140,141,.4); }
+.badge.verdict.CONFLICTED { background: rgba(192,57,43,.18); color: var(--critical); border-color: rgba(192,57,43,.55); }
+
+.conflict-banner {
+  margin: 10px 0 4px; padding: 9px 12px; font-size: 12.5px; line-height: 1.5;
+  background: rgba(192,57,43,.1); border: 1px solid rgba(192,57,43,.45);
+  border-left-width: 3px; border-radius: 3px; color: var(--ink);
+}
+.conflict-banner strong { color: var(--critical); }
+
+.card-body { display: flex; gap: 16px; align-items: flex-start; }
+.card-main { flex: 1; min-width: 0; }
+
+.frame-pos { flex: 0 0 auto; text-align: center; }
+.frame-pos svg { display: block; border-radius: 3px; }
+.frame-bg { fill: rgba(255,255,255,.035); stroke: var(--line); stroke-width: 1; }
+.frame-guide { stroke: var(--line); stroke-width: .5; stroke-dasharray: 2 4; }
+.frame-box { fill-opacity: .3; stroke-width: 1.5; }
+.frame-box.CRITICAL { fill: var(--critical); stroke: var(--critical); }
+.frame-box.HIGH { fill: var(--high); stroke: var(--high); }
+.frame-box.MEDIUM { fill: var(--medium); stroke: var(--medium); }
+.frame-box.LOW { fill: var(--low); stroke: var(--low); }
+.frame-cap { font-family: var(--mono); font-size: 9.5px; color: var(--muted); margin-top: 4px; }
+
+.sec-note { font-weight: normal; text-transform: none; letter-spacing: 0; color: var(--muted); }
+.signal-count { color: var(--high); }
+.citation.material { border-left: 2px solid var(--critical); padding-left: 8px; }
+.sig-flag {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .5px;
+  background: rgba(192,57,43,.2); color: var(--critical);
+  border: 1px solid rgba(192,57,43,.5); border-radius: 3px; padding: 1px 5px;
+}
+
+.terr-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 4px 0 6px; }
+.terr-chip {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .4px;
+  padding: 3px 9px; border-radius: 3px; border: 1px solid var(--line); cursor: help;
+}
+.terr-chip.CRITICAL { color: var(--critical); border-color: rgba(192,57,43,.5); }
+.terr-chip.HIGH { color: var(--high); border-color: rgba(230,126,34,.5); }
+.terr-chip.MEDIUM { color: var(--medium); border-color: rgba(41,128,185,.5); }
+.terr-chip.LOW { color: var(--low); border-color: rgba(39,174,96,.5); }
+
+.chip.ok { color: var(--low); border-color: rgba(39,174,96,.5); }
+
+button.secondary {
+  background: transparent; color: var(--ink); border: 1px solid var(--line);
+  border-radius: 3px; padding: 9px 16px; font-size: 12.5px; cursor: pointer;
+  font-family: inherit; margin-right: 10px;
+}
+button.secondary:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+button.secondary:disabled { opacity: .5; cursor: default; }
+.fresh-note { font-size: 12px; color: var(--muted); margin-left: 14px; }
+
+/* The decision stamp is absolutely positioned; with the identity/territory
+   badges the header now runs under it. Reserve the corner. */
+.card-head { padding-right: 190px; }
+.card:has(.stamp) .card-body { padding-top: 2px; }
+@media (max-width: 900px) {
+  .card-head { padding-right: 0; }
+  .stamp { position: static; display: inline-block; transform: none; margin-bottom: 8px; }
+  .card-body { flex-direction: column; }
+  .frame-pos { align-self: flex-start; }
+}
