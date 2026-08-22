@@ -21,6 +21,7 @@ export default function App() {
   const [freshNote, setFreshNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showUpload, setShowUpload] = useState(false);
+  const [resuming, setResuming] = useState<string | null>(null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -33,15 +34,40 @@ export default function App() {
       loadDemo();
       return;
     }
+    // Restore whatever you were last looking at. The list comes back newest
+    // first; if that run is still going, keep pulling until it finishes rather
+    // than presenting a half-finished report as though it were the answer.
     api
       .listProductions()
       .then(async (list) => {
-        if (list.length > 0) setState(await api.getProduction(list[0].id));
+        if (list.length === 0) return;
+        const newest = list[0];
+        setState(await api.getProduction(newest.id));
+        if (newest.running) setResuming(newest.id);
       })
       .catch(() => setError("Could not reach the ClearFrame API. Is the server running?"))
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // A restored run is still executing server-side. Poll until it finishes, so
+  // a page refresh mid-analysis picks up where it left off instead of freezing
+  // on a partial report.
+  useEffect(() => {
+    if (!resuming) return;
+    const id = window.setInterval(async () => {
+      try {
+        const fresh = await api.getProduction(resuming);
+        setState(fresh);
+        const list = await api.listProductions();
+        const row = list.find((r) => r.id === resuming);
+        if (row && !row.running) setResuming(null);
+      } catch {
+        setResuming(null);
+      }
+    }, 3000);
+    return () => window.clearInterval(id);
+  }, [resuming]);
 
   const changeRole = (r: Role) => {
     setRole(r);
@@ -435,6 +461,13 @@ export default function App() {
       </div>
 
       <main className="cards">
+        {resuming && (
+          <div className="resuming-banner">
+            <strong>Still analysing.</strong> This run is continuing on the server —
+            the findings below are what has landed so far and will keep filling in.
+            Refreshing or closing the tab will not stop it.
+          </div>
+        )}
         {claimed.length > 0 && (
           <div className="platform-banner">
             <strong>Platform enforcement — {claimed[0].platform}.</strong> Separate from

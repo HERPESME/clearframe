@@ -49,6 +49,14 @@ export interface SponsorConflict {
   note: string;
 }
 
+export interface ProductionSummary {
+  id: string;
+  title: string;
+  stage_status: Record<string, string>;
+  updated_at: number;
+  running: boolean;
+}
+
 export interface PlatformOutcome {
   element_id: string;
   platform: string;

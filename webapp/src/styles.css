@@ -866,6 +866,9 @@ button {
   color: inherit; cursor: pointer; letter-spacing: inherit; }
 .brand-home:hover { opacity: .8; }
 
+.resuming-banner { background: rgba(241,196,15,.10); border:1px solid rgba(241,196,15,.4); border-radius:4px; padding:10px 14px; margin: 0 0 16px; font-size:13px; }
+.resuming-banner strong { color: var(--amber); }
+
 .platform-banner { background: rgba(211,84,0,.10); border:1px solid rgba(211,84,0,.4); border-radius:4px; padding:10px 14px; margin: 0 0 16px; font-size:13px; }
 .platform-banner strong { color:#e67e22; }
 .platform-banner em { color: var(--muted); font-style: normal; }

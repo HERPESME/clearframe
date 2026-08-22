@@ -26,10 +26,19 @@ has() {  # has <needle> <curl args...>
   grep -q -- "$needle" <<<"$body"
 }
 
-cleanup() { pkill -f "clearframe serve" 2>/dev/null || true; }
+# Kill only what is listening on OUR port. `pkill -f "clearframe serve"` was
+# killing every ClearFrame server on the machine, including a dev server the
+# user had running on another port — twice per invocation, since the EXIT trap
+# fires too. A test that silently kills your app is worse than a slow one.
+kill_our_port() {
+  local pids
+  pids=$(lsof -ti:"$PORT" 2>/dev/null) || return 0
+  [ -n "$pids" ] && kill $pids 2>/dev/null || true
+}
+cleanup() { kill_our_port; }
 trap cleanup EXIT
 # ensure no stale server from a previous run holds the port
-pkill -f "clearframe serve" 2>/dev/null || true
+kill_our_port
 sleep 1
 
 echo "━━ 1. Test suite"
