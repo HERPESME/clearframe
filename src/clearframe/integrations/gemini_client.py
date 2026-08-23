@@ -55,8 +55,12 @@ SCAN_PROMPT = (
     "released film, series, advert or game, rather than original material that "
     "merely contains third-party items — say so as `source_work` with its title, "
     "the studio or rights holder if you know it, your confidence (high/medium/"
-    "low) and the evidence. Only claim it when you actually recognise the work; "
-    "a wrong identification would suppress every finding inside it. "
+    "low), the evidence, and its `medium`: animation if it is drawn, animated "
+    "or fully CG, live_action if it is photographed, mixed, or unknown. The "
+    "medium matters because a drawn work's studio authored everything in "
+    "frame, whereas a live-action set is full of real objects other people "
+    "own. Only claim a source work when you actually recognise it; a wrong "
+    "identification would suppress every finding inside it. "
     "Separately, report anything visible that should probably not be PUBLISHED "
     "at all, as `exposures` — these are not clearance items and nobody owns "
     "them, which is exactly why they get missed. Kinds: MINOR (an identifiable "
@@ -268,8 +272,12 @@ SCAN_RESPONSE_SCHEMA: dict = {
                 "rights_holder": {"type": "string"},
                 "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
                 "basis": {"type": "string"},
+                "medium": {
+                    "type": "string",
+                    "enum": ["animation", "live_action", "mixed", "unknown"],
+                },
             },
-            "required": ["title", "confidence", "basis"],
+            "required": ["title", "confidence", "basis", "medium"],
         },
         "exposures": {
             "type": "array",
