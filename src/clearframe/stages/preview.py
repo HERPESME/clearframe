@@ -47,6 +47,7 @@ class PreviewStage:
             ctx.state.corroboration,
             use_context=use_context,
             sponsors=ctx.state.production.sponsors,
+            source_work=ctx.state.source_work,
         )
         ctx.state.routes = routes
 

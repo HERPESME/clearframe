@@ -187,6 +187,7 @@ class ResearchStage:
             ctx.state.corroboration,
             use_context=use_context,
             sponsors=ctx.state.production.sponsors,
+            source_work=ctx.state.source_work,
         )
 
         # A CONFLICTED identity is routed BLOCKED by the router; keep the

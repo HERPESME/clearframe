@@ -639,6 +639,30 @@ class LiabilityEstimate(BaseModel):
     escalation: list[str] = Field(default_factory=list)
 
 
+class SourceWork(BaseModel):
+    """The footage IS someone else's work, rather than merely containing bits of it.
+
+    Uploading a clip of an existing film produced eight findings and five
+    separate multi-minute investigations into characters from one work with one
+    rights holder — inside footage that was itself that work. Six of seven deep
+    runs returned nothing.
+
+    The correct output is one finding, not eight: clear the work. You either
+    hold a licence to the film or you do not, and researching a supporting
+    character cannot change that.
+
+    Not everything is subsumed. A real brand placed inside the work is still a
+    live third-party mark — Pizza Hut paid for that placement in Japan, and the
+    sponsorship famously did not travel. Music carries its own paper. A real
+    person carries their own release.
+    """
+
+    title: str
+    rights_holder: str = ""
+    confidence: str = "low"
+    basis: str = ""
+
+
 class PreviewFinding(BaseModel):
     """One finding as it stands BEFORE any rights research has run.
 
@@ -705,6 +729,7 @@ class ProductionState(BaseModel):
     # Stored untyped because `territory.Defence` imports from this module.
     defences: dict[str, list[dict]] = Field(default_factory=dict)
     exposures: list[ExposureFinding] = Field(default_factory=list)
+    source_work: SourceWork | None = None
     assessed_exposures: list[AssessedExposure] = Field(default_factory=list)
     preview: list[PreviewFinding] = Field(default_factory=list)
     detector_hits: list[DetectorHit] = Field(default_factory=list)
