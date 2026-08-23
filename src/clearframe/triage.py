@@ -2,6 +2,7 @@
 
 from clearframe.matching import labels_match
 from clearframe.models import (
+    BBox,
     ClearanceCategory,
     DetectedElement,
     ElementType,
@@ -49,6 +50,58 @@ def _overlaps(a: DetectedElement, b: DetectedElement) -> bool:
     )
 
 
+# A label that names the same thing in both passes, allowing only for
+# punctuation and word order. Deliberately far above MATCH_THRESHOLD: this is
+# the only evidence permitted to merge across a type disagreement.
+_NAMES_THE_SAME = 0.9
+
+
+def _boxes_overlap(a: BBox, b: BBox) -> bool:
+    return a.xmin < b.xmax and b.xmin < a.xmax and a.ymin < b.ymax and b.ymin < a.ymax
+
+
+def _colocated(a: DetectedElement, b: DetectedElement) -> bool:
+    """On screen at the same moment AND in the same part of the frame.
+
+    The objection to matching on time alone is that two distinct logos share a
+    shot. They do — and they are not in the same place in it, which is what
+    this adds. Both sightings must carry a measured box: an absent box is not
+    agreement, so a pair with nothing to compare stays two findings.
+    """
+    pairs = [
+        (r.bbox, q.bbox)
+        for r in a.time_ranges
+        for q in b.time_ranges
+        if r.start_s < q.end_s and q.start_s < r.end_s
+        and r.bbox is not None and q.bbox is not None
+    ]
+    return any(_boxes_overlap(r, q) for r, q in pairs)
+
+
+def _same_finding(a: DetectedElement, b: DetectedElement) -> bool:
+    """Are these two sightings of one object?
+
+    Two rules beyond the label, each added for a pair that survived on a live
+    run and was routed, scored and reported twice.
+
+    Same type, same instant, same rectangle. "Mike Tyson face tattoo" and
+    "Stu's Face Tattoo" share {face, tattoo} — 2 of 4 tokens, 0.5 against a
+    0.6 threshold — so the label alone says no. They are the same square inch
+    of the same face at the same second, and the grounding pass returned the
+    identical box for both.
+
+    Or one of them is TEXT. TEXT_ON_SCREEN is what the scan produces when it
+    reads letters rather than recognising the thing wearing them, so a mark
+    the second pass spelled out is the mark, not a separate finding — but only
+    on an all-but-identical label, because that is the whole of the evidence.
+    """
+    if a.element_type is b.element_type:
+        return labels_match(a.label, b.label) or _colocated(a, b)
+    if ElementType.TEXT in (a.element_type, b.element_type):
+        return labels_match(a.label, b.label, _NAMES_THE_SAME) and _overlaps(a, b)
+    return False
+
+
 def _screen_time(group: list[DetectedElement], ranges: list[TimeRange]) -> float:
     """Measured from the merged ranges, not summed from each pass's claim.
 
@@ -91,6 +144,13 @@ def _merge(group: list[DetectedElement]) -> DetectedElement:
     richer = {
         "label": longest_label.label,
         "description": richest.description,
+        # A brand read as lettering is still the brand. TEXT is the fallback
+        # type, so it never decides the category of a group that contains a
+        # type naming an actual rights subject.
+        "element_type": next(
+            (d.element_type for d in group if d.element_type is not ElementType.TEXT),
+            first.element_type,
+        ),
         # Prefer whichever pass actually reported these; a default is not an
         # observation, and the first pass is not authoritative over the second.
         "siting": next(
@@ -133,13 +193,14 @@ def triage(detections: list[DetectedElement]) -> list[TriagedElement]:
 
     Matching is deliberately conservative. Under-merging leaves a duplicate,
     which is annoying and costs a research run. Over-merging DELETES a finding,
-    which is the failure this product exists to prevent. So a merge needs the
-    same element type AND a `labels_match`; a weak resemblance is not enough.
+    which is the failure this product exists to prevent. `_same_finding` holds
+    the whole rule: a shared label, or the same rectangle at the same instant,
+    or an all-but-identical label where one pass fell back to TEXT.
     """
     groups: list[list[DetectedElement]] = []
     for d in detections:
         for g in groups:
-            if g[0].element_type is d.element_type and labels_match(g[0].label, d.label):
+            if _same_finding(g[0], d):
                 g.append(d)
                 break
         else:
