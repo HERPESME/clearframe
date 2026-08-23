@@ -143,3 +143,34 @@ def test_a_catalogued_mark_is_unaffected():
         }
     )
     assert route(background, KB).tier in (ResearchTier.LOCAL, ResearchTier.SEARCH)
+
+
+def test_the_replica_test_matches_how_the_model_actually_writes():
+    """The live scan wrote "replicating", and the vocabulary held "replicated".
+
+    Whole-word matching missed the exact fact pattern Whitmill turns on, in the
+    exact clip that lawsuit was about. English inflects; a set of literals does
+    not, so the test is now on stems.
+    """
+    variants = [
+        "replicating Mike Tyson's famous tattoo",
+        "a replica of Mike Tyson's tattoo",
+        "replicated from another artist's design",
+        "reproducing a well-known tattoo",
+        "recreating the original artwork",
+        "copying a design seen elsewhere",
+        "an imitation of a famous tattoo",
+    ]
+    for description in variants:
+        r = route(art("Face tattoo", ElementType.TATTOO, description), KB)
+        assert r.tier is ResearchTier.DEEP, description
+        assert "Whitmill" in r.basis, description
+
+
+def test_a_tattoo_described_plainly_is_still_the_wearer_s_own():
+    for description in (
+        "A black tribal tattoo on the left side of a man's face.",
+        "A small bird tattooed on her wrist.",
+    ):
+        r = route(art("Face tattoo", ElementType.TATTOO, description), KB)
+        assert r.tier is ResearchTier.STATUTE, description
