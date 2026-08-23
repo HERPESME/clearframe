@@ -472,7 +472,27 @@ def create_app(out_root: Path) -> FastAPI:
         ctx = build_context(cfg.model_copy(update={"mode": "live"}), production, out_root)
         ctx.store = store
         event_queues[pid] = asyncio.Queue()
-        ctx.listener = event_queues[pid].put_nowait
+
+        def _listen(event: dict) -> None:
+            event_queues[pid].put_nowait(event)
+            # Warm the boxes the moment the timecodes are FINAL, which is when
+            # preview completes — not when the whole run does. Triage fixes the
+            # appearances and their rectangles before preview; everything after
+            # it (research, freshness, risk, territory, coverage, remediation,
+            # court) changes what is KNOWN about a finding, never where or when
+            # it is on screen.
+            #
+            # The measured shape of a run makes this free: preview lands at
+            # ~167s and the remaining stages take ~335s, while warming a 50s
+            # clip takes ~100s. Started here it finishes inside research, so
+            # the report and the boxes become ready at the same moment instead
+            # of the boxes trailing it by two minutes.
+            if event.get("type") == "stage_complete" and event.get("stage") == "preview":
+                if pid not in _pregrounded:
+                    _pregrounded.add(pid)
+                    asyncio.create_task(_preground(pid))
+
+        ctx.listener = _listen
 
         async def _run() -> None:
             try:
@@ -569,8 +589,13 @@ def create_app(out_root: Path) -> FastAPI:
         _ground_cache[key] = boxes
         return {"at_s": at_s, "boxes": boxes, "grounded": True}
 
-    # Productions whose boxes have already been warmed in this process.
+    # Productions whose boxes have already been warmed in this process, and
+    # how far along each one is. Without the second, a reviewer pausing during
+    # the warm-up cannot tell a frame that is still being measured from a
+    # player that has stopped working — which is exactly how this landed the
+    # first time.
     _pregrounded: set[str] = set()
+    _preground_progress: dict[str, dict] = {}
 
     async def _preground(pid: str) -> None:
         """Measure the moments that matter before anyone pauses on them.
@@ -606,6 +631,12 @@ def create_app(out_root: Path) -> FastAPI:
         if not ordered:
             return
         seconds = ordered[:PREGROUND_MAX_FRAMES]
+        _preground_progress[pid] = {
+            "total": len(seconds),
+            "done": 0,
+            "running": True,
+            "skipped": max(0, len(ordered) - len(seconds)),
+        }
         if len(ordered) > len(seconds):
             # Never a silent cap: a second that was not warmed still works, it
             # is just slow, and the reviewer should not have to guess which.
@@ -621,6 +652,7 @@ def create_app(out_root: Path) -> FastAPI:
         async def one(second: int) -> None:
             key = (pid, second)
             if key in _ground_cache:
+                _preground_progress[pid]["done"] += 1
                 return
             at_s = float(second)
             here = [
@@ -629,15 +661,26 @@ def create_app(out_root: Path) -> FastAPI:
                 and any(r.start_s <= at_s <= r.end_s for r in el.time_ranges)
             ]
             if not here:
+                _preground_progress[pid]["done"] += 1
                 return
             async with gate:
                 try:
                     await _measure_frame(pid, at_s, here, key)
                 except Exception as exc:  # a warm cache is a nicety, never a failure
                     log.warning("pre-grounding %s at %ss failed: %s", pid, second, exc)
+                finally:
+                    _preground_progress[pid]["done"] += 1
 
         await asyncio.gather(*(one(s) for s in seconds), return_exceptions=True)
+        _preground_progress[pid]["running"] = False
         log.info("pre-grounding complete for %s (%d cached)", pid, len(_ground_cache))
+
+    @app.get("/api/productions/{pid}/preground")
+    def preground_progress(pid: str):
+        """How much of this production has had its boxes measured."""
+        return _preground_progress.get(
+            pid, {"total": 0, "done": 0, "running": False, "skipped": 0}
+        )
 
     @app.post("/api/productions/{pid}/preground")
     async def preground(pid: str):
