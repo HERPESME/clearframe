@@ -205,3 +205,46 @@ def test_a_whole_frame_box_is_not_evidence_that_two_things_are_one():
               [(13.8, 15.6, {"ymin": .22, "xmin": .36, "ymax": .88, "xmax": .98})]),
     ])
     assert len(out) == 2
+
+
+def test_two_characters_sharing_a_shot_are_not_one_character():
+    """Colocation cannot manufacture agreement out of nothing.
+
+    Found by replaying a live Code Geass run. Two people standing in one frame
+    overlap — that is what standing next to someone looks like — so "same type,
+    same instant, same place" merged Lelouch with C.C., and merged Arthur (a
+    cat) with the pizza delivery guy. Both absorbed findings were DELETED from
+    the report, and the survivor took the longer label, so the cat's group came
+    out labelled "Pizza Delivery Guy".
+
+    The rule is now what it should always have been: a shared instant and a
+    shared place can PROMOTE a label agreement that fell just short of the
+    threshold. They cannot substitute for one. Lelouch and C.C. share no token
+    at all.
+    """
+    frame_left = {"ymin": .15, "xmin": .10, "ymax": .90, "xmax": .55}
+    frame_right = {"ymin": .18, "xmin": .40, "ymax": .88, "xmax": .85}
+    out = triage([
+        boxed("Lelouch Lamperouge", ElementType.CHARACTER, [(5.0, 11.4, frame_left)]),
+        boxed("C.C.", ElementType.CHARACTER, [(5.0, 11.4, frame_right)]),
+    ])
+    assert len(out) == 2
+
+
+def test_a_cat_and_a_delivery_driver_stay_two_findings():
+    out = triage([
+        boxed("Arthur", ElementType.CHARACTER,
+              [(2.0, 9.0, {"ymin": .55, "xmin": .20, "ymax": .95, "xmax": .60})]),
+        boxed("Pizza Delivery Guy", ElementType.CHARACTER,
+              [(2.0, 9.0, {"ymin": .10, "xmin": .15, "ymax": .90, "xmax": .70})]),
+    ])
+    assert len(out) == 2
+
+
+def test_colocation_still_rescues_a_label_that_nearly_matched():
+    """The tattoo pair: {face, tattoo} shared, 0.5 against a 0.6 threshold."""
+    out = triage([
+        boxed("Mike Tyson face tattoo", ElementType.TATTOO, [_TYSON]),
+        boxed("Stu's Face Tattoo", ElementType.TATTOO, [_STU]),
+    ])
+    assert len(out) == 1
