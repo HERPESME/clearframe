@@ -751,6 +751,12 @@ class ProductionState(BaseModel):
     # False when fingerprinting could not run at all — an unchecked recording
     # must never be reported as an unmatched one.
     audio_checked: bool = True
+    # Whether the logo detector was actually asked, as distinct from whether it
+    # found anything. `if not hits` cannot tell an empty answer from an absent
+    # one, so a clip where Video Intelligence recognised no catalogued logo
+    # paid its full latency twice — measured at 65s per live run, for the same
+    # empty result. Same shape as `audio_checked`, same reason.
+    detector_checked: bool = False
     routes: dict[str, ResearchRoute] = Field(default_factory=dict)
     liability: dict[str, LiabilityEstimate] = Field(default_factory=dict)
     sponsor_conflicts: list[SponsorConflict] = Field(default_factory=list)

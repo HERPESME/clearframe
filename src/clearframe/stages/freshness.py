@@ -10,6 +10,7 @@ import asyncio
 
 from clearframe.freshness import material_count, to_signals
 from clearframe.integrations.parallel_client import build_freshness_objective
+from clearframe.sourcework import subsumed_by
 from clearframe.models import research_is_incomplete
 from clearframe.pipeline import PipelineContext
 
@@ -21,10 +22,20 @@ class FreshnessStage:
         self.max_results = max_results
 
     async def run(self, ctx: PipelineContext) -> None:
+        # Only findings whose owner came from RESEARCH. An owner supplied by
+        # source-work subsumption or the local catalogue was never looked up on
+        # the open web, and asking whether that holder is currently litigating
+        # spends a Search call on a question we did not raise — three of them
+        # on the last live run, all asking whether Warner Bros. is suing people
+        # about elements of its own film.
+        subsumed = {
+            e.id for e in ctx.state.elements if subsumed_by(e, ctx.state.source_work)
+        }
         targets = [
             el
             for el in ctx.state.elements
-            if not research_is_incomplete(ctx.state.research.get(el.id))
+            if el.id not in subsumed
+            and not research_is_incomplete(ctx.state.research.get(el.id))
             and ctx.state.research[el.id].owner
         ]
 

@@ -1,6 +1,6 @@
 {
  "note": "Ownership is a verifiable corporate fact and resolves locally. Posture is live information: it is only asserted where a documented, citable depiction-related action exists, and is otherwise left unknown so the router escalates to Parallel Search.",
- "verified_on": "2026-08-22",
+ "verified_on": "2026-08-23",
  "marks": [
   {
    "label": "Coca-Cola",
@@ -90,8 +90,8 @@
   },
   {
    "label": "Nespresso",
-   "owner": "Nestlé S.A.",
-   "parent": "Nestlé S.A.",
+   "owner": "Nestl\u00e9 S.A.",
+   "parent": "Nestl\u00e9 S.A.",
    "aliases": [],
    "sector": "beverage",
    "posture": "unknown",
@@ -256,8 +256,8 @@
   },
   {
    "label": "Kit Kat",
-   "owner": "Nestlé S.A.",
-   "parent": "Nestlé S.A.",
+   "owner": "Nestl\u00e9 S.A.",
+   "parent": "Nestl\u00e9 S.A.",
    "aliases": [
     "kitkat"
    ],
@@ -819,9 +819,9 @@
    "posture_evidence": ""
   },
   {
-   "label": "Hermès",
-   "owner": "Hermès International S.A.",
-   "parent": "Hermès International S.A.",
+   "label": "Herm\u00e8s",
+   "owner": "Herm\u00e8s International S.A.",
+   "parent": "Herm\u00e8s International S.A.",
    "aliases": [
     "hermes",
     "birkin"
@@ -870,8 +870,8 @@
   },
   {
    "label": "Zara",
-   "owner": "Industria de Diseño Textil, S.A. (Inditex)",
-   "parent": "Industria de Diseño Textil, S.A. (Inditex)",
+   "owner": "Industria de Dise\u00f1o Textil, S.A. (Inditex)",
+   "parent": "Industria de Dise\u00f1o Textil, S.A. (Inditex)",
    "aliases": [],
    "sector": "apparel",
    "posture": "unknown",
@@ -1382,8 +1382,8 @@
   },
   {
    "label": "FIFA",
-   "owner": "Fédération Internationale de Football Association",
-   "parent": "Fédération Internationale de Football Association",
+   "owner": "F\u00e9d\u00e9ration Internationale de Football Association",
+   "parent": "F\u00e9d\u00e9ration Internationale de Football Association",
    "aliases": [],
    "sector": "sport",
    "posture": "unknown",
@@ -1417,7 +1417,7 @@
    ],
    "sector": "sport",
    "posture": "litigious",
-   "posture_evidence": "Protected beyond ordinary trademark by 36 U.S.C. §220506, which grants the USOPC exclusive rights without the usual likelihood-of-confusion showing. Enforced routinely against unlicensed depiction."
+   "posture_evidence": "Protected beyond ordinary trademark by 36 U.S.C. \u00a7220506, which grants the USOPC exclusive rights without the usual likelihood-of-confusion showing. Enforced routinely against unlicensed depiction."
   },
   {
    "label": "Caterpillar",
@@ -1428,7 +1428,7 @@
    ],
    "sector": "industrial",
    "posture": "standard",
-   "posture_evidence": "Sued Disney over bulldozer depiction in George of the Jungle 2 (Caterpillar v. Walt Disney, C.D. Ill. 2003) and lost — depicting a product is not trademark infringement absent confusion."
+   "posture_evidence": "Sued Disney over bulldozer depiction in George of the Jungle 2 (Caterpillar v. Walt Disney, C.D. Ill. 2003) and lost \u2014 depicting a product is not trademark infringement absent confusion."
   },
   {
    "label": "Bayer",
@@ -1520,13 +1520,795 @@
    "posture_evidence": ""
   },
   {
-   "label": "Nescafé",
-   "owner": "Nestlé S.A.",
-   "parent": "Nestlé S.A.",
+   "label": "Nescaf\u00e9",
+   "owner": "Nestl\u00e9 S.A.",
+   "parent": "Nestl\u00e9 S.A.",
    "aliases": [
     "nescafe"
    ],
    "sector": "beverage",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Calvin Klein",
+   "owner": "PVH Corp.",
+   "parent": "PVH Corp.",
+   "aliases": [
+    "ck"
+   ],
+   "sector": "apparel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Tommy Hilfiger",
+   "owner": "PVH Corp.",
+   "parent": "PVH Corp.",
+   "aliases": [],
+   "sector": "apparel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Ralph Lauren",
+   "owner": "Ralph Lauren Corporation",
+   "parent": "Ralph Lauren Corporation",
+   "aliases": [
+    "polo ralph lauren"
+   ],
+   "sector": "apparel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Lacoste",
+   "owner": "MF Brands Group",
+   "parent": "MF Brands Group",
+   "aliases": [],
+   "sector": "apparel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Guess",
+   "owner": "Guess?, Inc.",
+   "parent": "Guess?, Inc.",
+   "aliases": [],
+   "sector": "apparel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Timberland",
+   "owner": "VF Corporation",
+   "parent": "VF Corporation",
+   "aliases": [],
+   "sector": "apparel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Wrangler",
+   "owner": "Kontoor Brands, Inc.",
+   "parent": "Kontoor Brands, Inc.",
+   "aliases": [],
+   "sector": "apparel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Lee",
+   "owner": "Kontoor Brands, Inc.",
+   "parent": "Kontoor Brands, Inc.",
+   "aliases": [],
+   "sector": "apparel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Champion",
+   "owner": "Hanesbrands Inc.",
+   "parent": "Hanesbrands Inc.",
+   "aliases": [],
+   "sector": "apparel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Fila",
+   "owner": "Fila Holdings Corp.",
+   "parent": "Fila Holdings Corp.",
+   "aliases": [],
+   "sector": "apparel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Asics",
+   "owner": "ASICS Corporation",
+   "parent": "ASICS Corporation",
+   "aliases": [],
+   "sector": "apparel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Crocs",
+   "owner": "Crocs, Inc.",
+   "parent": "Crocs, Inc.",
+   "aliases": [],
+   "sector": "apparel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Dr. Martens",
+   "owner": "Dr. Martens plc",
+   "parent": "Dr. Martens plc",
+   "aliases": [
+    "doc martens",
+    "docs"
+   ],
+   "sector": "apparel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Omega",
+   "owner": "The Swatch Group Ltd.",
+   "parent": "The Swatch Group Ltd.",
+   "aliases": [],
+   "sector": "luxury",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Swatch",
+   "owner": "The Swatch Group Ltd.",
+   "parent": "The Swatch Group Ltd.",
+   "aliases": [],
+   "sector": "luxury",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Tissot",
+   "owner": "The Swatch Group Ltd.",
+   "parent": "The Swatch Group Ltd.",
+   "aliases": [],
+   "sector": "luxury",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Casio",
+   "owner": "Casio Computer Co., Ltd.",
+   "parent": "Casio Computer Co., Ltd.",
+   "aliases": [],
+   "sector": "consumer",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "G-Shock",
+   "owner": "Casio Computer Co., Ltd.",
+   "parent": "Casio Computer Co., Ltd.",
+   "aliases": [
+    "gshock"
+   ],
+   "sector": "consumer",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Seiko",
+   "owner": "Seiko Group Corporation",
+   "parent": "Seiko Group Corporation",
+   "aliases": [],
+   "sector": "consumer",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Citizen",
+   "owner": "Citizen Watch Co., Ltd.",
+   "parent": "Citizen Watch Co., Ltd.",
+   "aliases": [],
+   "sector": "consumer",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "TAG Heuer",
+   "owner": "LVMH Moet Hennessy Louis Vuitton",
+   "parent": "LVMH Moet Hennessy Louis Vuitton",
+   "aliases": [
+    "tag heuer",
+    "heuer"
+   ],
+   "sector": "luxury",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Cartier",
+   "owner": "Compagnie Financiere Richemont SA",
+   "parent": "Compagnie Financiere Richemont SA",
+   "aliases": [],
+   "sector": "luxury",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "IWC",
+   "owner": "Compagnie Financiere Richemont SA",
+   "parent": "Compagnie Financiere Richemont SA",
+   "aliases": [
+    "iwc schaffhausen"
+   ],
+   "sector": "luxury",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Montblanc",
+   "owner": "Compagnie Financiere Richemont SA",
+   "parent": "Compagnie Financiere Richemont SA",
+   "aliases": [],
+   "sector": "luxury",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Patek Philippe",
+   "owner": "Patek Philippe SA",
+   "parent": "Patek Philippe SA",
+   "aliases": [],
+   "sector": "luxury",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Audemars Piguet",
+   "owner": "Audemars Piguet Holding SA",
+   "parent": "Audemars Piguet Holding SA",
+   "aliases": [],
+   "sector": "luxury",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Tiffany & Co.",
+   "owner": "LVMH Moet Hennessy Louis Vuitton",
+   "parent": "LVMH Moet Hennessy Louis Vuitton",
+   "aliases": [
+    "tiffany"
+   ],
+   "sector": "luxury",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Pandora",
+   "owner": "Pandora A/S",
+   "parent": "Pandora A/S",
+   "aliases": [],
+   "sector": "luxury",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Swarovski",
+   "owner": "Swarovski AG",
+   "parent": "Swarovski AG",
+   "aliases": [],
+   "sector": "luxury",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Persol",
+   "owner": "EssilorLuxottica",
+   "parent": "EssilorLuxottica",
+   "aliases": [],
+   "sector": "apparel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Warby Parker",
+   "owner": "Warby Parker Inc.",
+   "parent": "Warby Parker Inc.",
+   "aliases": [],
+   "sector": "apparel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "National Car Rental",
+   "owner": "Enterprise Holdings, Inc.",
+   "parent": "Enterprise Holdings, Inc.",
+   "aliases": [
+    "national"
+   ],
+   "sector": "travel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Enterprise Rent-A-Car",
+   "owner": "Enterprise Holdings, Inc.",
+   "parent": "Enterprise Holdings, Inc.",
+   "aliases": [
+    "enterprise"
+   ],
+   "sector": "travel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Alamo",
+   "owner": "Enterprise Holdings, Inc.",
+   "parent": "Enterprise Holdings, Inc.",
+   "aliases": [
+    "alamo rent a car"
+   ],
+   "sector": "travel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Hertz",
+   "owner": "Hertz Global Holdings, Inc.",
+   "parent": "Hertz Global Holdings, Inc.",
+   "aliases": [],
+   "sector": "travel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Avis",
+   "owner": "Avis Budget Group, Inc.",
+   "parent": "Avis Budget Group, Inc.",
+   "aliases": [],
+   "sector": "travel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Budget",
+   "owner": "Avis Budget Group, Inc.",
+   "parent": "Avis Budget Group, Inc.",
+   "aliases": [
+    "budget rent a car"
+   ],
+   "sector": "travel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Sixt",
+   "owner": "Sixt SE",
+   "parent": "Sixt SE",
+   "aliases": [],
+   "sector": "travel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Ritz-Carlton",
+   "owner": "Marriott International, Inc.",
+   "parent": "Marriott International, Inc.",
+   "aliases": [
+    "ritz carlton"
+   ],
+   "sector": "travel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Hyatt",
+   "owner": "Hyatt Hotels Corporation",
+   "parent": "Hyatt Hotels Corporation",
+   "aliases": [],
+   "sector": "travel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Four Seasons",
+   "owner": "Four Seasons Hotels and Resorts",
+   "parent": "Four Seasons Hotels and Resorts",
+   "aliases": [],
+   "sector": "travel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Holiday Inn",
+   "owner": "InterContinental Hotels Group PLC",
+   "parent": "InterContinental Hotels Group PLC",
+   "aliases": [
+    "ihg"
+   ],
+   "sector": "travel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Best Western",
+   "owner": "Best Western International, Inc.",
+   "parent": "Best Western International, Inc.",
+   "aliases": [],
+   "sector": "travel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Delta",
+   "owner": "Delta Air Lines, Inc.",
+   "parent": "Delta Air Lines, Inc.",
+   "aliases": [
+    "delta air lines"
+   ],
+   "sector": "travel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Air France",
+   "owner": "Air France-KLM",
+   "parent": "Air France-KLM",
+   "aliases": [],
+   "sector": "travel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "British Airways",
+   "owner": "International Airlines Group",
+   "parent": "International Airlines Group",
+   "aliases": [],
+   "sector": "travel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Qatar Airways",
+   "owner": "Qatar Airways Group",
+   "parent": "Qatar Airways Group",
+   "aliases": [],
+   "sector": "travel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Ryanair",
+   "owner": "Ryanair Holdings plc",
+   "parent": "Ryanair Holdings plc",
+   "aliases": [],
+   "sector": "travel",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Domino's",
+   "owner": "Domino's Pizza, Inc.",
+   "parent": "Domino's Pizza, Inc.",
+   "aliases": [
+    "dominos",
+    "dominos pizza"
+   ],
+   "sector": "qsr",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Wendy's",
+   "owner": "The Wendy's Company",
+   "parent": "The Wendy's Company",
+   "aliases": [
+    "wendys"
+   ],
+   "sector": "qsr",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Chipotle",
+   "owner": "Chipotle Mexican Grill, Inc.",
+   "parent": "Chipotle Mexican Grill, Inc.",
+   "aliases": [],
+   "sector": "qsr",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Dunkin'",
+   "owner": "Inspire Brands, Inc.",
+   "parent": "Inspire Brands, Inc.",
+   "aliases": [
+    "dunkin",
+    "dunkin donuts"
+   ],
+   "sector": "qsr",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Popeyes",
+   "owner": "Restaurant Brands International Inc.",
+   "parent": "Restaurant Brands International Inc.",
+   "aliases": [],
+   "sector": "qsr",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Tim Hortons",
+   "owner": "Restaurant Brands International Inc.",
+   "parent": "Restaurant Brands International Inc.",
+   "aliases": [],
+   "sector": "qsr",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "In-N-Out",
+   "owner": "In-N-Out Burgers",
+   "parent": "In-N-Out Burgers",
+   "aliases": [
+    "in n out"
+   ],
+   "sector": "qsr",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Five Guys",
+   "owner": "Five Guys Enterprises LLC",
+   "parent": "Five Guys Enterprises LLC",
+   "aliases": [],
+   "sector": "qsr",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Papa John's",
+   "owner": "Papa John's International, Inc.",
+   "parent": "Papa John's International, Inc.",
+   "aliases": [
+    "papa johns"
+   ],
+   "sector": "qsr",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Johnnie Walker",
+   "owner": "Diageo plc",
+   "parent": "Diageo plc",
+   "aliases": [],
+   "sector": "alcohol",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Smirnoff",
+   "owner": "Diageo plc",
+   "parent": "Diageo plc",
+   "aliases": [],
+   "sector": "alcohol",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Bacardi",
+   "owner": "Bacardi Limited",
+   "parent": "Bacardi Limited",
+   "aliases": [],
+   "sector": "alcohol",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Jameson",
+   "owner": "Pernod Ricard",
+   "parent": "Pernod Ricard",
+   "aliases": [],
+   "sector": "alcohol",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Moet & Chandon",
+   "owner": "LVMH Moet Hennessy Louis Vuitton",
+   "parent": "LVMH Moet Hennessy Louis Vuitton",
+   "aliases": [
+    "moet"
+   ],
+   "sector": "alcohol",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Dom Perignon",
+   "owner": "LVMH Moet Hennessy Louis Vuitton",
+   "parent": "LVMH Moet Hennessy Louis Vuitton",
+   "aliases": [],
+   "sector": "alcohol",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Stella Artois",
+   "owner": "Anheuser-Busch InBev",
+   "parent": "Anheuser-Busch InBev",
+   "aliases": [
+    "stella"
+   ],
+   "sector": "alcohol",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Keurig",
+   "owner": "Keurig Dr Pepper Inc.",
+   "parent": "Keurig Dr Pepper Inc.",
+   "aliases": [],
+   "sector": "beverage",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Sonos",
+   "owner": "Sonos, Inc.",
+   "parent": "Sonos, Inc.",
+   "aliases": [],
+   "sector": "tech",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Leica",
+   "owner": "Leica Camera AG",
+   "parent": "Leica Camera AG",
+   "aliases": [],
+   "sector": "tech",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Fujifilm",
+   "owner": "Fujifilm Holdings Corporation",
+   "parent": "Fujifilm Holdings Corporation",
+   "aliases": [
+    "fuji"
+   ],
+   "sector": "tech",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Bang & Olufsen",
+   "owner": "Bang & Olufsen A/S",
+   "parent": "Bang & Olufsen A/S",
+   "aliases": [
+    "bang olufsen"
+   ],
+   "sector": "tech",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Garmin",
+   "owner": "Garmin Ltd.",
+   "parent": "Garmin Ltd.",
+   "aliases": [],
+   "sector": "tech",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Fitbit",
+   "owner": "Google LLC",
+   "parent": "Google LLC",
+   "aliases": [],
+   "sector": "tech",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Dyson",
+   "owner": "Dyson Ltd",
+   "parent": "Dyson Ltd",
+   "aliases": [],
+   "sector": "consumer",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "KitchenAid",
+   "owner": "Whirlpool Corporation",
+   "parent": "Whirlpool Corporation",
+   "aliases": [],
+   "sector": "consumer",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Whirlpool",
+   "owner": "Whirlpool Corporation",
+   "parent": "Whirlpool Corporation",
+   "aliases": [],
+   "sector": "consumer",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "InSinkErator",
+   "owner": "Whirlpool Corporation",
+   "parent": "Whirlpool Corporation",
+   "aliases": [
+    "in-sink-erator",
+    "in sink erator"
+   ],
+   "sector": "consumer",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Electrolux",
+   "owner": "AB Electrolux",
+   "parent": "AB Electrolux",
+   "aliases": [],
+   "sector": "consumer",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Le Creuset",
+   "owner": "Le Creuset",
+   "parent": "Le Creuset",
+   "aliases": [],
+   "sector": "consumer",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Wilson",
+   "owner": "Amer Sports",
+   "parent": "Amer Sports",
+   "aliases": [],
+   "sector": "sport",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Titleist",
+   "owner": "Acushnet Holdings Corp.",
+   "parent": "Acushnet Holdings Corp.",
+   "aliases": [],
+   "sector": "sport",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Callaway",
+   "owner": "Topgolf Callaway Brands Corp.",
+   "parent": "Topgolf Callaway Brands Corp.",
+   "aliases": [],
+   "sector": "sport",
+   "posture": "unknown",
+   "posture_evidence": ""
+  },
+  {
+   "label": "Peloton",
+   "owner": "Peloton Interactive, Inc.",
+   "parent": "Peloton Interactive, Inc.",
+   "aliases": [],
+   "sector": "sport",
    "posture": "unknown",
    "posture_evidence": ""
   }

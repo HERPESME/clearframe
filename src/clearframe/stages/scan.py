@@ -210,6 +210,10 @@ class ScanStage:
         if not ctx.state.audio_checked:
             ctx.emit({"type": "fingerprint_unavailable"})
         ctx.state.detector_hits = _or_empty(hits, "logo corroboration")
+        # Record that the detector was ASKED. Without this, an empty prefetch
+        # is indistinguishable from no prefetch and `corroborate` pays Video
+        # Intelligence's full latency a second time for the same empty answer.
+        ctx.state.detector_checked = not isinstance(hits, BaseException)
 
 
 def _or_empty(value, what: str) -> list:
