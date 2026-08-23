@@ -27,6 +27,7 @@ nothing.
 Pure code, no I/O.
 """
 
+from clearframe.matching import labels_match
 from clearframe.models import (
     ClearanceCategory,
     DetectedElement,
@@ -74,7 +75,10 @@ def subsumed_by(element: TriagedElement, work: SourceWork | None) -> bool:
 def corrected_types(
     detections: list[DetectedElement], work: SourceWork | None
 ) -> list[DetectedElement]:
-    """A real actor is not a drawn character, whatever the scan called them.
+    """The medium decides what kind of thing a person on screen is.
+
+    Two corrections, one in each direction, both gated on a medium the scan
+    identified and neither applied when it did not.
 
     CHARACTER exists for a specific legal reason: a drawn character has no
     right of publicity, because there is nobody to consent, and the right that
@@ -90,12 +94,54 @@ def corrected_types(
     Only corrected where it can be proven — a work the scan identified as
     live_action cannot have a drawn character playing its lead. An unknown
     medium changes nothing.
+
+    The drawn direction is handled by `_drawn_faces_are_characters` and is
+    deliberately narrower: it settles a disagreement between two passes rather
+    than reclassifying every face in an animation.
     """
-    if work is None or work.medium != "live_action":
+    if work is None:
+        return detections
+    if work.medium == "live_action":
+        return [
+            d.model_copy(update={"element_type": ElementType.FACE})
+            if d.element_type is ElementType.CHARACTER
+            else d
+            for d in detections
+        ]
+    if work.medium in _STUDIO_AUTHORED:
+        return _drawn_faces_are_characters(detections)
+    return detections
+
+
+def _drawn_faces_are_characters(
+    detections: list[DetectedElement],
+) -> list[DetectedElement]:
+    """The mirror image, and deliberately narrower than its reflection.
+
+    A live Code Geass run reported the same cartoon twice:
+
+        CHARACTER  "Pizza Hut Delivery Driver"   an element of the work
+        FACE       "Pizza Hut Delivery Driver"   obtain a personal release
+
+    One drawn delivery driver, two findings, two contradictory answers to the
+    only question that matters — and `triage` cannot join them, because
+    grouping needs one element type and both of these are rights-bearing.
+
+    Only a FACE that another detection in the SAME scan already called a
+    CHARACTER is corrected. That is a disagreement between two passes about
+    one object, and settling it invents nothing. A lone face is left as it is:
+    a drawn work can contain a photograph of a real person, CHARACTER is
+    subsumable by a licence to the work, and a blanket rule would therefore
+    risk suppressing a release that was genuinely needed. Narrow costs a
+    duplicate; broad costs a finding.
+    """
+    drawn = [d.label for d in detections if d.element_type is ElementType.CHARACTER]
+    if not drawn:
         return detections
     return [
-        d.model_copy(update={"element_type": ElementType.FACE})
-        if d.element_type is ElementType.CHARACTER
+        d.model_copy(update={"element_type": ElementType.CHARACTER})
+        if d.element_type is ElementType.FACE
+        and any(labels_match(d.label, c) for c in drawn)
         else d
         for d in detections
     ]

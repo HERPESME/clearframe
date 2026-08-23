@@ -16,7 +16,7 @@ from pydantic import BaseModel
 from clearframe.config import ClearFrameConfig, validate_live
 from clearframe.dossier import pending_ids
 from clearframe.licensing import assign_ids, parse_licence_csv, parse_licence_json
-from clearframe.media import extract_frame, probe_duration_s
+from clearframe.media import extract_frame, probe_duration_s, probe_fps
 
 log = logging.getLogger("clearframe.webapp")
 from clearframe.models import Production
@@ -72,6 +72,32 @@ def _find_dist_dir() -> Path | None:
 
 
 DIST_DIR = _find_dist_dir()
+
+
+class _ShellFiles(StaticFiles):
+    """The shell revalidates; the hashed assets it points at never need to.
+
+    Mounted as plain `StaticFiles`, index.html carried no cache policy, so
+    browsers served it from their heuristic cache — still pointing at a bundle
+    filename from two commits earlier. Two fixes were made, rebuilt, committed
+    and verified, and none of them reached the screen; the next three
+    diagnoses were of code that was no longer running.
+
+    Exactly the `media_version` failure in a different costume: a URL whose
+    bytes changed underneath a browser that had been given no reason to ask
+    again. The asset filenames are content-hashed by Vite, so caching THEM
+    forever is free and correct — it is only the document that names them
+    which must be checked every time.
+    """
+
+    def file_response(self, *args, **kwargs):
+        response = super().file_response(*args, **kwargs)
+        content_type = response.headers.get("content-type", "")
+        if content_type.startswith("text/html"):
+            response.headers["Cache-Control"] = "no-cache"
+        else:
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        return response
 
 
 class DecisionRequest(BaseModel):
@@ -415,7 +441,12 @@ def create_app(out_root: Path) -> FastAPI:
             id=pid,
             title=title,
             footage_uri=str(target),
-            fps=fps,
+            # Measured, for the same reason duration is. The form default of
+            # 24.0 fed `timeline`'s one-frame test, so a 30fps clip was judged
+            # against a 42ms frame instead of a 33ms one — a physical test
+            # running on a guessed constant. A caller who supplies a rate other
+            # than the default is trusted; otherwise ffmpeg decides.
+            fps=(fps if fps != 24.0 else (probe_fps(target) or 24.0)),
             # Measure it. The form defaults to 0.0 and nothing used to correct
             # that, so a 49-second clip declared itself zero seconds long and
             # got a single audio fingerprint sample at the head. A caller who
@@ -685,7 +716,7 @@ def create_app(out_root: Path) -> FastAPI:
         return FileResponse(out_root / name, media_type=media)
 
     if DIST_DIR is not None:
-        app.mount("/", StaticFiles(directory=DIST_DIR, html=True), name="ui")
+        app.mount("/", _ShellFiles(directory=DIST_DIR, html=True), name="ui")
     else:
 
         @app.get("/")
