@@ -184,3 +184,34 @@ def test_nothing_on_screen_is_a_real_grounded_answer(tmp_path, monkeypatch):
     body = c.get("/api/productions/p1/ground", params={"at_s": 30.0}).json()
     assert body["grounded"] is True
     assert body["boxes"] == {}
+
+
+def test_preground_warms_the_appearances(tmp_path):
+    """Grounding a cold frame is an 8-second model round trip.
+
+    On demand that is the whole interaction — pause, wait, and meanwhile the
+    only honest thing to draw is nothing, because the scan's rectangle is a
+    union across the appearance and wrong at any given instant. The timecodes
+    are already known, so the wait is avoidable.
+    """
+    from fastapi.testclient import TestClient
+
+    from clearframe.webapp.server import create_app
+
+    with TestClient(create_app(out_root=tmp_path)) as client:
+        state = client.post("/api/productions/demo").json()
+        pid = state["production"]["id"]
+        resp = client.post(f"/api/productions/{pid}/preground")
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["status"] == "warming"
+        assert body["appearances"] >= 1
+
+
+def test_preground_on_an_unknown_production_404s(tmp_path):
+    from fastapi.testclient import TestClient
+
+    from clearframe.webapp.server import create_app
+
+    with TestClient(create_app(out_root=tmp_path)) as client:
+        assert client.post("/api/productions/nope/preground").status_code == 404
