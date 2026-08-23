@@ -724,6 +724,22 @@ class PreviewFinding(BaseModel):
     awaiting_research: bool = False
 
 
+class CastCredit(BaseModel):
+    """A face the scan attributed to a named performer.
+
+    Deliberately not a TriagedElement: it carries no category, no risk band and
+    no route, because it is not a thing to be cleared. It is a reminder that
+    the paper already exists and a note to check its scope.
+    """
+
+    id: str
+    label: str
+    character: str | None = None
+    performer: str
+    screen_time_s: float = 0.0
+    basis: str = ""
+
+
 class ProductionState(BaseModel):
     production: Production
     stage_status: dict[str, str] = Field(default_factory=dict)
@@ -769,3 +785,8 @@ class ProductionState(BaseModel):
     assessed_exposures: list[AssessedExposure] = Field(default_factory=list)
     preview: list[PreviewFinding] = Field(default_factory=list)
     detector_hits: list[DetectorHit] = Field(default_factory=list)
+    # Faces the scan attributed to a named performer. Held apart from
+    # `elements` because they are not things to clear: the production engaged
+    # them, so the release a publicity finding asks for is already the cast
+    # agreement. Anyone the scan could NOT name stays in `elements`.
+    cast: list[CastCredit] = Field(default_factory=list)
