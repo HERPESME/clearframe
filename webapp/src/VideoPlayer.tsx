@@ -26,6 +26,7 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
   ref,
 ) {
   const [now, setNow] = useState(0);
+  const [paused, setPaused] = useState(true);
   const [ok, setOk] = useState(true);
   const localRef = useRef<HTMLVideoElement | null>(null);
 
@@ -35,8 +36,10 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
 
   if (!ok) return null;
 
-  const onFrame = (e: React.SyntheticEvent<HTMLVideoElement>) =>
+  const onFrame = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     setNow(e.currentTarget.currentTime);
+    setPaused(e.currentTarget.paused);
+  };
 
   // Mirrors clearframe/overlay.py::box_at exactly — one rule, two runtimes.
   // The box belongs to the APPEARANCE, so pausing at 1s gives the opening
@@ -56,9 +59,18 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
     return el.bbox;
   };
 
+  // Boxes are drawn only while paused, and that is an honesty decision rather
+  // than a tidiness one. Gemini samples video at 1 frame per second and
+  // returns ONE rectangle per time range, so a box covering a moving subject
+  // is a union of where it was across that range — wider than its position in
+  // any single frame. Tracking that box across playback would imply a
+  // precision it does not have. Held still, next to the frame it approximates,
+  // it is honest about being an approximation.
+  const showBoxes = paused;
   const visible = elements
     .map((el) => ({ el, box: boxAt(el) }))
-    .filter((v): v is { el: Element; box: BBox } => v.box !== null);
+    .filter((v): v is { el: Element; box: BBox } => v.box !== null)
+    .filter(() => showBoxes);
 
   // On screen but we do not know where. Worth saying — silence would read as
   // "nothing here", and inventing a rectangle would be worse than both.
@@ -89,6 +101,8 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
           preload="metadata"
           onTimeUpdate={onFrame}
           onSeeked={onFrame}
+          onPause={onFrame}
+          onPlay={onFrame}
           onError={() => setOk(false)}
         />
         <svg
@@ -134,7 +148,12 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
         })}
       </div>
       <div className="player-status">
-        {tc(now, fps)} · {visible.length} boxed
+        {tc(now, fps)} ·{" "}
+        {showBoxes ? (
+          <>{visible.length} boxed</>
+        ) : (
+          <span className="ov-unlocated">pause to place boxes</span>
+        )}
         {unlocated.length > 0 && (
           <span className="ov-unlocated">
             {" "}
