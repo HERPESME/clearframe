@@ -88,6 +88,8 @@ they surfaced was a human clicking.
   even compared. Type disagreement between passes is now bridged in one direction only: TEXT yields, because
   TEXT_ON_SCREEN is what the scan produces when it reads letters rather than recognising the thing wearing
   them. LOGO vs ARTWORK still stays two findings.
+- **A box over the actor's mouth, and grounding had already got it right.** Paused on the Hangover tattoo, the player drew the scan's `{.559,.587,.789,.811}` — a fifth of the frame below the tattoo — while `/ground` had returned `{.364,.665,.566,.839}`, squarely on it. `boxAt` knew three answers and there are **four**: grounded-and-found, grounded-and-absent, never-grounded, and **being measured right now**. The fourth looked identical to the third, so it took the fallback and painted the video pass's guess for the 2-5s a Gemini call on a still takes — long enough to pause, look and screenshot. A frame with no answer YET now draws nothing; a frame whose grounding FAILED still falls back. Diagnosed by rendering both rectangles onto that exact frame, which is the only way that has ever worked for box problems.
+- **The grounding effect cancelled its own answers.** `ground` was a dependency of the effect that writes to `ground`, so React's cleanup fired every time ANY second's answer arrived — cancelling the request in flight for the second the reviewer was looking at, discarding a paid-for Gemini call, and re-issuing it. Three pauses in quick succession cascade. **Effect cleanup is not a cancellation policy**: an answer for second N is correct for second N whatever the playhead does next, and only a change of FOOTAGE can invalidate it.
 - **AudD answers HTTP 200 when it refuses.** Error 900 on an inactive account looked identical to a genuine no-match, so the dossier claimed "returned no match" for a lookup that never happened. `service_unavailable()` + `state.audio_checked` separate them.
 
 ### Model-behaviour findings (measured 2026-08-23 — do not re-run these)
@@ -242,7 +244,7 @@ Our differentiators, in order of defensibility: corroborated identity (nobody ma
 - Live run: `set -a && source .env && set +a` then `python -m clearframe run --live --footage clip.mp4 --duration-s 60 --territories US,DE,FR --out out-live`
 - Review app: `python -m clearframe serve --out out --port 8000`
 - MCP: `python -m clearframe.mcp --out out` (stdio) · `--transport http --port 8080`
-- Tests: `.venv/bin/pytest -q` (575) · Smoke: `bash scripts/smoke.sh` · Frontend: `cd webapp && npm run build`
+- Tests: `.venv/bin/pytest -q` (583) · Smoke: `bash scripts/smoke.sh` · Frontend: `cd webapp && npm run build`
 - Test footage: `./scripts/fetch_test_clips.sh` (6 public-domain spots + ground truth)
 - Sample ledger to upload: `docs/sample-rights-ledger.csv` (14 rows, each labelled with the gap archetype it demonstrates)
 
