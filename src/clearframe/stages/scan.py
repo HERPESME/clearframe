@@ -15,10 +15,44 @@ import asyncio
 import logging
 
 from clearframe.integrations.gemini_client import build_scan_context
+from clearframe.models import DetectedElement
 from clearframe.pipeline import PipelineContext
 
 log = logging.getLogger("clearframe.scan")
 
+
+
+def merge_passes(
+    scan: list[DetectedElement], audit: list[DetectedElement]
+) -> list[DetectedElement]:
+    """Concatenate the two passes, guaranteeing every id is distinct.
+
+    Both calls are independent and both number their findings from 1, so the
+    moment the auditor catches something the first pass missed — its entire
+    purpose — two unrelated findings share an id. Every downstream dict is
+    keyed by that id, so one finding silently inherits the other's route,
+    ownership and risk. On a clip of The Hangover Part II, "Stu's Face Tattoo"
+    and a "National" car-rental logo were both id "1" and the tattoo was
+    reported with the car-rental company's analysis.
+
+    The first pass keeps its ids so an existing state or a UI deep-link does
+    not shift underneath it; only a later collision is renamed. Renaming
+    happens BEFORE triage, which dedupes by (type, label) rather than by id, so
+    a genuine second sighting of the same thing still merges.
+    """
+    out: list[DetectedElement] = []
+    seen: set[str] = set()
+    for d in [*scan, *audit]:
+        eid = d.id
+        if eid in seen:
+            n = 2
+            while f"{d.id}-{n}" in seen:
+                n += 1
+            eid = f"{d.id}-{n}"
+            d = d.model_copy(update={"id": eid})
+        seen.add(eid)
+        out.append(d)
+    return out
 
 class ScanStage:
     name = "scan"
@@ -79,7 +113,7 @@ class ScanStage:
             raise watched  # the scan is load-bearing; the other two are not
         result, audit = watched
 
-        ctx.state.detections = result.detections + audit.detections
+        ctx.state.detections = merge_passes(result.detections, audit.detections)
         ctx.state.unscanned_ranges = result.unscanned_ranges + audit.unscanned_ranges
         # Not clearance items. Nobody owns a delivery label with your address
         # on it, which is exactly why no clearance tool looks for one.

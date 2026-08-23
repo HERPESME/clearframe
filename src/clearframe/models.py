@@ -661,6 +661,18 @@ class SourceWork(BaseModel):
     rights_holder: str = ""
     confidence: str = "low"
     basis: str = ""
+    # Whether the work's own studio authored what is on screen.
+    #
+    # In a drawn work it did: every character, prop and background is the
+    # studio's artwork, so an element of the work really is covered by a
+    # licence to the work. Live action inverts this. The camera photographs a
+    # world full of other people's property, which is the entire reason
+    # clearance departments exist — Warner Bros. MADE The Hangover Part II and
+    # was still sued over the tattoo on its lead's face.
+    #
+    # "unknown" is the default and subsumes nothing: silence is not permission
+    # to suppress a finding.
+    medium: str = "unknown"  # animation | live_action | mixed | unknown
 
 
 class PreviewFinding(BaseModel):

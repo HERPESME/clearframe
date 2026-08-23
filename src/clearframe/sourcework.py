@@ -40,10 +40,29 @@ _SUBSUMABLE = {ClearanceCategory.COPYRIGHT_ART, ClearanceCategory.TEXT_ON_SCREEN
 
 _CONFIDENT = {"high", "medium"}
 
+# Only a drawn work authors what is on screen. This is the whole of the
+# distinction, and getting it wrong is not symmetrical: over-subsuming tells a
+# producer they are covered when they are not.
+_STUDIO_AUTHORED = {"animation"}
+
 
 def subsumed_by(element: TriagedElement, work: SourceWork | None) -> bool:
-    """Is this finding just a part of the identified work?"""
+    """Is this finding just a part of the identified work?
+
+    Only in a drawn work. There, the studio drew the characters, the props and
+    the background, so an element of the work genuinely is covered by a licence
+    to the work. Live action inverts it: the camera photographs a world full of
+    other people's property, which is why clearance departments exist at all.
+
+    Whitmill v. Warner Bros. settles it. Warner Bros. MADE The Hangover Part II
+    and was still sued over the tattoo on Stu's face — and still faced a
+    preliminary-injunction motion weeks before release. "Covered by your licence
+    to the film" would have been exactly the wrong advice, in the one direction
+    this product must never be wrong in.
+    """
     if work is None or work.confidence not in _CONFIDENT or not work.title:
+        return False
+    if work.medium not in _STUDIO_AUTHORED:
         return False
     # A drawn character is the studio's design by definition.
     if element.element_type is ElementType.CHARACTER:

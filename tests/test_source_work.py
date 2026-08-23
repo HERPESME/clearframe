@@ -34,6 +34,7 @@ GEASS = SourceWork(
     rights_holder="Sunrise / Bandai Namco Filmworks Inc.",
     confidence="high",
     basis="Named characters C.C. and Lelouch Lamperouge, and Zero's mask.",
+    medium="animation",
 )
 
 
@@ -141,3 +142,70 @@ def test_the_summary_leads_with_the_work():
 
 def test_no_work_means_no_summary():
     assert summarise_source_work(None, []) is None
+
+
+# --- The Hangover Part II regression -----------------------------------------
+#
+# Subsumption was generalised from an animated clip, where the studio draws
+# every visual element, so "part of the work" really did imply "authored by the
+# work's owner". Live action inverts that: the camera photographs a world full
+# of other people's property, which is the entire reason clearance departments
+# exist at all.
+#
+# Whitmill v. Warner Bros. is the proof. Warner Bros. MADE The Hangover Part II
+# and was still sued over the tattoo on Stu's face, and still faced a
+# preliminary-injunction motion weeks before release. Telling a user that
+# tattoo is "covered by your licence to the film" is wrong in the one direction
+# this product must never be wrong in.
+
+HANGOVER = SourceWork(
+    title="The Hangover Part II",
+    rights_holder="Warner Bros. Pictures",
+    confidence="high",
+    basis="The actors and the face tattoo are characteristic of the film.",
+    medium="live_action",
+)
+
+
+def test_a_live_action_work_does_not_subsume_a_tattoo():
+    """The Whitmill fact pattern, exactly."""
+    tattoo = el(ClearanceCategory.COPYRIGHT_ART, "Stu's Face Tattoo",
+                ElementType.TATTOO)
+    assert subsumed_by(tattoo, HANGOVER) is False
+
+
+def test_a_live_action_work_subsumes_nothing_at_all():
+    """Every prop in live action is a real object that somebody owns."""
+    for kind in (ElementType.TATTOO, ElementType.ARTWORK, ElementType.CHARACTER):
+        item = el(ClearanceCategory.COPYRIGHT_ART, "a thing on the set", kind)
+        assert subsumed_by(item, HANGOVER) is False, kind
+
+
+def test_an_undeclared_medium_subsumes_nothing():
+    """Silence is not permission to suppress a finding."""
+    vague = GEASS.model_copy(update={"medium": "unknown"})
+    art = el(ClearanceCategory.COPYRIGHT_ART, "Framed Painting")
+    assert subsumed_by(art, vague) is False
+
+
+def test_a_drawn_work_still_subsumes_its_own_parts():
+    """The Code Geass fix has to survive the Hangover fix."""
+    assert subsumed_by(el(ClearanceCategory.COPYRIGHT_ART, "Lelouch",
+                          ElementType.CHARACTER), GEASS) is True
+    assert subsumed_by(el(ClearanceCategory.COPYRIGHT_ART, "Insignia"),
+                       GEASS) is True
+
+
+def test_a_live_action_work_is_still_reported_as_the_headline():
+    """Subsuming nothing is not the same as saying nothing.
+
+    A producer clipping a real film still needs to be told, first, that the
+    footage is the film — even though every finding inside it stands on its own.
+    """
+    items = [el(ClearanceCategory.COPYRIGHT_ART, "Stu's Face Tattoo",
+                ElementType.TATTOO)]
+    summary = summarise_source_work(HANGOVER, items)
+    assert summary is not None
+    assert summary["title"] == "The Hangover Part II"
+    assert summary["subsumed"] == 0
+    assert summary["independent"] == 1
