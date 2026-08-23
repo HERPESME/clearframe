@@ -5,7 +5,7 @@ project context, conventions, the status tracker vs the hackathon resources guid
 and the agreed roadmap. Read it first — especially "Live-mode gotchas" and
 "Environment facts", which record what already went wrong so it doesn't twice.
 
-Current shape: a deterministic **13-stage** pipeline, **575 tests**, a 7-section
+Current shape: a deterministic **13-stage** pipeline, **611 tests**, a 7-section
 smoke script, three transports (CLI / web / MCP with 11 tools), and two Cloud Run
 services. Live validation, MCP, webapp expansion, audio fingerprinting, two-phase
 reporting and the escalation ladder are DONE. Open fronts: **recall** (~60% per
@@ -17,6 +17,18 @@ this project has shipped — transposed bounding boxes, an upload endpoint that
 500'd on a NameError, a page refresh that appeared to delete the analysis, a
 smoke script that killed the user's dev server — passed a green suite and were
 found by a human clicking. `CLAUDE.md` → "UI-mode gotchas" lists them.
+
+Where to pick up (as of Aug 23 evening): the backend and the built SPA are in
+sync, everything is committed, and the open thread is that **one finding can
+only draw one box per frame** — `parse_ground_payload` discards extra matches,
+so a mark in two places shows one. See `CLAUDE.md` -> NOT DONE.
+
+**Box accuracy is solved; box DELIVERY was the problem.** Grounding a still is
+accurate (verified by drawing rectangles onto real frames on three separate
+clips). What broke was that the call blocked the event loop, started too late,
+and was drawn over by the scan's union box in the meantime. All three fixed —
+if boxes misbehave again, check `measuring boxes N/M` in the player status line
+and which bundle the access log shows being fetched, before suspecting geometry.
 
 One module takes findings away rather than adding them: `cast.py` holds that a
 face attributed to a named performer is not a third-party finding, because the
