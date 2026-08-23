@@ -184,3 +184,24 @@ def test_genuine_on_screen_text_is_not_swallowed_by_a_mark():
               [(22.9, 25.4, {"ymin": .69, "xmin": .29, "ymax": .77, "xmax": .65})]),
     ])
     assert len(out) == 2
+
+
+def test_a_whole_frame_box_is_not_evidence_that_two_things_are_one():
+    """Two actors, one shared instant, and one box around the entire frame.
+
+    Found by replaying a real run's detections through the new rule rather
+    than by the suite: "Stu Price (Ed Helms)" and "Alan Garner (Zach
+    Galifianakis)" overlap for a tenth of a second at 15.5s, and Stu's box
+    there is {0, 0, 1, 1}. A rectangle around the whole picture overlaps every
+    other rectangle in it, so colocation became true for any pair that shared
+    an instant — and Ed Helms was deleted from the report.
+
+    A box that does not locate its own subject cannot locate anyone else's.
+    """
+    out = triage([
+        boxed("Stu Price (Ed Helms)", ElementType.FACE,
+              [(15.5, 18.5, {"ymin": 0.0, "xmin": 0.0, "ymax": 1.0, "xmax": 1.0})]),
+        boxed("Alan Garner (Zach Galifianakis)", ElementType.FACE,
+              [(13.8, 15.6, {"ymin": .22, "xmin": .36, "ymax": .88, "xmax": .98})]),
+    ])
+    assert len(out) == 2
