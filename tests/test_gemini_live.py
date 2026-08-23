@@ -254,3 +254,61 @@ async def test_a_deterministic_failure_is_not_retried(monkeypatch):
     with pytest.raises(Exception):
         await client.scan("clip.mp4", 30.0)
     assert models.calls == 1
+
+
+def test_grounding_does_not_block_the_event_loop():
+    """Every other model call offloads to a thread. This one did not.
+
+    `_generate` is a synchronous SDK call taking about eight seconds for a
+    still. `scan_script`, `_scan_with_prompt` and the rest wrap it in
+    `asyncio.to_thread`; `ground_frame` called it inline inside an `async def`,
+    so awaiting it yielded nothing and the server served NOTHING ELSE for the
+    whole call — no API, no media, no second grounding request.
+
+    That is most of "I pause and no box ever appears": the request was made,
+    and the process that had to answer it was blocked on the one before.
+    Warming sixteen frames in the background turned it from a stall into a
+    minute-long freeze.
+    """
+    import asyncio
+    import time
+
+    client = LiveGeminiClient(project="p", location="us-central1")
+    payload = {"found": [{"label": "Acme soda can",
+                          "bbox": {"ymin": 0.1, "xmin": 0.1,
+                                   "ymax": 0.3, "xmax": 0.3}}]}
+
+    def blocking_generate(contents, schema=None):
+        time.sleep(0.3)
+        return json.dumps(payload)
+
+    client._generate = blocking_generate
+
+    async def scenario():
+        ticks = 0
+        stop = False
+
+        async def ticker():
+            nonlocal ticks
+            while not stop:
+                await asyncio.sleep(0.01)
+                ticks += 1
+
+        counting = asyncio.create_task(ticker())
+        await asyncio.sleep(0.02)  # let it get going
+        before = ticks
+        boxes = await client.ground_frame(b"jpegbytes", ["Acme soda can"])
+        during = ticks - before
+        stop = True
+        await counting
+        return during, boxes
+
+    # Ticks counted DURING the call, not after it. Waiting for the ticker to
+    # finish would pass either way, which is how the first version of this
+    # test passed against the blocking implementation.
+    during, boxes = asyncio.run(scenario())
+    assert during >= 5, (
+        f"only {during} tick(s) ran during a 0.3s call — the event loop was "
+        "blocked, so the server can answer nothing else while grounding"
+    )
+    assert "Acme soda can" in boxes

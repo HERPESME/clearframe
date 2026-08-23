@@ -535,7 +535,9 @@ def create_app(out_root: Path) -> FastAPI:
         if found is None:
             return {"at_s": at_s, "boxes": {}, "grounded": False}
 
-        frame = extract_frame(found[0], at_s)
+        # ffmpeg is a subprocess, and a subprocess call in an async handler
+        # blocks the event loop exactly as a synchronous SDK call does.
+        frame = await asyncio.to_thread(extract_frame, found[0], at_s)
         if frame is None:
             # Nobody looked at this frame. Saying "grounded" would tell the
             # player to suppress every box on it.
