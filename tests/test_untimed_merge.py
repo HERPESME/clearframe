@@ -70,9 +70,13 @@ def test_the_broken_ranges_do_not_come_along():
 
 
 def test_a_group_with_no_usable_clock_stays_disowned():
+    # Labels that genuinely agree — "Wristwatch" and "Wrist watch" share no
+    # token once split, and colocation is corroboration rather than a
+    # substitute for agreement. What is under test here is the reliability
+    # flag surviving the merge, not the merge itself.
     out = triage([
+        det("Gold Wristwatch", ElementType.LOGO, [_BROKEN], reliable=False),
         det("Wristwatch", ElementType.LOGO, [_BROKEN], reliable=False),
-        det("Wrist watch", ElementType.LOGO, [_BROKEN], reliable=False),
     ])
     assert len(out) == 1
     assert out[0].timing_reliable is False

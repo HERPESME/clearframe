@@ -56,6 +56,14 @@ def _overlaps(a: DetectedElement, b: DetectedElement) -> bool:
 # the only evidence permitted to merge across a type disagreement.
 _NAMES_THE_SAME = 0.9
 
+# The floor for treating a shared instant and a shared place as CORROBORATION.
+# Colocation promotes a label agreement that fell just short of
+# MATCH_THRESHOLD; it never manufactures one. Without this, two people standing
+# in one frame overlapped — which is what standing next to someone looks like —
+# and Lelouch was merged with C.C., and a cat named Arthur with a pizza
+# delivery guy. Both absorbed findings were deleted from the report.
+_WEAK_AGREEMENT = 0.3
+
 
 # How much two rectangles must agree when there is no usable clock behind
 # them. Anchored on the two pairs that set it, both from one live re-run:
@@ -136,7 +144,10 @@ def _same_finding(a: DetectedElement, b: DetectedElement) -> bool:
     on an all-but-identical label, because that is the whole of the evidence.
     """
     if a.element_type is b.element_type:
-        return labels_match(a.label, b.label) or _colocated(a, b)
+        if labels_match(a.label, b.label):
+            return True
+        # Corroboration, not substitution: the labels must already half agree.
+        return labels_match(a.label, b.label, _WEAK_AGREEMENT) and _colocated(a, b)
     if ElementType.TEXT in (a.element_type, b.element_type):
         return labels_match(a.label, b.label, _NAMES_THE_SAME) and _overlaps(a, b)
     return False
