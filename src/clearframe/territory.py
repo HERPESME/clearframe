@@ -20,6 +20,7 @@ from pydantic import BaseModel
 
 from clearframe.models import (
     ClearanceCategory,
+    ElementType,
     RiskBand,
     TerritoryRisk,
     TriagedElement,
@@ -202,9 +203,139 @@ def defences_for(element: TriagedElement, territory: str) -> list[Defence]:
 _PANORAMA_CATEGORIES = {ClearanceCategory.COPYRIGHT_ART, ClearanceCategory.LOCATION}
 
 
+# Freedom of panorama turns on one fact and one fact only: is the work
+# permanently installed somewhere the public can reach? The whole COPYRIGHT_ART
+# category used to be run through the panorama branch, so a face tattoo, a
+# t-shirt print and a sticker on an indoor water heater were all banded under
+# the exception for public sculpture — and it moved the band, down in DE/IN and
+# up in FR.
+#
+# Only these two element types can be permanently sited at all. A tattoo is on
+# a person; a drawn character is on a cel; a logo is on a product.
+_SITEABLE_TYPES = {ElementType.ARTWORK, ElementType.LOCATION}
+
+_PUBLIC_PERMANENT = "public_permanent"
+
+
+def _panorama_applies(element: TriagedElement) -> bool:
+    return (
+        element.category in _PANORAMA_CATEGORIES
+        and element.element_type in _SITEABLE_TYPES
+        and element.siting == _PUBLIC_PERMANENT
+    )
+
+
+def _panorama_undetermined(element: TriagedElement) -> bool:
+    """Could have been a panorama case; the scan could not tell."""
+    return (
+        element.category in _PANORAMA_CATEGORIES
+        and element.element_type in _SITEABLE_TYPES
+        and element.siting not in (_PUBLIC_PERMANENT, "portable_or_interior")
+    )
+
+
 def _shift(band: RiskBand, steps: int) -> RiskBand:
     idx = _BAND_ORDER.index(band)
     return _BAND_ORDER[max(0, min(len(_BAND_ORDER) - 1, idx + steps))]
+
+
+# Copyright works that are NOT permanently sited — a tattoo, a t-shirt print, a
+# sticker, a poster on an interior wall — plus readable on-screen text. For
+# these the jurisdictional question is not panorama but whether background
+# inclusion is excused at all, which is exactly where the table differs most:
+# statutory and generous in GB/IN/CA, narrow in DE/JP/AU/BR/KR/ES, judge-made
+# in US/FR, and entirely absent in Italy.
+_INCIDENTAL_GOVERNED = {
+    ClearanceCategory.COPYRIGHT_ART,
+    ClearanceCategory.TEXT_ON_SCREEN,
+}
+
+# Moral rights survive the economic ones and cannot be waived in these
+# jurisdictions, so an heir can object to a treatment a licence permitted.
+_PERPETUAL_MORAL = "perpetual"
+
+
+def _is_incidental(element: TriagedElement) -> bool:
+    """Genuinely in the background — the only thing the exception ever covers.
+
+    Deliberately the same shape as `scoring.de_minimis`: an exception for
+    incidental inclusion is worth nothing to a work the camera dwells on.
+    """
+    p = element.prominence
+    return (
+        not p.plot_integral
+        and p.screen_time_s < 5.0
+        and p.frame_coverage < 0.15
+        and p.centrality < 0.5
+    )
+
+
+def _incidental_risk(
+    element: TriagedElement, base_band: RiskBand, territory: str, rule: dict
+) -> TerritoryRisk:
+    incidental = rule["incidental_inclusion"]
+    moral = (
+        " Moral rights are perpetual here and cannot be waived, so the author's "
+        "heirs can object to how the work is treated even under a licence."
+        if rule["moral_rights"] == _PERPETUAL_MORAL
+        else ""
+    )
+
+    if incidental == "none":
+        return TerritoryRisk(
+            element_id=element.id,
+            territory=territory,
+            band=_shift(base_band, 1),
+            rationale=(
+                f"{rule['name']} has no incidental-inclusion exception at all, so "
+                "background presence is not excused however fleeting. Risk steps up."
+                + moral
+            ),
+            authority=rule["incidental_authority"],
+        )
+
+    if incidental in _INCIDENTAL_AVAILABLE and _is_incidental(element):
+        return TerritoryRisk(
+            element_id=element.id,
+            territory=territory,
+            band=_shift(base_band, -1) if incidental == "broad" else base_band,
+            rationale=(
+                f"{rule['name']} excuses incidental inclusion by statute, and this "
+                "finding is genuinely in the background rather than featured."
+                + (
+                    " Risk steps down."
+                    if incidental == "broad"
+                    else " The exception is narrow, so the band is unchanged."
+                )
+                + moral
+            ),
+            authority=rule["incidental_authority"],
+        )
+
+    if incidental in _INCIDENTAL_AVAILABLE:
+        return TerritoryRisk(
+            element_id=element.id,
+            territory=territory,
+            band=base_band,
+            rationale=(
+                f"{rule['name']} excuses incidental inclusion, but only where the "
+                "work really is incidental. This one is featured or sustained "
+                "enough that the exception cannot be relied on." + moral
+            ),
+            authority=rule["incidental_authority"],
+        )
+
+    return TerritoryRisk(
+        element_id=element.id,
+        territory=territory,
+        band=base_band,
+        rationale=(
+            f"{rule['name']} has no statutory incidental-inclusion exception; "
+            "de minimis is judge-made and decided on the facts, so it is an "
+            "argument to run rather than a safe harbour." + moral
+        ),
+        authority=rule["incidental_authority"],
+    )
 
 
 def assess(
@@ -221,7 +352,7 @@ def assess(
             authority="",
         )
 
-    if element.category in _PANORAMA_CATEGORIES:
+    if _panorama_applies(element):
         panorama = rule["panorama"]
         if panorama == "broad":
             return TerritoryRisk(
@@ -257,6 +388,21 @@ def assess(
             authority=rule["authority"],
         )
 
+    if _panorama_undetermined(element):
+        return TerritoryRisk(
+            element_id=element.id,
+            territory=territory,
+            band=base_band,
+            rationale=(
+                f"{rule['name']}'s panorama exception covers works permanently "
+                "installed in a place the public can reach, and the scan could not "
+                "establish whether this one is. The band is unchanged in either "
+                "direction: establish the siting to claim the exception, because a "
+                "discount for not knowing is worth nothing to an E&O carrier."
+            ),
+            authority=rule["authority"],
+        )
+
     if (
         element.category == ClearanceCategory.RIGHT_OF_PUBLICITY
         and rule["publicity"] == "strong"
@@ -272,13 +418,53 @@ def assess(
             authority=rule["authority"],
         )
 
+    # Everything that is not a siting or a publicity question. Panorama is one
+    # of eight dimensions in the table and governs almost nothing in a typical
+    # clip; framing every other finding as "does not vary by panorama rule"
+    # told a producer which rule was IRRELEVANT and never which one applied.
+    if element.category in _INCIDENTAL_GOVERNED:
+        return _incidental_risk(element, base_band, territory, rule)
+
+    if element.category == ClearanceCategory.TRADEMARK:
+        return TerritoryRisk(
+            element_id=element.id,
+            territory=territory,
+            band=base_band,
+            rationale=(
+                f"A mark in an expressive work is judged by {rule['name']}'s own "
+                "test, not by panorama or incidental-inclusion rules. "
+                + (
+                    "An open-ended fair-use standard is available here."
+                    if rule["exceptions_model"] == "open"
+                    else "The exceptions here are a closed statutory list, so a "
+                    "US Rogers v. Grimaldi memo does not travel — the argument "
+                    "has to be rebuilt on local grounds."
+                )
+            ),
+            authority=rule["exceptions_authority"],
+        )
+
+    if element.category == ClearanceCategory.MUSIC_SYNC:
+        return TerritoryRisk(
+            element_id=element.id,
+            territory=territory,
+            band=base_band,
+            rationale=(
+                "Music does not vary by jurisdiction in the way visual works do: "
+                "a synchronisation licence and a master licence are required in "
+                f"every territory including {rule['name']}, and no incidental or "
+                "panorama exception substitutes for either."
+            ),
+            authority="",
+        )
+
     return TerritoryRisk(
         element_id=element.id,
         territory=territory,
         band=base_band,
         rationale=(
-            f"{element.category.value} exposure does not vary by panorama rule; "
-            f"{rule['name']} tracks the baseline band."
+            f"{element.category.value} exposure tracks the baseline band in "
+            f"{rule['name']}; no jurisdiction-specific exception applies to it."
         ),
         authority="",
     )

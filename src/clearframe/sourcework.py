@@ -29,6 +29,7 @@ Pure code, no I/O.
 
 from clearframe.models import (
     ClearanceCategory,
+    DetectedElement,
     ElementType,
     SourceWork,
     TriagedElement,
@@ -68,6 +69,36 @@ def subsumed_by(element: TriagedElement, work: SourceWork | None) -> bool:
     if element.element_type is ElementType.CHARACTER:
         return True
     return element.category in _SUBSUMABLE
+
+
+def corrected_types(
+    detections: list[DetectedElement], work: SourceWork | None
+) -> list[DetectedElement]:
+    """A real actor is not a drawn character, whatever the scan called them.
+
+    CHARACTER exists for a specific legal reason: a drawn character has no
+    right of publicity, because there is nobody to consent, and the right that
+    does exist is copyright in the design. Applied to a live actor it inverts —
+    Bradley Cooper stops needing a personal release and becomes a drawing
+    somebody owns.
+
+    The scan prompt already says to use FACE for a real person. It is obeyed
+    intermittently: across three identical runs of one clip, one typed all
+    three actors CHARACTER, one typed them FACE, one found no people. A prompt
+    is not a contract.
+
+    Only corrected where it can be proven — a work the scan identified as
+    live_action cannot have a drawn character playing its lead. An unknown
+    medium changes nothing.
+    """
+    if work is None or work.medium != "live_action":
+        return detections
+    return [
+        d.model_copy(update={"element_type": ElementType.FACE})
+        if d.element_type is ElementType.CHARACTER
+        else d
+        for d in detections
+    ]
 
 
 def summarise_source_work(

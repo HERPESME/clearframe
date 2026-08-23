@@ -97,7 +97,8 @@
         "ymax": 0.48,
         "xmax": 0.86
       },
-      "at_s": 22.0
+      "at_s": 22.0,
+      "siting": "portable_or_interior"
     },
     {
       "id": "e5",
@@ -122,7 +123,8 @@
         "ymax": 0.92,
         "xmax": 0.78
       },
-      "at_s": 33.0
+      "at_s": 33.0,
+      "siting": "public_permanent"
     },
     {
       "id": "e6",
