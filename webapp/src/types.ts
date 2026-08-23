@@ -60,6 +60,19 @@ export interface ProductionSummary {
   running: boolean;
 }
 
+export interface PreviewFinding {
+  element_id: string;
+  label: string;
+  category: string;
+  provisional_score: number;
+  provisional_band: string;
+  identity: string | null;
+  depiction: string | null;
+  route_tier: string;
+  disposition: string;
+  awaiting_research: boolean;
+}
+
 export interface LiabilityEstimate {
   element_id: string;
   headline: string;
@@ -343,6 +356,7 @@ export interface ProductionState {
   corroboration: Record<string, Corroboration>;
   routes: Record<string, ResearchRoute>;
   liability: Record<string, LiabilityEstimate>;
+  preview: PreviewFinding[];
   sponsor_conflicts: SponsorConflict[];
   assessed_exposures: AssessedExposure[];
   platform_outcomes: PlatformOutcome[];

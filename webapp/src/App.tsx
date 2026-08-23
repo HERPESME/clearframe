@@ -5,7 +5,7 @@ import { MissionControl } from "./MissionControl";
 import { Timeline } from "./Timeline";
 import { Uploader } from "./Uploader";
 import { VideoPlayer } from "./VideoPlayer";
-import type { Action, ProductionState, RiskBand, Role } from "./types";
+import type { Action, ProductionState, Risk, RiskBand, Role } from "./types";
 
 const BANDS: RiskBand[] = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
 
@@ -229,6 +229,7 @@ export default function App() {
     research_plan,
     routes,
     liability,
+    preview,
     sponsor_conflicts,
     assessed_exposures,
     platform_outcomes,
@@ -243,7 +244,30 @@ export default function App() {
     coverage,
   } = state;
   const unscriptedIds = new Set(drift?.unscripted_element_ids ?? []);
-  const sorted = [...elements].sort((a, b) => risk[b.id].score - risk[a.id].score);
+  // Risk lands at stage 9; findings land at stage 3. Restoring a run in
+  // between meant `risk[el.id]` was undefined and the whole view threw — a
+  // blank screen, which is the worst possible way to render partial progress.
+  //
+  // The preview stage already banded every finding at stage 6, and that
+  // provisional score is an upper bound, so it is the correct stand-in until
+  // the real one arrives.
+  const previewById = Object.fromEntries(
+    (preview ?? []).map((f) => [f.element_id, f]),
+  );
+  const riskFor = (id: string): Risk => {
+    const final = risk?.[id];
+    if (final) return final;
+    const p = previewById[id];
+    return {
+      element_id: id,
+      score: p?.provisional_score ?? 0,
+      band: (p?.provisional_band ?? "LOW") as Risk["band"],
+      factors: {},
+      de_minimis: false,
+    };
+  };
+
+  const sorted = [...elements].sort((a, b) => riskFor(b.id).score - riskFor(a.id).score);
   const pending = elements.filter((el) => !decisions[el.id]);
   const disputed = elements.filter(
     (el) => corroboration?.[el.id]?.verdict === "CONFLICTED",
@@ -268,7 +292,7 @@ export default function App() {
     .flat()
     .filter((s) => s.material).length;
   const bandCounts = Object.fromEntries(
-    BANDS.map((b) => [b, elements.filter((el) => risk[el.id].band === b).length]),
+    BANDS.map((b) => [b, elements.filter((el) => riskFor(el.id).band === b).length]),
   );
 
   const jumpTo = (id: string) => {
@@ -544,7 +568,7 @@ export default function App() {
             key={el.id}
             element={el}
             research={research[el.id]}
-            risk={risk[el.id]}
+            risk={riskFor(el.id)}
             options={remediation[el.id] ?? []}
             decision={decisions[el.id]}
             court={court?.[el.id]}

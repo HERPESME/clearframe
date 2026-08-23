@@ -160,6 +160,30 @@ def create_app(out_root: Path) -> FastAPI:
             "version": clearframe.__version__,
         }
 
+    def _stored_media(pid: str):
+        """The footage file for this production, if one is on disk."""
+        media_dir = out_root / "media" / pid
+        for suffix, media_type in MEDIA_TYPES.items():
+            candidate = media_dir / f"footage{suffix}"
+            if candidate.exists():
+                return candidate, media_type
+        return None
+
+    def _with_media_flag(state):
+        """Answer `has_media` by looking for the file, not by trusting a flag.
+
+        The review app renders its video player on this. It used to be set only
+        by the upload endpoint, so a production re-scanned from the CLI came
+        back False while the media endpoint served the very same bytes with a
+        200 — no player, and no way for a user to work out why.
+        """
+        actual = _stored_media(state.production.id) is not None
+        if state.production.has_media == actual:
+            return state
+        return state.model_copy(
+            update={"production": state.production.model_copy(update={"has_media": actual})}
+        )
+
     @app.get("/api/productions")
     def list_productions():
         """Newest first, each flagged with whether its run is still going.
@@ -356,12 +380,13 @@ def create_app(out_root: Path) -> FastAPI:
     def get_media(pid: str):
         """Serve the uploaded footage so the review UI can play it."""
         _load(pid)
-        media_dir = out_root / "media" / pid
-        for suffix, media_type in MEDIA_TYPES.items():
-            candidate = media_dir / f"footage{suffix}"
-            if candidate.exists():
-                return FileResponse(candidate, media_type=media_type)
-        raise HTTPException(status_code=404, detail="No footage stored for this production")
+        found = _stored_media(pid)
+        if found is None:
+            raise HTTPException(
+                status_code=404, detail="No footage stored for this production"
+            )
+        path, media_type = found
+        return FileResponse(path, media_type=media_type)
 
     @app.get("/api/licences")
     def list_licences():
@@ -424,7 +449,7 @@ def create_app(out_root: Path) -> FastAPI:
 
     @app.get("/api/productions/{pid}")
     def get_production(pid: str):
-        return JSONResponse(_load(pid).model_dump(mode="json"))
+        return JSONResponse(_with_media_flag(_load(pid)).model_dump(mode="json"))
 
     @app.post("/api/productions/{pid}/decisions")
     async def post_decision(
