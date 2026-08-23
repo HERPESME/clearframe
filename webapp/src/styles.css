@@ -922,6 +922,11 @@ button {
 .exposure-banner { background: rgba(192,57,43,.10); border:1px solid rgba(192,57,43,.4); border-radius:4px; padding:10px 14px; margin: 0 0 16px; font-size:13px; }
 .exposure-banner strong { color: var(--critical); }
 .exposure-banner em { color: var(--muted); font-style: normal; }
+/* The scan's union box, shown while grounding measures this frame. Dashed and
+   faded because it is a placeholder: one rectangle covers a whole appearance,
+   so it is right about WHAT and only roughly right about WHERE. */
+.ov-box.approx { stroke-dasharray: 6 5; opacity: .55; }
+.ov-approx { margin-left: 6px; font-size: 9px; letter-spacing: .5px; color: var(--muted); text-transform: uppercase; }
 .cast-banner { background: rgba(41,128,185,.10); border:1px solid rgba(41,128,185,.35); border-radius:4px; padding:10px 14px; margin: 0 0 16px; font-size:13px; }
 .cast-banner strong { color:#4aa3df; }
 .cast-banner ul { margin:8px 0; padding-left:18px; }
@@ -1008,7 +1013,20 @@ button.secondary:disabled { opacity: .5; cursor: default; }
 .player-wrap { padding: 14px 24px 4px; background: var(--panel, #111); border-bottom: 1px solid var(--line); }
 .player-frame { position: relative; max-width: 900px; margin: 0 auto; line-height: 0; }
 .player-frame video { width: 100%; height: auto; display: block; border-radius: 4px; background: #000; }
-.player-overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+/* Positioned in JS to the RENDERED picture, not the element. `inset: 0` was
+   only ever correct while the video element was exactly the size of the
+   picture inside it; full screen letterboxes it and every box was then drawn
+   against the screen instead of the frame. */
+.player-overlay { position: absolute; pointer-events: none; }
+/* The native control can only fullscreen the <video>, which leaves the overlay
+   — a sibling — behind on the page. Ours takes the wrapper. */
+.player-frame video::-webkit-media-controls-fullscreen-button { display: none; }
+.player-fs { position: absolute; right: 10px; top: 10px; z-index: 3; background: rgba(0,0,0,.55);
+  color: #fff; border: 1px solid rgba(255,255,255,.25); border-radius: 4px; width: 30px; height: 30px;
+  font-size: 14px; line-height: 1; cursor: pointer; opacity: .65; }
+.player-fs:hover { opacity: 1; }
+.player-frame:fullscreen { max-width: none; width: 100vw; height: 100vh; display: grid; place-items: center; background: #000; }
+.player-frame:fullscreen video { width: 100vw; height: 100vh; object-fit: contain; }
 .ov-g { pointer-events: auto; cursor: pointer; }
 .ov-box { fill: transparent; stroke-width: 2; }
 .ov-box.CRITICAL { stroke: var(--critical); } .ov-box.HIGH { stroke: var(--high); }

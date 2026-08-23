@@ -528,7 +528,9 @@ def create_app(out_root: Path) -> FastAPI:
                 "grounded": True,
                 "cached": True,
             }
+        return await _measure_frame(pid, at_s, here, key)
 
+    async def _measure_frame(pid: str, at_s: float, here: list, key) -> dict:
         found = _stored_media(pid)
         if found is None:
             return {"at_s": at_s, "boxes": {}, "grounded": False}
@@ -557,6 +559,73 @@ def create_app(out_root: Path) -> FastAPI:
         }
         _ground_cache[key] = boxes
         return {"at_s": at_s, "boxes": boxes, "grounded": True}
+
+    # Productions whose boxes have already been warmed in this process.
+    _pregrounded: set[str] = set()
+
+    async def _preground(pid: str) -> None:
+        """Measure the moments that matter before anyone pauses on them.
+
+        Grounding a cold frame is a Gemini call on a still and takes about
+        eight seconds. On demand that is the whole interaction: pause, wait,
+        and meanwhile the only honest thing to draw is nothing, because the
+        scan's rectangle is a union across the whole appearance and is wrong
+        at any given instant.
+
+        The appearance timecodes are already known, so the wait is avoidable.
+        One frame per appearance, measured in the background once the analysis
+        is complete, makes every "jump to this finding" land on a warm second.
+        Bounded concurrency because each call is a model round trip, and
+        failures are swallowed: a cold second still works the old way.
+        """
+        try:
+            state = store.load(pid)
+        except FileNotFoundError:
+            return
+        seconds = sorted(
+            {
+                int((r.start_s + r.end_s) / 2)
+                for el in state.elements
+                if el.timing_reliable
+                for r in el.time_ranges
+            }
+        )
+        if not seconds:
+            return
+        log.info("pre-grounding %d frame(s) for %s", len(seconds), pid)
+        gate = asyncio.Semaphore(4)
+
+        async def one(second: int) -> None:
+            key = (pid, second)
+            if key in _ground_cache:
+                return
+            at_s = float(second)
+            here = [
+                el for el in state.elements
+                if el.timing_reliable
+                and any(r.start_s <= at_s <= r.end_s for r in el.time_ranges)
+            ]
+            if not here:
+                return
+            async with gate:
+                try:
+                    await _measure_frame(pid, at_s, here, key)
+                except Exception as exc:  # a warm cache is a nicety, never a failure
+                    log.warning("pre-grounding %s at %ss failed: %s", pid, second, exc)
+
+        await asyncio.gather(*(one(s) for s in seconds), return_exceptions=True)
+        log.info("pre-grounding complete for %s (%d cached)", pid, len(_ground_cache))
+
+    @app.post("/api/productions/{pid}/preground")
+    async def preground(pid: str):
+        """Warm the boxes on demand — used by the UI once a run finishes."""
+        state = _load(pid)
+        _pregrounded.add(pid)
+        asyncio.create_task(_preground(pid))
+        return {
+            "status": "warming",
+            "appearances": sum(len(el.time_ranges) for el in state.elements),
+        }
 
     @app.get("/api/licences")
     def list_licences():

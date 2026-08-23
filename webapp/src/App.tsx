@@ -71,6 +71,22 @@ export default function App() {
     return () => window.clearInterval(id);
   }, [resuming]);
 
+  // Warm the boxes for the moments a reviewer will actually pause on.
+  //
+  // Grounding a cold frame is a model round trip on a still and takes about
+  // eight seconds. Done only on demand that IS the interaction: pause, wait,
+  // and meanwhile the only box available is the scan's union across the whole
+  // appearance, which is right about what and only roughly right about where.
+  // The appearance timecodes are already known, so the wait is avoidable.
+  const warmed = useRef<string | null>(null);
+  useEffect(() => {
+    const pid = state?.production?.id;
+    if (!pid || !state?.production?.has_media || resuming) return;
+    if (warmed.current === pid) return;
+    warmed.current = pid;
+    fetch(`/api/productions/${pid}/preground`, { method: "POST" }).catch(() => {});
+  }, [state?.production?.id, state?.production?.has_media, resuming]);
+
   const changeRole = (r: Role) => {
     setRole(r);
     setRoleState(r);

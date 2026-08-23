@@ -55,6 +55,64 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
   const [pending, setPending] = useState<Record<string, true>>({});
   const [ok, setOk] = useState(true);
   const localRef = useRef<HTMLVideoElement | null>(null);
+  const frameRef = useRef<HTMLDivElement | null>(null);
+  // Where the picture actually is inside the video element, in CSS pixels.
+  //
+  // The overlay used to be `inset: 0` on the frame, which is only correct
+  // while the video element is exactly the size of the picture — true for
+  // `width:100%; height:auto` in the page, and false the moment anything
+  // letterboxes it. Full screen does exactly that: the element becomes the
+  // whole display and the picture sits centred inside it with bars, so every
+  // box was drawn against the screen instead of against the frame. Measuring
+  // the rect makes the overlay correct in any container shape.
+  const [rect, setRect] = useState({ left: 0, top: 0, width: 0, height: 0 });
+
+  useEffect(() => {
+    const video = localRef.current;
+    if (!video) return;
+    const measure = () => {
+      const cw = video.clientWidth;
+      const ch = video.clientHeight;
+      const vw = video.videoWidth;
+      const vh = video.videoHeight;
+      if (!cw || !ch || !vw || !vh) return;
+      // `object-fit: contain` is the default: the picture is scaled to fit and
+      // centred, so the bars are split evenly.
+      const scale = Math.min(cw / vw, ch / vh);
+      const width = vw * scale;
+      const height = vh * scale;
+      setRect({
+        left: video.offsetLeft + (cw - width) / 2,
+        top: video.offsetTop + (ch - height) / 2,
+        width,
+        height,
+      });
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(video);
+    video.addEventListener("loadedmetadata", measure);
+    document.addEventListener("fullscreenchange", measure);
+    window.addEventListener("resize", measure);
+    return () => {
+      observer.disconnect();
+      video.removeEventListener("loadedmetadata", measure);
+      document.removeEventListener("fullscreenchange", measure);
+      window.removeEventListener("resize", measure);
+    };
+  }, [pid, mediaVersion]);
+
+  // Full screen has to take the WRAPPER, not the video. The overlay is a
+  // sibling of the <video>, so fullscreening the video alone leaves every box
+  // behind on the page — which is exactly what a reviewer reported. The native
+  // control can only ever target the video, so it is hidden in CSS and this
+  // replaces it.
+  const toggleFullscreen = () => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    if (document.fullscreenElement) void document.exitFullscreen();
+    else void frame.requestFullscreen?.();
+  };
   // Bumped when the footage changes. A response that arrives after the clip
   // has been swapped belongs to a different film and is dropped — which is the
   // ONLY reason to drop one.
@@ -126,34 +184,22 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
   // placing a wristwatch in the same frame to the pixel.
   const locates = (b: BBox | null | undefined): b is BBox =>
     !!b && (b.xmax - b.xmin) * (b.ymax - b.ymin) < 0.9;
-  const boxAt = (el: Element): BBox | null => {
-    // Timecodes the scan cannot have measured place a box nowhere real.
-    if (el.timing_reliable === false) return null;
-    // A box measured on THIS frame beats one inferred from a time range — and
-    // once a frame HAS been grounded, its answer is the whole answer. An
-    // element the grounding pass did not find is not in this frame, and
-    // falling back to the scan's rectangle would put the video pass's guess
-    // back on screen precisely where it was checked and rejected. A live pause
-    // drew "Ray-Ban Aviator Sunglasses" across a bare forehead that way.
-    const second = String(Math.floor(now));
-    const frame = ground[second];
-    if (frame?.grounded) {
-      const g = frame.boxes[el.id];
-      return locates(g) ? g : null;
-    }
-    // No answer for this second YET. Not the same as nobody having looked, so
-    // it does not get the fallback: the scan's rectangle for the Hangover
-    // tattoo sits over the actor's mouth, a fifth of the frame below the
-    // tattoo, and grounding was already on its way to saying so. Asking
-    // `ground` rather than `pending` closes the one painted frame between the
-    // pause and the request being marked in flight — long enough to be seen.
-    //
-    // NO ANSWER is the condition, not "not grounded". A frame whose grounding
-    // FAILED stores {grounded: false} and still falls through to the scan box,
-    // which is the rule that has always held: grounded-and-absent,
-    // grounded-and-found, and never-grounded are three answers, and only the
-    // third may fall back.
-    if (paused && !frame) return null;
+  // Three-valued on purpose. `undefined` means no answer for this second yet;
+  // `null` means grounding looked and this element is not in the frame; a box
+  // means it located it. Conflating the first two is what drew "Ray-Ban
+  // Aviator Sunglasses" across a bare forehead.
+  const groundedBox = (el: Element): BBox | null | undefined => {
+    const frame = ground[String(Math.floor(now))];
+    // No answer, or an answer that failed — both fall back to the scan.
+    if (!frame || !frame.grounded) return undefined;
+    const g = frame.boxes[el.id];
+    return locates(g) ? g : null;
+  };
+
+  // What the video pass measured: ONE rectangle per time range, so a union of
+  // where the subject travelled rather than where it is now. Useful as a
+  // placeholder, never as an answer — which is why it is drawn differently.
+  const scanBox = (el: Element): BBox | null => {
     const appearance = el.time_ranges.find(
       (r) => now >= r.start_s && now <= r.end_s,
     );
@@ -165,6 +211,24 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
     }
     return el.bbox;
   };
+
+  const boxAt = (el: Element): BBox | null => {
+    // Timecodes the scan cannot have measured place a box nowhere real.
+    if (el.timing_reliable === false) return null;
+    const grounded = groundedBox(el);
+    // Once a frame HAS been grounded its answer is the whole answer, including
+    // "not in this frame". Falling back then would put the video pass's guess
+    // back precisely where it was checked and rejected.
+    if (grounded !== undefined) return grounded;
+    return scanBox(el);
+  };
+
+  // The scan's box is showing because grounding has not answered yet. Drawing
+  // nothing while an 8-second model call runs read as the app being broken;
+  // drawing this as though it were measured read as the app being wrong. So
+  // it is drawn, and drawn as an approximation.
+  const isApprox = (el: Element): boolean =>
+    el.timing_reliable !== false && groundedBox(el) === undefined;
 
   // Boxes are drawn only while paused, and that is an honesty decision rather
   // than a tidiness one. Gemini samples video at 1 frame per second and
@@ -202,7 +266,7 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
 
   return (
     <div className="player-wrap">
-      <div className="player-frame">
+      <div className="player-frame" ref={frameRef}>
         <video
           ref={(node) => {
             localRef.current = node;
@@ -223,6 +287,12 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
           viewBox="0 0 1 1"
           preserveAspectRatio="none"
           aria-hidden={visible.length === 0}
+          style={{
+            left: rect.width ? `${rect.left}px` : 0,
+            top: rect.width ? `${rect.top}px` : 0,
+            width: rect.width ? `${rect.width}px` : "100%",
+            height: rect.width ? `${rect.height}px` : "100%",
+          }}
         >
           {visible.map(({ el, box: b }) => {
             const band = risk[el.id]?.band ?? "LOW";
@@ -234,7 +304,9 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
                   y={b.ymin}
                   width={Math.max(b.xmax - b.xmin, 0.004)}
                   height={Math.max(b.ymax - b.ymin, 0.004)}
-                  className={`ov-box ${band} ${active ? "active" : ""}`}
+                  className={`ov-box ${band} ${active ? "active" : ""} ${
+                    isApprox(el) ? "approx" : ""
+                  }`}
                   vectorEffect="non-scaling-stroke"
                 />
               </g>
@@ -249,21 +321,46 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
             <button
               key={el.id}
               className={`ov-label ${band}`}
-              style={{ left: `${b.xmin * 100}%`, top: `${b.ymin * 100}%` }}
+              style={
+                rect.width
+                  ? {
+                      left: `${rect.left + b.xmin * rect.width}px`,
+                      top: `${rect.top + b.ymin * rect.height}px`,
+                    }
+                  : { left: `${b.xmin * 100}%`, top: `${b.ymin * 100}%` }
+              }
               onClick={() => onPick(el.id)}
               title="Jump to this finding"
             >
               {el.label}
+              {isApprox(el) && <span className="ov-approx">approx</span>}
               {verdict === "CONFLICTED" && <span className="ov-flag">ID?</span>}
               {cov && <span className={`ov-cov ${cov}`}>{COV_LABEL[cov]}</span>}
             </button>
           );
         })}
+        <button
+          type="button"
+          className="player-fs"
+          onClick={toggleFullscreen}
+          title="Full screen (keeps the detection boxes)"
+        >
+          ⛶
+        </button>
       </div>
       <div className="player-status">
         {tc(now, fps)} ·{" "}
         {showBoxes ? (
-          <>{visible.length} boxed</>
+          <>
+            {visible.length} boxed
+            {visible.filter((v) => isApprox(v.el)).length > 0 && (
+              <span className="ov-unlocated">
+                {" "}
+                ({visible.filter((v) => isApprox(v.el)).length} approximate until
+                this frame is measured)
+              </span>
+            )}
+          </>
         ) : (
           <span className="ov-unlocated">pause to place boxes</span>
         )}
