@@ -54,6 +54,35 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
   // takes. Long enough to pause, look, and screenshot a wrong box.
   const [pending, setPending] = useState<Record<string, true>>({});
   const [ok, setOk] = useState(true);
+  // How far the background measuring has got. Shown because a reviewer pausing
+  // during it must be able to tell a frame that is still being measured from a
+  // player that has stopped working — the confusion that made an eight-second
+  // model call read as a broken app.
+  const [warm, setWarm] = useState<{
+    total: number;
+    done: number;
+    running: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    let stopped = false;
+    let timer = 0;
+    const poll = async () => {
+      try {
+        const body = await (await fetch(`/api/productions/${pid}/preground`)).json();
+        if (stopped) return;
+        setWarm(body);
+        if (body.running) timer = window.setTimeout(poll, 2000);
+      } catch {
+        /* the boxes still work, they are just slower */
+      }
+    };
+    void poll();
+    return () => {
+      stopped = true;
+      window.clearTimeout(timer);
+    };
+  }, [pid, mediaVersion]);
   const localRef = useRef<HTMLVideoElement | null>(null);
   const frameRef = useRef<HTMLDivElement | null>(null);
   // Where the picture actually is inside the video element, in CSS pixels.
@@ -363,6 +392,12 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
           </>
         ) : (
           <span className="ov-unlocated">pause to place boxes</span>
+        )}
+        {warm?.running && warm.total > 0 && (
+          <span className="ov-warming">
+            {" "}
+            · measuring boxes {warm.done}/{warm.total}
+          </span>
         )}
         {paused && pending[String(Math.floor(now))] && (
           <span className="ov-unlocated"> · locating on this frame…</span>

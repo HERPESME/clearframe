@@ -926,6 +926,7 @@ button {
    faded because it is a placeholder: one rectangle covers a whole appearance,
    so it is right about WHAT and only roughly right about WHERE. */
 .ov-box.approx { stroke-dasharray: 6 5; opacity: .55; }
+.ov-warming { color: #4aa3df; }
 .ov-approx { margin-left: 6px; font-size: 9px; letter-spacing: .5px; color: var(--muted); text-transform: uppercase; }
 /* The footage IS someone's work. Leads the findings, because clearing the work
    clears everything under it and six characters from one anime are one

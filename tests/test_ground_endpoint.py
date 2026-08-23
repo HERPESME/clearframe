@@ -243,3 +243,44 @@ def test_preground_covers_every_second_not_just_midpoints(tmp_path, monkeypatch)
         assert body["status"] == "warming"
     # The endpoint reports appearances; coverage is what it schedules.
     assert len(seconds) >= 1
+
+
+def test_progress_is_reportable(tmp_path):
+    """A reviewer pausing mid-warm-up must be able to tell "measuring" from
+    "broken". That distinction is the whole reason this endpoint exists."""
+    from fastapi.testclient import TestClient
+
+    from clearframe.webapp.server import create_app
+
+    with TestClient(create_app(out_root=tmp_path)) as client:
+        state = client.post("/api/productions/demo").json()
+        pid = state["production"]["id"]
+        cold = client.get(f"/api/productions/{pid}/preground").json()
+        assert cold == {"total": 0, "done": 0, "running": False, "skipped": 0}
+        client.post(f"/api/productions/{pid}/preground")
+        after = client.get(f"/api/productions/{pid}/preground").json()
+        assert after["total"] >= 1
+        assert after["done"] <= after["total"]
+
+
+def test_warming_starts_when_preview_completes_not_when_the_run_does():
+    """Research and court take minutes after preview, and the timecodes are
+    already final — so the warm-up belongs inside that window, not after it.
+
+    Asserted on the listener wiring rather than a full live run: the hook is
+    `stage_complete` for `preview`, and the pipeline saves state BEFORE
+    emitting it, so the warm-up always reads a current state from the store.
+    """
+    import inspect
+
+    from clearframe.webapp import server as srv
+
+    source = inspect.getsource(srv.create_app)
+    assert '"stage_complete"' in source and 'event.get("stage") == "preview"' in source
+    # and the pipeline really does save before emitting that event
+    from clearframe.pipeline import Pipeline
+
+    run_src = inspect.getsource(Pipeline.run)
+    save_at = run_src.index("ctx.store.save(ctx.state)")
+    emit_at = run_src.index('{"type": "stage_complete"')
+    assert save_at < emit_at, "state must be persisted before the warm-up reads it"
