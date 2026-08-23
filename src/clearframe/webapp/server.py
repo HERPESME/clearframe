@@ -484,20 +484,29 @@ def create_app(out_root: Path) -> FastAPI:
             if el.timing_reliable
             and any(r.start_s <= at_s <= r.end_s for r in el.time_ranges)
         ]
+        # Nothing here is a conclusion, not a gap: the analysis says no
+        # element appears at this moment, so there is nothing to place.
         if not here:
-            return {"at_s": at_s, "boxes": {}}
+            return {"at_s": at_s, "boxes": {}, "grounded": True}
 
         key = (pid, int(at_s))
         if key in _ground_cache:
-            return {"at_s": at_s, "boxes": _ground_cache[key], "cached": True}
+            return {
+                "at_s": at_s,
+                "boxes": _ground_cache[key],
+                "grounded": True,
+                "cached": True,
+            }
 
         found = _stored_media(pid)
         if found is None:
-            return {"at_s": at_s, "boxes": {}}
+            return {"at_s": at_s, "boxes": {}, "grounded": False}
 
         frame = extract_frame(found[0], at_s)
         if frame is None:
-            return {"at_s": at_s, "boxes": {}}
+            # Nobody looked at this frame. Saying "grounded" would tell the
+            # player to suppress every box on it.
+            return {"at_s": at_s, "boxes": {}, "grounded": False}
 
         cfg = ClearFrameConfig.from_env(os.environ)
         try:
@@ -506,7 +515,7 @@ def create_app(out_root: Path) -> FastAPI:
             )
         except Exception as exc:  # a refined box is a nicety, never a failure
             log.warning("grounding failed for %s at %.2fs: %s", pid, at_s, exc)
-            return {"at_s": at_s, "boxes": {}}
+            return {"at_s": at_s, "boxes": {}, "grounded": False}
 
         # Keyed by element id: the client draws against its own state, and a
         # label is not a stable identifier.
@@ -516,7 +525,7 @@ def create_app(out_root: Path) -> FastAPI:
             if el.label in located
         }
         _ground_cache[key] = boxes
-        return {"at_s": at_s, "boxes": boxes}
+        return {"at_s": at_s, "boxes": boxes, "grounded": True}
 
     @app.get("/api/licences")
     def list_licences():

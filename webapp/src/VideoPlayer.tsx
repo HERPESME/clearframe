@@ -39,7 +39,13 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
   // whole second. The scan's boxes come from the video pass, where Gemini
   // samples at ~1fps and returns one rectangle per time range — a union of
   // where the subject travelled rather than where it is in this frame.
-  const [ground, setGround] = useState<Record<string, Record<string, BBox>>>({});
+  // Per second: the boxes found, and whether the frame was actually grounded.
+  // The two are different answers — "grounded, absent" is a conclusion and
+  // "never grounded" is a gap — and conflating them threw away the only
+  // judgement worth having.
+  const [ground, setGround] = useState<
+    Record<string, { boxes: Record<string, BBox>; grounded: boolean }>
+  >({});
   const [locating, setLocating] = useState(false);
   const [ok, setOk] = useState(true);
   const localRef = useRef<HTMLVideoElement | null>(null);
@@ -58,14 +64,20 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
     let cancelled = false;
     setLocating(true);
     fetch(`/api/productions/${pid}/ground?at_s=${now.toFixed(2)}`)
-      .then((r) => (r.ok ? r.json() : { boxes: {} }))
+      .then((r) => (r.ok ? r.json() : { boxes: {}, grounded: false }))
       .then((body) => {
-        if (!cancelled) setGround((g) => ({ ...g, [second]: body.boxes ?? {} }));
+        if (cancelled) return;
+        setGround((g) => ({
+          ...g,
+          [second]: { boxes: body.boxes ?? {}, grounded: body.grounded === true },
+        }));
       })
       .catch(() => {
-        // A refined box is a nicety. Falling back to the scan's box is the
-        // behaviour that existed before this, and it is fine.
-        if (!cancelled) setGround((g) => ({ ...g, [second]: {} }));
+        // Nobody looked at this frame, so the scan's box is still the best
+        // thing we have — which is the behaviour that existed before this.
+        if (!cancelled) {
+          setGround((g) => ({ ...g, [second]: { boxes: {}, grounded: false } }));
+        }
       })
       .finally(() => {
         if (!cancelled) setLocating(false);
@@ -90,9 +102,14 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
   const boxAt = (el: Element): BBox | null => {
     // Timecodes the scan cannot have measured place a box nowhere real.
     if (el.timing_reliable === false) return null;
-    // A box measured on THIS frame beats one inferred from a time range.
-    const grounded = ground[String(Math.floor(now))]?.[el.id];
-    if (grounded) return grounded;
+    // A box measured on THIS frame beats one inferred from a time range — and
+    // once a frame HAS been grounded, its answer is the whole answer. An
+    // element the grounding pass did not find is not in this frame, and
+    // falling back to the scan's rectangle would put the video pass's guess
+    // back on screen precisely where it was checked and rejected. A live pause
+    // drew "Ray-Ban Aviator Sunglasses" across a bare forehead that way.
+    const frame = ground[String(Math.floor(now))];
+    if (frame?.grounded) return frame.boxes[el.id] ?? null;
     const appearance = el.time_ranges.find(
       (r) => now >= r.start_s && now <= r.end_s,
     );

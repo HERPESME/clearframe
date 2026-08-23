@@ -129,3 +129,58 @@ def test_a_model_failure_is_not_an_error(tmp_path, monkeypatch):
 
     assert r.status_code == 200
     assert r.json()["boxes"] == {}
+
+
+# --- grounding must be able to say "not here" ---------------------------------
+#
+# A live pause put a "Ray-Ban Aviator Sunglasses" box on a bare forehead. The
+# model was not at fault — a control asking it to place the Eiffel Tower and
+# the Golden Gate Bridge in the same frame correctly returned neither. The
+# player was: when grounding omitted an element, boxAt fell through to the
+# scan's stored box, which is the video-pass rectangle grounding exists to
+# replace. The one judgement worth having was thrown away.
+#
+# So the response has to distinguish three states the client used to conflate:
+# grounded and found, grounded and absent, and not grounded at all.
+
+
+def test_a_successful_grounding_says_so(tmp_path, monkeypatch):
+    calls = []
+    c = _client(tmp_path, monkeypatch, calls)
+    body = c.get("/api/productions/p1/ground", params={"at_s": 12.0}).json()
+    assert body["grounded"] is True
+
+
+def test_an_unavailable_frame_is_not_reported_as_grounded(tmp_path, monkeypatch):
+    """Otherwise the client suppresses every box on a frame nobody looked at."""
+    calls = []
+    c = _client(tmp_path, monkeypatch, calls)
+    monkeypatch.setattr(
+        "clearframe.webapp.server.extract_frame", lambda path, at_s, **kw: None
+    )
+    body = c.get("/api/productions/p1/ground", params={"at_s": 12.0}).json()
+    assert body["grounded"] is False
+
+
+def test_a_model_failure_is_not_reported_as_grounded(tmp_path, monkeypatch):
+    calls = []
+    c = _client(tmp_path, monkeypatch, calls)
+
+    class Broken:
+        async def ground_frame(self, image, labels):
+            raise RuntimeError("model refused")
+
+    monkeypatch.setattr(
+        "clearframe.webapp.server.build_grounding_client", lambda cfg: Broken()
+    )
+    body = c.get("/api/productions/p1/ground", params={"at_s": 12.0}).json()
+    assert body["grounded"] is False
+
+
+def test_nothing_on_screen_is_a_real_grounded_answer(tmp_path, monkeypatch):
+    """No elements here means no boxes, and that is a conclusion, not a gap."""
+    calls = []
+    c = _client(tmp_path, monkeypatch, calls)
+    body = c.get("/api/productions/p1/ground", params={"at_s": 30.0}).json()
+    assert body["grounded"] is True
+    assert body["boxes"] == {}
