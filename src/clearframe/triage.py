@@ -1,5 +1,6 @@
 """Rule-based clearance triage and cross-shot duplicate merging."""
 
+from clearframe.matching import labels_match
 from clearframe.models import (
     ClearanceCategory,
     DetectedElement,
@@ -70,7 +71,13 @@ def _screen_time(group: list[DetectedElement], ranges: list[TimeRange]) -> float
 
 
 def _merge(group: list[DetectedElement]) -> DetectedElement:
+    # Keep the id and position of the first sighting, but take the fullest
+    # label and description in the group: routing reads the description, and a
+    # pass that wrote "replicating Mike Tyson's famous tattoo" knows something
+    # the pass that wrote "a tribal tattoo" does not.
     first = group[0]
+    richest = max(group, key=lambda d: len(d.description or ""))
+    longest_label = max(group, key=lambda d: len(d.label or ""))
     ranges = _union([r for d in group for r in d.time_ranges])
     # Screen time comes from the ranges rather than from the sum of what each
     # pass claimed: an element cannot be on screen longer than the timecodes
@@ -82,6 +89,8 @@ def _merge(group: list[DetectedElement]) -> DetectedElement:
     # pass was added. The demo mural lost its siting and Germany stopped
     # applying freedom of panorama to the one element written for it.
     richer = {
+        "label": longest_label.label,
+        "description": richest.description,
         # Prefer whichever pass actually reported these; a default is not an
         # observation, and the first pass is not authoritative over the second.
         "siting": next(
@@ -112,12 +121,32 @@ def _merge(group: list[DetectedElement]) -> DetectedElement:
 
 
 def triage(detections: list[DetectedElement]) -> list[TriagedElement]:
-    groups: dict[tuple[ElementType, str], list[DetectedElement]] = {}
+    """Group sightings of one thing, then assign its clearance category.
+
+    Grouping used to be exact string equality on `(element_type, label)`, which
+    worked while the only two sources were the scan and its auditor — the
+    auditor is primed with the first pass's labels and echoes them. A second
+    independent pass is not, and phrases things its own way: one live run
+    produced "Stu's Face Tattoo" and "Face Tattoo" as separate findings with
+    separate routes, disagreeing with each other about whether it was the
+    Whitmill fact pattern.
+
+    Matching is deliberately conservative. Under-merging leaves a duplicate,
+    which is annoying and costs a research run. Over-merging DELETES a finding,
+    which is the failure this product exists to prevent. So a merge needs the
+    same element type AND a `labels_match`; a weak resemblance is not enough.
+    """
+    groups: list[list[DetectedElement]] = []
     for d in detections:
-        groups.setdefault((d.element_type, d.label.casefold().strip()), []).append(d)
+        for g in groups:
+            if g[0].element_type is d.element_type and labels_match(g[0].label, d.label):
+                g.append(d)
+                break
+        else:
+            groups.append([d])
 
     out: list[TriagedElement] = []
-    for group in groups.values():
+    for group in groups:
         merged = _merge(group) if len(group) > 1 else group[0]
         out.append(
             TriagedElement(**merged.model_dump(), category=CATEGORY_RULES[merged.element_type])
