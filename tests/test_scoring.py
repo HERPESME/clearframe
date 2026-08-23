@@ -58,9 +58,15 @@ def test_de_minimis_background_face_capped_low():
     assert r.de_minimis is True and r.band == RiskBand.LOW
 
 
-def test_missing_research_uses_unknown_posture():
+def test_missing_research_is_scored_at_worst_case_not_discounted():
+    """Failing to look is not evidence that there is nothing to find.
+
+    This used to assert 0.7 — UNKNOWN's factor — so a finding nobody could
+    research scored 30% below its own provisional band. See
+    tests/test_failed_research_posture.py for the full case.
+    """
     r = score_element(make_element(), None)
-    assert r.factors["posture_factor"] == 0.7
+    assert r.factors["posture_factor"] == 1.0
 
 
 def test_band_boundaries():

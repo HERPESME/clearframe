@@ -23,38 +23,1858 @@
     "media_version": ""
   },
   "stage_status": {
-    "script": "complete"
+    "script": "complete",
+    "scan": "complete",
+    "triage": "complete",
+    "corroborate": "complete",
+    "drift": "complete",
+    "preview": "complete",
+    "research": "complete",
+    "freshness": "complete",
+    "risk": "complete",
+    "territory": "complete",
+    "coverage": "complete",
+    "remediation": "complete",
+    "court": "complete",
+    "review": "awaiting"
   },
-  "detections": [],
-  "elements": [],
-  "research": {},
-  "risk": {},
-  "remediation": {},
+  "detections": [
+    {
+      "id": "tattoo_01",
+      "label": "Mike Tyson face tattoo",
+      "element_type": "TATTOO",
+      "description": "A black tribal-style tattoo on the left side of a man's face, replicating Mike Tyson's famous tattoo.",
+      "time_ranges": [
+        {
+          "start_s": 5.1,
+          "end_s": 7.8,
+          "bbox": {
+            "ymin": 0.435,
+            "xmin": 0.673,
+            "ymax": 0.605,
+            "xmax": 0.829
+          }
+        },
+        {
+          "start_s": 10.8,
+          "end_s": 13.5,
+          "bbox": {
+            "ymin": 0.448,
+            "xmin": 0.666,
+            "ymax": 0.622,
+            "xmax": 0.813
+          }
+        },
+        {
+          "start_s": 16.1,
+          "end_s": 18.5,
+          "bbox": {
+            "ymin": 0.441,
+            "xmin": 0.682,
+            "ymax": 0.579,
+            "xmax": 0.824
+          }
+        },
+        {
+          "start_s": 20.8,
+          "end_s": 22.4,
+          "bbox": {
+            "ymin": 0.44,
+            "xmin": 0.668,
+            "ymax": 0.572,
+            "xmax": 0.804
+          }
+        },
+        {
+          "start_s": 25.8,
+          "end_s": 27.6,
+          "bbox": {
+            "ymin": 0.444,
+            "xmin": 0.672,
+            "ymax": 0.568,
+            "xmax": 0.804
+          }
+        },
+        {
+          "start_s": 35.1,
+          "end_s": 38.3,
+          "bbox": {
+            "ymin": 0.298,
+            "xmin": 0.506,
+            "ymax": 0.443,
+            "xmax": 0.651
+          }
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 12.0,
+        "frame_coverage": 0.02,
+        "centrality": 0.7,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": "UNFLATTERING",
+      "timing_reliable": true,
+      "timing_note": ""
+    },
+    {
+      "id": "logo_01",
+      "label": "Calvin Klein",
+      "element_type": "LOGO",
+      "description": "The 'Calvin Klein' brand name is visible on the waistband of a man's underwear.",
+      "time_ranges": [
+        {
+          "start_s": 23.3,
+          "end_s": 25.3,
+          "bbox": {
+            "ymin": 0.932,
+            "xmin": 0.497,
+            "ymax": 0.969,
+            "xmax": 0.617
+          }
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 2.0,
+        "frame_coverage": 0.005,
+        "centrality": 0.5,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": "UNFLATTERING",
+      "timing_reliable": true,
+      "timing_note": ""
+    },
+    {
+      "id": "logo_02",
+      "label": "National",
+      "element_type": "LOGO",
+      "description": "The 'National' brand logo is visible on a yellow water heater in the bathroom.",
+      "time_ranges": [
+        {
+          "start_s": 32.2,
+          "end_s": 33.5,
+          "bbox": {
+            "ymin": 0.321,
+            "xmin": 0.441,
+            "ymax": 0.349,
+            "xmax": 0.53
+          }
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 1.3,
+        "frame_coverage": 0.002,
+        "centrality": 0.5,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": "UNFLATTERING",
+      "timing_reliable": true,
+      "timing_note": ""
+    },
+    {
+      "id": "artwork_01",
+      "label": "Sticker on water heater",
+      "element_type": "ARTWORK",
+      "description": "A yellow circular sticker with black graphics is on a water heater.",
+      "time_ranges": [
+        {
+          "start_s": 32.2,
+          "end_s": 33.5,
+          "bbox": {
+            "ymin": 0.352,
+            "xmin": 0.469,
+            "ymax": 0.42,
+            "xmax": 0.551
+          }
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 1.3,
+        "frame_coverage": 0.005,
+        "centrality": 0.5,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": "NEUTRAL",
+      "timing_reliable": true,
+      "timing_note": ""
+    },
+    {
+      "id": "artwork_001",
+      "label": "Dog on T-shirt",
+      "element_type": "ARTWORK",
+      "description": "A graphic depicting the head of a yellow Labrador retriever on the front of a yellow t-shirt worn by the character Alan.",
+      "time_ranges": [
+        {
+          "start_s": 14.1,
+          "end_s": 15.5,
+          "bbox": null
+        },
+        {
+          "start_s": 19.1,
+          "end_s": 20.3,
+          "bbox": null
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 2.6,
+        "frame_coverage": 0.15,
+        "centrality": 0.7,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": null,
+      "timing_reliable": true,
+      "timing_note": ""
+    }
+  ],
+  "elements": [
+    {
+      "id": "tattoo_01",
+      "label": "Mike Tyson face tattoo",
+      "element_type": "TATTOO",
+      "description": "A black tribal-style tattoo on the left side of a man's face, replicating Mike Tyson's famous tattoo.",
+      "time_ranges": [
+        {
+          "start_s": 5.1,
+          "end_s": 7.8,
+          "bbox": {
+            "ymin": 0.435,
+            "xmin": 0.673,
+            "ymax": 0.605,
+            "xmax": 0.829
+          }
+        },
+        {
+          "start_s": 10.8,
+          "end_s": 13.5,
+          "bbox": {
+            "ymin": 0.448,
+            "xmin": 0.666,
+            "ymax": 0.622,
+            "xmax": 0.813
+          }
+        },
+        {
+          "start_s": 16.1,
+          "end_s": 18.5,
+          "bbox": {
+            "ymin": 0.441,
+            "xmin": 0.682,
+            "ymax": 0.579,
+            "xmax": 0.824
+          }
+        },
+        {
+          "start_s": 20.8,
+          "end_s": 22.4,
+          "bbox": {
+            "ymin": 0.44,
+            "xmin": 0.668,
+            "ymax": 0.572,
+            "xmax": 0.804
+          }
+        },
+        {
+          "start_s": 25.8,
+          "end_s": 27.6,
+          "bbox": {
+            "ymin": 0.444,
+            "xmin": 0.672,
+            "ymax": 0.568,
+            "xmax": 0.804
+          }
+        },
+        {
+          "start_s": 35.1,
+          "end_s": 38.3,
+          "bbox": {
+            "ymin": 0.298,
+            "xmin": 0.506,
+            "ymax": 0.443,
+            "xmax": 0.651
+          }
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 12.0,
+        "frame_coverage": 0.02,
+        "centrality": 0.7,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": "UNFLATTERING",
+      "timing_reliable": true,
+      "timing_note": "",
+      "category": "COPYRIGHT_ART"
+    },
+    {
+      "id": "logo_01",
+      "label": "Calvin Klein",
+      "element_type": "LOGO",
+      "description": "The 'Calvin Klein' brand name is visible on the waistband of a man's underwear.",
+      "time_ranges": [
+        {
+          "start_s": 23.3,
+          "end_s": 25.3,
+          "bbox": {
+            "ymin": 0.932,
+            "xmin": 0.497,
+            "ymax": 0.969,
+            "xmax": 0.617
+          }
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 2.0,
+        "frame_coverage": 0.005,
+        "centrality": 0.5,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": "UNFLATTERING",
+      "timing_reliable": true,
+      "timing_note": "",
+      "category": "TRADEMARK"
+    },
+    {
+      "id": "logo_02",
+      "label": "National",
+      "element_type": "LOGO",
+      "description": "The 'National' brand logo is visible on a yellow water heater in the bathroom.",
+      "time_ranges": [
+        {
+          "start_s": 32.2,
+          "end_s": 33.5,
+          "bbox": {
+            "ymin": 0.321,
+            "xmin": 0.441,
+            "ymax": 0.349,
+            "xmax": 0.53
+          }
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 1.3,
+        "frame_coverage": 0.002,
+        "centrality": 0.5,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": "UNFLATTERING",
+      "timing_reliable": true,
+      "timing_note": "",
+      "category": "TRADEMARK"
+    },
+    {
+      "id": "artwork_01",
+      "label": "Sticker on water heater",
+      "element_type": "ARTWORK",
+      "description": "A yellow circular sticker with black graphics is on a water heater.",
+      "time_ranges": [
+        {
+          "start_s": 32.2,
+          "end_s": 33.5,
+          "bbox": {
+            "ymin": 0.352,
+            "xmin": 0.469,
+            "ymax": 0.42,
+            "xmax": 0.551
+          }
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 1.3,
+        "frame_coverage": 0.005,
+        "centrality": 0.5,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": "NEUTRAL",
+      "timing_reliable": true,
+      "timing_note": "",
+      "category": "COPYRIGHT_ART"
+    },
+    {
+      "id": "artwork_001",
+      "label": "Dog on T-shirt",
+      "element_type": "ARTWORK",
+      "description": "A graphic depicting the head of a yellow Labrador retriever on the front of a yellow t-shirt worn by the character Alan.",
+      "time_ranges": [
+        {
+          "start_s": 14.1,
+          "end_s": 15.5,
+          "bbox": null
+        },
+        {
+          "start_s": 19.1,
+          "end_s": 20.3,
+          "bbox": null
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 2.6,
+        "frame_coverage": 0.15,
+        "centrality": 0.7,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": null,
+      "timing_reliable": true,
+      "timing_note": "",
+      "category": "COPYRIGHT_ART"
+    }
+  ],
+  "research": {
+    "logo_02": {
+      "element_id": "logo_02",
+      "owner": null,
+      "owner_confidence": "low",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [],
+      "status": "incomplete"
+    },
+    "artwork_01": {
+      "element_id": "artwork_01",
+      "owner": null,
+      "owner_confidence": "low",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [],
+      "status": "incomplete"
+    },
+    "tattoo_01": {
+      "element_id": "tattoo_01",
+      "owner": null,
+      "owner_confidence": "low",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [],
+      "status": "incomplete"
+    },
+    "artwork_001": {
+      "element_id": "artwork_001",
+      "owner": null,
+      "owner_confidence": "low",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [],
+      "status": "incomplete"
+    },
+    "logo_01": {
+      "element_id": "logo_01",
+      "owner": null,
+      "owner_confidence": "low",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [],
+      "status": "incomplete"
+    }
+  },
+  "risk": {
+    "tattoo_01": {
+      "element_id": "tattoo_01",
+      "score": 41,
+      "band": "MEDIUM",
+      "factors": {
+        "screen_time_norm": 1.0,
+        "prominence_score": 0.646,
+        "category_weight": 0.9,
+        "posture_factor": 0.7,
+        "use_context_factor": 1.0,
+        "depiction_factor": 1.0
+      },
+      "de_minimis": false
+    },
+    "logo_01": {
+      "element_id": "logo_01",
+      "score": 13,
+      "band": "LOW",
+      "factors": {
+        "screen_time_norm": 0.2,
+        "prominence_score": 0.182,
+        "category_weight": 0.8,
+        "posture_factor": 0.7,
+        "use_context_factor": 1.0,
+        "depiction_factor": 1.3
+      },
+      "de_minimis": false
+    },
+    "logo_02": {
+      "element_id": "logo_02",
+      "score": 11,
+      "band": "LOW",
+      "factors": {
+        "screen_time_norm": 0.13,
+        "prominence_score": 0.153,
+        "category_weight": 0.8,
+        "posture_factor": 0.7,
+        "use_context_factor": 1.0,
+        "depiction_factor": 1.3
+      },
+      "de_minimis": false
+    },
+    "artwork_01": {
+      "element_id": "artwork_01",
+      "score": 10,
+      "band": "LOW",
+      "factors": {
+        "screen_time_norm": 0.13,
+        "prominence_score": 0.154,
+        "category_weight": 0.9,
+        "posture_factor": 0.7,
+        "use_context_factor": 1.0,
+        "depiction_factor": 1.0
+      },
+      "de_minimis": false
+    },
+    "artwork_001": {
+      "element_id": "artwork_001",
+      "score": 18,
+      "band": "LOW",
+      "factors": {
+        "screen_time_norm": 0.26,
+        "prominence_score": 0.289,
+        "category_weight": 0.9,
+        "posture_factor": 0.7,
+        "use_context_factor": 1.0,
+        "depiction_factor": 1.0
+      },
+      "de_minimis": false
+    }
+  },
+  "remediation": {
+    "tattoo_01": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Mike Tyson face tattoo' in 6 shot(s), 01:00:05:02-01:00:07:19. Estimated VFX cost $300-$800/shot at 2% frame coverage.",
+        "est_cost_band": "$300-$800/shot"
+      }
+    ],
+    "logo_01": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Calvin Klein' in 1 shot(s), 01:00:23:07-01:00:25:07. Estimated VFX cost $300-$800/shot at 0% frame coverage.",
+        "est_cost_band": "$300-$800/shot"
+      }
+    ],
+    "logo_02": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'National' in 1 shot(s), 01:00:32:05-01:00:33:12. Estimated VFX cost $300-$800/shot at 0% frame coverage.",
+        "est_cost_band": "$300-$800/shot"
+      }
+    ],
+    "artwork_01": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Sticker on water heater' in 1 shot(s), 01:00:32:05-01:00:33:12. Estimated VFX cost $300-$800/shot at 0% frame coverage.",
+        "est_cost_band": "$300-$800/shot"
+      }
+    ],
+    "artwork_001": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Dog on T-shirt' in 2 shot(s), 01:00:14:02-01:00:15:12. Estimated VFX cost $800-$2500/shot at 15% frame coverage.",
+        "est_cost_band": "$800-$2500/shot"
+      }
+    ]
+  },
   "decisions": {},
   "unscanned_ranges": [],
-  "audit_log": [],
-  "court": {},
-  "research_plan": {},
+  "audit_log": [
+    {
+      "at": "2026-08-23T10:44:55.850651+00:00",
+      "actor": "system",
+      "role": "system",
+      "event": "freshness_checked",
+      "detail": "0 holders checked, 0 enforcement signals"
+    }
+  ],
+  "court": {
+    "tattoo_01": {
+      "element_id": "tattoo_01",
+      "holding": "clear_required",
+      "confidence": "high",
+      "reasoning": "The legal risk presented by the on-screen use of this specific tattoo is unacceptably high. The controlling precedent, S. Victor Whitmill v. Warner Bros., involves the exact same artwork in a highly analogous context. In that case, the court signaled that the artist had a 'strong likelihood of success on the merits' and a major studio subsequently settled, demonstrating the significant financial and legal peril. The advocate's argument that this film's 'plot-integral' use is more transformative than the 'comedic' use in 'The Hangover Part II' is a fine distinction that is unlikely to overcome the fundamental fact of direct reproduction. From a practical standpoint, the risk of a preliminary injunction, which was seriously considered in the Whitmill case, could jeopardize the film's release and is a catastrophic business risk. The cost of licensing the tattoo, or the VFX cost to alter or remove it, is a calculable expense that is decisively preferable to the uncapped exposure of litigation, potential damages, and the threat of an injunction. The tattoo must be licensed from the rights holder or altered to be non-infringing.",
+      "briefs": [
+        {
+          "side": "counsel",
+          "argument": "The on-screen use of the 'Mike Tyson face tattoo' presents a significant, actionable copyright clearance risk. The tattoo is an original graphic work fixed in a tangible medium of expression (skin), making it eligible for copyright protection under 17 U.S.C. § 102. The rights are presumed to be held by the original artist, S. Victor Whitmill. Although our research could not identify the rights holder, this does not extinguish the copyright; it merely prevents us from obtaining a license, thus heightening the risk of an infringement claim post-release. The proposed use—12 seconds of screen time, integral to the plot—is not de minimis and would be considered a reproduction of the work. A fair use defense under 17 U.S.C. § 107 would likely fail: (1) the use is commercial and not transformative, as it's a direct copy rather than a parody or critique of the tattoo itself; (2) the work is highly creative, affording it strong protection; (3) the entire work is being used; and (4) the use could usurp the artist's potential market for licensing the design. The direct precedent set by S. Victor Whitmill's lawsuit against Warner Bros. for an identical use in 'The Hangover Part II' demonstrates that courts take this claim seriously and that such use can lead to costly litigation and potential injunctions. To mitigate risk, the tattoo must be licensed, digitally removed, or altered to be non-infringing.",
+          "precedents": [
+            {
+              "case_name": "S. Victor Whitmill v. Warner Bros. Entertainment Inc.",
+              "citation": "Case No. 4:11-CV-752 (E.D. Mo. 2011)",
+              "holding": "The case settled before a final judgment. However, in the hearing for a preliminary injunction, the judge stated that the plaintiff tattoo artist had a 'strong likelihood of success on the merits' and that the tattoo was a copyrightable work. The court was highly skeptical of the studio's fair use defense for replicating the tattoo on an actor's face.",
+              "relevance": "This is the controlling precedent for this specific tattoo. A federal court has already signaled that replicating this exact design on an actor for a film constitutes likely copyright infringement. Warner Bros. ultimately settled for an undisclosed sum, demonstrating that a major studio faced with this precise issue found the legal risk too high to litigate to conclusion. Our fact pattern is nearly identical, making this a very high-risk element.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Solid Oak Sketches, LLC v. 2K Games, Inc.",
+              "citation": "449 F. Supp. 3d 333 (S.D.N.Y. 2020)",
+              "holding": "The court found that the depiction of NBA players' tattoos in a video game was not infringing because the use was de minimis (the tattoos were small and indistinct) and the players had an implied license to appear in media with their tattoos as part of their likeness.",
+              "relevance": "This case is distinguishable and highlights the risk of our specific use. Our proposed use is plot-integral and has significant screen time, so a de minimis defense would fail. Crucially, the implied license defense is inapplicable, as we are replicating the tattoo on a different person (an actor), not depicting Mike Tyson himself. This case shows that while some uses of tattoos may be permissible, ours does not fall into the categories the court found acceptable.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        },
+        {
+          "side": "advocate",
+          "argument": "The primary defense for using the 'Mike Tyson face tattoo' is fair use under 17 U.S.C. § 107. While the tattoo is a creative work (Factor 2 weighs against us) and the entire design was used (Factor 3 also weighs against us, though it was necessary to use the whole design to make the reference), the use is likely transformative and has no negative market impact. \n\nFactor 1, the purpose and character of the use, strongly favors fair use. By placing this iconic tattoo in a new context on a character central to our plot, we are not merely copying it for its aesthetic value. Instead, we are using it as a cultural signifier to comment on themes of identity, fame, or consequence. This recontextualization is a classic transformative use. \n\nFactor 4, the effect on the market, is our strongest point. Our film does not usurp any market for the original tattoo artist's work. A movie ticket is not a substitute for a tattoo, and there is no established licensing market for this specific use that our production would harm. \n\nThe weakest point in our defense is the precedent set by S. Victor Whitmill, the tattoo's artist, suing Warner Bros. over its use in 'The Hangover Part II.' In that case, the judge signaled the plaintiff had a strong case for infringement before the parties settled. However, our use is distinguishable. Where that film's use was arguably for a purely comedic sight gag, our use is integral to the plot and character development, strengthening our claim of transformative purpose over mere duplication.",
+          "precedents": [
+            {
+              "case_name": "Whitmill v. Warner Bros. Entertainment Inc.",
+              "citation": "No. 4:11-CV-752 (E.D. Mo. 2011)",
+              "holding": "The case settled before a final ruling. However, in denying Warner Bros.' motion to dismiss and in considering a preliminary injunction, the judge stated the plaintiff had a 'strong likelihood of success on the merits' of his copyright infringement claim, finding the studio's fair use defense to be weak.",
+              "relevance": "This is the most factually similar case, involving the exact same copyrighted work. It serves as a significant caution, as the court was initially unpersuaded by the fair use defense for the tattoo's appearance in 'The Hangover Part II.' Our defense must distinguish our 'plot-integral' use from the comedic use in that film.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Campbell v. Acuff-Rose Music, Inc.",
+              "citation": "510 U.S. 569 (1994)",
+              "holding": "The Supreme Court held that a commercial parody could qualify as fair use, establishing the importance of 'transformativeness' under the first fair use factor. A use is transformative if it adds new expression, meaning, or message to the original work.",
+              "relevance": "This case provides the foundational legal principle for our argument. We argue that recontextualizing the tattoo within our narrative is a transformative act that imbues the original work with new meaning, which is the central inquiry for the first and most important fair use factor.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Ringgold v. Black Entertainment Television, Inc.",
+              "citation": "126 F.3d 70 (2d Cir. 1997)",
+              "holding": "The court held that the use of a copyrighted poster as set dressing in a TV show, visible for a total of 26.75 seconds, was not de minimis (too trivial to be infringing) and remanded the case for a full fair use analysis.",
+              "relevance": "This case demonstrates that a use of 12 seconds is not automatically de minimis. It forecloses a weaker 'incidental use' argument and forces us to rely on the more substantive, four-factor fair use defense, which is more appropriate given the use is integral to our plot.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "research_plan": {
+    "tattoo_01": {
+      "element_id": "tattoo_01",
+      "processor": "base",
+      "rationale": "Standard single-owner lookup expected; escalate tier manually if research returns incomplete.",
+      "est_cost_usd": 0.01
+    },
+    "artwork_001": {
+      "element_id": "artwork_001",
+      "processor": "base",
+      "rationale": "Standard single-owner lookup expected; escalate tier manually if research returns incomplete.",
+      "est_cost_usd": 0.01
+    },
+    "logo_01": {
+      "element_id": "logo_01",
+      "processor": "base",
+      "rationale": "Standard single-owner lookup expected; escalate tier manually if research returns incomplete.",
+      "est_cost_usd": 0.01
+    }
+  },
   "script_mentions": [],
   "drift": null,
   "candidates": {},
   "watches": {},
   "alerts": [],
-  "corroboration": {},
+  "corroboration": {
+    "tattoo_01": {
+      "element_id": "tattoo_01",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers COPYRIGHT_ART; identity rests on the video model alone."
+    },
+    "logo_01": {
+      "element_id": "logo_01",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "cloud-video-intelligence saw no catalogued mark in this window. Not a contradiction — the mark may simply be outside its vocabulary — but identity is unconfirmed."
+    },
+    "logo_02": {
+      "element_id": "logo_02",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "cloud-video-intelligence saw no catalogued mark in this window. Not a contradiction — the mark may simply be outside its vocabulary — but identity is unconfirmed."
+    },
+    "artwork_01": {
+      "element_id": "artwork_01",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers COPYRIGHT_ART; identity rests on the video model alone."
+    },
+    "artwork_001": {
+      "element_id": "artwork_001",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers COPYRIGHT_ART; identity rests on the video model alone."
+    }
+  },
   "freshness": {},
-  "territory_risk": {},
-  "territories": [],
-  "coverage": {},
+  "territory_risk": {
+    "tattoo_01": [
+      {
+        "element_id": "tattoo_01",
+        "territory": "US",
+        "band": "MEDIUM",
+        "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+      },
+      {
+        "element_id": "tattoo_01",
+        "territory": "DE",
+        "band": "LOW",
+        "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+      },
+      {
+        "element_id": "tattoo_01",
+        "territory": "FR",
+        "band": "HIGH",
+        "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+      }
+    ],
+    "logo_01": [
+      {
+        "element_id": "logo_01",
+        "territory": "US",
+        "band": "LOW",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; United States tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "logo_01",
+        "territory": "DE",
+        "band": "LOW",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; Germany tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "logo_01",
+        "territory": "FR",
+        "band": "LOW",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; France tracks the baseline band.",
+        "authority": ""
+      }
+    ],
+    "logo_02": [
+      {
+        "element_id": "logo_02",
+        "territory": "US",
+        "band": "LOW",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; United States tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "logo_02",
+        "territory": "DE",
+        "band": "LOW",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; Germany tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "logo_02",
+        "territory": "FR",
+        "band": "LOW",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; France tracks the baseline band.",
+        "authority": ""
+      }
+    ],
+    "artwork_01": [
+      {
+        "element_id": "artwork_01",
+        "territory": "US",
+        "band": "LOW",
+        "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+      },
+      {
+        "element_id": "artwork_01",
+        "territory": "DE",
+        "band": "LOW",
+        "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+      },
+      {
+        "element_id": "artwork_01",
+        "territory": "FR",
+        "band": "MEDIUM",
+        "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+      }
+    ],
+    "artwork_001": [
+      {
+        "element_id": "artwork_001",
+        "territory": "US",
+        "band": "LOW",
+        "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+      },
+      {
+        "element_id": "artwork_001",
+        "territory": "DE",
+        "band": "LOW",
+        "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+      },
+      {
+        "element_id": "artwork_001",
+        "territory": "FR",
+        "band": "MEDIUM",
+        "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+      }
+    ]
+  },
+  "territories": [
+    "US",
+    "DE",
+    "FR"
+  ],
+  "coverage": {
+    "tattoo_01": {
+      "element_id": "tattoo_01",
+      "status": "UNKNOWN",
+      "licence_id": null,
+      "rights_holder": null,
+      "gaps": [],
+      "note": "Rights holder is not established, so the ledger cannot be checked. Coverage is unknowable until identity and ownership are resolved."
+    },
+    "logo_01": {
+      "element_id": "logo_01",
+      "status": "UNKNOWN",
+      "licence_id": null,
+      "rights_holder": null,
+      "gaps": [],
+      "note": "Rights holder is not established, so the ledger cannot be checked. Coverage is unknowable until identity and ownership are resolved."
+    },
+    "logo_02": {
+      "element_id": "logo_02",
+      "status": "UNKNOWN",
+      "licence_id": null,
+      "rights_holder": null,
+      "gaps": [],
+      "note": "Rights holder is not established, so the ledger cannot be checked. Coverage is unknowable until identity and ownership are resolved."
+    },
+    "artwork_01": {
+      "element_id": "artwork_01",
+      "status": "UNKNOWN",
+      "licence_id": null,
+      "rights_holder": null,
+      "gaps": [],
+      "note": "Rights holder is not established, so the ledger cannot be checked. Coverage is unknowable until identity and ownership are resolved."
+    },
+    "artwork_001": {
+      "element_id": "artwork_001",
+      "status": "UNKNOWN",
+      "licence_id": null,
+      "rights_holder": null,
+      "gaps": [],
+      "note": "Rights holder is not established, so the ledger cannot be checked. Coverage is unknowable until identity and ownership are resolved."
+    }
+  },
   "audio_matches": [],
-  "audio_checked": true,
-  "routes": {},
-  "liability": {},
+  "audio_checked": false,
+  "routes": {
+    "tattoo_01": {
+      "element_id": "tattoo_01",
+      "tier": "DEEP",
+      "rationale": "For artwork, 'who owns this' IS the question, and a two-second search cannot answer it: a poster's rights can sit with the band, the label, the photographer or the designer. Ownership chains for authored images are multi-hop by nature, which is what a deep run is for.",
+      "basis": "Ringgold v. Black Entertainment Television, 126 F.3d 70 (2d Cir. 1997) — recognisable background artwork is not de minimis",
+      "disposition": "",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.01,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "logo_01": {
+      "element_id": "logo_01",
+      "tier": "DEEP",
+      "rationale": "Mark is not in the local catalogue, so ownership genuinely requires an open-web investigation — registries, corporate filings, assignments.",
+      "basis": "",
+      "disposition": "",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.01,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "logo_02": {
+      "element_id": "logo_02",
+      "tier": "BLOCKED",
+      "rationale": "Beyond the research spend cap for this run. Reported as RESEARCH INCOMPLETE rather than silently dropped.",
+      "basis": "",
+      "disposition": "",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.0,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "artwork_01": {
+      "element_id": "artwork_01",
+      "tier": "BLOCKED",
+      "rationale": "Beyond the research spend cap for this run. Reported as RESEARCH INCOMPLETE rather than silently dropped.",
+      "basis": "Ringgold v. Black Entertainment Television, 126 F.3d 70 (2d Cir. 1997) — recognisable background artwork is not de minimis",
+      "disposition": "",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.0,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "artwork_001": {
+      "element_id": "artwork_001",
+      "tier": "DEEP",
+      "rationale": "For artwork, 'who owns this' IS the question, and a two-second search cannot answer it: a poster's rights can sit with the band, the label, the photographer or the designer. Ownership chains for authored images are multi-hop by nature, which is what a deep run is for.",
+      "basis": "Ringgold v. Black Entertainment Television, 126 F.3d 70 (2d Cir. 1997) — recognisable background artwork is not de minimis",
+      "disposition": "",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.01,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    }
+  },
+  "liability": {
+    "tattoo_01": {
+      "element_id": "tattoo_01",
+      "headline": "Shipping this uncleared exposes you to $750–$150,000 per work in statutory damages, and a claim in this category has stopped a release before.",
+      "clear_now": null,
+      "fix_in_post": "$300-$800/shot",
+      "statutory_min_usd": 750,
+      "statutory_max_usd": 30000,
+      "statutory_willful_usd": 150000,
+      "statutory_basis": "17 U.S.C. §504(c) — the copyright owner may elect statutory damages of $750 to $30,000 per work, rising to $150,000 if the infringement is found wilful. No proof of actual loss is required.",
+      "injunction_risk": "documented",
+      "injunction_basis": "Woods v. Universal City Studios (920 F. Supp. 62 (S.D.N.Y. 1996)) — Preliminary injunction GRANTED against distribution of the portions reproducing the drawing — while the film was already in theatres. An injunction stops distribution regardless of what damages would eventually be awarded, which is why these settle.",
+      "escalation": [
+        "Clear it now — cost not established; the rights holder has not been priced.",
+        "Fix it at picture lock — $300-$800/shot, per shot, after the cut is conformed.",
+        "Find it at delivery — you negotiate with zero leverage against a fixed release date, which is the position every settlement in the record was made from."
+      ]
+    },
+    "logo_01": {
+      "element_id": "logo_01",
+      "headline": "Holders in this category usually lose on the merits, but the claim still has to be defended — and defence costs more than clearance.",
+      "clear_now": null,
+      "fix_in_post": "$300-$800/shot",
+      "statutory_min_usd": null,
+      "statutory_max_usd": null,
+      "statutory_willful_usd": null,
+      "statutory_basis": "No statutory damages for depiction — 15 U.S.C. §1117 gives the holder your profits, their damages and, in exceptional cases, their legal fees. The realistic exposure is the cost of defending, not a fixed sum.",
+      "injunction_risk": "sought and denied",
+      "injunction_basis": "Injunctions have been sought and refused in this category (Wham-O v. Paramount Pictures, Caterpillar v. Walt Disney). The claim still had to be defended, which is its own cost.",
+      "escalation": [
+        "Clear it now — cost not established; the rights holder has not been priced.",
+        "Fix it at picture lock — $300-$800/shot, per shot, after the cut is conformed.",
+        "Find it at delivery — you negotiate with zero leverage against a fixed release date, which is the position every settlement in the record was made from."
+      ]
+    },
+    "logo_02": {
+      "element_id": "logo_02",
+      "headline": "Holders in this category usually lose on the merits, but the claim still has to be defended — and defence costs more than clearance.",
+      "clear_now": null,
+      "fix_in_post": "$300-$800/shot",
+      "statutory_min_usd": null,
+      "statutory_max_usd": null,
+      "statutory_willful_usd": null,
+      "statutory_basis": "No statutory damages for depiction — 15 U.S.C. §1117 gives the holder your profits, their damages and, in exceptional cases, their legal fees. The realistic exposure is the cost of defending, not a fixed sum.",
+      "injunction_risk": "sought and denied",
+      "injunction_basis": "Injunctions have been sought and refused in this category (Wham-O v. Paramount Pictures, Caterpillar v. Walt Disney). The claim still had to be defended, which is its own cost.",
+      "escalation": [
+        "Clear it now — cost not established; the rights holder has not been priced.",
+        "Fix it at picture lock — $300-$800/shot, per shot, after the cut is conformed.",
+        "Find it at delivery — you negotiate with zero leverage against a fixed release date, which is the position every settlement in the record was made from."
+      ]
+    },
+    "artwork_01": {
+      "element_id": "artwork_01",
+      "headline": "Shipping this uncleared exposes you to $750–$150,000 per work in statutory damages, and a claim in this category has stopped a release before.",
+      "clear_now": null,
+      "fix_in_post": "$300-$800/shot",
+      "statutory_min_usd": 750,
+      "statutory_max_usd": 30000,
+      "statutory_willful_usd": 150000,
+      "statutory_basis": "17 U.S.C. §504(c) — the copyright owner may elect statutory damages of $750 to $30,000 per work, rising to $150,000 if the infringement is found wilful. No proof of actual loss is required.",
+      "injunction_risk": "documented",
+      "injunction_basis": "Woods v. Universal City Studios (920 F. Supp. 62 (S.D.N.Y. 1996)) — Preliminary injunction GRANTED against distribution of the portions reproducing the drawing — while the film was already in theatres. An injunction stops distribution regardless of what damages would eventually be awarded, which is why these settle.",
+      "escalation": [
+        "Clear it now — cost not established; the rights holder has not been priced.",
+        "Fix it at picture lock — $300-$800/shot, per shot, after the cut is conformed.",
+        "Find it at delivery — you negotiate with zero leverage against a fixed release date, which is the position every settlement in the record was made from."
+      ]
+    },
+    "artwork_001": {
+      "element_id": "artwork_001",
+      "headline": "Shipping this uncleared exposes you to $750–$150,000 per work in statutory damages, and a claim in this category has stopped a release before.",
+      "clear_now": null,
+      "fix_in_post": "$800-$2500/shot",
+      "statutory_min_usd": 750,
+      "statutory_max_usd": 30000,
+      "statutory_willful_usd": 150000,
+      "statutory_basis": "17 U.S.C. §504(c) — the copyright owner may elect statutory damages of $750 to $30,000 per work, rising to $150,000 if the infringement is found wilful. No proof of actual loss is required.",
+      "injunction_risk": "documented",
+      "injunction_basis": "Woods v. Universal City Studios (920 F. Supp. 62 (S.D.N.Y. 1996)) — Preliminary injunction GRANTED against distribution of the portions reproducing the drawing — while the film was already in theatres. An injunction stops distribution regardless of what damages would eventually be awarded, which is why these settle.",
+      "escalation": [
+        "Clear it now — cost not established; the rights holder has not been priced.",
+        "Fix it at picture lock — $800-$2500/shot, per shot, after the cut is conformed.",
+        "Find it at delivery — you negotiate with zero leverage against a fixed release date, which is the position every settlement in the record was made from."
+      ]
+    }
+  },
   "sponsor_conflicts": [],
-  "platform_outcomes": [],
-  "defences": {},
+  "platform_outcomes": [
+    {
+      "element_id": "tattoo_01",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:05–00:38. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "logo_01",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:23–00:25. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "logo_02",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:32–00:33. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "artwork_01",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:32–00:33. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "artwork_001",
+      "platform": "No platform (theatrical, festival, broadcast delivery)",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on No platform (theatrical, festival, broadcast delivery) can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:14–00:20. Route if challenged: None — exposure runs through the distributor and the E&O carrier instead.",
+      "revenue_impact": ""
+    }
+  ],
+  "defences": {
+    "tattoo_01": [
+      {
+        "territory": "US",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "Campbell v. Acuff-Rose Music, 510 U.S. 569 (1994) — parody may be fair use under §107",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Fair use (open-ended)",
+        "available": true,
+        "authority": "17 U.S.C. §107 — an open-ended four-factor standard, not a closed list",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "No statutory exception. De minimis is judge-made: Sandoval v. New Line (2d Cir. 1998) vs Ringgold v. BET (2d Cir. 1997)",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "US",
+        "name": "Freedom of panorama",
+        "available": false,
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only",
+        "note": "Covers architecture only — artwork on a building is not exempt (this is what Falkner v. GM turned on)."
+      },
+      {
+        "territory": "US",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "17 U.S.C. §106A (VARA) — visual art only, attribution and integrity, waivable",
+        "note": "Attribution and integrity rights persist alongside the economic rights."
+      },
+      {
+        "territory": "DE",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "UrhG §51a — caricature, parody and pastiche, in force since 2021 (replacing free use under old §24)",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "UrhG §§44a-63a — an enumerated catalogue of permitted uses; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "DE",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "UrhG §57 — incidental works of minor significance alongside the actual subject",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Freedom of panorama",
+        "available": true,
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "UrhG §§12-14 — publication, attribution and integrity; inalienable, lasting as long as copyright",
+        "note": "Attribution and integrity rights persist alongside the economic rights."
+      },
+      {
+        "territory": "FR",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "CPI art. L.122-5 4° — parodie, pastiche et caricature, subject to the rules of the genre",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "CPI art. L.122-5 — an exhaustive list of exceptions; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "FR",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "Théorie de l'accessoire — judge-made, narrow, and not a statutory exception",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "FR",
+        "name": "Freedom of panorama",
+        "available": true,
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "CPI art. L.121-1 — droit moral is perpetual, inalienable and imprescriptible; it survives sale of the copyright",
+        "note": "Perpetual and inalienable here: the author can object to treatment of the work even after selling the copyright, and heirs can assert it without time limit."
+      }
+    ],
+    "logo_01": [
+      {
+        "territory": "US",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "Campbell v. Acuff-Rose Music, 510 U.S. 569 (1994) — parody may be fair use under §107",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Fair use (open-ended)",
+        "available": true,
+        "authority": "17 U.S.C. §107 — an open-ended four-factor standard, not a closed list",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "No statutory exception. De minimis is judge-made: Sandoval v. New Line (2d Cir. 1998) vs Ringgold v. BET (2d Cir. 1997)",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "DE",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "UrhG §51a — caricature, parody and pastiche, in force since 2021 (replacing free use under old §24)",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "UrhG §§44a-63a — an enumerated catalogue of permitted uses; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "DE",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "UrhG §57 — incidental works of minor significance alongside the actual subject",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "CPI art. L.122-5 4° — parodie, pastiche et caricature, subject to the rules of the genre",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "CPI art. L.122-5 — an exhaustive list of exceptions; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "FR",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "Théorie de l'accessoire — judge-made, narrow, and not a statutory exception",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      }
+    ],
+    "logo_02": [
+      {
+        "territory": "US",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "Campbell v. Acuff-Rose Music, 510 U.S. 569 (1994) — parody may be fair use under §107",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Fair use (open-ended)",
+        "available": true,
+        "authority": "17 U.S.C. §107 — an open-ended four-factor standard, not a closed list",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "No statutory exception. De minimis is judge-made: Sandoval v. New Line (2d Cir. 1998) vs Ringgold v. BET (2d Cir. 1997)",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "DE",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "UrhG §51a — caricature, parody and pastiche, in force since 2021 (replacing free use under old §24)",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "UrhG §§44a-63a — an enumerated catalogue of permitted uses; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "DE",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "UrhG §57 — incidental works of minor significance alongside the actual subject",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "CPI art. L.122-5 4° — parodie, pastiche et caricature, subject to the rules of the genre",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "CPI art. L.122-5 — an exhaustive list of exceptions; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "FR",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "Théorie de l'accessoire — judge-made, narrow, and not a statutory exception",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      }
+    ],
+    "artwork_01": [
+      {
+        "territory": "US",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "Campbell v. Acuff-Rose Music, 510 U.S. 569 (1994) — parody may be fair use under §107",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Fair use (open-ended)",
+        "available": true,
+        "authority": "17 U.S.C. §107 — an open-ended four-factor standard, not a closed list",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "No statutory exception. De minimis is judge-made: Sandoval v. New Line (2d Cir. 1998) vs Ringgold v. BET (2d Cir. 1997)",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "US",
+        "name": "Freedom of panorama",
+        "available": false,
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only",
+        "note": "Covers architecture only — artwork on a building is not exempt (this is what Falkner v. GM turned on)."
+      },
+      {
+        "territory": "US",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "17 U.S.C. §106A (VARA) — visual art only, attribution and integrity, waivable",
+        "note": "Attribution and integrity rights persist alongside the economic rights."
+      },
+      {
+        "territory": "DE",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "UrhG §51a — caricature, parody and pastiche, in force since 2021 (replacing free use under old §24)",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "UrhG §§44a-63a — an enumerated catalogue of permitted uses; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "DE",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "UrhG §57 — incidental works of minor significance alongside the actual subject",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Freedom of panorama",
+        "available": true,
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "UrhG §§12-14 — publication, attribution and integrity; inalienable, lasting as long as copyright",
+        "note": "Attribution and integrity rights persist alongside the economic rights."
+      },
+      {
+        "territory": "FR",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "CPI art. L.122-5 4° — parodie, pastiche et caricature, subject to the rules of the genre",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "CPI art. L.122-5 — an exhaustive list of exceptions; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "FR",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "Théorie de l'accessoire — judge-made, narrow, and not a statutory exception",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "FR",
+        "name": "Freedom of panorama",
+        "available": true,
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "CPI art. L.121-1 — droit moral is perpetual, inalienable and imprescriptible; it survives sale of the copyright",
+        "note": "Perpetual and inalienable here: the author can object to treatment of the work even after selling the copyright, and heirs can assert it without time limit."
+      }
+    ],
+    "artwork_001": [
+      {
+        "territory": "US",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "Campbell v. Acuff-Rose Music, 510 U.S. 569 (1994) — parody may be fair use under §107",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Fair use (open-ended)",
+        "available": true,
+        "authority": "17 U.S.C. §107 — an open-ended four-factor standard, not a closed list",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "No statutory exception. De minimis is judge-made: Sandoval v. New Line (2d Cir. 1998) vs Ringgold v. BET (2d Cir. 1997)",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "US",
+        "name": "Freedom of panorama",
+        "available": false,
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only",
+        "note": "Covers architecture only — artwork on a building is not exempt (this is what Falkner v. GM turned on)."
+      },
+      {
+        "territory": "US",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "17 U.S.C. §106A (VARA) — visual art only, attribution and integrity, waivable",
+        "note": "Attribution and integrity rights persist alongside the economic rights."
+      },
+      {
+        "territory": "DE",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "UrhG §51a — caricature, parody and pastiche, in force since 2021 (replacing free use under old §24)",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "UrhG §§44a-63a — an enumerated catalogue of permitted uses; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "DE",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "UrhG §57 — incidental works of minor significance alongside the actual subject",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Freedom of panorama",
+        "available": true,
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "UrhG §§12-14 — publication, attribution and integrity; inalienable, lasting as long as copyright",
+        "note": "Attribution and integrity rights persist alongside the economic rights."
+      },
+      {
+        "territory": "FR",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "CPI art. L.122-5 4° — parodie, pastiche et caricature, subject to the rules of the genre",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "CPI art. L.122-5 — an exhaustive list of exceptions; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "FR",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "Théorie de l'accessoire — judge-made, narrow, and not a statutory exception",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "FR",
+        "name": "Freedom of panorama",
+        "available": true,
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "CPI art. L.121-1 — droit moral is perpetual, inalienable and imprescriptible; it survives sale of the copyright",
+        "note": "Perpetual and inalienable here: the author can object to treatment of the work even after selling the copyright, and heirs can assert it without time limit."
+      }
+    ]
+  },
   "exposures": [],
-  "source_work": null,
+  "source_work": {
+    "title": "The Hangover Part II",
+    "rights_holder": "Warner Bros. Pictures",
+    "confidence": "high",
+    "basis": "The scene features actors Bradley Cooper, Ed Helms, and Zach Galifianakis reprising their roles from 'The Hangover' franchise. The specific scene, involving the characters waking up in a dilapidated room in Bangkok and Ed Helms' character discovering a replica of Mike Tyson's face tattoo, is a key plot point of the film.",
+    "medium": "live_action"
+  },
   "assessed_exposures": [],
-  "preview": [],
+  "preview": [
+    {
+      "element_id": "tattoo_01",
+      "label": "Mike Tyson face tattoo",
+      "category": "COPYRIGHT_ART",
+      "time_ranges": [
+        {
+          "start_s": 5.1,
+          "end_s": 7.8,
+          "bbox": {
+            "ymin": 0.435,
+            "xmin": 0.673,
+            "ymax": 0.605,
+            "xmax": 0.829
+          }
+        },
+        {
+          "start_s": 10.8,
+          "end_s": 13.5,
+          "bbox": {
+            "ymin": 0.448,
+            "xmin": 0.666,
+            "ymax": 0.622,
+            "xmax": 0.813
+          }
+        },
+        {
+          "start_s": 16.1,
+          "end_s": 18.5,
+          "bbox": {
+            "ymin": 0.441,
+            "xmin": 0.682,
+            "ymax": 0.579,
+            "xmax": 0.824
+          }
+        },
+        {
+          "start_s": 20.8,
+          "end_s": 22.4,
+          "bbox": {
+            "ymin": 0.44,
+            "xmin": 0.668,
+            "ymax": 0.572,
+            "xmax": 0.804
+          }
+        },
+        {
+          "start_s": 25.8,
+          "end_s": 27.6,
+          "bbox": {
+            "ymin": 0.444,
+            "xmin": 0.672,
+            "ymax": 0.568,
+            "xmax": 0.804
+          }
+        },
+        {
+          "start_s": 35.1,
+          "end_s": 38.3,
+          "bbox": {
+            "ymin": 0.298,
+            "xmin": 0.506,
+            "ymax": 0.443,
+            "xmax": 0.651
+          }
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 58,
+      "provisional_band": "HIGH",
+      "identity": "SINGLE_SOURCE",
+      "depiction": "UNFLATTERING",
+      "territory": [
+        {
+          "element_id": "tattoo_01",
+          "territory": "US",
+          "band": "HIGH",
+          "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "tattoo_01",
+          "territory": "DE",
+          "band": "MEDIUM",
+          "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "tattoo_01",
+          "territory": "FR",
+          "band": "CRITICAL",
+          "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "artwork_001",
+      "label": "Dog on T-shirt",
+      "category": "COPYRIGHT_ART",
+      "time_ranges": [
+        {
+          "start_s": 14.1,
+          "end_s": 15.5,
+          "bbox": null
+        },
+        {
+          "start_s": 19.1,
+          "end_s": 20.3,
+          "bbox": null
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 26,
+      "provisional_band": "MEDIUM",
+      "identity": "SINGLE_SOURCE",
+      "depiction": null,
+      "territory": [
+        {
+          "element_id": "artwork_001",
+          "territory": "US",
+          "band": "MEDIUM",
+          "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "artwork_001",
+          "territory": "DE",
+          "band": "LOW",
+          "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "artwork_001",
+          "territory": "FR",
+          "band": "HIGH",
+          "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "logo_01",
+      "label": "Calvin Klein",
+      "category": "TRADEMARK",
+      "time_ranges": [
+        {
+          "start_s": 23.3,
+          "end_s": 25.3,
+          "bbox": {
+            "ymin": 0.932,
+            "xmin": 0.497,
+            "ymax": 0.969,
+            "xmax": 0.617
+          }
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 19,
+      "provisional_band": "LOW",
+      "identity": "SINGLE_SOURCE",
+      "depiction": "UNFLATTERING",
+      "territory": [
+        {
+          "element_id": "logo_01",
+          "territory": "US",
+          "band": "LOW",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; United States tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "logo_01",
+          "territory": "DE",
+          "band": "LOW",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; Germany tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "logo_01",
+          "territory": "FR",
+          "band": "LOW",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; France tracks the baseline band.",
+          "authority": ""
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "logo_02",
+      "label": "National",
+      "category": "TRADEMARK",
+      "time_ranges": [
+        {
+          "start_s": 32.2,
+          "end_s": 33.5,
+          "bbox": {
+            "ymin": 0.321,
+            "xmin": 0.441,
+            "ymax": 0.349,
+            "xmax": 0.53
+          }
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 16,
+      "provisional_band": "LOW",
+      "identity": "SINGLE_SOURCE",
+      "depiction": "UNFLATTERING",
+      "territory": [
+        {
+          "element_id": "logo_02",
+          "territory": "US",
+          "band": "LOW",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; United States tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "logo_02",
+          "territory": "DE",
+          "band": "LOW",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; Germany tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "logo_02",
+          "territory": "FR",
+          "band": "LOW",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; France tracks the baseline band.",
+          "authority": ""
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "artwork_01",
+      "label": "Sticker on water heater",
+      "category": "COPYRIGHT_ART",
+      "time_ranges": [
+        {
+          "start_s": 32.2,
+          "end_s": 33.5,
+          "bbox": {
+            "ymin": 0.352,
+            "xmin": 0.469,
+            "ymax": 0.42,
+            "xmax": 0.551
+          }
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 14,
+      "provisional_band": "LOW",
+      "identity": "SINGLE_SOURCE",
+      "depiction": "NEUTRAL",
+      "territory": [
+        {
+          "element_id": "artwork_01",
+          "territory": "US",
+          "band": "LOW",
+          "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "artwork_01",
+          "territory": "DE",
+          "band": "LOW",
+          "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "artwork_01",
+          "territory": "FR",
+          "band": "MEDIUM",
+          "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "",
+      "awaiting_research": true
+    }
+  ],
   "detector_hits": []
 }
