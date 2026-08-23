@@ -35,6 +35,14 @@ export interface Element {
   bbox: BBox | null;
   at_s: number | null;
   depiction: DepictionTone | null;
+  /**
+   * False when the scan's timecodes are physically impossible — appearances
+   * shorter than one frame, or past the end of the clip. The finding stands;
+   * only its timing is unusable, so no box is drawn and the reason is shown
+   * instead of a rectangle nobody can pause on.
+   */
+  timing_reliable?: boolean;
+  timing_note?: string;
 }
 
 export type DepictionTone =

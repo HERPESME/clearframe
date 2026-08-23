@@ -34,6 +34,7 @@ from clearframe.review import (
 )
 from clearframe.stages.dossier import ReviewPendingError
 from clearframe.store import LicenceStore, LocalJsonStore
+from clearframe.timeline import timing_is_reliable
 
 # Browsers must be able to <video> it; keep the accepted set narrow.
 MEDIA_TYPES = {
@@ -199,6 +200,32 @@ def create_app(out_root: Path) -> FastAPI:
                 )
             }
         )
+
+    def _with_timing_verdicts(state):
+        """Disown timecodes the scan cannot have measured, on read.
+
+        `scan` marks these when it runs, but every analysis completed before
+        `timeline.py` existed carries the default of "believable" — including,
+        on the clip that found this, a tattoo whose six appearances totalled
+        0.15 seconds. Deriving on read rather than migrating on disk means an
+        old state gets the correct answer without being rewritten, and there is
+        one rule in one place.
+        """
+        prod = state.production
+        checked = []
+        changed = False
+        for el in state.elements:
+            ok, reason = timing_is_reliable(el, prod.duration_s, prod.fps)
+            if ok == el.timing_reliable and (ok or reason == el.timing_note):
+                checked.append(el)
+                continue
+            changed = True
+            checked.append(
+                el.model_copy(
+                    update={"timing_reliable": ok, "timing_note": "" if ok else reason}
+                )
+            )
+        return state.model_copy(update={"elements": checked}) if changed else state
 
     @app.get("/api/productions")
     def list_productions():
@@ -471,7 +498,9 @@ def create_app(out_root: Path) -> FastAPI:
 
     @app.get("/api/productions/{pid}")
     def get_production(pid: str):
-        return JSONResponse(_with_media_flag(_load(pid)).model_dump(mode="json"))
+        return JSONResponse(
+            _with_timing_verdicts(_with_media_flag(_load(pid))).model_dump(mode="json")
+        )
 
     @app.post("/api/productions/{pid}/decisions")
     async def post_decision(

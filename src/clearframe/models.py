@@ -155,6 +155,12 @@ class DetectedElement(BaseModel):
     bbox: BBox | None = None
     at_s: float | None = None
     depiction: DepictionTone | None = None
+    # False when the scan's timecodes are physically impossible — see
+    # `timeline.py`. The finding still stands; only its timing is unusable, so
+    # no box is drawn and the reason is shown instead of a rectangle nobody can
+    # reach. Defaults True so every existing state and fixture is unchanged.
+    timing_reliable: bool = True
+    timing_note: str = ""
 
 
 class TriagedElement(DetectedElement):

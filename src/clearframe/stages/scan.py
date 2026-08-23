@@ -17,6 +17,7 @@ import logging
 from clearframe.integrations.gemini_client import build_scan_context
 from clearframe.models import DetectedElement
 from clearframe.pipeline import PipelineContext
+from clearframe.timeline import timing_is_reliable
 
 log = logging.getLogger("clearframe.scan")
 
@@ -53,6 +54,30 @@ def merge_passes(
         seen.add(eid)
         out.append(d)
     return out
+
+
+def _with_timing_verdict(
+    detection: DetectedElement, production
+) -> DetectedElement:
+    """Mark a detection whose timecodes cannot be what they claim.
+
+    Gemini returned one element of eight with appearances of 20-30ms in a 24fps
+    clip while reporting 10 seconds of screen time for the same element. The
+    finding was real and important — it was the tattoo from Whitmill v. Warner
+    Bros. — but no human can pause inside a 20ms window, so it had timecodes in
+    the list and no box anywhere in the player.
+
+    The finding is kept. Only its timing is disowned.
+    """
+    ok, reason = timing_is_reliable(
+        detection, production.duration_s, production.fps
+    )
+    if ok:
+        return detection
+    log.warning("Unusable timecodes for %r: %s", detection.label, reason)
+    return detection.model_copy(
+        update={"timing_reliable": False, "timing_note": reason}
+    )
 
 class ScanStage:
     name = "scan"
@@ -113,7 +138,10 @@ class ScanStage:
             raise watched  # the scan is load-bearing; the other two are not
         result, audit = watched
 
-        ctx.state.detections = merge_passes(result.detections, audit.detections)
+        ctx.state.detections = [
+            _with_timing_verdict(d, production)
+            for d in merge_passes(result.detections, audit.detections)
+        ]
         ctx.state.unscanned_ranges = result.unscanned_ranges + audit.unscanned_ranges
         # Not clearance items. Nobody owns a delivery label with your address
         # on it, which is exactly why no clearance tool looks for one.
