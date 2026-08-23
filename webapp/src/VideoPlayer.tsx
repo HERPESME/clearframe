@@ -46,13 +46,25 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
   const [ground, setGround] = useState<
     Record<string, { boxes: Record<string, BBox>; grounded: boolean }>
   >({});
-  const [locating, setLocating] = useState(false);
+  // Seconds whose grounding call is in flight. A frame being measured RIGHT
+  // NOW is a fourth answer, distinct from the three below, and the one the
+  // player used to get wrong: it looked identical to "nobody looked at this
+  // frame", so it took the fallback and drew the scan's rectangle — the exact
+  // guess grounding exists to replace — for the two-to-five seconds the call
+  // takes. Long enough to pause, look, and screenshot a wrong box.
+  const [pending, setPending] = useState<Record<string, true>>({});
   const [ok, setOk] = useState(true);
   const localRef = useRef<HTMLVideoElement | null>(null);
+  // Bumped when the footage changes. A response that arrives after the clip
+  // has been swapped belongs to a different film and is dropped — which is the
+  // ONLY reason to drop one.
+  const clip = useRef(0);
 
   useEffect(() => {
+    clip.current += 1;
     setOk(true);
     setGround({});
+    setPending({});
   }, [pid, mediaVersion]);
 
   // Ground only while paused. During playback a refined box would be stale
@@ -60,13 +72,21 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
   useEffect(() => {
     if (!paused) return;
     const second = String(Math.floor(now));
-    if (ground[second]) return;
-    let cancelled = false;
-    setLocating(true);
+    if (ground[second] || pending[second]) return;
+    // Deliberately NOT an effect-cleanup cancellation. `ground` is a dependency
+    // and this effect writes to it, so cleanup fired every time ANY second's
+    // answer arrived — cancelling the request in flight for the second the
+    // reviewer was actually looking at, throwing away a Gemini call already
+    // paid for, and leaving the player on the scan's box. Three pauses in
+    // quick succession cascaded that way. An answer for second N is correct
+    // for second N whatever the playhead does next; only a change of FOOTAGE
+    // can invalidate it.
+    const mine = clip.current;
+    setPending((p) => ({ ...p, [second]: true }));
     fetch(`/api/productions/${pid}/ground?at_s=${now.toFixed(2)}`)
       .then((r) => (r.ok ? r.json() : { boxes: {}, grounded: false }))
       .then((body) => {
-        if (cancelled) return;
+        if (mine !== clip.current) return;
         setGround((g) => ({
           ...g,
           [second]: { boxes: body.boxes ?? {}, grounded: body.grounded === true },
@@ -75,17 +95,17 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
       .catch(() => {
         // Nobody looked at this frame, so the scan's box is still the best
         // thing we have — which is the behaviour that existed before this.
-        if (!cancelled) {
+        if (mine === clip.current) {
           setGround((g) => ({ ...g, [second]: { boxes: {}, grounded: false } }));
         }
       })
       .finally(() => {
-        if (!cancelled) setLocating(false);
+        setPending((p) => {
+          const { [second]: _done, ...rest } = p;
+          return rest;
+        });
       });
-    return () => {
-      cancelled = true;
-    };
-  }, [pid, paused, now, ground]);
+  }, [pid, paused, now, ground, pending]);
 
   if (!ok) return null;
 
@@ -115,11 +135,25 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
     // falling back to the scan's rectangle would put the video pass's guess
     // back on screen precisely where it was checked and rejected. A live pause
     // drew "Ray-Ban Aviator Sunglasses" across a bare forehead that way.
-    const frame = ground[String(Math.floor(now))];
+    const second = String(Math.floor(now));
+    const frame = ground[second];
     if (frame?.grounded) {
       const g = frame.boxes[el.id];
       return locates(g) ? g : null;
     }
+    // No answer for this second YET. Not the same as nobody having looked, so
+    // it does not get the fallback: the scan's rectangle for the Hangover
+    // tattoo sits over the actor's mouth, a fifth of the frame below the
+    // tattoo, and grounding was already on its way to saying so. Asking
+    // `ground` rather than `pending` closes the one painted frame between the
+    // pause and the request being marked in flight — long enough to be seen.
+    //
+    // NO ANSWER is the condition, not "not grounded". A frame whose grounding
+    // FAILED stores {grounded: false} and still falls through to the scan box,
+    // which is the rule that has always held: grounded-and-absent,
+    // grounded-and-found, and never-grounded are three answers, and only the
+    // third may fall back.
+    if (paused && !frame) return null;
     const appearance = el.time_ranges.find(
       (r) => now >= r.start_s && now <= r.end_s,
     );
@@ -233,7 +267,7 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
         ) : (
           <span className="ov-unlocated">pause to place boxes</span>
         )}
-        {paused && locating && (
+        {paused && pending[String(Math.floor(now))] && (
           <span className="ov-unlocated"> · locating on this frame…</span>
         )}
         {unlocated.length > 0 && (
