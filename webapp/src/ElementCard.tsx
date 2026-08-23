@@ -11,6 +11,7 @@ import type {
   RemediationOption,
   Research,
   ResearchPlan,
+  LiabilityEstimate,
   ResearchRoute,
   Risk,
   Role,
@@ -96,6 +97,7 @@ interface Props {
   court: CourtOpinion | undefined;
   plan: ResearchPlan | undefined;
   route: ResearchRoute | undefined;
+  liability: LiabilityEstimate | undefined;
   corroboration: Corroboration | undefined;
   coverage: Coverage | undefined;
   freshness: FreshnessSignal[];
@@ -118,6 +120,7 @@ export function ElementCard({
   court,
   plan,
   route,
+  liability,
   corroboration,
   coverage,
   freshness,
@@ -219,11 +222,6 @@ export function ElementCard({
               .join("  ·  ")}
           </div>
           <div className="el-desc">{element.description}</div>
-          <div className="factors">
-            {Object.entries(risk.factors)
-              .map(([k, v]) => `${k} ${v}`)
-              .join("  ·  ")}
-          </div>
         </div>
         {element.bbox && (
           <FramePosition
@@ -240,6 +238,48 @@ export function ElementCard({
           <strong>IDENTITY DISPUTED — research blocked.</strong> {corroboration!.note}
         </div>
       )}
+
+      {liability && (
+        <div className="sec cost-block">
+          <div className="sec-title">What this costs you</div>
+          <div className="cost-headline">{liability.headline}</div>
+          <ol className="cost-steps">
+            {liability.escalation.map((line, i) => (
+              <li key={i} className={i === 2 ? "cost-worst" : ""}>
+                {line}
+              </li>
+            ))}
+          </ol>
+          {liability.injunction_risk === "documented" && (
+            <div className="cost-injunction">
+              <strong>A claim like this has stopped a release before.</strong>{" "}
+              An injunction halts distribution whatever the damages would eventually
+              be — which is why these settle.
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Everything below is the evidence. Collapsed by default: a director
+          needs the answer and the price, and only reaches for the citations
+          when they disagree with it or an insurer asks. */}
+      <details className="evidence-fold">
+        <summary>
+          Why this rating — identity, research, jurisdictions, precedent
+        </summary>
+
+        <div className="sec">
+          <div className="sec-title">How the score was reached</div>
+          <div className="factors">
+            {Object.entries(risk.factors)
+              .map(([k, v]) => `${k.replace(/_/g, " ")} ${v}`)
+              .join("  ·  ")}
+          </div>
+          <div className="kv">
+            Multiplied together and scaled to 100. Every factor is stored, so this
+            number stays reproducible from the inputs that produced it.
+          </div>
+        </div>
 
       {coverage && (
         <div className="sec">
@@ -431,6 +471,8 @@ export function ElementCard({
           </details>
         ))}
       </div>
+
+      </details>
 
       {decision ? (
         <div className="stamp-note">

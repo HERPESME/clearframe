@@ -866,6 +866,28 @@ button {
   color: inherit; cursor: pointer; letter-spacing: inherit; }
 .brand-home:hover { opacity: .8; }
 
+/* The cost block is the answer; everything else is the evidence for it. It
+   reads first and it reads plainly — a director should not have to parse a
+   score to learn what shipping this uncleared would cost. */
+.cost-block { background: rgba(230,126,34,.07); border: 1px solid rgba(230,126,34,.28);
+  border-radius: 4px; padding: 12px 14px; }
+.cost-headline { font-size: 14px; line-height: 1.5; margin-bottom: 10px; }
+.cost-steps { margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.65; color: var(--muted); }
+.cost-steps li { margin-bottom: 2px; }
+.cost-steps li.cost-worst { color: var(--critical); }
+.cost-injunction { margin-top: 10px; font-size: 12px; color: var(--muted);
+  border-top: 1px solid var(--line); padding-top: 8px; }
+.cost-injunction strong { color: var(--critical); }
+
+/* Collapsed by default. The citations matter enormously to an insurer and
+   almost never to the person deciding whether to reshoot. */
+.evidence-fold { margin-top: 4px; }
+.evidence-fold > summary { cursor: pointer; font-family: var(--mono); font-size: 11px;
+  letter-spacing: .06em; color: var(--muted); padding: 8px 0; list-style: none; }
+.evidence-fold > summary::before { content: "▸ "; }
+.evidence-fold[open] > summary::before { content: "▾ "; }
+.evidence-fold > summary:hover { color: var(--fg); }
+
 .resuming-banner { background: rgba(241,196,15,.10); border:1px solid rgba(241,196,15,.4); border-radius:4px; padding:10px 14px; margin: 0 0 16px; font-size:13px; }
 .resuming-banner strong { color: var(--amber); }
 

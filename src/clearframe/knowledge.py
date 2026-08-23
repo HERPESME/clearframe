@@ -56,6 +56,11 @@ class Case:
     holding: str
     lesson: str
     url: str
+    # Whether the claim could STOP a release, which is a different question
+    # from whether the plaintiff wins. Woods got an injunction against a film
+    # already in theatres and took a high six-figure settlement to lift it.
+    #   granted / sought_denied / sought / not_sought / unknown
+    injunction: str = "unknown"
 
 
 @dataclass(frozen=True)

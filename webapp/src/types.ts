@@ -57,6 +57,20 @@ export interface ProductionSummary {
   running: boolean;
 }
 
+export interface LiabilityEstimate {
+  element_id: string;
+  headline: string;
+  clear_now: string | null;
+  fix_in_post: string | null;
+  statutory_min_usd: number | null;
+  statutory_max_usd: number | null;
+  statutory_willful_usd: number | null;
+  statutory_basis: string;
+  injunction_risk: string;
+  injunction_basis: string;
+  escalation: string[];
+}
+
 export interface PlatformOutcome {
   element_id: string;
   platform: string;
@@ -325,6 +339,7 @@ export interface ProductionState {
   alerts: WatchAlert[];
   corroboration: Record<string, Corroboration>;
   routes: Record<string, ResearchRoute>;
+  liability: Record<string, LiabilityEstimate>;
   sponsor_conflicts: SponsorConflict[];
   assessed_exposures: AssessedExposure[];
   platform_outcomes: PlatformOutcome[];

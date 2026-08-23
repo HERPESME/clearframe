@@ -1,0 +1,2979 @@
+{
+  "production": {
+    "id": "demo",
+    "title": "Golden Hour",
+    "footage_uri": "demo://salted-scene",
+    "fps": 24.0,
+    "duration_s": 62.0,
+    "script_uri": "demo://golden-hour-script",
+    "release_territories": [
+      "US",
+      "DE",
+      "FR"
+    ],
+    "use_context": "ADVERTISING",
+    "sponsors": [
+      "Pepsi"
+    ],
+    "platform": "youtube",
+    "distribution": [
+      "THEATRICAL",
+      "STREAMING"
+    ],
+    "has_media": false
+  },
+  "stage_status": {
+    "script": "complete",
+    "scan": "complete",
+    "triage": "complete",
+    "corroborate": "complete",
+    "drift": "complete",
+    "preview": "complete",
+    "research": "complete",
+    "freshness": "complete",
+    "risk": "complete",
+    "territory": "complete",
+    "coverage": "complete",
+    "remediation": "complete",
+    "court": "complete",
+    "review": "awaiting"
+  },
+  "detections": [
+    {
+      "id": "e1",
+      "label": "Upbeat electronic music",
+      "element_type": "MUSIC",
+      "description": "Synth-driven pop track audible under the dialogue, rising to dominate the mix in the final beat of the scene.",
+      "time_ranges": [
+        {
+          "start_s": 12.0,
+          "end_s": 24.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 12.0,
+        "frame_coverage": 0.0,
+        "centrality": 1.0,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": null
+    },
+    {
+      "id": "e2",
+      "label": "Coca-Cola can",
+      "element_type": "LOGO",
+      "description": "Red soda can with visible Coca-Cola script logo on the kitchen table.",
+      "time_ranges": [
+        {
+          "start_s": 5.0,
+          "end_s": 11.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 6.0,
+        "frame_coverage": 0.08,
+        "centrality": 0.6,
+        "plot_integral": false
+      },
+      "bbox": {
+        "ymin": 0.52,
+        "xmin": 0.41,
+        "ymax": 0.79,
+        "xmax": 0.55
+      },
+      "at_s": 6.0,
+      "depiction": "NEUTRAL"
+    },
+    {
+      "id": "e3",
+      "label": "Nike hoodie swoosh",
+      "element_type": "LOGO",
+      "description": "Swoosh logo on the lead actor's hoodie, visible in two scenes.",
+      "time_ranges": [
+        {
+          "start_s": 8.0,
+          "end_s": 18.0
+        },
+        {
+          "start_s": 40.0,
+          "end_s": 45.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 15.0,
+        "frame_coverage": 0.12,
+        "centrality": 0.7,
+        "plot_integral": false
+      },
+      "bbox": {
+        "ymin": 0.34,
+        "xmin": 0.3,
+        "ymax": 0.52,
+        "xmax": 0.46
+      },
+      "at_s": 10.0,
+      "depiction": "NEUTRAL"
+    },
+    {
+      "id": "e4",
+      "label": "Arctic Monkeys tour poster",
+      "element_type": "ARTWORK",
+      "description": "Framed 2023 tour poster on the bedroom wall behind the actors.",
+      "time_ranges": [
+        {
+          "start_s": 20.0,
+          "end_s": 25.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 5.0,
+        "frame_coverage": 0.2,
+        "centrality": 0.6,
+        "plot_integral": false
+      },
+      "bbox": {
+        "ymin": 0.12,
+        "xmin": 0.55,
+        "ymax": 0.48,
+        "xmax": 0.86
+      },
+      "at_s": 22.0,
+      "depiction": null
+    },
+    {
+      "id": "e5",
+      "label": "Street mural (unknown artist)",
+      "element_type": "ARTWORK",
+      "description": "Large colorful mural forming the backdrop of the walking shot; artist signature not legible.",
+      "time_ranges": [
+        {
+          "start_s": 30.0,
+          "end_s": 36.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 6.0,
+        "frame_coverage": 0.3,
+        "centrality": 0.5,
+        "plot_integral": false
+      },
+      "bbox": {
+        "ymin": 0.05,
+        "xmin": 0.02,
+        "ymax": 0.92,
+        "xmax": 0.78
+      },
+      "at_s": 33.0,
+      "depiction": null
+    },
+    {
+      "id": "e6",
+      "label": "Background passerby face",
+      "element_type": "FACE",
+      "description": "Unidentified pedestrian briefly visible and recognizable in the background, out of focus.",
+      "time_ranges": [
+        {
+          "start_s": 47.0,
+          "end_s": 48.2
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 1.2,
+        "frame_coverage": 0.03,
+        "centrality": 0.2,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": "NEUTRAL"
+    },
+    {
+      "id": "e8",
+      "label": "Adidas three-stripe duffel bag",
+      "element_type": "LOGO",
+      "description": "Striped sports duffel on the bedroom floor; the mark is partly occluded by bedding.",
+      "time_ranges": [
+        {
+          "start_s": 26.0,
+          "end_s": 30.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 4.0,
+        "frame_coverage": 0.09,
+        "centrality": 0.4,
+        "plot_integral": false
+      },
+      "bbox": {
+        "ymin": 0.61,
+        "xmin": 0.58,
+        "ymax": 0.8,
+        "xmax": 0.72
+      },
+      "at_s": 27.0,
+      "depiction": "NEUTRAL"
+    },
+    {
+      "id": "e7",
+      "label": "News broadcast on background TV",
+      "element_type": "ARTWORK",
+      "description": "A television in the back of the room plays a copyrighted news broadcast, partially visible and audible under dialogue.",
+      "time_ranges": [
+        {
+          "start_s": 50.0,
+          "end_s": 53.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 3.0,
+        "frame_coverage": 0.06,
+        "centrality": 0.3,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": null
+    }
+  ],
+  "elements": [
+    {
+      "id": "e1",
+      "label": "Blinding Lights — The Weeknd",
+      "element_type": "MUSIC",
+      "description": "Synth-driven pop track audible under the dialogue, rising to dominate the mix in the final beat of the scene.",
+      "time_ranges": [
+        {
+          "start_s": 12.0,
+          "end_s": 24.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 12.0,
+        "frame_coverage": 0.0,
+        "centrality": 1.0,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": null,
+      "category": "MUSIC_SYNC"
+    },
+    {
+      "id": "e2",
+      "label": "Coca-Cola can",
+      "element_type": "LOGO",
+      "description": "Red soda can with visible Coca-Cola script logo on the kitchen table.",
+      "time_ranges": [
+        {
+          "start_s": 5.0,
+          "end_s": 11.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 6.0,
+        "frame_coverage": 0.08,
+        "centrality": 0.6,
+        "plot_integral": false
+      },
+      "bbox": {
+        "ymin": 0.52,
+        "xmin": 0.41,
+        "ymax": 0.79,
+        "xmax": 0.55
+      },
+      "at_s": 6.0,
+      "depiction": "NEUTRAL",
+      "category": "TRADEMARK"
+    },
+    {
+      "id": "e3",
+      "label": "Nike hoodie swoosh",
+      "element_type": "LOGO",
+      "description": "Swoosh logo on the lead actor's hoodie, visible in two scenes.",
+      "time_ranges": [
+        {
+          "start_s": 8.0,
+          "end_s": 18.0
+        },
+        {
+          "start_s": 40.0,
+          "end_s": 45.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 15.0,
+        "frame_coverage": 0.12,
+        "centrality": 0.7,
+        "plot_integral": false
+      },
+      "bbox": {
+        "ymin": 0.34,
+        "xmin": 0.3,
+        "ymax": 0.52,
+        "xmax": 0.46
+      },
+      "at_s": 10.0,
+      "depiction": "NEUTRAL",
+      "category": "TRADEMARK"
+    },
+    {
+      "id": "e4",
+      "label": "Arctic Monkeys tour poster",
+      "element_type": "ARTWORK",
+      "description": "Framed 2023 tour poster on the bedroom wall behind the actors.",
+      "time_ranges": [
+        {
+          "start_s": 20.0,
+          "end_s": 25.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 5.0,
+        "frame_coverage": 0.2,
+        "centrality": 0.6,
+        "plot_integral": false
+      },
+      "bbox": {
+        "ymin": 0.12,
+        "xmin": 0.55,
+        "ymax": 0.48,
+        "xmax": 0.86
+      },
+      "at_s": 22.0,
+      "depiction": null,
+      "category": "COPYRIGHT_ART"
+    },
+    {
+      "id": "e5",
+      "label": "Street mural (unknown artist)",
+      "element_type": "ARTWORK",
+      "description": "Large colorful mural forming the backdrop of the walking shot; artist signature not legible.",
+      "time_ranges": [
+        {
+          "start_s": 30.0,
+          "end_s": 36.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 6.0,
+        "frame_coverage": 0.3,
+        "centrality": 0.5,
+        "plot_integral": false
+      },
+      "bbox": {
+        "ymin": 0.05,
+        "xmin": 0.02,
+        "ymax": 0.92,
+        "xmax": 0.78
+      },
+      "at_s": 33.0,
+      "depiction": null,
+      "category": "COPYRIGHT_ART"
+    },
+    {
+      "id": "e6",
+      "label": "Background passerby face",
+      "element_type": "FACE",
+      "description": "Unidentified pedestrian briefly visible and recognizable in the background, out of focus.",
+      "time_ranges": [
+        {
+          "start_s": 47.0,
+          "end_s": 48.2
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 1.2,
+        "frame_coverage": 0.03,
+        "centrality": 0.2,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": "NEUTRAL",
+      "category": "RIGHT_OF_PUBLICITY"
+    },
+    {
+      "id": "e8",
+      "label": "Adidas three-stripe duffel bag",
+      "element_type": "LOGO",
+      "description": "Striped sports duffel on the bedroom floor; the mark is partly occluded by bedding.",
+      "time_ranges": [
+        {
+          "start_s": 26.0,
+          "end_s": 30.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 4.0,
+        "frame_coverage": 0.09,
+        "centrality": 0.4,
+        "plot_integral": false
+      },
+      "bbox": {
+        "ymin": 0.61,
+        "xmin": 0.58,
+        "ymax": 0.8,
+        "xmax": 0.72
+      },
+      "at_s": 27.0,
+      "depiction": "NEUTRAL",
+      "category": "TRADEMARK"
+    },
+    {
+      "id": "e7",
+      "label": "News broadcast on background TV",
+      "element_type": "ARTWORK",
+      "description": "A television in the back of the room plays a copyrighted news broadcast, partially visible and audible under dialogue.",
+      "time_ranges": [
+        {
+          "start_s": 50.0,
+          "end_s": 53.0
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 3.0,
+        "frame_coverage": 0.06,
+        "centrality": 0.3,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": null,
+      "category": "COPYRIGHT_ART"
+    }
+  ],
+  "research": {
+    "e6": {
+      "element_id": "e6",
+      "owner": null,
+      "owner_confidence": "low",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [
+        {
+          "field": "clearance_route",
+          "url": "",
+          "excerpt": "Right of publicity — cleared by consent, not by ownership research; commercial appropriation is the core of the tort",
+          "reasoning": "An unnamed individual has no discoverable rights holder. Research cannot produce the instrument this needs. In a commercial context this is not advisory: the right of publicity is a tort of COMMERCIAL appropriation, so an advert is the one place the claim is at its strongest. Required action: A signed personal release is MANDATORY before this can run commercially. Blur otherwise — a crowd notice does not cover advertising use.",
+          "confidence": "high"
+        }
+      ],
+      "status": "complete"
+    },
+    "e8": {
+      "element_id": "e8",
+      "owner": null,
+      "owner_confidence": "low",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [],
+      "status": "incomplete"
+    },
+    "e3": {
+      "element_id": "e3",
+      "owner": "Nike, Inc.",
+      "owner_confidence": "high",
+      "licensing_contact": "https://www.nike.com/help (brand protection / entertainment marketing)",
+      "licensing_posture": "litigious",
+      "litigation_history": [
+        "Aggressive trademark enforcement program; hundreds of USPTO oppositions filed",
+        "Nike v. MSCHF (2021) — rapid federal enforcement over unauthorized product depiction"
+      ],
+      "estimated_license_cost_band": "No paid clearance program; permission typically denied — blur or wardrobe change recommended",
+      "basis": [
+        {
+          "field": "owner",
+          "url": "https://about.nike.com/",
+          "excerpt": "Nike, Inc. owns the Swoosh design mark and related trade dress.",
+          "reasoning": "Swoosh is a registered mark of Nike, Inc.; ownership undisputed.",
+          "confidence": "high"
+        },
+        {
+          "field": "litigation_history",
+          "url": "https://www.reuters.com/legal/nike-mschf-satan-shoes-settlement-2021-04-08/",
+          "excerpt": "Nike obtained a temporary restraining order within days of the product's release.",
+          "reasoning": "Recent high-profile action demonstrates fast, aggressive enforcement posture.",
+          "confidence": "high"
+        }
+      ],
+      "status": "complete"
+    },
+    "e1": {
+      "element_id": "e1",
+      "owner": "The Weeknd XO, Inc. / Universal Music Group (master); Universal Music Publishing Group (composition)",
+      "owner_confidence": "high",
+      "licensing_contact": "sync@umusic.com",
+      "licensing_posture": "litigious",
+      "litigation_history": [
+        "Multiple sync infringement claims filed by UMG against productions 2019-2024",
+        "UMG routinely issues takedowns and pursues statutory damages for uncleared sync use"
+      ],
+      "estimated_license_cost_band": "$50k-$250k (major-label hit, sync + master)",
+      "basis": [
+        {
+          "field": "owner",
+          "url": "https://www.umusicpub.com/",
+          "excerpt": "Universal Music Publishing Group administers the composition catalog for The Weeknd.",
+          "reasoning": "Publisher catalog listing confirms UMPG administration of the composition; master recording released under XO/Republic (UMG).",
+          "confidence": "high"
+        },
+        {
+          "field": "licensing_posture",
+          "url": "https://www.billboard.com/pro/music-sync-licensing-lawsuits/",
+          "excerpt": "Major labels have stepped up enforcement against unlicensed sync usage in film and streaming content.",
+          "reasoning": "Documented pattern of aggressive sync enforcement by UMG.",
+          "confidence": "high"
+        }
+      ],
+      "status": "complete"
+    },
+    "e2": {
+      "element_id": "e2",
+      "owner": "The Coca-Cola Company",
+      "owner_confidence": "high",
+      "licensing_contact": "https://www.coca-colacompany.com/contact-us (brand & media licensing)",
+      "licensing_posture": "standard",
+      "litigation_history": [],
+      "estimated_license_cost_band": "$0 (product placement agreement) - $15k",
+      "basis": [
+        {
+          "field": "owner",
+          "url": "https://www.coca-colacompany.com/about-us",
+          "excerpt": "The Coca-Cola Company owns and licenses the Coca-Cola trademarks worldwide.",
+          "reasoning": "Trademark ownership is publicly registered and undisputed.",
+          "confidence": "high"
+        },
+        {
+          "field": "licensing_posture",
+          "url": "https://www.uspto.gov/trademarks",
+          "excerpt": "Registered marks include the Coca-Cola script and contour bottle trade dress.",
+          "reasoning": "Company maintains an active product-placement program and typically cooperates with productions; incidental depiction disputes are rare.",
+          "confidence": "medium"
+        }
+      ],
+      "status": "complete"
+    },
+    "e5": {
+      "element_id": "e5",
+      "owner": null,
+      "owner_confidence": "low",
+      "licensing_contact": null,
+      "licensing_posture": "unknown",
+      "litigation_history": [],
+      "estimated_license_cost_band": null,
+      "basis": [
+        {
+          "field": "owner",
+          "url": "https://www.copyright.gov/title17/92chap1.html",
+          "excerpt": "Pictorial, graphic, and sculptural works fixed in a tangible medium are protected by copyright.",
+          "reasoning": "Murals are copyright-protected works (and may carry VARA moral rights); no signature or registry match could be located for this specific mural, so the artist could not be identified from open-web sources.",
+          "confidence": "low"
+        }
+      ],
+      "status": "incomplete"
+    },
+    "e4": {
+      "element_id": "e4",
+      "owner": "Domino Recording Co. (band artwork) / original poster designer (design copyright)",
+      "owner_confidence": "medium",
+      "licensing_contact": "licensing@dominomusic.com",
+      "licensing_posture": "standard",
+      "litigation_history": [],
+      "estimated_license_cost_band": "$500-$5k (set-dressing artwork license)",
+      "basis": [
+        {
+          "field": "owner",
+          "url": "https://www.dominomusic.com/artists/arctic-monkeys",
+          "excerpt": "Arctic Monkeys are signed to Domino Recording Company, which manages official band imagery.",
+          "reasoning": "Label controls official merchandising artwork; tour poster design copyright may additionally vest in the commissioned designer.",
+          "confidence": "medium"
+        }
+      ],
+      "status": "complete"
+    },
+    "e7": {
+      "element_id": "e7",
+      "owner": "Local broadcast affiliate (KXBC-7) / parent station group",
+      "owner_confidence": "medium",
+      "licensing_contact": "clips@kxbc7.example (station clip licensing desk)",
+      "licensing_posture": "standard",
+      "litigation_history": [],
+      "estimated_license_cost_band": "$500-$3k (news clip license) or replace with cleared stock broadcast",
+      "basis": [
+        {
+          "field": "owner",
+          "url": "https://www.copyright.gov/circs/circ45.pdf",
+          "excerpt": "Broadcast programming, including news, is protected by copyright from the moment of fixation.",
+          "reasoning": "Broadcast footage on an in-scene TV is a copyrighted audiovisual work owned by the originating station; standard practice is a clip license or replacement with cleared content.",
+          "confidence": "medium"
+        }
+      ],
+      "status": "complete"
+    }
+  },
+  "risk": {
+    "e1": {
+      "element_id": "e1",
+      "score": 70,
+      "band": "CRITICAL",
+      "factors": {
+        "screen_time_norm": 1.0,
+        "prominence_score": 0.7,
+        "category_weight": 1.0,
+        "posture_factor": 1.0,
+        "use_context_factor": 1.0,
+        "depiction_factor": 1.0
+      },
+      "de_minimis": false
+    },
+    "e2": {
+      "element_id": "e2",
+      "score": 30,
+      "band": "MEDIUM",
+      "factors": {
+        "screen_time_norm": 0.6,
+        "prominence_score": 0.384,
+        "category_weight": 0.8,
+        "posture_factor": 0.7,
+        "use_context_factor": 1.4,
+        "depiction_factor": 1.0
+      },
+      "de_minimis": false
+    },
+    "e3": {
+      "element_id": "e3",
+      "score": 65,
+      "band": "HIGH",
+      "factors": {
+        "screen_time_norm": 1.0,
+        "prominence_score": 0.576,
+        "category_weight": 0.8,
+        "posture_factor": 1.0,
+        "use_context_factor": 1.4,
+        "depiction_factor": 1.0
+      },
+      "de_minimis": false
+    },
+    "e4": {
+      "element_id": "e4",
+      "score": 34,
+      "band": "MEDIUM",
+      "factors": {
+        "screen_time_norm": 0.5,
+        "prominence_score": 0.38,
+        "category_weight": 0.9,
+        "posture_factor": 0.7,
+        "use_context_factor": 1.4,
+        "depiction_factor": 1.0
+      },
+      "de_minimis": false
+    },
+    "e5": {
+      "element_id": "e5",
+      "score": 38,
+      "band": "MEDIUM",
+      "factors": {
+        "screen_time_norm": 0.6,
+        "prominence_score": 0.43,
+        "category_weight": 0.9,
+        "posture_factor": 0.7,
+        "use_context_factor": 1.4,
+        "depiction_factor": 1.0
+      },
+      "de_minimis": false
+    },
+    "e6": {
+      "element_id": "e6",
+      "score": 9,
+      "band": "LOW",
+      "factors": {
+        "screen_time_norm": 0.12,
+        "prominence_score": 0.097,
+        "category_weight": 0.9,
+        "posture_factor": 0.7,
+        "use_context_factor": 1.4,
+        "depiction_factor": 1.0
+      },
+      "de_minimis": true
+    },
+    "e8": {
+      "element_id": "e8",
+      "score": 21,
+      "band": "MEDIUM",
+      "factors": {
+        "screen_time_norm": 0.4,
+        "prominence_score": 0.267,
+        "category_weight": 0.8,
+        "posture_factor": 0.7,
+        "use_context_factor": 1.4,
+        "depiction_factor": 1.0
+      },
+      "de_minimis": false
+    },
+    "e7": {
+      "element_id": "e7",
+      "score": 17,
+      "band": "LOW",
+      "factors": {
+        "screen_time_norm": 0.3,
+        "prominence_score": 0.198,
+        "category_weight": 0.9,
+        "posture_factor": 0.7,
+        "use_context_factor": 1.4,
+        "depiction_factor": 1.0
+      },
+      "de_minimis": false
+    }
+  },
+  "remediation": {
+    "e1": [
+      {
+        "kind": "license",
+        "summary": "License from The Weeknd XO, Inc. / Universal Music Group (master); Universal Music Publishing Group (composition)",
+        "detail": "To: sync@umusic.com\nSubject: License request — \"Blinding Lights — The Weeknd\" appearing in \"Golden Hour\"\n\nDear rights holder,\n\nWe are producing \"Golden Hour\", an independent film currently in post-production.\nYour property \"Blinding Lights — The Weeknd\" appears in our footage at timecode 01:00:12:00-01:00:24:00\n(Synth-driven pop track audible under the dialogue, rising to dominate the mix in the final beat of the scene.). We would like to license this use for worldwide distribution across\nall media, in perpetuity.\n\nResearch indicates a typical license range of $50k-$250k (major-label hit, sync + master). Could you confirm\navailability, terms, and your quote for this use?\n\nWe are happy to provide the relevant footage excerpt for review.\n\nKind regards,\n\"Golden Hour\" clearance team\n",
+        "est_cost_band": "$50k-$250k (major-label hit, sync + master)"
+      },
+      {
+        "kind": "reshoot",
+        "summary": "Reshoot / reframe the affected scene",
+        "detail": "Risk is CRITICAL (score 70). If licensing fails, plan a reshoot of the scene at 01:00:12:00 without 'Blinding Lights — The Weeknd'.",
+        "est_cost_band": null
+      }
+    ],
+    "e2": [
+      {
+        "kind": "license",
+        "summary": "License from The Coca-Cola Company",
+        "detail": "To: https://www.coca-colacompany.com/contact-us (brand & media licensing)\nSubject: License request — \"Coca-Cola can\" appearing in \"Golden Hour\"\n\nDear rights holder,\n\nWe are producing \"Golden Hour\", an independent film currently in post-production.\nYour property \"Coca-Cola can\" appears in our footage at timecode 01:00:05:00-01:00:11:00\n(Red soda can with visible Coca-Cola script logo on the kitchen table.). We would like to license this use for worldwide distribution across\nall media, in perpetuity.\n\nResearch indicates a typical license range of $0 (product placement agreement) - $15k. Could you confirm\navailability, terms, and your quote for this use?\n\nWe are happy to provide the relevant footage excerpt for review.\n\nKind regards,\n\"Golden Hour\" clearance team\n",
+        "est_cost_band": "$0 (product placement agreement) - $15k"
+      },
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Coca-Cola can' in 1 shot(s), 01:00:05:00-01:00:11:00. Estimated VFX cost $300-$800/shot at 8% frame coverage.",
+        "est_cost_band": "$300-$800/shot"
+      }
+    ],
+    "e3": [
+      {
+        "kind": "license",
+        "summary": "License from Nike, Inc.",
+        "detail": "To: https://www.nike.com/help (brand protection / entertainment marketing)\nSubject: License request — \"Nike hoodie swoosh\" appearing in \"Golden Hour\"\n\nDear rights holder,\n\nWe are producing \"Golden Hour\", an independent film currently in post-production.\nYour property \"Nike hoodie swoosh\" appears in our footage at timecode 01:00:08:00-01:00:18:00\n(Swoosh logo on the lead actor's hoodie, visible in two scenes.). We would like to license this use for worldwide distribution across\nall media, in perpetuity.\n\nResearch indicates a typical license range of No paid clearance program; permission typically denied — blur or wardrobe change recommended. Could you confirm\navailability, terms, and your quote for this use?\n\nWe are happy to provide the relevant footage excerpt for review.\n\nKind regards,\n\"Golden Hour\" clearance team\n",
+        "est_cost_band": "No paid clearance program; permission typically denied — blur or wardrobe change recommended"
+      },
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Nike hoodie swoosh' in 2 shot(s), 01:00:08:00-01:00:18:00. Estimated VFX cost $800-$2500/shot at 12% frame coverage.",
+        "est_cost_band": "$800-$2500/shot"
+      }
+    ],
+    "e4": [
+      {
+        "kind": "license",
+        "summary": "License from Domino Recording Co. (band artwork) / original poster designer (design copyright)",
+        "detail": "To: licensing@dominomusic.com\nSubject: License request — \"Arctic Monkeys tour poster\" appearing in \"Golden Hour\"\n\nDear rights holder,\n\nWe are producing \"Golden Hour\", an independent film currently in post-production.\nYour property \"Arctic Monkeys tour poster\" appears in our footage at timecode 01:00:20:00-01:00:25:00\n(Framed 2023 tour poster on the bedroom wall behind the actors.). We would like to license this use for worldwide distribution across\nall media, in perpetuity.\n\nResearch indicates a typical license range of $500-$5k (set-dressing artwork license). Could you confirm\navailability, terms, and your quote for this use?\n\nWe are happy to provide the relevant footage excerpt for review.\n\nKind regards,\n\"Golden Hour\" clearance team\n",
+        "est_cost_band": "$500-$5k (set-dressing artwork license)"
+      },
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Arctic Monkeys tour poster' in 1 shot(s), 01:00:20:00-01:00:25:00. Estimated VFX cost $800-$2500/shot at 20% frame coverage.",
+        "est_cost_band": "$800-$2500/shot"
+      }
+    ],
+    "e5": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Street mural (unknown artist)' in 1 shot(s), 01:00:30:00-01:00:36:00. Estimated VFX cost $800-$2500/shot at 30% frame coverage.",
+        "est_cost_band": "$800-$2500/shot"
+      }
+    ],
+    "e6": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Background passerby face' in 1 shot(s), 01:00:47:00-01:00:48:05. Estimated VFX cost $300-$800/shot at 3% frame coverage.",
+        "est_cost_band": "$300-$800/shot"
+      },
+      {
+        "kind": "fair_use_memo",
+        "summary": "De-minimis / incidental use position",
+        "detail": "De-minimis use memo — Background passerby face: the element appears for 1.2s, covers under 5% of frame, is not a focal point of the composition, and is not integral to the plot. Under the de-minimis doctrine (see e.g. Sandoval v. New Line Cinema, 147 F.3d 215 (2d Cir. 1998)), fleeting and incidental background appearances of this kind are generally non-actionable. Recommend counsel confirmation before relying on this position.",
+        "est_cost_band": null
+      }
+    ],
+    "e8": [
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'Adidas three-stripe duffel bag' in 1 shot(s), 01:00:26:00-01:00:30:00. Estimated VFX cost $300-$800/shot at 9% frame coverage.",
+        "est_cost_band": "$300-$800/shot"
+      }
+    ],
+    "e7": [
+      {
+        "kind": "license",
+        "summary": "License from Local broadcast affiliate (KXBC-7) / parent station group",
+        "detail": "To: clips@kxbc7.example (station clip licensing desk)\nSubject: License request — \"News broadcast on background TV\" appearing in \"Golden Hour\"\n\nDear rights holder,\n\nWe are producing \"Golden Hour\", an independent film currently in post-production.\nYour property \"News broadcast on background TV\" appears in our footage at timecode 01:00:50:00-01:00:53:00\n(A television in the back of the room plays a copyrighted news broadcast, partially visible and audible under dialogue.). We would like to license this use for worldwide distribution across\nall media, in perpetuity.\n\nResearch indicates a typical license range of $500-$3k (news clip license) or replace with cleared stock broadcast. Could you confirm\navailability, terms, and your quote for this use?\n\nWe are happy to provide the relevant footage excerpt for review.\n\nKind regards,\n\"Golden Hour\" clearance team\n",
+        "est_cost_band": "$500-$3k (news clip license) or replace with cleared stock broadcast"
+      },
+      {
+        "kind": "blur",
+        "summary": "VFX blur / digital replacement in post",
+        "detail": "Blur or digitally replace 'News broadcast on background TV' in 1 shot(s), 01:00:50:00-01:00:53:00. Estimated VFX cost $300-$800/shot at 6% frame coverage.",
+        "est_cost_band": "$300-$800/shot"
+      }
+    ]
+  },
+  "decisions": {},
+  "unscanned_ranges": [],
+  "audit_log": [],
+  "court": {
+    "e1": {
+      "element_id": "e1",
+      "holding": "clear_required",
+      "confidence": "high",
+      "reasoning": "Featured diegetic use of a recognizable hit song for 12 seconds with character interaction. Ringgold forecloses de minimis for deliberately featured works; § 504(c) exposure covers two separate copyrights. License both sync and master before any distribution, or cut/replace the cue.",
+      "briefs": [
+        {
+          "side": "counsel",
+          "argument": "This is a 12-second, plot-integral use of a major-label hit — characters react to the song, making it a featured sync use. Unlicensed sync and master use exposes the production to statutory damages of up to $150,000 per work for willful infringement, and both the composition (UMPG) and the master (XO/Republic) are implicated as separate works. There is no realistic de-minimis position: courts reject de-minimis where the copyrighted work is deliberately featured and recognizable. Distribution without a license is uninsurable.",
+          "precedents": [
+            {
+              "case_name": "17 U.S.C. § 504(c) (statutory damages)",
+              "citation": "17 U.S.C. § 504(c)",
+              "holding": "Statutory damages up to $150,000 per work for willful infringement, without proof of actual harm.",
+              "relevance": "Two works (composition + master) are in play; willfulness is easy to show for a knowing sync use.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Ringgold v. Black Entertainment Television",
+              "citation": "126 F.3d 70 (2d Cir. 1997)",
+              "holding": "Recognizable, deliberately included copyrighted work in a TV scene was not de minimis and infringed.",
+              "relevance": "A deliberately featured, recognizable work defeats a de-minimis defense.",
+              "quote": "The de minimis doctrine is inapplicable where the copying is qualitatively and quantitatively significant enough that the ordinary observer would recognize the appropriation.",
+              "source_url": "https://law.justia.com/cases/federal/appellate-courts/F3/126/70/589230/"
+            }
+          ]
+        },
+        {
+          "side": "advocate",
+          "argument": "The use is diegetic — the song plays from a character's phone within the story world, not as underscore. But candor requires conceding: diegetic use is still a use requiring sync and master licenses; the doctrine offers no exemption for source music, and the 12-second duration with on-screen character reaction makes the work a focal element. The defense has no precedent to stand on at this prominence.",
+          "precedents": [
+            {
+              "case_name": "Sandoval v. New Line Cinema",
+              "citation": "147 F.3d 215 (2d Cir. 1998)",
+              "holding": "Fleeting, out-of-focus, unidentifiable background use of copyrighted works was de minimis.",
+              "relevance": "Cited for contrast: this use is the opposite — clear, extended, and plot-integral.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        }
+      ]
+    },
+    "e2": {
+      "element_id": "e2",
+      "holding": "defensible",
+      "confidence": "medium",
+      "reasoning": "Incidental background depiction of a consumer product in an expressive work is well protected (Rogers; Caterpillar) and Coca-Cola's enforcement posture toward film depiction is cooperative. Defensible as-is; a free placement agreement would convert the residual risk to zero if the producer prefers.",
+      "briefs": [
+        {
+          "side": "counsel",
+          "argument": "The can sits on the kitchen table for six seconds at 60% centrality — visible enough to read the script mark. While depiction alone is rarely actionable, the conservative path for E&O purposes is either a product-placement agreement (often free — Coca-Cola actively places product) or a two-second art-department swap to a greeked can.",
+          "precedents": [
+            {
+              "case_name": "Ringgold v. Black Entertainment Television",
+              "citation": "126 F.3d 70 (2d Cir. 1997)",
+              "holding": "Deliberate set-dressing with protected material can be actionable where recognizable.",
+              "relevance": "Cited by analogy for deliberate set-dressing, though trademark (not copyright) governs here.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        },
+        {
+          "side": "advocate",
+          "argument": "An ordinary soda can on a kitchen table is precisely the realistic incidental depiction courts protect in expressive works. There is no plot role, no disparagement, and no suggestion of sponsorship — under Rogers and Caterpillar, trademark owners cannot control truthful depictions of their products existing in the world. Productions depict branded consumer goods constantly without licenses.",
+          "precedents": [
+            {
+              "case_name": "Rogers v. Grimaldi",
+              "citation": "875 F.2d 994 (2d Cir. 1989)",
+              "holding": "Trademark use in expressive works is protected absent artistic irrelevance or explicit misleading.",
+              "relevance": "Incidental prop depiction has artistic relevance (realism) and implies no sponsorship.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Caterpillar Inc. v. Walt Disney Co.",
+              "citation": "287 F. Supp. 2d 913 (C.D. Ill. 2003)",
+              "holding": "Depiction of branded products in film, without more, is not trademark infringement.",
+              "relevance": "Directly on point for a background consumer product.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        }
+      ]
+    },
+    "e3": {
+      "element_id": "e3",
+      "holding": "escalate",
+      "confidence": "medium",
+      "reasoning": "The Rogers defense is legally strong for wardrobe depiction, but prominence (15s, lead actor, two scenes) plus Nike's documented enforcement posture makes the practical calculus close: an $800/shot blur is cheaper than answering Nike's first letter. Escalate to counsel with a recommendation to blur or change wardrobe unless the depiction carries deliberate artistic weight.",
+      "briefs": [
+        {
+          "side": "counsel",
+          "argument": "The Swoosh appears for 15 seconds across two scenes on the lead actor at 12% frame coverage — this is prominence, not incident. Nike operates one of the most aggressive trademark enforcement programs in existence and moved for a TRO within days in the MSCHF matter. Even where a defense ultimately prevails, Nike's demonstrated willingness to litigate makes the expected cost of a dispute far exceed the cost of a wardrobe blur. Prominent, repeated display on a protagonist also edges toward implied endorsement, weakening the expressive-use defense.",
+          "precedents": [
+            {
+              "case_name": "Nike, Inc. v. MSCHF Product Studio, Inc.",
+              "citation": "No. 21-cv-1679 (E.D.N.Y. 2021)",
+              "holding": "Nike obtained rapid injunctive relief against unauthorized use of its marks on modified products.",
+              "relevance": "Demonstrates enforcement speed and appetite, which drives practical risk regardless of the merits.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        },
+        {
+          "side": "advocate",
+          "argument": "Trademarks appearing in expressive works enjoy robust First Amendment protection: under Rogers, use of a mark in an expressive work is actionable only if it has no artistic relevance or explicitly misleads about sponsorship. A character wearing ordinary branded streetwear is realistic set dressing with artistic relevance and no sponsorship claim. Courts have repeatedly refused to let trademark owners control depictions of their products in film.",
+          "precedents": [
+            {
+              "case_name": "Rogers v. Grimaldi",
+              "citation": "875 F.2d 994 (2d Cir. 1989)",
+              "holding": "Trademark use in expressive works is protected unless artistically irrelevant or explicitly misleading.",
+              "relevance": "Wardrobe depiction in a narrative film sits squarely inside the Rogers safe harbor.",
+              "quote": "The [Lanham] Act should be construed to apply to artistic works only where the public interest in avoiding consumer confusion outweighs the public interest in free expression.",
+              "source_url": "https://law.justia.com/cases/federal/appellate-courts/F2/875/994/79604/"
+            },
+            {
+              "case_name": "Caterpillar Inc. v. Walt Disney Co.",
+              "citation": "287 F. Supp. 2d 913 (C.D. Ill. 2003)",
+              "holding": "Court refused to enjoin depiction of Caterpillar bulldozers as villainous machinery in a film.",
+              "relevance": "Mere depiction of branded products in a film, even unflattering, is not infringement.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        }
+      ]
+    },
+    "e4": {
+      "element_id": "e4",
+      "holding": "clear_required",
+      "confidence": "medium",
+      "reasoning": "This sits between Ringgold and Sandoval, but closer to Ringgold: the poster is in focus, framed as decor, and identifiable at 20% coverage. With a $500–$5k license band and a cooperative rights holder, clearing is cheap relative to the litigation-anchored downside. License it, or reframe/soften focus so Sandoval controls.",
+      "briefs": [
+        {
+          "side": "counsel",
+          "argument": "Ringgold is directly on point and fatal: a copyrighted poster visible in the background of a scene for a comparable duration (26.75 seconds aggregate in Ringgold; 5 continuous seconds at 20% frame coverage here, in focus) was held infringing, with the Second Circuit explicitly rejecting a de-minimis defense where the work is recognizable and its expressive content is conveyed. The poster is framed, lit, and identifiable — its expressive value is being used as set decoration without license.",
+          "precedents": [
+            {
+              "case_name": "Ringgold v. Black Entertainment Television",
+              "citation": "126 F.3d 70 (2d Cir. 1997)",
+              "holding": "A poster of a copyrighted artwork visible in a TV scene background was infringing; de minimis rejected.",
+              "relevance": "Nearly identical fact pattern: decorative poster, background of a dramatic scene, recognizable.",
+              "quote": "The painting component of the poster is recognizable as a painting, and with sufficient observable detail for the average lay observer to discern African-Americans wearing hats and colorful clothing.",
+              "source_url": "https://law.justia.com/cases/federal/appellate-courts/F3/126/70/589230/"
+            }
+          ]
+        },
+        {
+          "side": "advocate",
+          "argument": "Sandoval shows the line: where background works are fleeting, obscured, or unidentifiable, the use is de minimis. At five seconds with actors in the foreground pulling focus, an average observer's ability to discern the poster's protected expression is genuinely contestable — the observability analysis, not raw duration, controls. A licensing conversation at the $500–$5k band is nonetheless cheap certainty.",
+          "precedents": [
+            {
+              "case_name": "Sandoval v. New Line Cinema",
+              "citation": "147 F.3d 215 (2d Cir. 1998)",
+              "holding": "Background photographs that were fleeting and out of focus were de minimis and non-infringing.",
+              "relevance": "The counter-anchor: if the poster reads as unidentifiable set dressing, no infringement.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        }
+      ]
+    },
+    "e5": {
+      "element_id": "e5",
+      "holding": "escalate",
+      "confidence": "high",
+      "reasoning": "Prominent use of an enforceable copyrighted work whose owner cannot be identified is the single worst clearance posture — no license is even possible yet. Escalate: commission a human investigation to identify the artist (local arts orgs, street-art registries, the building owner), and prepare the fallback of recutting the shot to Sandoval territory.",
+      "briefs": [
+        {
+          "side": "counsel",
+          "argument": "The mural fills 30% of frame for six seconds as the walking shot's backdrop — it is the shot's visual subject, not incident. Murals are fully copyright-protected pictorial works, and street artists have repeatedly and successfully enforced against commercial exploitation of their work in media. Because deep research could not identify the artist, the production faces the worst posture: a live copyright with an untraceable owner. E&O underwriters treat unidentifiable rights holders as uninsurable exposure, and VARA adds moral-rights complications no release can cure retroactively.",
+          "precedents": [
+            {
+              "case_name": "Falkner v. General Motors LLC",
+              "citation": "393 F. Supp. 3d 927 (C.D. Cal. 2018)",
+              "holding": "A muralist's copyright claim over commercial photography featuring his mural survived summary judgment.",
+              "relevance": "Street art is enforceable copyright; prominent commercial use of murals draws real claims.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Visual Artists Rights Act",
+              "citation": "17 U.S.C. § 106A",
+              "holding": "Authors of works of visual art hold attribution and integrity rights independent of copyright ownership.",
+              "relevance": "Even a later license from a building owner would not extinguish the artist's own rights.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        },
+        {
+          "side": "advocate",
+          "argument": "The mural is public street context in a walking shot — filming the world as it exists. If the shot were brief or the mural incidental, Sandoval-style observability arguments would apply. But at 30% coverage for six seconds the work's expression is plainly conveyed, and candor requires acknowledging that the de-minimis position is weak on these facts. The stronger practical defense is mitigation: reframe, shorten, or defocus the shot.",
+          "precedents": [
+            {
+              "case_name": "Sandoval v. New Line Cinema",
+              "citation": "147 F.3d 215 (2d Cir. 1998)",
+              "holding": "Fleeting, unidentifiable background use is de minimis.",
+              "relevance": "Would control only if the shot were recut to make the mural incidental.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "research_plan": {
+    "e3": {
+      "element_id": "e3",
+      "processor": "lite",
+      "rationale": "Famous mark: ownership is trivial; only posture/contact needs confirming.",
+      "est_cost_usd": 0.005
+    },
+    "e1": {
+      "element_id": "e1",
+      "processor": "pro",
+      "rationale": "Music rights split across composition and master with publisher chains; needs deep research.",
+      "est_cost_usd": 0.1
+    },
+    "e2": {
+      "element_id": "e2",
+      "processor": "lite",
+      "rationale": "Famous mark: ownership is trivial; only posture/contact needs confirming.",
+      "est_cost_usd": 0.005
+    },
+    "e5": {
+      "element_id": "e5",
+      "processor": "ultra",
+      "rationale": "Unidentified artist: exhaustive open-web dig (registries, street-art databases, local press) required.",
+      "est_cost_usd": 0.3
+    },
+    "e4": {
+      "element_id": "e4",
+      "processor": "base",
+      "rationale": "Standard single-owner lookup expected; escalate tier manually if research returns incomplete.",
+      "est_cost_usd": 0.01
+    },
+    "e7": {
+      "element_id": "e7",
+      "processor": "base",
+      "rationale": "Standard single-owner lookup expected; escalate tier manually if research returns incomplete.",
+      "est_cost_usd": 0.01
+    }
+  },
+  "script_mentions": [
+    {
+      "label": "Coca-Cola can",
+      "element_type": "LOGO",
+      "scene": "INT. MAYA'S KITCHEN — MORNING"
+    },
+    {
+      "label": "Blinding Lights - The Weeknd",
+      "element_type": "MUSIC",
+      "scene": "INT. MAYA'S KITCHEN — MORNING"
+    },
+    {
+      "label": "Arctic Monkeys tour poster",
+      "element_type": "ARTWORK",
+      "scene": "INT. MAYA'S BEDROOM — CONTINUOUS"
+    }
+  ],
+  "drift": {
+    "unscripted_element_ids": [
+      "e3",
+      "e5",
+      "e8",
+      "e7"
+    ],
+    "scripted_not_seen": []
+  },
+  "candidates": {
+    "e5": [
+      {
+        "name": "Precita Eyes Muralists Association",
+        "kind": "mural arts registry",
+        "url": "https://www.precitaeyes.org/",
+        "note": "Registers and documents community murals in the area; maintains artist attribution records and can identify unsigned works."
+      },
+      {
+        "name": "Building owner of record (county assessor parcel lookup)",
+        "kind": "property owner",
+        "url": "https://sfassessor.org/",
+        "note": "The wall's owner often commissioned the mural or holds the artist agreement; assessor records identify who to ask."
+      },
+      {
+        "name": "Local street-art documentation project (Mural Registry / street-art map)",
+        "kind": "crowdsourced archive",
+        "url": "https://www.muralregistry.example/",
+        "note": "Geotagged mural databases frequently attribute works that carry no visible signature."
+      }
+    ]
+  },
+  "watches": {},
+  "alerts": [],
+  "corroboration": {
+    "e1": {
+      "element_id": "e1",
+      "verdict": "FINGERPRINTED",
+      "detector": "audd-fingerprint",
+      "detected_label": "Blinding Lights",
+      "confidence": 1.0,
+      "note": "The video model offered only a description ('Upbeat electronic music'), which is an absence of identity rather than a competing claim. Acoustic fingerprinting identified 'Blinding Lights' by The Weeknd at 12.0s, so the fingerprint supplies identity."
+    },
+    "e2": {
+      "element_id": "e2",
+      "verdict": "CORROBORATED",
+      "detector": "cloud-video-intelligence",
+      "detected_label": "Coca-Cola",
+      "confidence": 0.8843,
+      "note": "cloud-video-intelligence independently identified 'Coca-Cola' in the same window at 88% confidence."
+    },
+    "e3": {
+      "element_id": "e3",
+      "verdict": "CORROBORATED",
+      "detector": "cloud-video-intelligence",
+      "detected_label": "Nike",
+      "confidence": 0.9312,
+      "note": "cloud-video-intelligence independently identified 'Nike' in the same window at 93% confidence."
+    },
+    "e4": {
+      "element_id": "e4",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers COPYRIGHT_ART; identity rests on the video model alone."
+    },
+    "e5": {
+      "element_id": "e5",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers COPYRIGHT_ART; identity rests on the video model alone."
+    },
+    "e6": {
+      "element_id": "e6",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers RIGHT_OF_PUBLICITY; identity rests on the video model alone."
+    },
+    "e8": {
+      "element_id": "e8",
+      "verdict": "CONFLICTED",
+      "detector": "cloud-video-intelligence",
+      "detected_label": "Kappa",
+      "confidence": 0.7106,
+      "note": "Identity dispute: the video model read 'Adidas three-stripe duffel bag' but cloud-video-intelligence read 'Kappa' in the same window. Resolve before researching — researching the wrong rights holder produces a false clearance."
+    },
+    "e7": {
+      "element_id": "e7",
+      "verdict": "SINGLE_SOURCE",
+      "detector": "cloud-video-intelligence",
+      "detected_label": null,
+      "confidence": 0.0,
+      "note": "No closed-vocabulary detector covers COPYRIGHT_ART; identity rests on the video model alone."
+    }
+  },
+  "freshness": {
+    "e1": [
+      {
+        "element_id": "e1",
+        "owner": "The Weeknd XO, Inc. / Universal Music Group (master); Universal Music Publishing Group (composition)",
+        "title": "Majors escalate sync enforcement against unlicensed film use",
+        "url": "https://www.billboard.com/pro/music-sync-licensing-lawsuits/",
+        "excerpt": "Universal Music Group has filed suit against several production companies over uncleared synchronisation of recordings, seeking statutory damages under 17 U.S.C. 504(c).",
+        "material": true
+      },
+      {
+        "element_id": "e1",
+        "owner": "The Weeknd XO, Inc. / Universal Music Group (master); Universal Music Publishing Group (composition)",
+        "title": "Universal Music Publishing Group — sync licensing",
+        "url": "https://www.umusicpub.com/",
+        "excerpt": "UMPG administers the composition catalogue and processes synchronisation requests for film and television through its licensing desk.",
+        "material": false
+      }
+    ],
+    "e3": [
+      {
+        "element_id": "e3",
+        "owner": "Nike, Inc.",
+        "title": "Can You Use the Nike Logo Legally? Trademark Guide",
+        "url": "https://www.trademarkia.com/news/fashion/nike-logo-trademark-legal-use",
+        "excerpt": "Not without risk - trademark law helps safeguard against consumer confusion and protects brand identity. Under the Lanham Act, which governs U.S. trademark law, unauthorised commercial use of the Swoosh invites an infringement claim.",
+        "material": true
+      },
+      {
+        "element_id": "e3",
+        "owner": "Nike, Inc.",
+        "title": "Nike trademark enforcement record",
+        "url": "https://www.tramatm.com/en/trademark-hall-of-fame/nike",
+        "excerpt": "Nike alleged trademark infringement, claiming that the design copied the iconic Swoosh logo and other elements associated with Nike's Dunk sneakers, and moved swiftly for injunctive relief.",
+        "material": true
+      },
+      {
+        "element_id": "e3",
+        "owner": "Nike, Inc.",
+        "title": "Nike unveils autumn brand campaign",
+        "url": "https://news.example/nike-brand-campaign-2026",
+        "excerpt": "The company announced a new global marketing push centred on running, with campaign films launching across streaming platforms this quarter.",
+        "material": false
+      }
+    ]
+  },
+  "territory_risk": {
+    "e1": [
+      {
+        "element_id": "e1",
+        "territory": "US",
+        "band": "CRITICAL",
+        "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; United States tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "e1",
+        "territory": "DE",
+        "band": "CRITICAL",
+        "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; Germany tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "e1",
+        "territory": "FR",
+        "band": "CRITICAL",
+        "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; France tracks the baseline band.",
+        "authority": ""
+      }
+    ],
+    "e2": [
+      {
+        "element_id": "e2",
+        "territory": "US",
+        "band": "MEDIUM",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; United States tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "e2",
+        "territory": "DE",
+        "band": "MEDIUM",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; Germany tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "e2",
+        "territory": "FR",
+        "band": "MEDIUM",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; France tracks the baseline band.",
+        "authority": ""
+      }
+    ],
+    "e3": [
+      {
+        "element_id": "e3",
+        "territory": "US",
+        "band": "HIGH",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; United States tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "e3",
+        "territory": "DE",
+        "band": "HIGH",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; Germany tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "e3",
+        "territory": "FR",
+        "band": "HIGH",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; France tracks the baseline band.",
+        "authority": ""
+      }
+    ],
+    "e4": [
+      {
+        "element_id": "e4",
+        "territory": "US",
+        "band": "MEDIUM",
+        "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+      },
+      {
+        "element_id": "e4",
+        "territory": "DE",
+        "band": "LOW",
+        "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+      },
+      {
+        "element_id": "e4",
+        "territory": "FR",
+        "band": "HIGH",
+        "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+      }
+    ],
+    "e5": [
+      {
+        "element_id": "e5",
+        "territory": "US",
+        "band": "MEDIUM",
+        "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+      },
+      {
+        "element_id": "e5",
+        "territory": "DE",
+        "band": "LOW",
+        "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+      },
+      {
+        "element_id": "e5",
+        "territory": "FR",
+        "band": "HIGH",
+        "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+      }
+    ],
+    "e6": [
+      {
+        "element_id": "e6",
+        "territory": "US",
+        "band": "MEDIUM",
+        "rationale": "United States enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+      },
+      {
+        "element_id": "e6",
+        "territory": "DE",
+        "band": "MEDIUM",
+        "rationale": "Germany enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+      },
+      {
+        "element_id": "e6",
+        "territory": "FR",
+        "band": "MEDIUM",
+        "rationale": "France enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+      }
+    ],
+    "e8": [
+      {
+        "element_id": "e8",
+        "territory": "US",
+        "band": "MEDIUM",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; United States tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "e8",
+        "territory": "DE",
+        "band": "MEDIUM",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; Germany tracks the baseline band.",
+        "authority": ""
+      },
+      {
+        "element_id": "e8",
+        "territory": "FR",
+        "band": "MEDIUM",
+        "rationale": "TRADEMARK exposure does not vary by panorama rule; France tracks the baseline band.",
+        "authority": ""
+      }
+    ],
+    "e7": [
+      {
+        "element_id": "e7",
+        "territory": "US",
+        "band": "LOW",
+        "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+      },
+      {
+        "element_id": "e7",
+        "territory": "DE",
+        "band": "LOW",
+        "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+      },
+      {
+        "element_id": "e7",
+        "territory": "FR",
+        "band": "MEDIUM",
+        "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+      }
+    ]
+  },
+  "territories": [
+    "US",
+    "DE",
+    "FR"
+  ],
+  "coverage": {
+    "e1": {
+      "element_id": "e1",
+      "status": "PARTIAL",
+      "licence_id": "LIC-002",
+      "rights_holder": "The Weeknd XO, Inc. / Universal Music Group (master); Universal Music Publishing Group (composition)",
+      "gaps": [
+        "synchronisation (composition — publisher): territory not granted: DE, FR (licence covers US)",
+        "synchronisation (composition — publisher): media not granted: STREAMING (licence covers THEATRICAL)",
+        "master use (recording — label) licence missing — the grants on file do not convey it"
+      ],
+      "note": "A song needs both a synchronisation licence for the composition and a master-use licence for the recording. One without the other means shipping an uncleared work."
+    },
+    "e2": {
+      "element_id": "e2",
+      "status": "COVERED",
+      "licence_id": "LIC-001",
+      "rights_holder": "The Coca-Cola Company",
+      "gaps": [],
+      "note": "Covered by LIC-001 (Product placement / incidental depiction) from The Coca-Cola Company."
+    },
+    "e3": {
+      "element_id": "e3",
+      "status": "NOT_COVERED",
+      "licence_id": null,
+      "rights_holder": "Nike, Inc.",
+      "gaps": [],
+      "note": "No licence on file from Nike, Inc.. This use is unlicensed unless a defence applies."
+    },
+    "e4": {
+      "element_id": "e4",
+      "status": "COVERED",
+      "licence_id": "LIC-003",
+      "rights_holder": "Domino Recording Co.",
+      "gaps": [],
+      "note": "Covered by LIC-003 (Artwork reproduction in set dressing) from Domino Recording Co.."
+    },
+    "e5": {
+      "element_id": "e5",
+      "status": "UNKNOWN",
+      "licence_id": null,
+      "rights_holder": null,
+      "gaps": [],
+      "note": "Rights holder is not established, so the ledger cannot be checked. Coverage is unknowable until identity and ownership are resolved."
+    },
+    "e6": {
+      "element_id": "e6",
+      "status": "UNKNOWN",
+      "licence_id": null,
+      "rights_holder": null,
+      "gaps": [],
+      "note": "Rights holder is not established, so the ledger cannot be checked. Coverage is unknowable until identity and ownership are resolved."
+    },
+    "e8": {
+      "element_id": "e8",
+      "status": "UNKNOWN",
+      "licence_id": null,
+      "rights_holder": null,
+      "gaps": [],
+      "note": "Rights holder is not established, so the ledger cannot be checked. Coverage is unknowable until identity and ownership are resolved."
+    },
+    "e7": {
+      "element_id": "e7",
+      "status": "PARTIAL",
+      "licence_id": "LIC-004",
+      "rights_holder": "Local broadcast affiliate (KXBC-7)",
+      "gaps": [
+        "licence expired 2025-12-31"
+      ],
+      "note": "LIC-004 from Local broadcast affiliate (KXBC-7) does not reach this use. Extend the grant or treat the finding as uncleared."
+    }
+  },
+  "audio_matches": [
+    {
+      "title": "Blinding Lights",
+      "artist": "The Weeknd",
+      "album": "After Hours",
+      "label": "Republic Records",
+      "release_date": "2019-11-29",
+      "isrc": "USUG11904206",
+      "song_link": "https://lis.tn/BlindingLights",
+      "at_s": 12.0,
+      "confidence": 1.0,
+      "provenance": "VERIFIED",
+      "catalogues": [
+        "spotify",
+        "apple_music"
+      ]
+    }
+  ],
+  "audio_checked": true,
+  "routes": {
+    "e1": {
+      "element_id": "e1",
+      "tier": "DEEP",
+      "rationale": "This is advertising use, which carries no expressive-work shield — Rogers v. Grimaldi protects films, not adverts, and every brand-owner win in the record is an advert (Falkner v. GM, Mercedes v. the Detroit muralists, Revok v. H&M). Knowing the posture is not enough; you need an actual licence, so you need the contact and the cost band. Recording identified by acoustic fingerprint, so the remaining unknowns are posture and the two licensing contacts (composition and master) — a search answers both in seconds.",
+      "basis": "",
+      "disposition": "Clear BOTH the synchronisation licence from the publisher and the master-use licence from the label. One without the other is the most common music clearance failure.",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.1,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "e2": {
+      "element_id": "e2",
+      "tier": "DEEP",
+      "rationale": "This is advertising use, which carries no expressive-work shield — Rogers v. Grimaldi protects films, not adverts, and every brand-owner win in the record is an advert (Falkner v. GM, Mercedes v. the Detroit muralists, Revok v. H&M). Knowing the posture is not enough; you need an actual licence, so you need the contact and the cost band. Ownership resolved locally (The Coca-Cola Company); a live search establishes current licensing posture and the contact route. Posture is the variable a static table cannot know, and for trademark it is the variable that decides risk — brand owners sue over unflattering depiction, not presence.",
+      "basis": "",
+      "disposition": "Confirm posture, then approach The Coca-Cola Company if depiction is unflattering.",
+      "owner": "The Coca-Cola Company",
+      "posture": null,
+      "est_cost_usd": 0.005,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "e3": {
+      "element_id": "e3",
+      "tier": "DEEP",
+      "rationale": "This is advertising use, which carries no expressive-work shield — Rogers v. Grimaldi protects films, not adverts, and every brand-owner win in the record is an advert (Falkner v. GM, Mercedes v. the Detroit muralists, Revok v. H&M). Knowing the posture is not enough; you need an actual licence, so you need the contact and the cost band. Ownership resolved locally (Nike, Inc.); a live search establishes current licensing posture and the contact route. Posture is the variable a static table cannot know, and for trademark it is the variable that decides risk — brand owners sue over unflattering depiction, not presence.",
+      "basis": "",
+      "disposition": "Confirm posture, then approach Nike, Inc. if depiction is unflattering.",
+      "owner": "Nike, Inc.",
+      "posture": null,
+      "est_cost_usd": 0.005,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "e4": {
+      "element_id": "e4",
+      "tier": "DEEP",
+      "rationale": "For artwork, 'who owns this' IS the question, and a two-second search cannot answer it: a poster's rights can sit with the band, the label, the photographer or the designer. Ownership chains for authored images are multi-hop by nature, which is what a deep run is for.",
+      "basis": "Ringgold v. Black Entertainment Television, 126 F.3d 70 (2d Cir. 1997) — recognisable background artwork is not de minimis",
+      "disposition": "",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.01,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    },
+    "e5": {
+      "element_id": "e5",
+      "tier": "DEEP",
+      "rationale": "Material artwork with no author on the face of the work. This is the highest-value visual clearance risk and the one case where exhaustive open-web enumeration genuinely pays.",
+      "basis": "Falkner v. General Motors (C.D. Cal. 2018) — the US architectural exemption, 17 U.S.C. §120(a), does not cover art painted on a building",
+      "disposition": "",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.3,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": true
+    },
+    "e6": {
+      "element_id": "e6",
+      "tier": "STATUTE",
+      "rationale": "An unnamed individual has no discoverable rights holder. Research cannot produce the instrument this needs. In a commercial context this is not advisory: the right of publicity is a tort of COMMERCIAL appropriation, so an advert is the one place the claim is at its strongest.",
+      "basis": "Right of publicity — cleared by consent, not by ownership research; commercial appropriation is the core of the tort",
+      "disposition": "A signed personal release is MANDATORY before this can run commercially. Blur otherwise — a crowd notice does not cover advertising use.",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.0,
+      "est_latency_s": 0.0,
+      "enumerate_candidates": false
+    },
+    "e8": {
+      "element_id": "e8",
+      "tier": "BLOCKED",
+      "rationale": "Two independent detectors named different things. Research asks 'who owns THIS', and we do not yet agree on what THIS is — researching would attribute rights to the wrong holder.",
+      "basis": "Identity conflict",
+      "disposition": "A human resolves identity before any research runs.",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.0,
+      "est_latency_s": 0.0,
+      "enumerate_candidates": false
+    },
+    "e7": {
+      "element_id": "e7",
+      "tier": "DEEP",
+      "rationale": "For artwork, 'who owns this' IS the question, and a two-second search cannot answer it: a poster's rights can sit with the band, the label, the photographer or the designer. Ownership chains for authored images are multi-hop by nature, which is what a deep run is for.",
+      "basis": "Ringgold v. Black Entertainment Television, 126 F.3d 70 (2d Cir. 1997) — recognisable background artwork is not de minimis",
+      "disposition": "",
+      "owner": null,
+      "posture": null,
+      "est_cost_usd": 0.01,
+      "est_latency_s": 180.0,
+      "enumerate_candidates": false
+    }
+  },
+  "liability": {
+    "e1": {
+      "element_id": "e1",
+      "headline": "Shipping this uncleared exposes you to $750–$150,000 per work in statutory damages.",
+      "clear_now": "$50k-$250k (major-label hit, sync + master)",
+      "fix_in_post": null,
+      "statutory_min_usd": 750,
+      "statutory_max_usd": 30000,
+      "statutory_willful_usd": 150000,
+      "statutory_basis": "17 U.S.C. §504(c) — the copyright owner may elect statutory damages of $750 to $30,000 per work, rising to $150,000 if the infringement is found wilful. No proof of actual loss is required.",
+      "injunction_risk": "no precedent on file",
+      "injunction_basis": "No injunction precedent recorded for this category. That is an absence of evidence, not a safe harbour.",
+      "escalation": [
+        "Clear it now — $50k-$250k (major-label hit, sync + master).",
+        "Replace or mute the cue at picture lock, and re-conform the mix.",
+        "Find it at delivery — you negotiate with zero leverage against a fixed release date, which is the position every settlement in the record was made from."
+      ]
+    },
+    "e2": {
+      "element_id": "e2",
+      "headline": "Holders in this category usually lose on the merits, but the claim still has to be defended — and defence costs more than clearance.",
+      "clear_now": "$0 (product placement agreement) - $15k",
+      "fix_in_post": "$300-$800/shot",
+      "statutory_min_usd": null,
+      "statutory_max_usd": null,
+      "statutory_willful_usd": null,
+      "statutory_basis": "No statutory damages for depiction — 15 U.S.C. §1117 gives the holder your profits, their damages and, in exceptional cases, their legal fees. The realistic exposure is the cost of defending, not a fixed sum.",
+      "injunction_risk": "sought and denied",
+      "injunction_basis": "Injunctions have been sought and refused in this category (Wham-O v. Paramount Pictures, Caterpillar v. Walt Disney). The claim still had to be defended, which is its own cost.",
+      "escalation": [
+        "Clear it now — $0 (product placement agreement) - $15k.",
+        "Fix it at picture lock — $300-$800/shot, per shot, after the cut is conformed.",
+        "Find it at delivery — you negotiate with zero leverage against a fixed release date, which is the position every settlement in the record was made from."
+      ]
+    },
+    "e3": {
+      "element_id": "e3",
+      "headline": "Holders in this category usually lose on the merits, but the claim still has to be defended — and defence costs more than clearance.",
+      "clear_now": "No paid clearance program; permission typically denied — blur or wardrobe change recommended",
+      "fix_in_post": "$800-$2500/shot",
+      "statutory_min_usd": null,
+      "statutory_max_usd": null,
+      "statutory_willful_usd": null,
+      "statutory_basis": "No statutory damages for depiction — 15 U.S.C. §1117 gives the holder your profits, their damages and, in exceptional cases, their legal fees. The realistic exposure is the cost of defending, not a fixed sum.",
+      "injunction_risk": "sought and denied",
+      "injunction_basis": "Injunctions have been sought and refused in this category (Wham-O v. Paramount Pictures, Caterpillar v. Walt Disney). The claim still had to be defended, which is its own cost.",
+      "escalation": [
+        "Clear it now — No paid clearance program; permission typically denied — blur or wardrobe change recommended.",
+        "Fix it at picture lock — $800-$2500/shot, per shot, after the cut is conformed.",
+        "Find it at delivery — you negotiate with zero leverage against a fixed release date, which is the position every settlement in the record was made from."
+      ]
+    },
+    "e4": {
+      "element_id": "e4",
+      "headline": "Shipping this uncleared exposes you to $750–$150,000 per work in statutory damages, and a claim in this category has stopped a release before.",
+      "clear_now": "$500-$5k (set-dressing artwork license)",
+      "fix_in_post": "$800-$2500/shot",
+      "statutory_min_usd": 750,
+      "statutory_max_usd": 30000,
+      "statutory_willful_usd": 150000,
+      "statutory_basis": "17 U.S.C. §504(c) — the copyright owner may elect statutory damages of $750 to $30,000 per work, rising to $150,000 if the infringement is found wilful. No proof of actual loss is required.",
+      "injunction_risk": "documented",
+      "injunction_basis": "Woods v. Universal City Studios (920 F. Supp. 62 (S.D.N.Y. 1996)) — Preliminary injunction GRANTED against distribution of the portions reproducing the drawing — while the film was already in theatres. An injunction stops distribution regardless of what damages would eventually be awarded, which is why these settle.",
+      "escalation": [
+        "Clear it now — $500-$5k (set-dressing artwork license).",
+        "Fix it at picture lock — $800-$2500/shot, per shot, after the cut is conformed.",
+        "Find it at delivery — you negotiate with zero leverage against a fixed release date, which is the position every settlement in the record was made from."
+      ]
+    },
+    "e5": {
+      "element_id": "e5",
+      "headline": "Shipping this uncleared exposes you to $750–$150,000 per work in statutory damages, and a claim in this category has stopped a release before.",
+      "clear_now": null,
+      "fix_in_post": "$800-$2500/shot",
+      "statutory_min_usd": 750,
+      "statutory_max_usd": 30000,
+      "statutory_willful_usd": 150000,
+      "statutory_basis": "17 U.S.C. §504(c) — the copyright owner may elect statutory damages of $750 to $30,000 per work, rising to $150,000 if the infringement is found wilful. No proof of actual loss is required.",
+      "injunction_risk": "documented",
+      "injunction_basis": "Woods v. Universal City Studios (920 F. Supp. 62 (S.D.N.Y. 1996)) — Preliminary injunction GRANTED against distribution of the portions reproducing the drawing — while the film was already in theatres. An injunction stops distribution regardless of what damages would eventually be awarded, which is why these settle.",
+      "escalation": [
+        "Clear it now — cost not established; the rights holder has not been priced.",
+        "Fix it at picture lock — $800-$2500/shot, per shot, after the cut is conformed.",
+        "Find it at delivery — you negotiate with zero leverage against a fixed release date, which is the position every settlement in the record was made from."
+      ]
+    },
+    "e6": {
+      "element_id": "e6",
+      "headline": "Holders in this category usually lose on the merits, but the claim still has to be defended — and defence costs more than clearance.",
+      "clear_now": null,
+      "fix_in_post": "$300-$800/shot",
+      "statutory_min_usd": null,
+      "statutory_max_usd": null,
+      "statutory_willful_usd": null,
+      "statutory_basis": "State law, and it varies widely. Some states set statutory minimums (California Civil Code §3344 sets $750); most award actual damages plus profits. There is no federal figure to quote.",
+      "injunction_risk": "no precedent on file",
+      "injunction_basis": "No injunction precedent recorded for this category. That is an absence of evidence, not a safe harbour.",
+      "escalation": [
+        "Clear it now — cost not established; the rights holder has not been priced.",
+        "Fix it at picture lock — $300-$800/shot, per shot, after the cut is conformed.",
+        "Find it at delivery — you negotiate with zero leverage against a fixed release date, which is the position every settlement in the record was made from."
+      ]
+    },
+    "e8": {
+      "element_id": "e8",
+      "headline": "Holders in this category usually lose on the merits, but the claim still has to be defended — and defence costs more than clearance.",
+      "clear_now": null,
+      "fix_in_post": "$300-$800/shot",
+      "statutory_min_usd": null,
+      "statutory_max_usd": null,
+      "statutory_willful_usd": null,
+      "statutory_basis": "No statutory damages for depiction — 15 U.S.C. §1117 gives the holder your profits, their damages and, in exceptional cases, their legal fees. The realistic exposure is the cost of defending, not a fixed sum.",
+      "injunction_risk": "sought and denied",
+      "injunction_basis": "Injunctions have been sought and refused in this category (Wham-O v. Paramount Pictures, Caterpillar v. Walt Disney). The claim still had to be defended, which is its own cost.",
+      "escalation": [
+        "Clear it now — cost not established; the rights holder has not been priced.",
+        "Fix it at picture lock — $300-$800/shot, per shot, after the cut is conformed.",
+        "Find it at delivery — you negotiate with zero leverage against a fixed release date, which is the position every settlement in the record was made from."
+      ]
+    },
+    "e7": {
+      "element_id": "e7",
+      "headline": "Shipping this uncleared exposes you to $750–$150,000 per work in statutory damages, and a claim in this category has stopped a release before.",
+      "clear_now": "$500-$3k (news clip license) or replace with cleared stock broadcast",
+      "fix_in_post": "$300-$800/shot",
+      "statutory_min_usd": 750,
+      "statutory_max_usd": 30000,
+      "statutory_willful_usd": 150000,
+      "statutory_basis": "17 U.S.C. §504(c) — the copyright owner may elect statutory damages of $750 to $30,000 per work, rising to $150,000 if the infringement is found wilful. No proof of actual loss is required.",
+      "injunction_risk": "documented",
+      "injunction_basis": "Woods v. Universal City Studios (920 F. Supp. 62 (S.D.N.Y. 1996)) — Preliminary injunction GRANTED against distribution of the portions reproducing the drawing — while the film was already in theatres. An injunction stops distribution regardless of what damages would eventually be awarded, which is why these settle.",
+      "escalation": [
+        "Clear it now — $500-$3k (news clip license) or replace with cleared stock broadcast.",
+        "Fix it at picture lock — $300-$800/shot, per shot, after the cut is conformed.",
+        "Find it at delivery — you negotiate with zero leverage against a fixed release date, which is the position every settlement in the record was made from."
+      ]
+    }
+  },
+  "sponsor_conflicts": [
+    {
+      "element_id": "e2",
+      "label": "Coca-Cola can",
+      "detected_owner": "The Coca-Cola Company",
+      "conflicts_with": "Pepsi",
+      "sector": "beverage",
+      "note": "'Coca-Cola can' (The Coca-Cola Company) is a beverage competitor of sponsor Pepsi (PepsiCo, Inc.). Category exclusivity is standard in sponsorship contracts, so this may breach the deal even though the depiction itself is lawful. Check the exclusivity clause before delivery."
+    }
+  ],
+  "platform_outcomes": [
+    {
+      "element_id": "e1",
+      "platform": "YouTube",
+      "action": "CLAIM_LIKELY",
+      "confidence": "near-certain",
+      "detected_by": "AUDIO_FINGERPRINT",
+      "consequence": "A commercially released recording matched by acoustic fingerprint. YouTube matches this automatically on upload, so a claim is near-certain. Fair use is no defence here: the matching system does not evaluate it, and disputing a claim is a manual process most creators lose by default.",
+      "remedy": "Mute or replace the audio at 00:12–00:24 before publishing, or licence the recording. Editing after a claim lands does not reverse it.",
+      "revenue_impact": "Monetisation for the whole video is diverted to Republic Records."
+    },
+    {
+      "element_id": "e6",
+      "platform": "YouTube",
+      "action": "PRIVACY_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "An identifiable person can complain personally, through a route separate from copyright. In the EU and UK this is also personal data under GDPR, and in India under the DPDP Act — a different regime with a different remedy from the US right of publicity.",
+      "remedy": "Obtain a release, or blur the face at 00:47–00:48. Route if challenged: Privacy complaint process; the subject must file personally, and YouTube may require the uploader to blur or remove.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "e2",
+      "platform": "YouTube",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on YouTube can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:05–00:11. Route if challenged: Separate trademark complaint form, reviewed by a human; distinct from the copyright process and does not create a copyright strike.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "e3",
+      "platform": "YouTube",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on YouTube can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:08–00:45. Route if challenged: Separate trademark complaint form, reviewed by a human; distinct from the copyright process and does not create a copyright strike.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "e4",
+      "platform": "YouTube",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on YouTube can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:20–00:25. Route if challenged: Separate trademark complaint form, reviewed by a human; distinct from the copyright process and does not create a copyright strike.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "e5",
+      "platform": "YouTube",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on YouTube can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:30–00:36. Route if challenged: Separate trademark complaint form, reviewed by a human; distinct from the copyright process and does not create a copyright strike.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "e8",
+      "platform": "YouTube",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on YouTube can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:26–00:30. Route if challenged: Separate trademark complaint form, reviewed by a human; distinct from the copyright process and does not create a copyright strike.",
+      "revenue_impact": ""
+    },
+    {
+      "element_id": "e7",
+      "platform": "YouTube",
+      "action": "MANUAL_COMPLAINT",
+      "confidence": "possible",
+      "detected_by": "HUMAN_REPORT",
+      "consequence": "No platform runs automated matching over logos or artwork inside a video, so this bites only when a person notices and files. Lower probability, higher severity: a manual complaint on YouTube can become a takedown and a strike rather than a revenue share.",
+      "remedy": "Clear it, blur it, or reframe the shot at 00:50–00:53. Route if challenged: Separate trademark complaint form, reviewed by a human; distinct from the copyright process and does not create a copyright strike.",
+      "revenue_impact": ""
+    }
+  ],
+  "defences": {
+    "e1": [
+      {
+        "territory": "US",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "Campbell v. Acuff-Rose Music, 510 U.S. 569 (1994) — parody may be fair use under §107",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Fair use (open-ended)",
+        "available": true,
+        "authority": "17 U.S.C. §107 — an open-ended four-factor standard, not a closed list",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "No statutory exception. De minimis is judge-made: Sandoval v. New Line (2d Cir. 1998) vs Ringgold v. BET (2d Cir. 1997)",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "DE",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "UrhG §51a — caricature, parody and pastiche, in force since 2021 (replacing free use under old §24)",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "UrhG §§44a-63a — an enumerated catalogue of permitted uses; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "DE",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "UrhG §57 — incidental works of minor significance alongside the actual subject",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "CPI art. L.122-5 4° — parodie, pastiche et caricature, subject to the rules of the genre",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "CPI art. L.122-5 — an exhaustive list of exceptions; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "FR",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "Théorie de l'accessoire — judge-made, narrow, and not a statutory exception",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      }
+    ],
+    "e2": [
+      {
+        "territory": "US",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "Campbell v. Acuff-Rose Music, 510 U.S. 569 (1994) — parody may be fair use under §107",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Fair use (open-ended)",
+        "available": true,
+        "authority": "17 U.S.C. §107 — an open-ended four-factor standard, not a closed list",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "No statutory exception. De minimis is judge-made: Sandoval v. New Line (2d Cir. 1998) vs Ringgold v. BET (2d Cir. 1997)",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "DE",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "UrhG §51a — caricature, parody and pastiche, in force since 2021 (replacing free use under old §24)",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "UrhG §§44a-63a — an enumerated catalogue of permitted uses; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "DE",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "UrhG §57 — incidental works of minor significance alongside the actual subject",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "CPI art. L.122-5 4° — parodie, pastiche et caricature, subject to the rules of the genre",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "CPI art. L.122-5 — an exhaustive list of exceptions; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "FR",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "Théorie de l'accessoire — judge-made, narrow, and not a statutory exception",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      }
+    ],
+    "e3": [
+      {
+        "territory": "US",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "Campbell v. Acuff-Rose Music, 510 U.S. 569 (1994) — parody may be fair use under §107",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Fair use (open-ended)",
+        "available": true,
+        "authority": "17 U.S.C. §107 — an open-ended four-factor standard, not a closed list",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "No statutory exception. De minimis is judge-made: Sandoval v. New Line (2d Cir. 1998) vs Ringgold v. BET (2d Cir. 1997)",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "DE",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "UrhG §51a — caricature, parody and pastiche, in force since 2021 (replacing free use under old §24)",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "UrhG §§44a-63a — an enumerated catalogue of permitted uses; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "DE",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "UrhG §57 — incidental works of minor significance alongside the actual subject",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "CPI art. L.122-5 4° — parodie, pastiche et caricature, subject to the rules of the genre",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "CPI art. L.122-5 — an exhaustive list of exceptions; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "FR",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "Théorie de l'accessoire — judge-made, narrow, and not a statutory exception",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      }
+    ],
+    "e4": [
+      {
+        "territory": "US",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "Campbell v. Acuff-Rose Music, 510 U.S. 569 (1994) — parody may be fair use under §107",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Fair use (open-ended)",
+        "available": true,
+        "authority": "17 U.S.C. §107 — an open-ended four-factor standard, not a closed list",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "No statutory exception. De minimis is judge-made: Sandoval v. New Line (2d Cir. 1998) vs Ringgold v. BET (2d Cir. 1997)",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "US",
+        "name": "Freedom of panorama",
+        "available": false,
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only",
+        "note": "Covers architecture only — artwork on a building is not exempt (this is what Falkner v. GM turned on)."
+      },
+      {
+        "territory": "US",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "17 U.S.C. §106A (VARA) — visual art only, attribution and integrity, waivable",
+        "note": "Attribution and integrity rights persist alongside the economic rights."
+      },
+      {
+        "territory": "DE",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "UrhG §51a — caricature, parody and pastiche, in force since 2021 (replacing free use under old §24)",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "UrhG §§44a-63a — an enumerated catalogue of permitted uses; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "DE",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "UrhG §57 — incidental works of minor significance alongside the actual subject",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Freedom of panorama",
+        "available": true,
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "UrhG §§12-14 — publication, attribution and integrity; inalienable, lasting as long as copyright",
+        "note": "Attribution and integrity rights persist alongside the economic rights."
+      },
+      {
+        "territory": "FR",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "CPI art. L.122-5 4° — parodie, pastiche et caricature, subject to the rules of the genre",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "CPI art. L.122-5 — an exhaustive list of exceptions; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "FR",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "Théorie de l'accessoire — judge-made, narrow, and not a statutory exception",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "FR",
+        "name": "Freedom of panorama",
+        "available": true,
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "CPI art. L.121-1 — droit moral is perpetual, inalienable and imprescriptible; it survives sale of the copyright",
+        "note": "Perpetual and inalienable here: the author can object to treatment of the work even after selling the copyright, and heirs can assert it without time limit."
+      }
+    ],
+    "e5": [
+      {
+        "territory": "US",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "Campbell v. Acuff-Rose Music, 510 U.S. 569 (1994) — parody may be fair use under §107",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Fair use (open-ended)",
+        "available": true,
+        "authority": "17 U.S.C. §107 — an open-ended four-factor standard, not a closed list",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "No statutory exception. De minimis is judge-made: Sandoval v. New Line (2d Cir. 1998) vs Ringgold v. BET (2d Cir. 1997)",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "US",
+        "name": "Freedom of panorama",
+        "available": false,
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only",
+        "note": "Covers architecture only — artwork on a building is not exempt (this is what Falkner v. GM turned on)."
+      },
+      {
+        "territory": "US",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "17 U.S.C. §106A (VARA) — visual art only, attribution and integrity, waivable",
+        "note": "Attribution and integrity rights persist alongside the economic rights."
+      },
+      {
+        "territory": "DE",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "UrhG §51a — caricature, parody and pastiche, in force since 2021 (replacing free use under old §24)",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "UrhG §§44a-63a — an enumerated catalogue of permitted uses; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "DE",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "UrhG §57 — incidental works of minor significance alongside the actual subject",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Freedom of panorama",
+        "available": true,
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "UrhG §§12-14 — publication, attribution and integrity; inalienable, lasting as long as copyright",
+        "note": "Attribution and integrity rights persist alongside the economic rights."
+      },
+      {
+        "territory": "FR",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "CPI art. L.122-5 4° — parodie, pastiche et caricature, subject to the rules of the genre",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "CPI art. L.122-5 — an exhaustive list of exceptions; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "FR",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "Théorie de l'accessoire — judge-made, narrow, and not a statutory exception",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "FR",
+        "name": "Freedom of panorama",
+        "available": true,
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "CPI art. L.121-1 — droit moral is perpetual, inalienable and imprescriptible; it survives sale of the copyright",
+        "note": "Perpetual and inalienable here: the author can object to treatment of the work even after selling the copyright, and heirs can assert it without time limit."
+      }
+    ],
+    "e6": [
+      {
+        "territory": "US",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "Campbell v. Acuff-Rose Music, 510 U.S. 569 (1994) — parody may be fair use under §107",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Fair use (open-ended)",
+        "available": true,
+        "authority": "17 U.S.C. §107 — an open-ended four-factor standard, not a closed list",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "No statutory exception. De minimis is judge-made: Sandoval v. New Line (2d Cir. 1998) vs Ringgold v. BET (2d Cir. 1997)",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "US",
+        "name": "Personal data / personality regime",
+        "available": false,
+        "authority": "State right of publicity (commercial appropriation); no general federal data-protection regime for video",
+        "note": "The remedy here is consent or a blur, not a licence — a different instrument from the US right of publicity."
+      },
+      {
+        "territory": "DE",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "UrhG §51a — caricature, parody and pastiche, in force since 2021 (replacing free use under old §24)",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "UrhG §§44a-63a — an enumerated catalogue of permitted uses; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "DE",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "UrhG §57 — incidental works of minor significance alongside the actual subject",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Personal data / personality regime",
+        "available": false,
+        "authority": "GDPR plus KunstUrhG §22 — publication of a person's image generally requires consent",
+        "note": "The remedy here is consent or a blur, not a licence — a different instrument from the US right of publicity."
+      },
+      {
+        "territory": "FR",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "CPI art. L.122-5 4° — parodie, pastiche et caricature, subject to the rules of the genre",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "CPI art. L.122-5 — an exhaustive list of exceptions; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "FR",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "Théorie de l'accessoire — judge-made, narrow, and not a statutory exception",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "FR",
+        "name": "Personal data / personality regime",
+        "available": false,
+        "authority": "GDPR plus droit à l'image under Code civil art. 9 — consent is generally required",
+        "note": "The remedy here is consent or a blur, not a licence — a different instrument from the US right of publicity."
+      }
+    ],
+    "e8": [
+      {
+        "territory": "US",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "Campbell v. Acuff-Rose Music, 510 U.S. 569 (1994) — parody may be fair use under §107",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Fair use (open-ended)",
+        "available": true,
+        "authority": "17 U.S.C. §107 — an open-ended four-factor standard, not a closed list",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "No statutory exception. De minimis is judge-made: Sandoval v. New Line (2d Cir. 1998) vs Ringgold v. BET (2d Cir. 1997)",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "DE",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "UrhG §51a — caricature, parody and pastiche, in force since 2021 (replacing free use under old §24)",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "UrhG §§44a-63a — an enumerated catalogue of permitted uses; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "DE",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "UrhG §57 — incidental works of minor significance alongside the actual subject",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "CPI art. L.122-5 4° — parodie, pastiche et caricature, subject to the rules of the genre",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "CPI art. L.122-5 — an exhaustive list of exceptions; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "FR",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "Théorie de l'accessoire — judge-made, narrow, and not a statutory exception",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      }
+    ],
+    "e7": [
+      {
+        "territory": "US",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "Campbell v. Acuff-Rose Music, 510 U.S. 569 (1994) — parody may be fair use under §107",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Fair use (open-ended)",
+        "available": true,
+        "authority": "17 U.S.C. §107 — an open-ended four-factor standard, not a closed list",
+        "note": ""
+      },
+      {
+        "territory": "US",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "No statutory exception. De minimis is judge-made: Sandoval v. New Line (2d Cir. 1998) vs Ringgold v. BET (2d Cir. 1997)",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "US",
+        "name": "Freedom of panorama",
+        "available": false,
+        "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only",
+        "note": "Covers architecture only — artwork on a building is not exempt (this is what Falkner v. GM turned on)."
+      },
+      {
+        "territory": "US",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "17 U.S.C. §106A (VARA) — visual art only, attribution and integrity, waivable",
+        "note": "Attribution and integrity rights persist alongside the economic rights."
+      },
+      {
+        "territory": "DE",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "UrhG §51a — caricature, parody and pastiche, in force since 2021 (replacing free use under old §24)",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "UrhG §§44a-63a — an enumerated catalogue of permitted uses; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "DE",
+        "name": "Incidental inclusion",
+        "available": true,
+        "authority": "UrhG §57 — incidental works of minor significance alongside the actual subject",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Freedom of panorama",
+        "available": true,
+        "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places",
+        "note": ""
+      },
+      {
+        "territory": "DE",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "UrhG §§12-14 — publication, attribution and integrity; inalienable, lasting as long as copyright",
+        "note": "Attribution and integrity rights persist alongside the economic rights."
+      },
+      {
+        "territory": "FR",
+        "name": "Parody / caricature",
+        "available": true,
+        "authority": "CPI art. L.122-5 4° — parodie, pastiche et caricature, subject to the rules of the genre",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Fair use (open-ended)",
+        "available": false,
+        "authority": "CPI art. L.122-5 — an exhaustive list of exceptions; no general fair use",
+        "note": "Closed list: a use that is not on the statutory list is infringing however reasonable it looks. A fair-use memo written for the US does not travel here."
+      },
+      {
+        "territory": "FR",
+        "name": "Incidental inclusion",
+        "available": false,
+        "authority": "Théorie de l'accessoire — judge-made, narrow, and not a statutory exception",
+        "note": "No statutory incidental-inclusion exception; de minimis is judge-made and fact-specific."
+      },
+      {
+        "territory": "FR",
+        "name": "Freedom of panorama",
+        "available": true,
+        "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons",
+        "note": ""
+      },
+      {
+        "territory": "FR",
+        "name": "Moral rights (a risk, not a defence)",
+        "available": false,
+        "authority": "CPI art. L.121-1 — droit moral is perpetual, inalienable and imprescriptible; it survives sale of the copyright",
+        "note": "Perpetual and inalienable here: the author can object to treatment of the work even after selling the copyright, and heirs can assert it without time limit."
+      }
+    ]
+  },
+  "exposures": [
+    {
+      "id": "x1",
+      "kind": "PERSONAL_DATA",
+      "description": "Addressed delivery label on a parcel by the kitchen table; the street address is legible for about three seconds.",
+      "time_ranges": [
+        {
+          "start_s": 18.0,
+          "end_s": 21.0
+        }
+      ],
+      "bbox": null
+    }
+  ],
+  "assessed_exposures": [
+    {
+      "id": "x1",
+      "kind": "PERSONAL_DATA",
+      "description": "Addressed delivery label on a parcel by the kitchen table; the street address is legible for about three seconds.",
+      "time_ranges": [
+        {
+          "start_s": 18.0,
+          "end_s": 21.0
+        }
+      ],
+      "bbox": null,
+      "territory": "DE",
+      "regime": "GDPR plus KunstUrhG §22 — publication of a person's image generally requires consent",
+      "score": 88,
+      "band": "CRITICAL",
+      "rationale": "Directly identifying information — an address, phone number, email or account number — readable on screen. Governing regime: GDPR plus KunstUrhG §22 — publication of a person's image generally requires consent",
+      "remedy": "Blur or crop at 00:18–00:21 before publishing."
+    }
+  ],
+  "preview": [
+    {
+      "element_id": "e1",
+      "label": "Blinding Lights — The Weeknd",
+      "category": "MUSIC_SYNC",
+      "time_ranges": [
+        {
+          "start_s": 12.0,
+          "end_s": 24.0
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 70,
+      "provisional_band": "CRITICAL",
+      "identity": "FINGERPRINTED",
+      "depiction": null,
+      "territory": [
+        {
+          "element_id": "e1",
+          "territory": "US",
+          "band": "CRITICAL",
+          "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; United States tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "e1",
+          "territory": "DE",
+          "band": "CRITICAL",
+          "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; Germany tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "e1",
+          "territory": "FR",
+          "band": "CRITICAL",
+          "rationale": "MUSIC_SYNC exposure does not vary by panorama rule; France tracks the baseline band.",
+          "authority": ""
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "Clear BOTH the synchronisation licence from the publisher and the master-use licence from the label. One without the other is the most common music clearance failure.",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "e3",
+      "label": "Nike hoodie swoosh",
+      "category": "TRADEMARK",
+      "time_ranges": [
+        {
+          "start_s": 8.0,
+          "end_s": 18.0
+        },
+        {
+          "start_s": 40.0,
+          "end_s": 45.0
+        }
+      ],
+      "bbox": {
+        "ymin": 0.34,
+        "xmin": 0.3,
+        "ymax": 0.52,
+        "xmax": 0.46
+      },
+      "at_s": 10.0,
+      "provisional_score": 65,
+      "provisional_band": "HIGH",
+      "identity": "CORROBORATED",
+      "depiction": "NEUTRAL",
+      "territory": [
+        {
+          "element_id": "e3",
+          "territory": "US",
+          "band": "HIGH",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; United States tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "e3",
+          "territory": "DE",
+          "band": "HIGH",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; Germany tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "e3",
+          "territory": "FR",
+          "band": "HIGH",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; France tracks the baseline band.",
+          "authority": ""
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "Confirm posture, then approach Nike, Inc. if depiction is unflattering.",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "e5",
+      "label": "Street mural (unknown artist)",
+      "category": "COPYRIGHT_ART",
+      "time_ranges": [
+        {
+          "start_s": 30.0,
+          "end_s": 36.0
+        }
+      ],
+      "bbox": {
+        "ymin": 0.05,
+        "xmin": 0.02,
+        "ymax": 0.92,
+        "xmax": 0.78
+      },
+      "at_s": 33.0,
+      "provisional_score": 54,
+      "provisional_band": "HIGH",
+      "identity": "SINGLE_SOURCE",
+      "depiction": null,
+      "territory": [
+        {
+          "element_id": "e5",
+          "territory": "US",
+          "band": "HIGH",
+          "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "e5",
+          "territory": "DE",
+          "band": "MEDIUM",
+          "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "e5",
+          "territory": "FR",
+          "band": "CRITICAL",
+          "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "e4",
+      "label": "Arctic Monkeys tour poster",
+      "category": "COPYRIGHT_ART",
+      "time_ranges": [
+        {
+          "start_s": 20.0,
+          "end_s": 25.0
+        }
+      ],
+      "bbox": {
+        "ymin": 0.12,
+        "xmin": 0.55,
+        "ymax": 0.48,
+        "xmax": 0.86
+      },
+      "at_s": 22.0,
+      "provisional_score": 48,
+      "provisional_band": "HIGH",
+      "identity": "SINGLE_SOURCE",
+      "depiction": null,
+      "territory": [
+        {
+          "element_id": "e4",
+          "territory": "US",
+          "band": "HIGH",
+          "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "e4",
+          "territory": "DE",
+          "band": "MEDIUM",
+          "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "e4",
+          "territory": "FR",
+          "band": "CRITICAL",
+          "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "e2",
+      "label": "Coca-Cola can",
+      "category": "TRADEMARK",
+      "time_ranges": [
+        {
+          "start_s": 5.0,
+          "end_s": 11.0
+        }
+      ],
+      "bbox": {
+        "ymin": 0.52,
+        "xmin": 0.41,
+        "ymax": 0.79,
+        "xmax": 0.55
+      },
+      "at_s": 6.0,
+      "provisional_score": 43,
+      "provisional_band": "MEDIUM",
+      "identity": "CORROBORATED",
+      "depiction": "NEUTRAL",
+      "territory": [
+        {
+          "element_id": "e2",
+          "territory": "US",
+          "band": "MEDIUM",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; United States tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "e2",
+          "territory": "DE",
+          "band": "MEDIUM",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; Germany tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "e2",
+          "territory": "FR",
+          "band": "MEDIUM",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; France tracks the baseline band.",
+          "authority": ""
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "Confirm posture, then approach The Coca-Cola Company if depiction is unflattering.",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "e8",
+      "label": "Adidas three-stripe duffel bag",
+      "category": "TRADEMARK",
+      "time_ranges": [
+        {
+          "start_s": 26.0,
+          "end_s": 30.0
+        }
+      ],
+      "bbox": {
+        "ymin": 0.61,
+        "xmin": 0.58,
+        "ymax": 0.8,
+        "xmax": 0.72
+      },
+      "at_s": 27.0,
+      "provisional_score": 30,
+      "provisional_band": "MEDIUM",
+      "identity": "CONFLICTED",
+      "depiction": "NEUTRAL",
+      "territory": [
+        {
+          "element_id": "e8",
+          "territory": "US",
+          "band": "MEDIUM",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; United States tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "e8",
+          "territory": "DE",
+          "band": "MEDIUM",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; Germany tracks the baseline band.",
+          "authority": ""
+        },
+        {
+          "element_id": "e8",
+          "territory": "FR",
+          "band": "MEDIUM",
+          "rationale": "TRADEMARK exposure does not vary by panorama rule; France tracks the baseline band.",
+          "authority": ""
+        }
+      ],
+      "route_tier": "BLOCKED",
+      "disposition": "A human resolves identity before any research runs.",
+      "awaiting_research": false
+    },
+    {
+      "element_id": "e7",
+      "label": "News broadcast on background TV",
+      "category": "COPYRIGHT_ART",
+      "time_ranges": [
+        {
+          "start_s": 50.0,
+          "end_s": 53.0
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 25,
+      "provisional_band": "MEDIUM",
+      "identity": "SINGLE_SOURCE",
+      "depiction": null,
+      "territory": [
+        {
+          "element_id": "e7",
+          "territory": "US",
+          "band": "MEDIUM",
+          "rationale": "United States extends panorama freedom to architecture only; a pictorial or sculptural work in frame stays exposed at the baseline band.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "e7",
+          "territory": "DE",
+          "band": "LOW",
+          "rationale": "Germany recognises freedom of panorama for works permanently sited in public. Risk steps down IF this work is permanently installed and filmed from a place accessible to the public — confirm both before relying on it.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "e7",
+          "territory": "FR",
+          "band": "HIGH",
+          "rationale": "France limits its panorama exception to non-commercial use, so commercial distribution is not covered. Risk steps up.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        }
+      ],
+      "route_tier": "DEEP",
+      "disposition": "",
+      "awaiting_research": true
+    },
+    {
+      "element_id": "e6",
+      "label": "Background passerby face",
+      "category": "RIGHT_OF_PUBLICITY",
+      "time_ranges": [
+        {
+          "start_s": 47.0,
+          "end_s": 48.2
+        }
+      ],
+      "bbox": null,
+      "at_s": null,
+      "provisional_score": 12,
+      "provisional_band": "LOW",
+      "identity": "SINGLE_SOURCE",
+      "depiction": "NEUTRAL",
+      "territory": [
+        {
+          "element_id": "e6",
+          "territory": "US",
+          "band": "MEDIUM",
+          "rationale": "United States enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "17 U.S.C. §120(a) — pictorial representation exemption covers architectural works only"
+        },
+        {
+          "element_id": "e6",
+          "territory": "DE",
+          "band": "MEDIUM",
+          "rationale": "Germany enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "UrhG §59 (Panoramafreiheit) — works permanently in public ways or open places"
+        },
+        {
+          "element_id": "e6",
+          "territory": "FR",
+          "band": "MEDIUM",
+          "rationale": "France enforces strong personality/image rights, so an identifiable person in frame carries elevated exposure without a signed release.",
+          "authority": "CPI art. L.122-5 11° — panorama exception limited to non-commercial use by natural persons"
+        }
+      ],
+      "route_tier": "STATUTE",
+      "disposition": "A signed personal release is MANDATORY before this can run commercially. Blur otherwise — a crowd notice does not cover advertising use.",
+      "awaiting_research": false
+    }
+  ],
+  "detector_hits": [
+    {
+      "label": "Coca-Cola",
+      "confidence": 0.8843,
+      "start_s": 5.0,
+      "end_s": 11.0,
+      "bbox": {
+        "ymin": 0.52,
+        "xmin": 0.41,
+        "ymax": 0.79,
+        "xmax": 0.55
+      }
+    },
+    {
+      "label": "Nike",
+      "confidence": 0.9312,
+      "start_s": 8.0,
+      "end_s": 18.0,
+      "bbox": {
+        "ymin": 0.34,
+        "xmin": 0.3,
+        "ymax": 0.52,
+        "xmax": 0.46
+      }
+    },
+    {
+      "label": "Kappa",
+      "confidence": 0.7106,
+      "start_s": 26.0,
+      "end_s": 30.0,
+      "bbox": {
+        "ymin": 0.61,
+        "xmin": 0.58,
+        "ymax": 0.8,
+        "xmax": 0.72
+      }
+    }
+  ]
+}
