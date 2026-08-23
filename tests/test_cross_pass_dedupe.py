@@ -248,3 +248,47 @@ def test_colocation_still_rescues_a_label_that_nearly_matched():
         boxed("Stu's Face Tattoo", ElementType.TATTOO, [_STU]),
     ])
     assert len(out) == 1
+
+
+# --- a label has to be true of everything it is attached to
+
+def test_one_mark_on_three_objects_keeps_the_label_they_share():
+    """Pizza Hut, on a scooter, a cap and a pizza box, in one Code Geass clip.
+
+    All three are one trademark clearance, so merging them is right. Taking
+    the LONGEST label is not: the group came out called "Pizza Hut Delivery
+    Scooter", and at 4s that label sat on a box drawn round the delivery man's
+    hat. A reviewer reads it as the tool losing track of the scooter.
+
+    The longest label was chosen for a different case — two passes phrasing ONE
+    object, where "Stu's Face Tattoo" knows more than "Face Tattoo". When a
+    group holds several objects bearing one mark, the only label true of all of
+    them is the one they share.
+    """
+    out = triage([
+        det("Pizza Hut", ElementType.LOGO),
+        det("Pizza Hut Delivery Scooter", ElementType.LOGO),
+        det("Pizza Hut logo on hat", ElementType.LOGO),
+        det("Pizza Hut Box", ElementType.LOGO),
+    ])
+    assert len(out) == 1
+    assert out[0].label == "Pizza Hut"
+
+
+def test_the_general_label_wins_even_when_it_arrives_last():
+    out = triage([
+        det("Pizza Hut Delivery Scooter", ElementType.LOGO),
+        det("Pizza Hut", ElementType.LOGO),
+    ])
+    assert out[0].label == "Pizza Hut"
+
+
+def test_two_phrasings_of_one_object_still_keep_what_they_know():
+    """No label here contains the other, so the fuller one still wins."""
+    out = triage([
+        det("Stu's Face Tattoo", description="replicating Mike Tyson's tattoo"),
+        det("Tribal Face Tattoo", description="a tribal tattoo"),
+    ])
+    assert len(out) == 1
+    assert out[0].label in {"Stu's Face Tattoo", "Tribal Face Tattoo"}
+    assert "replicating" in out[0].description

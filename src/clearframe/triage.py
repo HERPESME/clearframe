@@ -1,6 +1,6 @@
 """Rule-based clearance triage and cross-shot duplicate merging."""
 
-from clearframe.matching import labels_match
+from clearframe.matching import labels_match, tokens
 from clearframe.overlay import locates
 from clearframe.models import (
     BBox,
@@ -174,6 +174,42 @@ def _screen_time(group: list[DetectedElement], ranges: list[TimeRange]) -> float
     return measured or max(d.prominence.screen_time_s for d in group)
 
 
+def _shared_label(group: list[DetectedElement]) -> str:
+    """The label that is true of every member, or the fullest if none is.
+
+    Two rules pulling opposite ways, and both are right for their own case.
+
+    Two passes describing ONE object: "Stu's Face Tattoo" knows something
+    "Face Tattoo" does not, so the fuller label wins. That is what this used
+    to do unconditionally.
+
+    One MARK on several objects: a live Code Geass clip put Pizza Hut on a
+    delivery scooter, on the delivery man's cap and on the pizza box. Merging
+    them is right — it is one trademark and one clearance — but the longest
+    label won, so the group was called "Pizza Hut Delivery Scooter" and at 4s
+    that label sat on a rectangle round the man's hat. It reads as the tool
+    losing track of the scooter.
+
+    A label whose tokens are contained in every other member's is true of all
+    of them; "Pizza Hut" is, and "Pizza Hut Delivery Scooter" is not. Where no
+    such label exists, nothing has been generalised and the fullest still wins.
+    """
+    labels = [d.label for d in group if d.label]
+    if not labels:
+        return group[0].label
+    sets = [(label, tokens(label)) for label in labels]
+    general = [
+        label
+        for label, own in sets
+        if own and all(own <= other for _, other in sets if other)
+    ]
+    if general:
+        # Shortest among equals: the same mark spelled two ways generalises to
+        # the plainer spelling rather than an arbitrary one.
+        return min(general, key=len)
+    return max(labels, key=len)
+
+
 def _merge(group: list[DetectedElement]) -> DetectedElement:
     # Keep the id and position of the first sighting, but take the fullest
     # label and description in the group: routing reads the description, and a
@@ -181,7 +217,7 @@ def _merge(group: list[DetectedElement]) -> DetectedElement:
     # the pass that wrote "a tribal tattoo" does not.
     first = group[0]
     richest = max(group, key=lambda d: len(d.description or ""))
-    longest_label = max(group, key=lambda d: len(d.label or ""))
+    label = _shared_label(group)
     # A pass whose timecodes failed the physical test contributes none of them.
     # Unioning them in produced a range set spanning both units at once, and
     # the stickiness rule below then disowned the whole finding — so a sighting
@@ -199,7 +235,7 @@ def _merge(group: list[DetectedElement]) -> DetectedElement:
     # pass was added. The demo mural lost its siting and Germany stopped
     # applying freedom of panorama to the one element written for it.
     richer = {
-        "label": longest_label.label,
+        "label": label,
         "description": richest.description,
         # A brand read as lettering is still the brand. TEXT is the fallback
         # type, so it never decides the category of a group that contains a
