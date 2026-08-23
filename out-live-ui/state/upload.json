@@ -33,7 +33,9 @@
     "risk": "complete",
     "territory": "complete",
     "coverage": "complete",
-    "remediation": "complete"
+    "remediation": "complete",
+    "court": "complete",
+    "review": "awaiting"
   },
   "detections": [
     {
@@ -996,7 +998,144 @@
   "decisions": {},
   "unscanned_ranges": [],
   "audit_log": [],
-  "court": {},
+  "court": {
+    "2": {
+      "element_id": "2",
+      "holding": "clear_required",
+      "confidence": "high",
+      "reasoning": "While the Advocate presents a plausible fair use defense, the practical risks are too significant. The core issue is the intentional, recognizable reference to 'The Hangover Part II'. This qualitative significance undermines the 'de minimis' defense, as argued by Counsel citing Ringgold. More importantly, the use creates substantial risk under the fourth fair use factor: market harm. Counsel's argument that this use usurps the valuable licensing market that Warner Bros. controls is highly persuasive from a practical standpoint. Warner Bros. has a strong incentive and the resources to protect its IP. The cost of defending a copyright infringement lawsuit, even if ultimately successful, would far exceed the cost of a fix. The most cost-effective and risk-averse solution is to digitally alter the ring to be generic, thereby eliminating the legal threat entirely. The potential cost of litigation or a forced license fee makes this a clear requirement for clearance.",
+      "briefs": [
+        {
+          "side": "counsel",
+          "argument": "The unlicensed appearance of 'Phil's Ring' constitutes a significant copyright infringement risk that must be addressed. Although the element's screen time is brief (4.9 seconds), a 'de minimis use' defense is unlikely to prevail. Courts assess not only the quantitative amount of the use but also its qualitative significance. Here, the ring is not an incidental background prop; it is part of a larger collection of elements—including specific actors, character appearances, and plot points—that deliberately and recognizably evoke the Warner Bros. film 'The Hangover Part II'. This contextual use enhances the ring's recognizability and expressive impact, making it qualitatively significant. Precedent set in Ringgold v. Black Entertainment Television, Inc. shows that even brief, background uses of copyrighted art can be infringing if the work is recognizable. Furthermore, a fair use defense under 17 U.S.C. § 107 would likely fail. The use is not transformative; it merely replicates an element from the original work for a commercial purpose. It copies from a highly creative, fictional work, weighing against fair use. Most critically, this use directly harms the potential market for the copyrighted work. By appropriating iconic elements from 'The Hangover Part II', our production usurps the valuable licensing market that Warner Bros. is exclusively entitled to exploit under 17 U.S.C. § 106. Given the weak defenses and the clear identification of the copyrighted material and its owner, the risk of a costly infringement claim is high. We must either secure a license from Warner Bros., digitally alter the ring to be unrecognizable, or remove the shot entirely.",
+          "precedents": [
+            {
+              "case_name": "Ringgold v. Black Entertainment Television, Inc.",
+              "citation": "126 F.3d 70 (2d Cir. 1997)",
+              "holding": "The Second Circuit held that the background use of a copyrighted poster in a television sitcom for a total of 26.75 seconds was not de minimis use because the poster was clearly visible and recognizable, even if not in focus for the entire duration.",
+              "relevance": "This case defeats the argument that 4.9 seconds of screen time is automatically non-infringing. The key factor is recognizability, not duration. As 'Phil's Ring' is used in a context that intentionally references 'The Hangover Part II', its qualitative significance and recognizability are high, making the use more than de minimis and therefore actionable.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Sandoval v. New Line Cinema Corp.",
+              "citation": "147 F.3d 215 (2d Cir. 1998)",
+              "holding": "The court found the use of copyrighted photographs in the background of the film 'Seven' to be de minimis because they were fleeting, indistinct, out of focus, and not recognizable to the viewer.",
+              "relevance": "This case establishes the standard for a successful de minimis defense: a lack of observability. Our use of 'Phil's Ring' is distinguishable. The research notes the ring was identified, and its placement alongside other 'Hangover' elements makes it contextually observable, unlike the photos in 'Sandoval'. This precedent helps define why our use likely crosses the threshold into infringement.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Warner Bros. Entm't, Inc. v. RDR Books",
+              "citation": "575 F. Supp. 2d 513 (S.D.N.Y. 2008)",
+              "holding": "The court found that an unauthorized encyclopedia of the Harry Potter series was an infringement and not fair use. It determined that the work usurped the copyright holder's market for derivative works by extensively drawing upon the original's creative expression.",
+              "relevance": "This case is relevant to the fair use factor concerning market harm. The use of 'Phil's Ring', combined with other identifiable elements from 'The Hangover Part II', could be viewed as creating an unauthorized derivative work. This cumulative use harms the market Warner Bros. controls for licensing its film properties, strengthening the case for infringement.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        },
+        {
+          "side": "advocate",
+          "argument": "The use of 'Phil's Ring' constitutes a non-infringing de minimis use, or alternatively, a clear case of fair use. The defense is very strong. First, the use is legally trivial (de minimis). The ring appears for only 4.9 seconds, is not a focal point of any shot, and is not integral to the plot. Such a fleeting and inconsequential appearance of a copyrighted work, particularly one that is part of a character's costume, falls below the quantitative threshold for copyright infringement. Courts have consistently held that brief, out-of-focus, or background appearances of copyrighted works do not give rise to a claim. Second, even if the use were not de minimis, it is protected by the fair use doctrine. (1) The purpose and character of the use is transformative. The ring is not used for its intrinsic aesthetic value, but as a symbolic reference to the film 'The Hangover Part II' as part of a larger commentary, parody, or homage. This creates a new work with a new expressive purpose. (2) While the nature of the copyrighted work is creative (a feature film), weighing against fair use, this factor is far outweighed by the others. (3) The amount and substantiality of the portion used is minuscule. A 4.9-second glimpse of a prop from a 102-minute film is quantitatively and qualitatively insignificant. (4) The use has no negative effect on the market for or value of 'The Hangover Part II.' Our production does not serve as a market substitute for the original film or its merchandise; if anything, it may renew interest in the original. The combination of a de minimis appearance and a strong transformative use argument creates a very low risk of a successful infringement claim.",
+          "precedents": [
+            {
+              "case_name": "Sandoval v. New Line Cinema Corp.",
+              "citation": "147 F.3d 215 (2d Cir. 1998)",
+              "holding": "The court held that the brief, obscured, and out-of-focus inclusion of copyrighted photographs in the background of a scene in the film 'Seven' was a de minimis use and therefore not actionable as copyright infringement.",
+              "relevance": "This case directly supports the argument that a very brief and non-prominent use of a copyrighted work (4.9 seconds, 0% coverage) is legally insignificant and does not rise to the level of infringement. The use of 'Phil's Ring' is analogous to the photographs in 'Seven' in its fleeting and background nature.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Campbell v. Acuff-Rose Music, Inc.",
+              "citation": "510 U.S. 569 (1994)",
+              "holding": "The Supreme Court ruled that a commercial parody can qualify as a transformative fair use, establishing that the key inquiry is whether the new work adds something new, with a further purpose or different character, altering the first with new expression, meaning, or message.",
+              "relevance": "This is the foundational case for transformative use. Our use of the ring is not to supplant the original, but to reference 'The Hangover Part II' for the purpose of commentary or parody. 'Campbell' confirms that such a transformative purpose is the 'heart of the fair use inquiry' and weighs heavily in our favor.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Bill Graham Archives v. Dorling Kindersley Ltd.",
+              "citation": "448 F.3d 605 (2d Cir. 2006)",
+              "holding": "The Second Circuit found that the reproduction of Grateful Dead concert posters in a biographical book was a transformative fair use. The court reasoned that the posters were used as 'historical artifacts' to illustrate the timeline, a purpose different from their original promotional intent.",
+              "relevance": "This case demonstrates that recontextualizing a copyrighted work for a referential purpose is transformative. We are using 'Phil's Ring' not as a piece of jewelry, but as a symbolic artifact to refer to 'The Hangover Part II'. This is a different purpose from its original use within that film, making our use transformative under the 'Bill Graham' standard.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        }
+      ]
+    },
+    "3": {
+      "element_id": "3",
+      "holding": "defensible",
+      "confidence": "high",
+      "reasoning": "The use of the wristwatch is legally defensible. The advocate's argument prevails, primarily on the grounds that the use is de minimis. The precedent set in Gottlieb Dev. LLC v. Paramount Pictures Corp. is directly applicable; a fleeting (8.8 seconds), non-prominent (1% screen coverage) background use of a trademark is legally trivial and highly unlikely to create the consumer confusion required for an infringement claim. Furthermore, the use satisfies the two-prong test from Rogers v. Grimaldi. It has artistic relevance as a realistic component of a character's costume, and the use is not explicitly misleading, as courts have recognized that audiences do not assume every prop constitutes a brand endorsement (Louis Vuitton Malletier S.A. v. Warner Bros.). While counsel correctly notes that an unidentifiable rights holder makes licensing impossible and introduces an unknown risk, the legal strength of the defense is exceptionally high. The practical choice is to weigh a definite, albeit 'minimal', VFX cost against a remote and speculative litigation risk. Given the strength of the de minimis and First Amendment defenses, the legal exposure is low, making the expenditure on alteration an unnecessary cost. The use is defensible as is.",
+      "briefs": [
+        {
+          "side": "counsel",
+          "argument": "The on-screen use of the trademarked 'Wristwatch' presents an unacceptable legal risk and must be addressed. Despite the relatively short screen time of 8.8 seconds, the use is prominent enough for a brand to be identified. Because the watch is not integral to the plot, our use is not defensible as artistically necessary under the standard established in Rogers v. Grimaldi. A plaintiff could argue that because any generic watch would have sufficed, our choice to display a specific, protected trademark creates a misleading impression of sponsorship or affiliation, which is the basis for a trademark infringement claim under the Lanham Act (15 U.S.C. § 1114). Furthermore, the fact that the rights holder could not be identified exacerbates the risk; it makes securing a license impossible and creates an unknown potential plaintiff who could surface post-release and seek an injunction or damages. The cost of digital alteration or removal at this stage is minimal compared to the potential costs of litigation. To mitigate this clear and present risk, the element must be altered or removed.",
+          "precedents": [
+            {
+              "case_name": "Rogers v. Grimaldi",
+              "citation": "875 F.2d 994 (2d Cir. 1989)",
+              "holding": "The use of a trademark in an artistic work is permissible unless the use has (1) no artistic relevance to the underlying work, or (2) if it has some artistic relevance, it explicitly misleads as to the source or content of the work.",
+              "relevance": "This case establishes the primary legal test for use of trademarks in film. Our use of the wristwatch is weak on both prongs. Because it is not plot-integral, its 'artistic relevance' is low and difficult to defend. A court could find that 8.8 seconds of screen time on a non-essential item is 'explicitly misleading' as to a commercial sponsorship.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Louis Vuitton Malletier S.A. v. Warner Bros. Entertainment Inc.",
+              "citation": "868 F. Supp. 2d 172 (S.D.N.Y. 2012)",
+              "holding": "The use of a knock-off Louis Vuitton bag in 'The Hangover Part II' was not infringing because the bag was integral to a joke and developing a character's personality, thus satisfying the 'artistic relevance' test.",
+              "relevance": "This case highlights the importance of artistic necessity. Unlike the bag in 'The Hangover', our wristwatch serves no specific character or plot function. Our use is merely decorative, which makes our case legally distinguishable and riskier than the defensible use by Warner Bros.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Caterpillar Inc. v. Walt Disney Co.",
+              "citation": "287 F. Supp. 2d 913 (C.D. Ill. 2003)",
+              "holding": "The use of Caterpillar's bulldozers by villains in 'George of the Jungle 2' was not trademark infringement because viewers would not believe Caterpillar sponsored the film or its environmentally destructive themes.",
+              "relevance": "This case involved a 'tarnishing' claim where the brand was used in a negative context. Our use is neutral but implies a positive affiliation, which can be a stronger basis for a consumer confusion claim. A viewer is more likely to believe a watch company sponsored a character than a bulldozer company sponsored a villain, making our use riskier from a traditional infringement perspective.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        },
+        {
+          "side": "advocate",
+          "argument": "The use of the unidentified wristwatch is legally defensible, primarily on the grounds that it is a de minimis and incidental use that does not trigger trademark liability. The watch appears for only 8.8 seconds with a mere 1% screen coverage and is not integral to the plot. Such a fleeting and indistinct appearance is legally trivial and fails to create a likelihood of consumer confusion as to the source, sponsorship, or affiliation of the production, which is the cornerstone of any trademark infringement claim. Courts have consistently held that the mere background presence of a branded item in a film scene is not actionable. Additionally, the use is protected under the First Amendment as applied through the Rogers v. Grimaldi test for expressive works. The watch's inclusion has artistic relevance as a component of a character's costume, contributing to realism and character development. The use is in no way explicitly misleading; the production does not suggest that the watch manufacturer endorsed or was involved with the film. Audiences understand that not all props appearing in a film are sponsored products. While any unlicensed use carries a theoretical risk, the defense here is exceptionally strong due to the trivial nature of the use. The inability to identify the rights holder for licensing further underscores the good-faith effort and the practical necessity of relying on these legal defenses.",
+          "precedents": [
+            {
+              "case_name": "Gottlieb Dev. LLC v. Paramount Pictures Corp.",
+              "citation": "590 F. Supp. 2d 625 (S.D.N.Y. 2008)",
+              "holding": "The court dismissed a trademark infringement claim, ruling that the fleeting, indistinct, and background appearance of a branded pinball machine in a movie scene was a de minimis use that could not plausibly create consumer confusion.",
+              "relevance": "This case is directly analogous. It establishes that a brief, non-prominent appearance of a trademarked product in the background of a film set is legally insignificant (de minimis) and does not constitute trademark infringement. The wristwatch's 8.8-second appearance and low screen coverage fall squarely within this precedent.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Louis Vuitton Malletier S.A. v. Warner Bros. Entm't Inc.",
+              "citation": "868 F. Supp. 2d 172 (S.D.N.Y. 2012)",
+              "holding": "The use of a Louis Vuitton-like bag in 'The Hangover: Part II' was not trademark infringement. The court applied the Rogers test, finding the use was artistically relevant and not explicitly misleading, and noted that such uses are unlikely to cause confusion as audiences do not expect every prop to be an endorsement.",
+              "relevance": "This precedent confirms that the Rogers test applies to branded props within a film. It supports our argument that using the watch as part of a character's costume is artistically relevant and is not misleading as to sponsorship, as the court recognized audiences are sophisticated enough to understand the difference between a prop and a product placement.",
+              "quote": "",
+              "source_url": ""
+            },
+            {
+              "case_name": "Rogers v. Grimaldi",
+              "citation": "875 F.2d 994 (2d Cir. 1989)",
+              "holding": "The use of a celebrity's name in the title of an artistic work is permissible as long as the use has some artistic relevance and does not explicitly mislead consumers as to the source or content of the work.",
+              "relevance": "This seminal case established the legal framework for protecting First Amendment interests in expressive works against trademark claims. While originally about a film title, its two-part test (artistic relevance and not explicitly misleading) has been broadly applied to the use of trademarks within the body of creative works, including films, providing a strong secondary defense for the wristwatch's appearance.",
+              "quote": "",
+              "source_url": ""
+            }
+          ]
+        }
+      ]
+    }
+  },
   "research_plan": {
     "3": {
       "element_id": "3",

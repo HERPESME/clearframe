@@ -378,6 +378,7 @@ export default function App() {
         <VideoPlayer
           ref={videoRef}
           pid={production.id}
+          mediaVersion={production.media_version ?? ""}
           elements={elements}
           risk={risk}
           corroboration={corroboration ?? {}}

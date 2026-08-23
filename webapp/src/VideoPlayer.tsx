@@ -4,6 +4,14 @@ import { tc } from "./timecode";
 
 interface Props {
   pid: string;
+  /**
+   * Changes whenever the stored footage changes.
+   *
+   * Every upload lands at the same production id, so this src is otherwise
+   * byte-identical between two different films and the browser replays the one
+   * it already has — the previous clip's frames under the new clip's boxes.
+   */
+  mediaVersion: string;
   elements: Element[];
   risk: Record<string, Risk>;
   corroboration: Record<string, Corroboration>;
@@ -22,7 +30,7 @@ interface Props {
  * what it is, whether two detectors agreed, and whether it is already licensed.
  */
 export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPlayer(
-  { pid, elements, risk, corroboration, coverage, fps, activeId, onPick },
+  { pid, mediaVersion, elements, risk, corroboration, coverage, fps, activeId, onPick },
   ref,
 ) {
   const [now, setNow] = useState(0);
@@ -32,7 +40,7 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
 
   useEffect(() => {
     setOk(true);
-  }, [pid]);
+  }, [pid, mediaVersion]);
 
   if (!ok) return null;
 
@@ -96,7 +104,7 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
             if (typeof ref === "function") ref(node);
             else if (ref) (ref as React.MutableRefObject<HTMLVideoElement | null>).current = node;
           }}
-          src={`/api/productions/${pid}/media`}
+          src={`/api/productions/${pid}/media?v=${encodeURIComponent(mediaVersion)}`}
           controls
           preload="metadata"
           onTimeUpdate={onFrame}
