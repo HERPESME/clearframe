@@ -86,3 +86,36 @@ def test_a_publicly_sited_work_in_france_still_steps_up():
     fr = assess(MURAL(), RiskBand.MEDIUM, "FR")
     assert fr.band is RiskBand.HIGH
     assert "non-commercial" in fr.rationale
+
+
+# --- Italy has no panorama exception at all ----------------------------------
+#
+# The module documents four values for `panorama` — broad, buildings_only,
+# narrow, none — and assess() branched on two. Italy's "none" fell through to
+# the buildings_only text and was told that Italy "extends panorama freedom to
+# architecture only", which is the opposite of true: Italy grants no panorama
+# exception whatsoever and additionally requires Ministry authorisation to
+# publish images of cultural property.
+#
+# The distinction was written down in a comment at the top of the file and
+# never reached the code — the same failure as the siting condition below it.
+
+
+def test_italy_grants_no_panorama_exception():
+    it = assess(MURAL(), RiskBand.MEDIUM, "IT")
+    assert it.band is RiskBand.HIGH                      # steps UP, not baseline
+    assert "no" in it.rationale.lower()
+    assert "architecture only" not in it.rationale
+
+
+def test_italy_warns_about_cultural_property():
+    """A mural on a listed building needs Ministry authorisation, not a licence."""
+    it = assess(MURAL(), RiskBand.MEDIUM, "IT")
+    assert "authorisation" in it.rationale.lower()
+
+
+def test_buildings_only_still_reads_as_buildings_only():
+    """The US branch must not be collateral damage."""
+    us = assess(MURAL(), RiskBand.MEDIUM, "US")
+    assert us.band is RiskBand.MEDIUM
+    assert "architecture only" in us.rationale

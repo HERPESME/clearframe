@@ -366,6 +366,21 @@ def assess(
                 ),
                 authority=rule["authority"],
             )
+        if panorama == "none":
+            return TerritoryRisk(
+                element_id=element.id,
+                territory=territory,
+                band=_shift(base_band, 1),
+                rationale=(
+                    f"{rule['name']} grants no freedom-of-panorama exception at all, "
+                    "so filming a work permanently sited in public is not excused by "
+                    "its being in public. Publishing images of cultural property "
+                    "additionally requires Ministry authorisation, which is an "
+                    "administrative permission and not a copyright licence — holding "
+                    "one does not give you the other. Risk steps up."
+                ),
+                authority=rule["authority"],
+            )
         if panorama == "narrow":
             return TerritoryRisk(
                 element_id=element.id,
