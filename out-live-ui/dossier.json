@@ -9,7 +9,10 @@
     "release_territories": [
       "US",
       "DE",
-      "FR"
+      "FR",
+      "JP",
+      "IT",
+      "IN"
     ],
     "use_context": "EXPRESSIVE",
     "sponsors": [],
@@ -21,7 +24,7 @@
     "has_media": true,
     "media_version": ""
   },
-  "generated_at": "2026-08-23T09:31:55.355164+00:00",
+  "generated_at": "2026-08-23T11:41:28.875009+00:00",
   "entries": [],
   "summary": {
     "LOW": 0,
