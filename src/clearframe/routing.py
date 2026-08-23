@@ -275,11 +275,19 @@ def _all_tokens(label: str, vocab: set[str]) -> bool:
 # The scan describing an element as a reproduction of another work. Whitmill
 # turns on exactly this: replicating a tattoo onto a different person is
 # materially riskier than filming the person who wears it.
-_REPLICA = {
-    "replica", "replicated", "reproduction", "recreation", "recreated",
-    "copy", "copied", "imitation", "knockoff", "duplicate",
-    "modelled", "modeled", "based",
-}
+#
+# Stems, not whole words. The live scan wrote "replicating" while the set held
+# "replicated", so the check missed the exact fact pattern that lawsuit was
+# about, in the exact clip it was about. English inflects; a list of literals
+# does not.
+_REPLICA_STEMS = (
+    "replic", "reproduc", "recreat", "copie", "copy",
+    "imitat", "duplicat", "mimic", "knockoff", "knock-off",
+)
+
+
+def _describes_a_reproduction(text: str) -> bool:
+    return any(t.startswith(_REPLICA_STEMS) for t in _meaningful(text))
 
 
 def is_de_minimis(p: Prominence) -> bool:
@@ -454,7 +462,7 @@ def _tattoo_route(el: TriagedElement, kb: KnowledgeBase) -> ResearchRoute:
     """
     cases = kb.cases_for(ClearanceCategory.COPYRIGHT_ART.value)
     named = {c.name.split(" v. ")[0]: c for c in cases}
-    replica = _any_token(el.description, _REPLICA)
+    replica = _describes_a_reproduction(el.description)
 
     if replica:
         whitmill = named.get("Whitmill")
