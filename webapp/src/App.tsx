@@ -218,6 +218,7 @@ export default function App() {
     court,
     research_plan,
     routes,
+    liability,
     sponsor_conflicts,
     assessed_exposures,
     platform_outcomes,
@@ -528,6 +529,7 @@ export default function App() {
             court={court?.[el.id]}
             plan={research_plan?.[el.id]}
             route={routes?.[el.id]}
+            liability={liability?.[el.id]}
             corroboration={corroboration?.[el.id]}
             coverage={coverage?.[el.id]}
             freshness={freshness?.[el.id] ?? []}

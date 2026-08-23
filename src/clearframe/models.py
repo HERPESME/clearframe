@@ -600,6 +600,33 @@ class AssessedExposure(BaseModel):
     remedy: str
 
 
+class LiabilityEstimate(BaseModel):
+    """What it costs to ignore this, as against what it costs to clear it.
+
+    The case law is rarely about damages. Woods did not win a damages award
+    against 12 Monkeys — he won an INJUNCTION against a film already in
+    theatres, and took a high six-figure settlement to lift it. Whitmill was
+    denied an injunction and Warner Bros. settled anyway, weeks before release.
+    The exposure is delay and leverage.
+
+    So: a statutory range with its citation where one genuinely applies, a flag
+    for whether a claim can stop a release, and the escalation — because the
+    only variable a director actually controls is when they find out.
+    """
+
+    element_id: str
+    headline: str
+    clear_now: str | None = None
+    fix_in_post: str | None = None
+    statutory_min_usd: int | None = None
+    statutory_max_usd: int | None = None
+    statutory_willful_usd: int | None = None
+    statutory_basis: str = ""
+    injunction_risk: str = "unknown"
+    injunction_basis: str = ""
+    escalation: list[str] = Field(default_factory=list)
+
+
 class PreviewFinding(BaseModel):
     """One finding as it stands BEFORE any rights research has run.
 
@@ -659,6 +686,7 @@ class ProductionState(BaseModel):
     # must never be reported as an unmatched one.
     audio_checked: bool = True
     routes: dict[str, ResearchRoute] = Field(default_factory=dict)
+    liability: dict[str, LiabilityEstimate] = Field(default_factory=dict)
     sponsor_conflicts: list[SponsorConflict] = Field(default_factory=list)
     platform_outcomes: list[PlatformOutcome] = Field(default_factory=list)
     # element id -> list of {territory, name, available, authority, note}.
