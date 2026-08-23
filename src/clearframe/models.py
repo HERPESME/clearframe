@@ -489,6 +489,13 @@ class Production(BaseModel):
         default_factory=lambda: ["THEATRICAL", "STREAMING"]
     )
     has_media: bool = False
+    # A cache-busting token for the stored footage, empty when there is none.
+    # Derived from the file on every read and never authoritative — it exists
+    # so the player's URL changes when the bytes do. Every upload lands at the
+    # same production id, so without it the src is identical between two
+    # different films and the browser replays the one it already has: the
+    # previous clip's frames under the new clip's boxes.
+    media_version: str = ""
 
 
 class SponsorConflict(BaseModel):

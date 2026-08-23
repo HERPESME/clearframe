@@ -339,6 +339,7 @@ export interface ProductionState {
     release_territories: string[];
     distribution: string[];
     has_media: boolean;
+    media_version: string;
   };
   stage_status: Record<string, string>;
   elements: Element[];

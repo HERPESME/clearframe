@@ -177,11 +177,27 @@ def create_app(out_root: Path) -> FastAPI:
         back False while the media endpoint served the very same bytes with a
         200 — no player, and no way for a user to work out why.
         """
-        actual = _stored_media(state.production.id) is not None
-        if state.production.has_media == actual:
+        found = _stored_media(state.production.id)
+        actual = found is not None
+        if found:
+            st = found[0].stat()
+            # Size and write time together: whole seconds collide when two
+            # uploads land in the same second, which a test does routinely and
+            # an impatient user manages too.
+            version = f"{st.st_size}-{st.st_mtime_ns}"
+        else:
+            version = ""
+        if (
+            state.production.has_media == actual
+            and state.production.media_version == version
+        ):
             return state
         return state.model_copy(
-            update={"production": state.production.model_copy(update={"has_media": actual})}
+            update={
+                "production": state.production.model_copy(
+                    update={"has_media": actual, "media_version": version}
+                )
+            }
         )
 
     @app.get("/api/productions")
@@ -386,7 +402,13 @@ def create_app(out_root: Path) -> FastAPI:
                 status_code=404, detail="No footage stored for this production"
             )
         path, media_type = found
-        return FileResponse(path, media_type=media_type)
+        # The URL is the same for every upload to this production, so a player
+        # holding it will replay the previous clip unless told to check. The
+        # ETag makes that check cheap; `media_version` on the production keeps
+        # a fresh page from asking at all.
+        return FileResponse(
+            path, media_type=media_type, headers={"Cache-Control": "no-cache"}
+        )
 
     @app.get("/api/licences")
     def list_licences():
