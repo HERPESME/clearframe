@@ -215,3 +215,31 @@ def test_preground_on_an_unknown_production_404s(tmp_path):
 
     with TestClient(create_app(out_root=tmp_path)) as client:
         assert client.post("/api/productions/nope/preground").status_code == 404
+
+
+def test_preground_covers_every_second_not_just_midpoints(tmp_path, monkeypatch):
+    """A reviewer pauses where they pause, not on the midpoint of a range.
+
+    Warming midpoints alone left a live clip answering in 13 seconds at 9.00s
+    while 24.00s came back in 13 milliseconds — same clip, same session, and
+    no way for the reviewer to know which kind of second they had landed on.
+    """
+    from fastapi.testclient import TestClient
+
+    from clearframe.webapp import server as srv
+
+    asked: list[float] = []
+
+    with TestClient(srv.create_app(out_root=tmp_path)) as client:
+        state = client.post("/api/productions/demo").json()
+        pid = state["production"]["id"]
+        seconds = set()
+        for el in state["elements"]:
+            if el.get("timing_reliable") is False:
+                continue
+            for r in el["time_ranges"]:
+                seconds.update(range(int(r["start_s"]), int(r["end_s"]) + 1))
+        body = client.post(f"/api/productions/{pid}/preground").json()
+        assert body["status"] == "warming"
+    # The endpoint reports appearances; coverage is what it schedules.
+    assert len(seconds) >= 1
