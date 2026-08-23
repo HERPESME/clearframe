@@ -58,8 +58,11 @@ def test_the_same_finding_seen_twice_still_merges():
 
     assert len(elements) == 1
     assert elements[0].id == "1"
-    # Merged, not dropped: both sightings are in the total.
-    assert elements[0].prominence.screen_time_s == 6.0
+    # Merged, not dropped — and counted ONCE. Both passes describe the same
+    # three seconds, so the total is 3.0, not 6.0. See
+    # tests/test_merge_prominence.py: summing made a 10s tattoo read as 20s
+    # the moment a second independent pass was added.
+    assert elements[0].prominence.screen_time_s == 3.0
 
 
 def test_ids_are_unique_even_within_one_pass():

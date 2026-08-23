@@ -17,6 +17,7 @@ import logging
 from clearframe.integrations.gemini_client import build_scan_context
 from clearframe.models import DetectedElement
 from clearframe.pipeline import PipelineContext
+from clearframe.matching import labels_match
 from clearframe.sourcework import corrected_types
 from clearframe.timeline import timing_is_reliable
 
@@ -80,6 +81,47 @@ def _with_timing_verdict(
         update={"timing_reliable": False, "timing_note": reason}
     )
 
+
+# How many independent Gemini passes to run before the auditor. Two, because a
+# single pass was measured at about 60% recall: three identical baseline runs
+# over one 41.5s clip found 15 distinct things between them, a mean of 9.0
+# each, with only 3 present in all three and 7 in exactly one.
+#
+# Recall is this product's whole safety claim, and no video parameter improved
+# it — media_resolution is rejected by the model outright, and fps=2 was
+# strictly worse. Another pass is what works, and running it concurrently makes
+# it nearly free in wall clock, which matters because anything that costs
+# minutes eventually gets cut.
+SCAN_PASSES = 2
+
+
+async def gather_detections(
+    gemini, footage_uri: str, duration_s: float, context: str, passes: int = SCAN_PASSES
+):
+    """Independent passes concurrently, then the auditor primed on their union.
+
+    The auditor's job is to catch what was missed, so it should be told
+    everything already found — not just one pass's share of it. Returns the
+    merged detections and the ScanResult of the first pass, which carries the
+    document-level fields (source_work, unscanned_ranges, exposures).
+    """
+    results = await asyncio.gather(
+        *(gemini.scan(footage_uri, duration_s, context) for _ in range(max(1, passes)))
+    )
+
+    seen: list[str] = []
+    for r in results:
+        for d in r.detections:
+            if not any(labels_match(d.label, s) for s in seen):
+                seen.append(d.label)
+
+    audit = await gemini.audit_scan(footage_uri, duration_s, seen, context)
+
+    merged: list[DetectedElement] = []
+    for r in [*results, audit]:
+        merged = merge_passes(merged, r.detections) if merged else list(r.detections)
+    return merge_passes(merged, []), results[0], audit
+
 class ScanStage:
     name = "scan"
 
@@ -93,18 +135,15 @@ class ScanStage:
         scan_context = build_scan_context(production, ctx.state.script_mentions)
 
         async def _watch():
-            result = await ctx.gemini.scan(
-                production.footage_uri, production.duration_s, scan_context
-            )
-            ctx.emit({"type": "scan_found", "count": len(result.detections)})
-            audit = await ctx.gemini.audit_scan(
+            merged, result, audit = await gather_detections(
+                ctx.gemini,
                 production.footage_uri,
                 production.duration_s,
-                [d.label for d in result.detections],
                 scan_context,
             )
+            ctx.emit({"type": "scan_found", "count": len(result.detections)})
             ctx.emit({"type": "audit_found", "count": len(audit.detections)})
-            return result, audit
+            return merged, result, audit
 
         async def _listen():
             if ctx.audio is None:
@@ -137,9 +176,8 @@ class ScanStage:
 
         if isinstance(watched, BaseException):
             raise watched  # the scan is load-bearing; the other two are not
-        result, audit = watched
+        merged, result, audit = watched
 
-        merged = merge_passes(result.detections, audit.detections)
         # Typing is corrected BEFORE triage, which is what turns an element
         # type into a clearance category — a real actor needs a release, not a
         # copyright licence.
