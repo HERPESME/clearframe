@@ -102,3 +102,41 @@ def test_an_element_with_no_ranges_is_never_visible():
     el = el.model_copy(update={"time_ranges": []})
     assert visible_at(el, 0.5) is False
     assert box_at(el, 0.5) is None
+
+
+# ------------------------------------------- a box that locates nothing
+#
+# Asked to place a person on a frame, the model answers with the frame:
+# {0, 0, 1, 1} for "Stu Price (Ed Helms)" at 6s and again at 9s on a live run,
+# while the IWC watch in the same shot came back pixel-accurate. A rectangle
+# around the entire picture restates what the finding already says — that this
+# is in the shot — and painted over every real box beneath it.
+
+FULL_FRAME = BBox(ymin=0.0, xmin=0.0, ymax=1.0, xmax=1.0)
+
+
+def test_a_box_around_the_whole_frame_is_not_drawn():
+    el = element([TimeRange(start_s=0, end_s=5, bbox=FULL_FRAME)])
+    assert box_at(el, 2.0) is None
+
+
+def test_the_finding_is_still_on_screen():
+    """Suppressing the rectangle must not suppress the finding.
+
+    The player already has the honest phrasing for this — "on screen without a
+    known position" — and it is the correct one here.
+    """
+    el = element([TimeRange(start_s=0, end_s=5, bbox=FULL_FRAME)])
+    assert visible_at(el, 2.0) is True
+
+
+def test_a_large_box_that_still_points_somewhere_is_drawn():
+    """A close-up genuinely fills most of the frame. Only the whole of it goes."""
+    big = BBox(ymin=0.05, xmin=0.05, ymax=0.95, xmax=0.95)  # 81% of frame
+    el = element([TimeRange(start_s=0, end_s=5, bbox=big)])
+    assert box_at(el, 2.0) is not None
+
+
+def test_a_legacy_full_frame_box_is_suppressed_too():
+    el = element([TimeRange(start_s=0, end_s=5)], bbox=FULL_FRAME, at_s=2.0)
+    assert box_at(el, 2.0) is None
