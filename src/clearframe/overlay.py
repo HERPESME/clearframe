@@ -35,6 +35,8 @@ def _containing(element: DetectedElement, at_s: float) -> TimeRange | None:
 
 def visible_at(element: DetectedElement, at_s: float) -> bool:
     """Is this element on screen at all? Independent of whether we know where."""
+    if not element.timing_reliable:
+        return False
     return _containing(element, at_s) is not None
 
 
@@ -44,6 +46,10 @@ def box_at(element: DetectedElement, at_s: float) -> BBox | None:
     None is a real answer, not a failure: an element can be on screen while
     its position is unknown, and drawing a guess would be worse.
     """
+    # Timecodes the scan cannot have measured place a box nowhere real. The
+    # finding is kept; the rectangle is not drawn.
+    if not element.timing_reliable:
+        return None
     appearance = _containing(element, at_s)
     if appearance is None:
         return None

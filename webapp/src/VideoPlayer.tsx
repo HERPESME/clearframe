@@ -55,6 +55,8 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
   // older states drawing rather than silently losing every box on upgrade.
   const BOX_WINDOW_S = 2.0;
   const boxAt = (el: Element): BBox | null => {
+    // Timecodes the scan cannot have measured place a box nowhere real.
+    if (el.timing_reliable === false) return null;
     const appearance = el.time_ranges.find(
       (r) => now >= r.start_s && now <= r.end_s,
     );
@@ -84,9 +86,15 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
   // "nothing here", and inventing a rectangle would be worse than both.
   const unlocated = elements.filter(
     (el) =>
+      el.timing_reliable !== false &&
       boxAt(el) === null &&
       el.time_ranges.some((r) => now >= r.start_s && now <= r.end_s),
   );
+
+  // Detected, but with timecodes it cannot have measured — so it is on screen
+  // at no moment anyone can pause on. Listed for the whole clip rather than at
+  // a timestamp, because there is no timestamp to trust.
+  const untimed = elements.filter((el) => el.timing_reliable === false);
 
   const COV_LABEL: Record<string, string> = {
     COVERED: "licensed",
@@ -167,6 +175,17 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
             {" "}
             · {unlocated.length} on screen without a known position (
             {unlocated.map((e) => e.label).join(", ")})
+          </span>
+        )}
+        {untimed.length > 0 && (
+          <span
+            className="ov-untimed"
+            title={untimed.map((e) => e.timing_note).join("\n\n")}
+          >
+            {" "}
+            · {untimed.length} detected but not placeable in time (
+            {untimed.map((e) => e.label).join(", ")}) — the scan returned
+            timecodes it cannot have measured, so no box is drawn
           </span>
         )}
       </div>

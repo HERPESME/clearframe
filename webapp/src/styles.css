@@ -871,6 +871,10 @@ button {
    score to learn what shipping this uncleared would cost. */
 @keyframes cf-spin { to { transform: rotate(360deg); } }
 .ov-unlocated { color: var(--muted); }
+/* Detected but not placeable in time — a real finding whose timecodes the
+   scan cannot have measured. Warned rather than muted: a box that never
+   appears reads as a false detection unless the player says otherwise. */
+.ov-untimed { color: var(--high); cursor: help; }
 
 /* Each appearance is its own scrub target — that is how you reach the third
    shot's box. A dot marks the ones that actually have a rectangle. */
