@@ -30,11 +30,12 @@ class CorroborateStage:
         production = ctx.state.production
 
         hits = ctx.state.detector_hits
-        if not hits and ctx.corroborator is not None:
+        if not ctx.state.detector_checked and ctx.corroborator is not None:
             hits = await ctx.corroborator.detect(
                 production.footage_uri, production.duration_s
             )
             ctx.state.detector_hits = hits
+            ctx.state.detector_checked = True
             ctx.emit({"type": "corroborator_hits", "count": len(hits)})
 
         matches = ctx.state.audio_matches

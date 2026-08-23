@@ -41,6 +41,7 @@ from clearframe.models import (
 )
 from clearframe.pipeline import PipelineContext
 from clearframe.planner import EST_COST, plan_research
+from clearframe.scoring import provisional_score
 from clearframe.routing import route_all, summarise_routes
 
 # How to describe the work to a researcher. Rogers v. Grimaldi protects films
@@ -166,6 +167,32 @@ def _search_result(
     )
 
 
+def rank_for_funding(
+    deep_ids: list[str],
+    by_id: dict,
+    use_context: UseContext = UseContext.EXPRESSIVE,
+) -> list[str]:
+    """Most exposed first, so the cap funds the findings that matter.
+
+    This used to sort on `prominence.screen_time_s`, which is one of four
+    inputs to prominence and none of the inputs to category weight, use context
+    or depiction. On a clip where a work's own characters dominate the frame,
+    the funded slots went to them and the single genuinely unknown artwork
+    overflowed — the exact inversion the cap exists to prevent.
+
+    `provisional_score` already answers "how exposed is this before we know who
+    owns it", which is the question the cap has to rank by. It is also the
+    number the router escalates on and the number the two-phase report bands
+    with, so this is one ranking rule instead of two.
+
+    Ties keep their incoming order, so a run is reproducible.
+    """
+    return sorted(
+        deep_ids,
+        key=lambda i: -provisional_score(by_id[i], use_context),
+    )
+
+
 class ResearchStage:
     name = "research"
 
@@ -209,9 +236,7 @@ class ResearchStage:
         deep_ids = [eid for eid, r in routes.items() if r.tier is ResearchTier.DEEP]
         # The spend cap applies only to the expensive rung; the cheap ones are
         # free and must never be dropped for budget.
-        ranked = sorted(
-            deep_ids, key=lambda i: by_id[i].prominence.screen_time_s, reverse=True
-        )
+        ranked = rank_for_funding(deep_ids, by_id, use_context)
         funded, overflow = ranked[: self.max_research], ranked[self.max_research :]
 
         plan = plan_research([by_id[i] for i in funded])
