@@ -41,11 +41,14 @@ from clearframe.audio import is_generic_label
 from clearframe.knowledge import KnowledgeBase
 from clearframe.matching import tokens
 from clearframe.scoring import provisional_score
+import re
+
 from clearframe.models import (
     ClearanceCategory,
     DepictionTone,
     Corroboration,
     IdentityVerdict,
+    ElementType,
     LicensingPosture,
     Prominence,
     ResearchRoute,
@@ -207,6 +210,15 @@ _GENERIC_PLACE = {
 # a wall, and quietly downgrading authored images is the failure this product
 # exists to prevent.
 _UTILITARIAN = {
+    # Wardrobe and personal effects. A watch is a watch: there is no author to
+    # find, so a deep run spends minutes to discover it. Anything carrying a
+    # visible mark keeps a proper noun in its label and never reaches here,
+    # because the test is that EVERY meaningful token is generic.
+    "watch", "wristwatch", "watches", "sunglasses", "spectacles", "eyewear",
+    "ring", "rings", "bracelet", "necklace", "earring", "earrings", "belt",
+    "buckle", "shoe", "shoes", "boot", "boots", "sneaker", "sneakers",
+    "handbag", "purse", "wallet", "luggage", "suitcase", "briefcase",
+    "umbrella", "keys", "keyring", "sunglass", "aviator", "aviators",
     "vase", "vases", "pot", "pots", "planter", "plant", "plants", "flower",
     "flowers", "bouquet", "furniture", "chair", "chairs", "sofa", "couch",
     "table", "tables", "desk", "lamp", "lamps", "shelf", "shelves", "curtain",
@@ -237,6 +249,20 @@ def _meaningful(label: str) -> list[str]:
     return [t for t in tokens(label) if t not in _STOPWORDS]
 
 
+_POSSESSIVE = re.compile(r"\b[\w]+['’]s\b")
+
+
+def _without_possessives(label: str) -> str:
+    """Drop possessive words before testing whether a label is generic.
+
+    "Phil's Ring" is a ring. The possessive names the wearer, not the maker,
+    and there is no rights holder called Phil — but it kept the label out of
+    the utilitarian bucket and bought a multi-minute ownership investigation
+    into a piece of jewellery.
+    """
+    return _POSSESSIVE.sub(" ", label)
+
+
 def _any_token(label: str, vocab: set[str]) -> bool:
     return any(t in vocab for t in _meaningful(label))
 
@@ -244,6 +270,16 @@ def _any_token(label: str, vocab: set[str]) -> bool:
 def _all_tokens(label: str, vocab: set[str]) -> bool:
     words = _meaningful(label)
     return bool(words) and all(t in vocab for t in words)
+
+
+# The scan describing an element as a reproduction of another work. Whitmill
+# turns on exactly this: replicating a tattoo onto a different person is
+# materially riskier than filming the person who wears it.
+_REPLICA = {
+    "replica", "replicated", "reproduction", "recreation", "recreated",
+    "copy", "copied", "imitation", "knockoff", "duplicate",
+    "modelled", "modeled", "based",
+}
 
 
 def is_de_minimis(p: Prominence) -> bool:
@@ -324,6 +360,25 @@ def _deep(el, rationale, *, basis="", enumerate_candidates=False) -> ResearchRou
 
 def _route_trademark(el: TriagedElement, kb: KnowledgeBase) -> ResearchRoute:
     mark = kb.find_mark(el.label)
+    if mark is None and _all_tokens(_without_possessives(el.label), _UTILITARIAN):
+        # A product type is not a mark. The scan typed "Wristwatch" as a LOGO,
+        # so it reached the trademark router, missed the catalogue and bought a
+        # multi-minute ownership investigation — for a string with no
+        # proprietor in it. No amount of searching invents one.
+        #
+        # Deliberately narrow: this is not a catalogue miss. "Calvin Klein" is
+        # a real mark absent from our entries and still earns a deep run.
+        return _statute(
+            el,
+            "The label names a kind of object rather than a brand, so there is "
+            "no proprietor to find. A deep run here spends minutes establishing "
+            "that a wristwatch is a wristwatch.",
+            "A trademark protects a mark used to indicate source; a generic "
+            "product designation is not registrable — 15 U.S.C. §1064(3), "
+            "Kellogg Co. v. National Biscuit Co., 305 U.S. 111 (1938)",
+            "No action unless a mark becomes legible, in which case relabel the "
+            "finding with the brand and re-run.",
+        )
     if mark is None:
         return _deep(
             el,
@@ -384,8 +439,71 @@ def _route_music(el: TriagedElement, corroboration: Corroboration | None) -> Res
     )
 
 
-def _route_art(el: TriagedElement) -> ResearchRoute:
-    if _all_tokens(el.label, _UTILITARIAN):
+def _tattoo_route(el: TriagedElement, kb: KnowledgeBase) -> ResearchRoute:
+    """Tattoos have settled category guidance, and it is already in the table.
+
+    `cases_for()` fed liability.py and nothing else, so the most-litigated
+    tattoo in film history went to a four-minute open-web search that returned
+    nothing while the case describing it sat in `litigation.json`.
+
+    The record splits on one fact. Solid Oak and Alexander both concern tattoos
+    on the person who wears them: real claims, low value, answered by a release.
+    Whitmill concerns a tattoo REPLICATED onto someone else, which drew a
+    federal suit and a settlement weeks before opening. So the question is not
+    who inked it — it is whether this is the wearer or a copy.
+    """
+    cases = kb.cases_for(ClearanceCategory.COPYRIGHT_ART.value)
+    named = {c.name.split(" v. ")[0]: c for c in cases}
+    replica = _any_token(el.description, _REPLICA)
+
+    if replica:
+        whitmill = named.get("Whitmill")
+        return ResearchRoute(
+            element_id=el.id,
+            tier=ResearchTier.DEEP,
+            owner=None,
+            posture=None,
+            rationale=(
+                "The scan describes this as a reproduction of an existing "
+                "tattoo rather than the wearer's own. That is the fact Whitmill "
+                "turned on, and it moves the question from 'get a release' to "
+                "'who authored the original design' — which is a genuine "
+                "ownership investigation."
+            ),
+            basis=(
+                f"{whitmill.name} ({whitmill.citation}) — {whitmill.lesson}"
+                if whitmill
+                else "Replicating a tattoo onto a different person is materially "
+                "riskier than filming the person who wears it."
+            ),
+            disposition=(
+                "Identify and clear the original tattoo artist, or redesign the "
+                "artwork. A release from the actor wearing the copy does not "
+                "reach the design."
+            ),
+            est_cost_usd=0.0,  # filled from the processor tier by the planner
+        )
+
+    citing = [named[n] for n in ("Solid Oak", "Alexander") if n in named]
+    return _statute(
+        el,
+        "A tattoo on the person wearing it. The claim is real but low-value, and "
+        "it is answered by a release from the person, not by an ownership "
+        "investigation into who inked it — which is why a deep run here returns "
+        "nothing at a cost of minutes.",
+        "; ".join(f"{c.name} ({c.citation}) — {c.lesson}" for c in citing)
+        or "Tattoo claims on the wearer are defensible where the production is "
+        "entitled to depict the person.",
+        "Obtain a personal release from the wearer covering the tattoo, and keep "
+        "it on file. Escalate only if the design is a reproduction of another "
+        "artist's work.",
+    )
+
+
+def _route_art(el: TriagedElement, kb: KnowledgeBase) -> ResearchRoute:
+    if el.element_type is ElementType.TATTOO:
+        return _tattoo_route(el, kb)
+    if _all_tokens(_without_possessives(el.label), _UTILITARIAN):
         return _statute(
             el,
             "A useful article, not a work of authorship. There is no author to "
@@ -514,7 +632,7 @@ def _route_text(el: TriagedElement, kb: KnowledgeBase) -> ResearchRoute:
 _ROUTERS = {
     ClearanceCategory.TRADEMARK: lambda el, kb, corr, ctx: _route_trademark(el, kb),
     ClearanceCategory.MUSIC_SYNC: lambda el, kb, corr, ctx: _route_music(el, corr),
-    ClearanceCategory.COPYRIGHT_ART: lambda el, kb, corr, ctx: _route_art(el),
+    ClearanceCategory.COPYRIGHT_ART: lambda el, kb, corr, ctx: _route_art(el, kb),
     ClearanceCategory.RIGHT_OF_PUBLICITY: lambda el, kb, corr, ctx: _route_person(el, ctx),
     ClearanceCategory.LOCATION: lambda el, kb, corr, ctx: _route_location(el),
     ClearanceCategory.TEXT_ON_SCREEN: lambda el, kb, corr, ctx: _route_text(el, kb),

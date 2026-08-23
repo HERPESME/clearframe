@@ -139,8 +139,18 @@ def score_element(
     prominence_score_value = prominence_score(element)
     weight = CATEGORY_WEIGHT[element.category]
 
+    # Failing to look is not evidence that there is nothing to find. An
+    # incomplete lookup used to map to UNKNOWN and take UNKNOWN's 0.7 factor,
+    # so a finding whose research came back empty scored 30% BELOW its own
+    # provisional band — and below an identified litigious holder.
+    #
+    # `provisional_score` deliberately pins posture at its worst case so a band
+    # can only fall once research lands. It must fall because something was
+    # learned, never because the lookup failed. A successful lookup that
+    # identifies a holder without determining posture is a different state and
+    # keeps its discount: it found the counterparty.
     if research_is_incomplete(research):
-        posture = LicensingPosture.UNKNOWN
+        posture = LicensingPosture.LITIGIOUS
     else:
         posture = research.licensing_posture
     posture_factor = POSTURE_FACTOR[posture]
