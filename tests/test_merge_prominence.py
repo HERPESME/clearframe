@@ -101,11 +101,37 @@ def test_merging_preserves_every_field_the_scan_reported():
     assert merged.bbox is not None
 
 
-def test_unreliable_timing_survives_a_merge():
-    """Otherwise a disowned timeline quietly comes back as trustworthy."""
-    bad = det("Street mural", [(10.0, 20.0)], 10.0).model_copy(
+def test_a_disowned_timeline_never_comes_back_through_a_merge():
+    """The invariant this used to protect, stated where it actually lives.
+
+    It used to assert that unreliable timing SURVIVES a merge, because
+    `_merge` unioned every member's ranges — so a disowned member's garbage
+    timecodes leaked into the group, and disowning the whole finding was the
+    only safe answer.
+
+    A disowned member now contributes no ranges at all, which removes the
+    thing that had to be defended against. The stronger property is asserted
+    directly: the bad ranges are gone.
+
+    Inverting it mattered on a live re-run where the second Gemini pass
+    returned every timecode as seconds divided by 100. Three findings that had
+    been measured correctly by the first pass merged with their broken twins
+    and stopped drawing a box — the disowned clock outvoting the working one.
+    """
+    bad = det("Street mural", [(60.0, 61.0)], 1.0).model_copy(
         update={"timing_reliable": False, "timing_note": "sub-frame appearances"}
     )
     merged = triage([bad, det("Street mural", [(10.0, 20.0)], 10.0)])[0]
+    assert [(r.start_s, r.end_s) for r in merged.time_ranges] == [(10.0, 20.0)]
+    assert merged.timing_reliable is True
+    assert merged.timing_note == ""
+
+
+def test_a_group_with_nothing_measurable_stays_disowned():
+    """Sticky against silence, which is what the original rule was for."""
+    bad = det("Street mural", [(10.0, 20.0)], 10.0).model_copy(
+        update={"timing_reliable": False, "timing_note": "sub-frame appearances"}
+    )
+    merged = triage([bad, bad.model_copy(update={"label": "Street Mural"})])[0]
     assert merged.timing_reliable is False
     assert merged.timing_note
