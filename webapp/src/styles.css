@@ -922,6 +922,10 @@ button {
 .exposure-banner { background: rgba(192,57,43,.10); border:1px solid rgba(192,57,43,.4); border-radius:4px; padding:10px 14px; margin: 0 0 16px; font-size:13px; }
 .exposure-banner strong { color: var(--critical); }
 .exposure-banner em { color: var(--muted); font-style: normal; }
+.cast-banner { background: rgba(41,128,185,.10); border:1px solid rgba(41,128,185,.35); border-radius:4px; padding:10px 14px; margin: 0 0 16px; font-size:13px; }
+.cast-banner strong { color:#4aa3df; }
+.cast-banner ul { margin:8px 0; padding-left:18px; }
+.cast-banner em { color: var(--muted); font-style: italic; }
 .sponsor-banner { background: rgba(230,126,34,.10); border:1px solid rgba(230,126,34,.4); border-radius:4px; padding:10px 14px; margin: 0 0 16px; font-size:13px; }
 .sponsor-banner strong { color:#e67e22; }
 .route-chip { display:inline-block; padding:2px 8px; border-radius:9px; font-size:10px; letter-spacing:.6px; border:1px solid transparent; }

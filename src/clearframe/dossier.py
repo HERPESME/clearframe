@@ -2,7 +2,9 @@
 
 from pydantic import BaseModel
 
+from clearframe.cast import summarise
 from clearframe.models import (
+    CastCredit,
     AuditEvent,
     Corroboration,
     Coverage,
@@ -68,6 +70,11 @@ class ClearanceDossier(BaseModel):
     platform_outcomes: list[PlatformOutcome] = []
     defences: dict[str, list[dict]] = {}
     exposures: list[AssessedExposure] = []
+    # Not entries: a credited performer is not a finding. Printed so the report
+    # says who was recognised and what paper covers them, rather than silently
+    # omitting three faces the reviewer can plainly see on screen.
+    cast: list[CastCredit] = []
+    cast_summary: dict | None = None
     disclaimer: str = DISCLAIMER
 
 
@@ -150,6 +157,8 @@ def build_dossier(state: ProductionState, generated_at: str) -> ClearanceDossier
         defences=state.defences,
         exposures=state.assessed_exposures,
         use_context=state.production.use_context,
+        cast=state.cast,
+        cast_summary=summarise(state.cast),
     )
 
 

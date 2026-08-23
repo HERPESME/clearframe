@@ -232,6 +232,7 @@ export default function App() {
     preview,
     sponsor_conflicts,
     assessed_exposures,
+    cast,
     platform_outcomes,
     drift,
     candidates,
@@ -444,6 +445,28 @@ export default function App() {
           <span className="chip CRITICAL" title="Rights holder identified, but no licence on file.">
             <span className="n">{covCount("NOT_COVERED")}</span> unlicensed
           </span>
+        )}
+        {(cast?.length ?? 0) > 0 && (
+          <div className="cast-banner">
+            <strong>Cast recognised, not flagged.</strong> {cast.length} face
+            {cast.length === 1 ? "" : "s"} on screen belong to credited performers.
+            These are not clearance findings and carry no box: you engaged them, so
+            their consent is a cast agreement rather than a rights lookup. Anyone the
+            scan could <em>not</em> name is still in the list below and still needs a
+            release.
+            <ul>
+              {cast.map((c) => (
+                <li key={c.id}>
+                  <strong>{c.performer}</strong>
+                  {c.character && <> as {c.character}</>} — {c.screen_time_s.toFixed(1)}s
+                  on screen
+                </li>
+              ))}
+            </ul>
+            Confirm the executed performer agreements and any guild paperwork cover this
+            production's media, territory and term — the same three gaps that catch a
+            music licence.
+          </div>
         )}
         {(sponsor_conflicts?.length ?? 0) > 0 && (
           <span

@@ -337,6 +337,23 @@ export interface PipelineEvent {
   tier?: string;
 }
 
+/**
+ * A face the scan attributed to a named performer.
+ *
+ * Not an Element: it carries no category, no band and no route, because the
+ * production engaged this person. Held apart so it is never drawn on the
+ * frame — asked to place a named performer, the model answers with the whole
+ * frame, and that rectangle sat on top of every real finding.
+ */
+export interface CastCredit {
+  id: string;
+  label: string;
+  character: string | null;
+  performer: string;
+  screen_time_s: number;
+  basis: string;
+}
+
 export interface ProductionState {
   production: {
     id: string;
@@ -373,4 +390,5 @@ export interface ProductionState {
   territory_risk: Record<string, TerritoryRisk[]>;
   territories: string[];
   coverage: Record<string, Coverage>;
+  cast: CastCredit[];
 }
