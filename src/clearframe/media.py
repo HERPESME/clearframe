@@ -52,3 +52,55 @@ def probe_duration_s(path: str | Path) -> float:
         return 0.0
     hours, minutes, seconds = match.groups()
     return round(int(hours) * 3600 + int(minutes) * 60 + float(seconds), 2)
+
+
+def extract_frame(path: str | Path, at_s: float, width: int = 1280) -> bytes | None:
+    """One JPEG frame at `at_s`, or None if it cannot be produced.
+
+    Grounding a still is a different problem from grounding a video. Gemini
+    samples video at roughly 1fps and returns ONE box per time range, so a box
+    for a moving subject is a union of where it travelled rather than where it
+    is in any frame — which is why boxes are drawn only while paused, and why
+    three separate box defects all traced back to the same place.
+
+    Returning None rather than raising is deliberate and matches
+    `probe_duration_s`: a frame that cannot be produced means no refined box,
+    which is exactly what the player already renders when a position is
+    unknown. A failed extraction must never take a run down.
+
+    Seeking before -i is the fast path — ffmpeg jumps to the nearest keyframe
+    instead of decoding from the start, which is what makes this viable
+    per-pause rather than per-run.
+    """
+    path = Path(path)
+    if not path.exists() or at_s < 0:
+        return None
+    try:
+        import imageio_ffmpeg
+
+        result = subprocess.run(
+            [
+                imageio_ffmpeg.get_ffmpeg_exe(),
+                "-nostdin",
+                "-ss", f"{at_s:.3f}",
+                "-i", str(path),
+                "-frames:v", "1",
+                "-vf", f"scale={width}:-2",
+                "-f", "image2",
+                "-c:v", "mjpeg",
+                "-q:v", "3",
+                "-",
+            ],
+            capture_output=True,
+            timeout=30,
+        )
+    except (subprocess.TimeoutExpired, OSError, ImportError) as exc:
+        log.warning("could not extract frame at %.2fs from %s (%s)", at_s, path.name, exc)
+        return None
+
+    data = result.stdout or b""
+    # A seek past the end exits cleanly with no output, so emptiness is the
+    # signal rather than the return code.
+    if not data.startswith(b"\xff\xd8"):
+        return None
+    return data
