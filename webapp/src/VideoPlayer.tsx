@@ -99,6 +99,13 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
   // shot's rectangle and pausing at 27s gives the third's. Two fallbacks keep
   // older states drawing rather than silently losing every box on upgrade.
   const BOX_WINDOW_S = 2.0;
+  // Mirrors clearframe/overlay.py::MAX_LOCATING_AREA. A rectangle leaving less
+  // than a tenth of the picture outside it has stopped saying WHERE — it
+  // restates that the element is in the shot, and paints over every real box
+  // beneath it. The model returns exactly that for people ({0,0,1,1}) while
+  // placing a wristwatch in the same frame to the pixel.
+  const locates = (b: BBox | null | undefined): b is BBox =>
+    !!b && (b.xmax - b.xmin) * (b.ymax - b.ymin) < 0.9;
   const boxAt = (el: Element): BBox | null => {
     // Timecodes the scan cannot have measured place a box nowhere real.
     if (el.timing_reliable === false) return null;
@@ -109,13 +116,16 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
     // back on screen precisely where it was checked and rejected. A live pause
     // drew "Ray-Ban Aviator Sunglasses" across a bare forehead that way.
     const frame = ground[String(Math.floor(now))];
-    if (frame?.grounded) return frame.boxes[el.id] ?? null;
+    if (frame?.grounded) {
+      const g = frame.boxes[el.id];
+      return locates(g) ? g : null;
+    }
     const appearance = el.time_ranges.find(
       (r) => now >= r.start_s && now <= r.end_s,
     );
     if (!appearance) return null;
-    if (appearance.bbox) return appearance.bbox;
-    if (!el.bbox) return null;
+    if (appearance.bbox) return locates(appearance.bbox) ? appearance.bbox : null;
+    if (!locates(el.bbox)) return null;
     if (el.at_s !== null && el.at_s !== undefined) {
       return Math.abs(now - el.at_s) <= BOX_WINDOW_S ? el.bbox : null;
     }

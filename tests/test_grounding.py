@@ -83,3 +83,21 @@ async def test_the_fixture_client_grounds_without_a_network():
     client = FixtureGeminiClient(FIXTURES)
     boxes = await client.ground_frame(b"\xff\xd8fake", ["Nike hoodie swoosh"])
     assert "Nike hoodie swoosh" in boxes
+
+
+def test_a_box_around_the_whole_frame_is_not_a_location():
+    """The one answer the grounding pass gives reliably for people.
+
+    {0, 0, 1, 1} for "Stu Price (Ed Helms)" at 6s and again at 9s, while the
+    IWC watch in the same shot came back to the pixel. Dropped here so
+    "grounded, and not placed" stays the honest answer rather than a rectangle
+    over the whole picture.
+    """
+    payload = {"found": [
+        {"label": "Stu Price", "bbox": {"ymin": 0.0, "xmin": 0.0,
+                                        "ymax": 1.0, "xmax": 1.0}},
+        {"label": "IWC Watch", "bbox": {"ymin": 0.562, "xmin": 0.318,
+                                        "ymax": 0.708, "xmax": 0.498}},
+    ]}
+    out = parse_ground_payload(payload, ["Stu Price", "IWC Watch"])
+    assert set(out) == {"IWC Watch"}

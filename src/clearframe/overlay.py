@@ -18,6 +18,9 @@ boxes on upgrade:
 
   element bbox + at_s   drawn within TOLERANCE_S of the moment it was measured
   element bbox alone    drawn across the range, which is what it always did
+
+Whichever box wins, it still has to say WHERE. A rectangle around the entire
+frame is not a position — see `locates`.
 """
 
 from clearframe.models import BBox, DetectedElement, TimeRange
@@ -25,6 +28,25 @@ from clearframe.models import BBox, DetectedElement, TimeRange
 # How far from a legacy `at_s` a single measured box is still trusted. Two
 # seconds is about one shot; beyond that the camera has usually moved.
 TOLERANCE_S = 2.0
+
+# A rectangle this large has stopped being a location. At 0.9 the box leaves
+# less than a tenth of the picture outside it, so it says only that the element
+# is in the shot — which the finding already said — while painting over every
+# box beneath it.
+#
+# It is not hypothetical and it is not evenly distributed. Asked to place a
+# named person on a frame, the model returns {0, 0, 1, 1}; asked to place the
+# IWC watch in the same shot, it returns the watch to the pixel. So the guard
+# is about the answer, not about the subject, and applies wherever a box comes
+# from.
+MAX_LOCATING_AREA = 0.9
+
+
+def locates(box: BBox | None) -> bool:
+    """Does this rectangle actually say WHERE something is?"""
+    if box is None:
+        return False
+    return (box.xmax - box.xmin) * (box.ymax - box.ymin) < MAX_LOCATING_AREA
 
 
 def _containing(element: DetectedElement, at_s: float) -> TimeRange | None:
@@ -54,10 +76,10 @@ def box_at(element: DetectedElement, at_s: float) -> BBox | None:
     if appearance is None:
         return None
     if appearance.bbox is not None:
-        return appearance.bbox
+        return appearance.bbox if locates(appearance.bbox) else None
 
     # --- legacy states, in descending order of how much they tell us
-    if element.bbox is None:
+    if not locates(element.bbox):
         return None
     if element.at_s is not None:
         return element.bbox if abs(at_s - element.at_s) <= TOLERANCE_S else None

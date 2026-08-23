@@ -12,6 +12,7 @@ from typing import Protocol
 from pydantic import BaseModel, ValidationError
 
 from clearframe.matching import labels_match
+from clearframe.overlay import locates
 from clearframe.models import (
     BBox,
     DetectedElement,
@@ -516,6 +517,13 @@ def parse_ground_payload(payload: dict, known: list[str]) -> dict[str, BBox]:
     Labels are matched with `labels_match` because the model rarely echoes one
     verbatim — "Nike swoosh on the hoodie" is the same finding as "Nike hoodie
     swoosh", and an exact-string check would silently return nothing.
+
+    A box around the whole frame is dropped as well, and for the same reason
+    the unknown labels are: it is not an answer to the question asked. The
+    model returns one reliably for people — {0, 0, 1, 1} — while placing a
+    wristwatch in the same frame to the pixel. Dropping it here rather than in
+    the player keeps grounding's contract intact: what comes back is what was
+    located.
     """
     out: dict[str, BBox] = {}
     for entry in payload.get("found") or []:
@@ -528,7 +536,7 @@ def parse_ground_payload(payload: dict, known: list[str]) -> dict[str, BBox]:
         if match is None or match in out:
             continue
         box = parse_bbox(entry.get("bbox"))
-        if box is not None:
+        if locates(box):
             out[match] = box
     return out
 
