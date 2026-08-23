@@ -73,6 +73,13 @@ def _find_dist_dir() -> Path | None:
 
 DIST_DIR = _find_dist_dir()
 
+# How many frames a single production may warm in the background. Each one is
+# a model round trip on a still — about eight seconds, a fraction of a cent —
+# so a feature-length upload must not try to measure every second of itself.
+# Overridable because the right number depends on how long the footage is and
+# how much the operator wants to spend before anyone clicks.
+PREGROUND_MAX_FRAMES = int(os.environ.get("CLEARFRAME_PREGROUND_MAX", "150"))
+
 
 class _ShellFiles(StaticFiles):
     """The shell revalidates; the hashed assets it points at never need to.
@@ -584,17 +591,31 @@ def create_app(out_root: Path) -> FastAPI:
             state = store.load(pid)
         except FileNotFoundError:
             return
-        seconds = sorted(
-            {
-                int((r.start_s + r.end_s) / 2)
-                for el in state.elements
-                if el.timing_reliable
-                for r in el.time_ranges
-            }
-        )
-        if not seconds:
+        # Every whole second something is on screen, because a reviewer pauses
+        # where they pause — not on the midpoint of an appearance. Midpoints
+        # first so the moments most likely to be jumped to are warm earliest;
+        # a clip long enough to exceed the cap gets its midpoints regardless.
+        midpoints, filler = set(), set()
+        for el in state.elements:
+            if not el.timing_reliable:
+                continue
+            for r in el.time_ranges:
+                midpoints.add(int((r.start_s + r.end_s) / 2))
+                filler.update(range(int(r.start_s), int(r.end_s) + 1))
+        ordered = sorted(midpoints) + sorted(filler - midpoints)
+        if not ordered:
             return
-        log.info("pre-grounding %d frame(s) for %s", len(seconds), pid)
+        seconds = ordered[:PREGROUND_MAX_FRAMES]
+        if len(ordered) > len(seconds):
+            # Never a silent cap: a second that was not warmed still works, it
+            # is just slow, and the reviewer should not have to guess which.
+            log.info(
+                "pre-grounding %d of %d frame(s) for %s (capped at %d; the rest "
+                "are measured on demand)",
+                len(seconds), len(ordered), pid, PREGROUND_MAX_FRAMES,
+            )
+        else:
+            log.info("pre-grounding %d frame(s) for %s", len(seconds), pid)
         gate = asyncio.Semaphore(4)
 
         async def one(second: int) -> None:
