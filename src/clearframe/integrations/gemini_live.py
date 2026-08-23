@@ -213,7 +213,17 @@ class LiveGeminiClient:
             labels="\n".join(f"- {a}" for a in labels)
         )
         part = types.Part.from_bytes(data=image, mime_type="image/jpeg")
-        raw = self._generate([part, prompt], GROUND_RESPONSE_SCHEMA)
+        # Offloaded, like every other model call in this class. `_generate` is
+        # a synchronous SDK call and takes about eight seconds on a still, so
+        # calling it inline inside an `async def` froze the whole server for
+        # the duration — no API, no media, and no second grounding request.
+        # Most of "I pause and no box ever appears" was this: the request was
+        # made, and the process that had to answer it was blocked on the one
+        # before. Warming frames in the background turned a stall into a
+        # minute-long freeze.
+        raw = await asyncio.to_thread(
+            self._generate, [part, prompt], GROUND_RESPONSE_SCHEMA
+        )
         return parse_ground_payload(json.loads(raw), labels)
 
     async def scan_script(self, text: str):
