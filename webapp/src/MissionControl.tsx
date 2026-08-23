@@ -46,9 +46,24 @@ interface RowItem {
   chipClass?: string;
 }
 
-export function MissionControl({ onComplete }: { onComplete: () => void }) {
+export function MissionControl({
+  productionId = "demo",
+  onComplete,
+}: {
+  // Was hardcoded to "demo", so an upload opened a stream to the demo
+  // production's event queue — which is empty. The run was progressing fine
+  // server-side while the screen sat blank, which is exactly what it looked
+  // like: nothing happening and no way to tell why.
+  productionId?: string;
+  onComplete: () => void;
+}) {
   const [agents, setAgents] = useState<AgentCard[]>(INITIAL_AGENTS);
   const [previewRows, setPreviewRows] = useState<RowItem[]>([]);
+  // The preliminary report is complete at this point — every finding
+  // timestamped and banded — and only ownership is still landing. Making
+  // someone stare at a progress roster until the slowest rights lookup
+  // finishes is a UI decision, not a technical constraint.
+  const [previewReady, setPreviewReady] = useState(false);
   const [researchRows, setResearchRows] = useState<RowItem[]>([]);
   const [courtRows, setCourtRows] = useState<RowItem[]>([]);
   const [idRows, setIdRows] = useState<RowItem[]>([]);
@@ -59,7 +74,7 @@ export function MissionControl({ onComplete }: { onComplete: () => void }) {
     setAgents((prev) => prev.map((a) => (a.key === key ? { ...a, ...changes } : a)));
 
   useEffect(() => {
-    const source = new EventSource(api.eventsUrl("demo"));
+    const source = new EventSource(api.eventsUrl(productionId));
     sourceRef.current = source;
 
     source.onmessage = (msg) => {
@@ -195,6 +210,7 @@ export function MissionControl({ onComplete }: { onComplete: () => void }) {
             status: "done",
             line: `${e.count ?? 0} findings timestamped and banded · ${e.resolved_now ?? 0} already actionable · ${awaiting} awaiting ownership`,
           });
+          setPreviewReady(true);
           setPreviewRows(
             (e.findings ?? []).map((f) => ({
               id: f.element_id,
@@ -335,8 +351,19 @@ export function MissionControl({ onComplete }: { onComplete: () => void }) {
           <button className="generate" onClick={onComplete}>
             Enter review — all findings ready
           </button>
+        ) : previewReady ? (
+          <>
+            <span className="pending-note">
+              <span className="spinner" /> Ownership research still running…
+            </span>
+            <button className="generate" onClick={onComplete}>
+              See findings now — {previewRows.length} timestamped and banded
+            </button>
+          </>
         ) : (
-          <span className="pending-note">Streaming live from the pipeline…</span>
+          <span className="pending-note">
+            <span className="spinner" /> Streaming live from the pipeline…
+          </span>
         )}
       </div>
     </div>

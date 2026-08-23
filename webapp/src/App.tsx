@@ -11,7 +11,7 @@ const BANDS: RiskBand[] = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
 
 export default function App() {
   const [state, setState] = useState<ProductionState | null>(null);
-  const [mission, setMission] = useState(false);
+  const [mission, setMission] = useState<string | null>(null);
   const [mode, setMode] = useState<"demo" | "live">("demo");
   const [loading, setLoading] = useState(true);
   const [role, setRoleState] = useState<Role>("legal");
@@ -20,7 +20,9 @@ export default function App() {
   const [checking, setChecking] = useState(false);
   const [freshNote, setFreshNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [showUpload, setShowUpload] = useState(false);
+  // The upload form is the point of the home screen, so it is open by
+  // default rather than hidden behind a second click.
+  const [showUpload, setShowUpload] = useState(true);
   const [resuming, setResuming] = useState<string | null>(null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -79,7 +81,7 @@ export default function App() {
   // the only escape was reloading the browser.
   const newProduction = () => {
     setState(null);
-    setMission(false);
+    setMission(null);
     setShowUpload(true);
     setError(null);
   };
@@ -90,16 +92,22 @@ export default function App() {
       await api.startPacedDemo(0.45);
       setState(null);
       setArtifacts([]);
-      setMission(true);
+      setMission("demo");
     } catch {
       setError("Demo production could not be started.");
     }
   };
 
-  const enterReview = async () => {
+  const enterReview = async (pid: string = "demo") => {
     try {
-      setState(await api.getProduction("demo"));
-      setMission(false);
+      const fresh = await api.getProduction(pid);
+      setState(fresh);
+      setMission(null);
+      // Handing over at the preliminary report means the run is still going.
+      // Keep pulling so the cards fill in rather than freezing half-done.
+      const list = await api.listProductions();
+      const row = list.find((r) => r.id === pid);
+      if (row?.running) setResuming(pid);
     } catch {
       setError("Could not load the finished production.");
     }
@@ -167,7 +175,9 @@ export default function App() {
   }
 
   if (mission) {
-    return <MissionControl onComplete={enterReview} />;
+    return (
+      <MissionControl productionId={mission} onComplete={() => enterReview(mission)} />
+    );
   }
 
   if (!state) {
@@ -196,9 +206,9 @@ export default function App() {
         </div>
         {showUpload && (
           <Uploader
-            onStarted={() => {
+            onStarted={(pid) => {
               setState(null);
-              setMission(true);
+              setMission(pid);
             }}
             onLedger={() => {}}
           />
@@ -530,6 +540,7 @@ export default function App() {
             plan={research_plan?.[el.id]}
             route={routes?.[el.id]}
             liability={liability?.[el.id]}
+            pending={Boolean(resuming)}
             corroboration={corroboration?.[el.id]}
             coverage={coverage?.[el.id]}
             freshness={freshness?.[el.id] ?? []}

@@ -98,6 +98,7 @@ interface Props {
   plan: ResearchPlan | undefined;
   route: ResearchRoute | undefined;
   liability: LiabilityEstimate | undefined;
+  pending: boolean;
   corroboration: Corroboration | undefined;
   coverage: Coverage | undefined;
   freshness: FreshnessSignal[];
@@ -121,6 +122,7 @@ export function ElementCard({
   plan,
   route,
   liability,
+  pending,
   corroboration,
   coverage,
   freshness,
@@ -153,7 +155,11 @@ export function ElementCard({
   };
 
   return (
-    <div className={`card ${risk.band}`} ref={cardRef} onMouseEnter={onHover}>
+    <div
+      className={`card ${risk.band}${pending ? " pending" : ""}`}
+      ref={cardRef}
+      onMouseEnter={onHover}
+    >
       {decision && (
         <div className={`stamp ${decision.action === "escalate" ? "escalate" : ""}`}>
           {STAMP_LABEL[decision.action]}
@@ -236,6 +242,13 @@ export function ElementCard({
       {disputed && (
         <div className="conflict-banner">
           <strong>IDENTITY DISPUTED — research blocked.</strong> {corroboration!.note}
+        </div>
+      )}
+
+      {pending && !liability && (
+        <div className="pending-row">
+          <span className="spinner" />
+          Researching who owns this — the band above is provisional and can only fall
         </div>
       )}
 
