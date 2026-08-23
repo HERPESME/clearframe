@@ -25,7 +25,8 @@ from clearframe.territory import (
 from clearframe.models import RiskBand
 
 
-def el(category, label="x"):
+def el(category, label="x", siting="public_permanent"):
+    """Artwork here stands for a publicly-sited mural — see test_panorama_gate."""
     types = {
         ClearanceCategory.TRADEMARK: ElementType.LOGO,
         ClearanceCategory.COPYRIGHT_ART: ElementType.ARTWORK,
@@ -39,7 +40,7 @@ def el(category, label="x"):
         time_ranges=[TimeRange(start_s=0.0, end_s=5.0)],
         prominence=Prominence(screen_time_s=5.0, frame_coverage=0.2,
                               centrality=0.5, plot_integral=False),
-        category=category,
+        category=category, siting=siting,
     )
 
 

@@ -161,6 +161,11 @@ class DetectedElement(BaseModel):
     # reach. Defaults True so every existing state and fixture is unchanged.
     timing_reliable: bool = True
     timing_note: str = ""
+    # Whether this work is permanently installed in a place the public can
+    # reach. Freedom of panorama turns on exactly this, and on nothing else —
+    # a mural on a building qualifies, the same image on a t-shirt does not.
+    # "unknown" is the default and earns no band shift in either direction.
+    siting: str = "unknown"  # public_permanent | portable_or_interior | unknown
 
 
 class TriagedElement(DetectedElement):

@@ -17,6 +17,7 @@ import logging
 from clearframe.integrations.gemini_client import build_scan_context
 from clearframe.models import DetectedElement
 from clearframe.pipeline import PipelineContext
+from clearframe.sourcework import corrected_types
 from clearframe.timeline import timing_is_reliable
 
 log = logging.getLogger("clearframe.scan")
@@ -138,9 +139,14 @@ class ScanStage:
             raise watched  # the scan is load-bearing; the other two are not
         result, audit = watched
 
+        merged = merge_passes(result.detections, audit.detections)
+        # Typing is corrected BEFORE triage, which is what turns an element
+        # type into a clearance category — a real actor needs a release, not a
+        # copyright licence.
+        work = result.source_work or audit.source_work
         ctx.state.detections = [
             _with_timing_verdict(d, production)
-            for d in merge_passes(result.detections, audit.detections)
+            for d in corrected_types(merged, work)
         ]
         ctx.state.unscanned_ranges = result.unscanned_ranges + audit.unscanned_ranges
         # Not clearance items. Nobody owns a delivery label with your address

@@ -47,6 +47,13 @@ SCAN_PROMPT = (
     "illness or contempt). Judge only what is shown on screen; if the portrayal "
     "is not clear, use NEUTRAL. This matters because rights holders object to "
     "how a brand is depicted far more often than to its mere presence. "
+    "For ARTWORK and LOCATION also report `siting`: `public_permanent` if the "
+    "work is permanently installed somewhere the public can reach (a mural on "
+    "a building, a sculpture in a square, a shopfront), `portable_or_interior` "
+    "if it is not (a print on clothing, a poster or painting on an interior "
+    "wall, a sticker on an appliance, anything hand-held), or `unknown`. "
+    "Freedom of panorama turns on this and on nothing else, so a wrong answer "
+    "either excuses an infringement or invents one. "
     "Use FACE only for a REAL PERSON captured on camera; use CHARACTER for a "
     "drawn, animated, rendered or otherwise fictional character. The two need "
     "opposite instruments: a real person signs a release, while a character's "
@@ -242,6 +249,10 @@ SCAN_RESPONSE_SCHEMA: dict = {
                         "required": ["ymin", "xmin", "ymax", "xmax"],
                     },
                     "at_s": {"type": "number"},
+                    "siting": {
+                        "type": "string",
+                        "enum": ["public_permanent", "portable_or_interior", "unknown"],
+                    },
                     "depiction": {
                         "type": "string",
                         "enum": ["FAVOURABLE", "NEUTRAL", "UNFLATTERING", "DISPARAGING"],

@@ -10,10 +10,22 @@ from clearframe.pipeline import Pipeline, build_demo_pipeline, demo_context
 from clearframe.territory import assess, worst_band
 
 
-def make_element(category=ClearanceCategory.COPYRIGHT_ART, label="Street mural"):
+def make_element(
+    category=ClearanceCategory.COPYRIGHT_ART,
+    label="Street mural",
+    siting="public_permanent",
+):
+    """A street mural: the case freedom of panorama was actually written for.
+
+    Siting is explicit because the exception turns on it and nothing else. An
+    artwork that is not permanently sited in public — a poster on an interior
+    wall, a print on a t-shirt — gets no panorama treatment at all, which
+    `test_panorama_gate.py` covers separately.
+    """
     return TriagedElement(
         id="e5",
         label=label,
+        siting=siting,
         element_type=ElementType.ARTWORK,
         description="",
         time_ranges=[TimeRange(start_s=30, end_s=36)],
