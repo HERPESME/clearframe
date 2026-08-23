@@ -869,6 +869,18 @@ button {
 /* The cost block is the answer; everything else is the evidence for it. It
    reads first and it reads plainly — a director should not have to parse a
    score to learn what shipping this uncleared would cost. */
+@keyframes cf-spin { to { transform: rotate(360deg); } }
+.spinner { display:inline-block; width:11px; height:11px; margin-right:7px;
+  vertical-align:-1px; border:2px solid var(--line); border-top-color: var(--amber);
+  border-radius:50%; animation: cf-spin .8s linear infinite; }
+
+/* A card whose research has not landed yet. It shows what it already knows —
+   label, timecodes, provisional band — rather than an empty frame, because a
+   blank card reads as a broken app rather than as work in progress. */
+.card.pending { opacity: .92; }
+.pending-row { display:flex; align-items:center; gap:8px; font-family: var(--mono);
+  font-size:11px; letter-spacing:.06em; color: var(--muted); padding:10px 0; }
+
 .cost-block { background: rgba(230,126,34,.07); border: 1px solid rgba(230,126,34,.28);
   border-radius: 4px; padding: 12px 14px; }
 .cost-headline { font-size: 14px; line-height: 1.5; margin-bottom: 10px; }
