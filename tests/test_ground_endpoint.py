@@ -263,20 +263,22 @@ def test_progress_is_reportable(tmp_path):
         assert after["done"] <= after["total"]
 
 
-def test_warming_starts_when_preview_completes_not_when_the_run_does():
-    """Research and court take minutes after preview, and the timecodes are
-    already final — so the warm-up belongs inside that window, not after it.
+def test_warming_starts_at_triage_the_moment_the_boxes_are_final():
+    """Triage fixes the ids, labels, appearances and rectangles. Everything
+    after it changes what is KNOWN about a finding, never where or when it is
+    on screen — so that is the earliest correct place to start measuring, and
+    it puts the whole warm-up inside the stages that follow.
 
     Asserted on the listener wiring rather than a full live run: the hook is
-    `stage_complete` for `preview`, and the pipeline saves state BEFORE
-    emitting it, so the warm-up always reads a current state from the store.
+    `stage_complete` for `triage`, and the pipeline saves state BEFORE emitting
+    it, so the warm-up always reads a current state from the store.
     """
     import inspect
 
     from clearframe.webapp import server as srv
 
     source = inspect.getsource(srv.create_app)
-    assert '"stage_complete"' in source and 'event.get("stage") == "preview"' in source
+    assert '"stage_complete"' in source and 'event.get("stage") == "triage"' in source
     # and the pipeline really does save before emitting that event
     from clearframe.pipeline import Pipeline
 
@@ -284,3 +286,24 @@ def test_warming_starts_when_preview_completes_not_when_the_run_does():
     save_at = run_src.index("ctx.store.save(ctx.state)")
     emit_at = run_src.index('{"type": "stage_complete"')
     assert save_at < emit_at, "state must be persisted before the warm-up reads it"
+
+
+def test_only_music_labels_change_after_triage():
+    """The one thing that could make triage too early, pinned.
+
+    `corroborate` rewrites an element's label when a fingerprint promotes a
+    generic music description to an identified track. Grounding matches on
+    label, so a visual element renamed after the warm-up started would be
+    measured under a name the player no longer uses. It only ever renames
+    MUSIC, which carries no rectangle and is never grounded — and if that ever
+    widens, this fails.
+    """
+    import inspect
+
+    from clearframe.stages import corroborate as stage
+
+    source = inspect.getsource(stage)
+    rewrite = source.index("ctx.state.elements[index] = el.model_copy(")
+    guard = source.index("if el.category is ClearanceCategory.MUSIC_SYNC:")
+    assert guard < rewrite, "an element rename outside the MUSIC branch"
+    assert source.count("ctx.state.elements[index] = el.model_copy(") == 1

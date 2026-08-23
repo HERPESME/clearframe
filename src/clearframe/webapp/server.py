@@ -475,19 +475,22 @@ def create_app(out_root: Path) -> FastAPI:
 
         def _listen(event: dict) -> None:
             event_queues[pid].put_nowait(event)
-            # Warm the boxes the moment the timecodes are FINAL, which is when
-            # preview completes — not when the whole run does. Triage fixes the
-            # appearances and their rectangles before preview; everything after
-            # it (research, freshness, risk, territory, coverage, remediation,
-            # court) changes what is KNOWN about a finding, never where or when
-            # it is on screen.
+            # Warm the boxes at the EARLIEST moment they are final, which is
+            # triage — not when the run ends, and not when preview does.
             #
-            # The measured shape of a run makes this free: preview lands at
-            # ~167s and the remaining stages take ~335s, while warming a 50s
-            # clip takes ~100s. Started here it finishes inside research, so
-            # the report and the boxes become ready at the same moment instead
-            # of the boxes trailing it by two minutes.
-            if event.get("type") == "stage_complete" and event.get("stage") == "preview":
+            # Triage fixes the element ids, labels, appearances and rectangles.
+            # Everything after it changes what is KNOWN about a finding, never
+            # where or when it is on screen. The one exception is `corroborate`
+            # rewriting a label, and it does that only for MUSIC, which has no
+            # rectangle and is never grounded.
+            #
+            # The measured shape of a run: scan ends at ~102s, preview at
+            # ~167s, the whole run at ~502s, and warming a 50s clip takes
+            # ~100s. Hooking preview already hid the warm-up inside research;
+            # hooking triage buys another ~65s, which is what decides it on
+            # longer footage, where warming can outlast the stages it is
+            # hiding behind.
+            if event.get("type") == "stage_complete" and event.get("stage") == "triage":
                 if pid not in _pregrounded:
                     _pregrounded.add(pid)
                     asyncio.create_task(_preground(pid))
