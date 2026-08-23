@@ -104,6 +104,8 @@ interface Props {
   freshness: FreshnessSignal[];
   territory: TerritoryRisk[];
   unscripted: boolean;
+  /** An element of the work this footage IS — cleared by licensing the work. */
+  subsumed: boolean;
   candidates: CandidateEntity[];
   fps: number;
   role: Role;
@@ -129,6 +131,7 @@ export function ElementCard({
   freshness,
   territory,
   unscripted,
+  subsumed,
   candidates,
   fps,
   role,
@@ -175,6 +178,14 @@ export function ElementCard({
           {risk.band} · {risk.score}
         </span>
         {risk.de_minimis && <span className="badge dim">DE MINIMIS</span>}
+        {subsumed && (
+          <span
+            className="badge subsumed"
+            title="An element of the work this footage IS. Covered by whatever licence you hold to that work — not a separate clearance."
+          >
+            PART OF THE WORK
+          </span>
+        )}
         {coverage && (
           <span
             className={`badge cov ${coverage.status}`}

@@ -27,6 +27,7 @@ from clearframe.models import PreviewFinding, ResearchTier
 from clearframe.pipeline import PipelineContext
 from clearframe.routing import route_all, summarise_routes
 from clearframe.scoring import band_for, provisional_score
+from clearframe.sourcework import subsumed_by, summarise_source_work
 from clearframe.territory import assess as assess_territory
 
 
@@ -35,6 +36,14 @@ class PreviewStage:
 
     async def run(self, ctx: PipelineContext) -> None:
         elements = ctx.state.elements
+        # What the footage IS, before anything about what it contains. Six
+        # Code Geass characters banded separately read as six problems; the
+        # useful output is one line — clear the work with Sunrise. Routing
+        # already knew (every one came out LOCAL); nothing surfaced it, because
+        # `summarise_source_work` had no callers.
+        work = ctx.state.source_work
+        ctx.state.subsumed_ids = [e.id for e in elements if subsumed_by(e, work)]
+        ctx.state.source_work_summary = summarise_source_work(work, elements)
         if not elements:
             ctx.emit({"type": "preview_ready", "count": 0, "findings": []})
             return

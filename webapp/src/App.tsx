@@ -249,6 +249,8 @@ export default function App() {
     sponsor_conflicts,
     assessed_exposures,
     cast,
+    subsumed_ids,
+    source_work_summary,
     platform_outcomes,
     drift,
     candidates,
@@ -462,6 +464,15 @@ export default function App() {
             <span className="n">{covCount("NOT_COVERED")}</span> unlicensed
           </span>
         )}
+        {source_work_summary && source_work_summary.subsumed > 0 && (
+          <div className="work-banner">
+            <strong>This footage IS “{source_work_summary.title}”.</strong>{" "}
+            {source_work_summary.headline} There is one counterparty and one
+            action here, not {source_work_summary.subsumed}.
+            <div className="work-action">{source_work_summary.action}</div>
+            <div className="work-caveat">{source_work_summary.caveat}</div>
+          </div>
+        )}
         {(cast?.length ?? 0) > 0 && (
           <div className="cast-banner">
             <strong>Cast recognised, not flagged.</strong> {cast.length} face
@@ -620,6 +631,7 @@ export default function App() {
             coverage={coverage?.[el.id]}
             freshness={freshness?.[el.id] ?? []}
             territory={territory_risk?.[el.id] ?? []}
+            subsumed={(subsumed_ids ?? []).includes(el.id)}
             unscripted={unscriptedIds.has(el.id)}
             candidates={candidates?.[el.id] ?? []}
             fps={production.fps}
