@@ -139,9 +139,47 @@ def test_the_legacy_array_form_is_still_accepted():
     assert d.bbox.ymin == pytest.approx(0.52)
 
 
-def test_at_s_is_required_so_a_box_is_tied_to_a_moment():
-    """A single box drawn across four separate appearances is wrong in at least
-    three of them. Knowing WHEN it was measured is what makes it drawable."""
+def test_at_s_survives_for_legacy_states():
+    """Superseded by per-appearance boxes, which are strictly better: `at_s`
+    tied ONE box to ONE moment, so three of four appearances still got nothing.
+    The field stays in the schema so states written against it keep loading."""
     props = SCAN_RESPONSE_SCHEMA["properties"]["elements"]["items"]["properties"]
     assert "at_s" in props
-    assert "at_s" in SCAN_PROMPT or "at_s" in str(props["at_s"])
+
+
+# ------------------------------------------------- boxes inside appearances
+def test_a_box_is_parsed_inside_each_appearance():
+    payload = element()
+    payload["elements"][0]["time_ranges"] = [
+        {"start_s": 0, "end_s": 5, "bbox": {"ymin": 300, "xmin": 400, "ymax": 440, "xmax": 600}},
+        {"start_s": 23, "end_s": 28, "bbox": {"ymin": 700, "xmin": 100, "ymax": 800, "xmax": 250}},
+    ]
+    (d,) = parse_scan_payload(payload).detections
+    assert d.time_ranges[0].bbox.ymin == pytest.approx(0.30)
+    assert d.time_ranges[1].bbox.ymin == pytest.approx(0.70)
+
+
+def test_a_bad_box_in_one_appearance_costs_only_that_box():
+    """Same recall rule as before, one level down: never lose an appearance
+    over a malformed rectangle."""
+    payload = element()
+    payload["elements"][0]["time_ranges"] = [
+        {"start_s": 0, "end_s": 5, "bbox": [1, 2, 3]},
+        {"start_s": 23, "end_s": 28, "bbox": {"ymin": 700, "xmin": 100, "ymax": 800, "xmax": 250}},
+    ]
+    (d,) = parse_scan_payload(payload).detections
+    assert len(d.time_ranges) == 2
+    assert d.time_ranges[0].bbox is None
+    assert d.time_ranges[1].bbox is not None
+
+
+def test_appearances_without_boxes_still_parse():
+    (d,) = parse_scan_payload(element()).detections
+    assert d.time_ranges[0].bbox is None
+
+
+def test_the_schema_puts_the_box_inside_the_range():
+    props = SCAN_RESPONSE_SCHEMA["properties"]["elements"]["items"]["properties"]
+    tr = props["time_ranges"]["items"]["properties"]
+    assert "bbox" in tr
+    assert set(tr["bbox"]["properties"]) == {"ymin", "xmin", "ymax", "xmax"}

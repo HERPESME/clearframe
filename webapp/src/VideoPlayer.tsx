@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useRef, useState } from "react";
-import type { Corroboration, Coverage, Element, Risk } from "./types";
+import type { BBox, Corroboration, Coverage, Element, Risk } from "./types";
 import { tc } from "./timecode";
 
 interface Props {
@@ -38,21 +38,35 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
   const onFrame = (e: React.SyntheticEvent<HTMLVideoElement>) =>
     setNow(e.currentTarget.currentTime);
 
-  // A box is measured at ONE moment (`at_s`), so it is only true near that
-  // moment. Drawing it across every appearance put the Pizza Hut box on a wall
-  // three shots later — a confidently wrong rectangle, which is worse than no
-  // rectangle at all. Outside the window the finding still shows in the
-  // timeline and the card; only the overlay is withheld.
+  // Mirrors clearframe/overlay.py::box_at exactly — one rule, two runtimes.
+  // The box belongs to the APPEARANCE, so pausing at 1s gives the opening
+  // shot's rectangle and pausing at 27s gives the third's. Two fallbacks keep
+  // older states drawing rather than silently losing every box on upgrade.
   const BOX_WINDOW_S = 2.0;
-  const visible = elements.filter((el) => {
-    if (!el.bbox) return false;
+  const boxAt = (el: Element): BBox | null => {
+    const appearance = el.time_ranges.find(
+      (r) => now >= r.start_s && now <= r.end_s,
+    );
+    if (!appearance) return null;
+    if (appearance.bbox) return appearance.bbox;
+    if (!el.bbox) return null;
     if (el.at_s !== null && el.at_s !== undefined) {
-      return Math.abs(now - el.at_s) <= BOX_WINDOW_S;
+      return Math.abs(now - el.at_s) <= BOX_WINDOW_S ? el.bbox : null;
     }
-    // No timestamp reported: fall back to the old behaviour rather than
-    // hiding the box entirely, since older states have no at_s.
-    return el.time_ranges.some((r) => now >= r.start_s && now <= r.end_s);
-  });
+    return el.bbox;
+  };
+
+  const visible = elements
+    .map((el) => ({ el, box: boxAt(el) }))
+    .filter((v): v is { el: Element; box: BBox } => v.box !== null);
+
+  // On screen but we do not know where. Worth saying — silence would read as
+  // "nothing here", and inventing a rectangle would be worse than both.
+  const unlocated = elements.filter(
+    (el) =>
+      boxAt(el) === null &&
+      el.time_ranges.some((r) => now >= r.start_s && now <= r.end_s),
+  );
 
   const COV_LABEL: Record<string, string> = {
     COVERED: "licensed",
@@ -83,8 +97,7 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
           preserveAspectRatio="none"
           aria-hidden={visible.length === 0}
         >
-          {visible.map((el) => {
-            const b = el.bbox!;
+          {visible.map(({ el, box: b }) => {
             const band = risk[el.id]?.band ?? "LOW";
             const active = activeId === el.id;
             return (
@@ -101,8 +114,7 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
             );
           })}
         </svg>
-        {visible.map((el) => {
-          const b = el.bbox!;
+        {visible.map(({ el, box: b }) => {
           const band = risk[el.id]?.band ?? "LOW";
           const cov = coverage?.[el.id]?.status;
           const verdict = corroboration?.[el.id]?.verdict;
@@ -122,8 +134,14 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
         })}
       </div>
       <div className="player-status">
-        {tc(now, fps)} · {visible.length} clearable element
-        {visible.length === 1 ? "" : "s"} on screen
+        {tc(now, fps)} · {visible.length} boxed
+        {unlocated.length > 0 && (
+          <span className="ov-unlocated">
+            {" "}
+            · {unlocated.length} on screen without a known position (
+            {unlocated.map((e) => e.label).join(", ")})
+          </span>
+        )}
       </div>
     </div>
   );

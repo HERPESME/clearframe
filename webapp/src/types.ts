@@ -3,6 +3,9 @@ export type Action = "approve_risk" | "license" | "blur" | "reshoot" | "escalate
 export type Role = "legal" | "producer" | "editor";
 
 export interface TimeRange {
+  // One box per APPEARANCE. An element in four shots needs four rectangles;
+  // reusing one across all of them points a reviewer at empty screen.
+  bbox?: BBox | null;
   start_s: number;
   end_s: number;
 }

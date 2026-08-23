@@ -70,8 +70,20 @@ class UseContext(str, Enum):
 
 
 class TimeRange(BaseModel):
+    """One appearance, with the box for THAT appearance.
+
+    The box belongs to the appearance rather than the element because an
+    element that shows up in four shots needs four rectangles. A single box
+    per element was painted onto every range, so the one measured in the
+    opening shot landed on a wall three shots later.
+
+    Optional: audio has no position, and states written before this existed
+    carry no per-range box.
+    """
+
     start_s: float = Field(ge=0)
     end_s: float
+    bbox: "BBox | None" = None
 
     @model_validator(mode="after")
     def _check_order(self) -> "TimeRange":

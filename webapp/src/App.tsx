@@ -281,6 +281,17 @@ export default function App() {
     cardRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  // Jump to ONE appearance rather than the first. A finding that shows up in
+  // four shots has four boxes now, and the only way to see the third is to be
+  // able to land in it.
+  const seekTo = (seconds: number, id: string) => {
+    setActiveId(id);
+    if (videoRef.current && production.has_media) {
+      videoRef.current.currentTime = Math.max(seconds + 0.15, 0);
+      videoRef.current.pause();
+    }
+  };
+
   return (
     <>
       <header className="topbar">
@@ -554,6 +565,7 @@ export default function App() {
               cardRefs.current[el.id] = node;
             }}
             onHover={() => setActiveId(el.id)}
+            onSeek={(s) => seekTo(s, el.id)}
           />
         ))}
       </main>
