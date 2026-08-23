@@ -1,6 +1,7 @@
 """Rule-based clearance triage and cross-shot duplicate merging."""
 
 from clearframe.matching import labels_match
+from clearframe.overlay import locates
 from clearframe.models import (
     BBox,
     ClearanceCategory,
@@ -65,15 +66,22 @@ def _colocated(a: DetectedElement, b: DetectedElement) -> bool:
 
     The objection to matching on time alone is that two distinct logos share a
     shot. They do — and they are not in the same place in it, which is what
-    this adds. Both sightings must carry a measured box: an absent box is not
-    agreement, so a pair with nothing to compare stays two findings.
+    this adds. Both sightings must carry a box that LOCATES: an absent box is
+    not agreement, and neither is a box around the whole frame, which overlaps
+    every other box in the picture.
+
+    That last clause is not defensive. Replaying a real run's detections found
+    "Stu Price (Ed Helms)" boxed at {0, 0, 1, 1} while sharing a tenth of a
+    second with "Alan Garner (Zach Galifianakis)" — two actors, merged into
+    one, and one of them deleted from the report. Over-merging is the failure
+    this whole rule is written around.
     """
     pairs = [
         (r.bbox, q.bbox)
         for r in a.time_ranges
         for q in b.time_ranges
         if r.start_s < q.end_s and q.start_s < r.end_s
-        and r.bbox is not None and q.bbox is not None
+        and locates(r.bbox) and locates(q.bbox)
     ]
     return any(_boxes_overlap(r, q) for r, q in pairs)
 
