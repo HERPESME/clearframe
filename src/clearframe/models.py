@@ -790,3 +790,9 @@ class ProductionState(BaseModel):
     # them, so the release a publicity finding asks for is already the cast
     # agreement. Anyone the scan could NOT name stays in `elements`.
     cast: list[CastCredit] = Field(default_factory=list)
+    # Findings that are elements of the work this footage IS, rather than
+    # things it merely contains. Routed LOCAL and spending nothing already;
+    # this is what lets the REPORT say so, instead of showing six characters
+    # from one anime as six independent clearance problems.
+    subsumed_ids: list[str] = Field(default_factory=list)
+    source_work_summary: dict | None = None

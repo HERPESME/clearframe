@@ -75,6 +75,8 @@ class ClearanceDossier(BaseModel):
     # omitting three faces the reviewer can plainly see on screen.
     cast: list[CastCredit] = []
     cast_summary: dict | None = None
+    subsumed_ids: list[str] = []
+    source_work_summary: dict | None = None
     disclaimer: str = DISCLAIMER
 
 
@@ -159,6 +161,8 @@ def build_dossier(state: ProductionState, generated_at: str) -> ClearanceDossier
         use_context=state.production.use_context,
         cast=state.cast,
         cast_summary=summarise(state.cast),
+        subsumed_ids=state.subsumed_ids,
+        source_work_summary=state.source_work_summary,
     )
 
 

@@ -391,4 +391,15 @@ export interface ProductionState {
   territories: string[];
   coverage: Record<string, Coverage>;
   cast: CastCredit[];
+  subsumed_ids: string[];
+  source_work_summary: {
+    title: string;
+    rights_holder: string | null;
+    confidence: string;
+    subsumed: number;
+    independent: number;
+    headline: string;
+    action: string;
+    caveat: string;
+  } | null;
 }
