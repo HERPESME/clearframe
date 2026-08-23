@@ -11,6 +11,7 @@ from typing import Protocol
 
 from pydantic import BaseModel, ValidationError
 
+from clearframe.matching import labels_match
 from clearframe.models import (
     BBox,
     DetectedElement,
@@ -456,7 +457,81 @@ class GeminiClient(Protocol):
         context: str = "",
     ) -> ScanResult: ...
 
+    async def ground_frame(
+        self, image: bytes, labels: list[str]
+    ) -> dict[str, BBox]: ...
+
     async def scan_script(self, text: str) -> list[ScriptMention]: ...
+
+
+GROUND_PROMPT = (
+    "This is a single frame from a film. The following elements are already "
+    "known to appear somewhere in the footage:\n{labels}\n\n"
+    "For each one that is visible IN THIS IMAGE, return its bounding box as an "
+    "object with named edges ymin, xmin, ymax, xmax, normalised 0-1000, "
+    "measured on this frame. Use the label exactly as given. Omit anything you "
+    "cannot see here — a missing entry is correct and expected, since these "
+    "elements appear at different points in the film. Do NOT report anything "
+    "that is not on the list: this pass locates known elements, it does not "
+    "look for new ones."
+)
+
+GROUND_RESPONSE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "found": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "label": {"type": "string"},
+                    "bbox": {
+                        "type": "object",
+                        "properties": {
+                            "ymin": {"type": "number"},
+                            "xmin": {"type": "number"},
+                            "ymax": {"type": "number"},
+                            "xmax": {"type": "number"},
+                        },
+                        "required": ["ymin", "xmin", "ymax", "xmax"],
+                    },
+                },
+                "required": ["label", "bbox"],
+            },
+        },
+    },
+    "required": ["found"],
+}
+
+
+def parse_ground_payload(payload: dict, known: list[str]) -> dict[str, BBox]:
+    """Boxes for labels the scan already found, keyed by the scan's own label.
+
+    Anything the model names that is not on the known list is dropped, and that
+    is the whole safety property of this pass: grounding LOCATES, it does not
+    detect. A box for an element that never went through triage, corroboration
+    and routing would be a second unaudited detector wearing the first one's
+    clothes.
+
+    Labels are matched with `labels_match` because the model rarely echoes one
+    verbatim — "Nike swoosh on the hoodie" is the same finding as "Nike hoodie
+    swoosh", and an exact-string check would silently return nothing.
+    """
+    out: dict[str, BBox] = {}
+    for entry in payload.get("found") or []:
+        if not isinstance(entry, dict):
+            continue
+        label = (entry.get("label") or "").strip()
+        if not label:
+            continue
+        match = next((k for k in known if labels_match(label, k)), None)
+        if match is None or match in out:
+            continue
+        box = parse_bbox(entry.get("bbox"))
+        if box is not None:
+            out[match] = box
+    return out
+
 
 
 class FixtureGeminiClient:
@@ -480,6 +555,15 @@ class FixtureGeminiClient:
         if not path.exists():
             return ScanResult(detections=[], unscanned_ranges=[])
         return parse_scan_payload(json.loads(path.read_text()))
+
+    async def ground_frame(
+        self, image: bytes, labels: list[str]
+    ) -> dict[str, BBox]:
+        """Recorded boxes, so demo mode exercises the identical code path."""
+        path = self.fixtures_dir / "ground_frame.json"
+        if not path.exists():
+            return {}
+        return parse_ground_payload(json.loads(path.read_text()), labels)
 
     async def scan_script(self, text: str) -> list[ScriptMention]:
         path = self.fixtures_dir / "script_scan.json"

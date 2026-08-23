@@ -35,12 +35,45 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
 ) {
   const [now, setNow] = useState(0);
   const [paused, setPaused] = useState(true);
+  // Boxes measured on the paused frame itself, keyed by element id, cached by
+  // whole second. The scan's boxes come from the video pass, where Gemini
+  // samples at ~1fps and returns one rectangle per time range — a union of
+  // where the subject travelled rather than where it is in this frame.
+  const [ground, setGround] = useState<Record<string, Record<string, BBox>>>({});
+  const [locating, setLocating] = useState(false);
   const [ok, setOk] = useState(true);
   const localRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     setOk(true);
+    setGround({});
   }, [pid, mediaVersion]);
+
+  // Ground only while paused. During playback a refined box would be stale
+  // before it arrived, and every frame would cost a call.
+  useEffect(() => {
+    if (!paused) return;
+    const second = String(Math.floor(now));
+    if (ground[second]) return;
+    let cancelled = false;
+    setLocating(true);
+    fetch(`/api/productions/${pid}/ground?at_s=${now.toFixed(2)}`)
+      .then((r) => (r.ok ? r.json() : { boxes: {} }))
+      .then((body) => {
+        if (!cancelled) setGround((g) => ({ ...g, [second]: body.boxes ?? {} }));
+      })
+      .catch(() => {
+        // A refined box is a nicety. Falling back to the scan's box is the
+        // behaviour that existed before this, and it is fine.
+        if (!cancelled) setGround((g) => ({ ...g, [second]: {} }));
+      })
+      .finally(() => {
+        if (!cancelled) setLocating(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [pid, paused, now, ground]);
 
   if (!ok) return null;
 
@@ -57,6 +90,9 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
   const boxAt = (el: Element): BBox | null => {
     // Timecodes the scan cannot have measured place a box nowhere real.
     if (el.timing_reliable === false) return null;
+    // A box measured on THIS frame beats one inferred from a time range.
+    const grounded = ground[String(Math.floor(now))]?.[el.id];
+    if (grounded) return grounded;
     const appearance = el.time_ranges.find(
       (r) => now >= r.start_s && now <= r.end_s,
     );
@@ -169,6 +205,9 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
           <>{visible.length} boxed</>
         ) : (
           <span className="ov-unlocated">pause to place boxes</span>
+        )}
+        {paused && locating && (
+          <span className="ov-unlocated"> · locating on this frame…</span>
         )}
         {unlocated.length > 0 && (
           <span className="ov-unlocated">

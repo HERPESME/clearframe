@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import logging
 import os
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,7 +16,9 @@ from pydantic import BaseModel
 from clearframe.config import ClearFrameConfig, validate_live
 from clearframe.dossier import pending_ids
 from clearframe.licensing import assign_ids, parse_licence_csv, parse_licence_json
-from clearframe.media import probe_duration_s
+from clearframe.media import extract_frame, probe_duration_s
+
+log = logging.getLogger("clearframe.webapp")
 from clearframe.models import Production
 from clearframe.pipeline import (
     ANALYSIS_STAGES,
@@ -132,6 +135,29 @@ def _use_context(raw: str):
         return UseContext((raw or "").strip().upper())
     except ValueError:
         return UseContext.EXPRESSIVE
+
+
+
+def build_grounding_client(cfg):
+    """The client that locates known labels on a still frame.
+
+    Separate from `build_context` because grounding is not a pipeline stage —
+    it answers an interactive question about one moment, long after the run
+    finished. Demo mode gets the fixture twin, so the identical parser and the
+    identical drawing code run with no credentials and no network.
+    """
+    if cfg.mode == "live":
+        from clearframe.integrations.gemini_live import LiveGeminiClient
+
+        return LiveGeminiClient(cfg.project, cfg.location)
+
+    from pathlib import Path as _Path
+
+    from clearframe.integrations.gemini_client import FixtureGeminiClient
+
+    return FixtureGeminiClient(
+        _Path(__file__).resolve().parents[1] / "integrations" / "fixtures"
+    )
 
 
 def create_app(out_root: Path) -> FastAPI:
@@ -436,6 +462,61 @@ def create_app(out_root: Path) -> FastAPI:
         return FileResponse(
             path, media_type=media_type, headers={"Cache-Control": "no-cache"}
         )
+
+    # Boxes measured on the paused frame, cached per whole second.
+    #
+    # The scan's boxes come from the video pass, where Gemini samples at about
+    # 1fps and returns ONE rectangle per time range — a union of where the
+    # subject travelled rather than where it is in any frame. Three separate
+    # box defects traced back to that. Grounding a still sidesteps the video
+    # timeline entirely: full resolution, one frame, labels already known.
+    _ground_cache: dict[tuple[str, int], dict] = {}
+
+    @app.get("/api/productions/{pid}/ground")
+    async def ground_frame_at(pid: str, at_s: float = 0.0):
+        state = _load(pid)
+
+        # Only ask about elements the analysis says are on screen here. A model
+        # asked to place something that is not in the frame will sometimes
+        # oblige, and asking costs a call.
+        here = [
+            el for el in state.elements
+            if el.timing_reliable
+            and any(r.start_s <= at_s <= r.end_s for r in el.time_ranges)
+        ]
+        if not here:
+            return {"at_s": at_s, "boxes": {}}
+
+        key = (pid, int(at_s))
+        if key in _ground_cache:
+            return {"at_s": at_s, "boxes": _ground_cache[key], "cached": True}
+
+        found = _stored_media(pid)
+        if found is None:
+            return {"at_s": at_s, "boxes": {}}
+
+        frame = extract_frame(found[0], at_s)
+        if frame is None:
+            return {"at_s": at_s, "boxes": {}}
+
+        cfg = ClearFrameConfig.from_env(os.environ)
+        try:
+            located = await build_grounding_client(cfg).ground_frame(
+                frame, [el.label for el in here]
+            )
+        except Exception as exc:  # a refined box is a nicety, never a failure
+            log.warning("grounding failed for %s at %.2fs: %s", pid, at_s, exc)
+            return {"at_s": at_s, "boxes": {}}
+
+        # Keyed by element id: the client draws against its own state, and a
+        # label is not a stable identifier.
+        boxes = {
+            el.id: located[el.label].model_dump()
+            for el in here
+            if el.label in located
+        }
+        _ground_cache[key] = boxes
+        return {"at_s": at_s, "boxes": boxes}
 
     @app.get("/api/licences")
     def list_licences():

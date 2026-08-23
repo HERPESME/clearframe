@@ -189,6 +189,33 @@ class LiveGeminiClient:
 
         return await self._scan_with_prompt(footage_uri, scan_prompt_with(context))
 
+    async def ground_frame(
+        self, image: bytes, labels: list[str]
+    ) -> dict:
+        """Locate already-known labels on one still frame.
+
+        A still is a stronger grounding problem than video: full resolution, no
+        1fps sampling, no box that is a union of where the subject travelled.
+        The task is also easier — the labels are given, so the model is placing
+        known things rather than deciding what is there.
+        """
+        from google.genai import types
+
+        from clearframe.integrations.gemini_client import (
+            GROUND_PROMPT,
+            GROUND_RESPONSE_SCHEMA,
+            parse_ground_payload,
+        )
+
+        if not labels:
+            return {}
+        prompt = GROUND_PROMPT.format(
+            labels="\n".join(f"- {a}" for a in labels)
+        )
+        part = types.Part.from_bytes(data=image, mime_type="image/jpeg")
+        raw = self._generate([part, prompt], GROUND_RESPONSE_SCHEMA)
+        return parse_ground_payload(json.loads(raw), labels)
+
     async def scan_script(self, text: str):
         from clearframe.integrations.gemini_client import (
             SCRIPT_PROMPT,
