@@ -57,8 +57,28 @@ def _overlaps(a: DetectedElement, b: DetectedElement) -> bool:
 _NAMES_THE_SAME = 0.9
 
 
+# How much two rectangles must agree when there is no usable clock behind
+# them. Anchored on the two pairs that set it, both from one live re-run:
+# the same face tattoo measured by both passes scores 0.56, while aviator
+# sunglasses and a sticker on a water heater — which clip a corner — score
+# 0.06. Only used when the timing has been disowned; a pair that shares an
+# instant needs no more than an overlap.
+SAME_REGION_IOU = 0.3
+
+
 def _boxes_overlap(a: BBox, b: BBox) -> bool:
     return a.xmin < b.xmax and b.xmin < a.xmax and a.ymin < b.ymax and b.ymin < a.ymax
+
+
+def _iou(a: BBox, b: BBox) -> float:
+    if not _boxes_overlap(a, b):
+        return 0.0
+    inter = (min(a.xmax, b.xmax) - max(a.xmin, b.xmin)) * (
+        min(a.ymax, b.ymax) - max(a.ymin, b.ymin)
+    )
+    area_a = (a.xmax - a.xmin) * (a.ymax - a.ymin)
+    area_b = (b.xmax - b.xmin) * (b.ymax - b.ymin)
+    return inter / (area_a + area_b - inter)
 
 
 def _colocated(a: DetectedElement, b: DetectedElement) -> bool:
@@ -76,13 +96,25 @@ def _colocated(a: DetectedElement, b: DetectedElement) -> bool:
     one, and one of them deleted from the report. Over-merging is the failure
     this whole rule is written around.
     """
+    # A clock we have already disowned cannot testify that two sightings are
+    # different. One live re-run returned the second pass's timecodes as
+    # seconds DIVIDED BY 100 — 0.04971 for 4.971s — so the two passes' ranges
+    # never overlapped and the same tattoo stayed two findings. `timeline.py`
+    # had already proved those timecodes impossible; using them anyway to keep
+    # the findings apart was reading meaning into the same numbers we refused
+    # to trust.
+    unclocked = not (a.timing_reliable and b.timing_reliable)
     pairs = [
         (r.bbox, q.bbox)
         for r in a.time_ranges
         for q in b.time_ranges
-        if r.start_s < q.end_s and q.start_s < r.end_s
+        if (unclocked or (r.start_s < q.end_s and q.start_s < r.end_s))
         and locates(r.bbox) and locates(q.bbox)
     ]
+    if unclocked:
+        # The rectangle is the whole of the evidence, so it has to describe the
+        # same region rather than merely touch one.
+        return any(_iou(r, q) >= SAME_REGION_IOU for r, q in pairs)
     return any(_boxes_overlap(r, q) for r, q in pairs)
 
 
@@ -139,7 +171,13 @@ def _merge(group: list[DetectedElement]) -> DetectedElement:
     first = group[0]
     richest = max(group, key=lambda d: len(d.description or ""))
     longest_label = max(group, key=lambda d: len(d.label or ""))
-    ranges = _union([r for d in group for r in d.time_ranges])
+    # A pass whose timecodes failed the physical test contributes none of them.
+    # Unioning them in produced a range set spanning both units at once, and
+    # the stickiness rule below then disowned the whole finding — so a sighting
+    # that HAD been measured correctly stopped drawing a box. Three findings
+    # lost their boxes that way on one live re-run.
+    timed = [d for d in group if d.timing_reliable] or group
+    ranges = _union([r for d in timed for r in d.time_ranges])
     # Screen time comes from the ranges rather than from the sum of what each
     # pass claimed: an element cannot be on screen longer than the timecodes
     # saying where it is.
@@ -169,17 +207,20 @@ def _merge(group: list[DetectedElement]) -> DetectedElement:
         ),
         "bbox": next((d.bbox for d in group if d.bbox is not None), first.bbox),
         "at_s": next((d.at_s for d in group if d.at_s is not None), first.at_s),
-        # Disowned timing is sticky: one pass proving the timecodes impossible
-        # is not cancelled by another pass being silent about it.
-        "timing_reliable": all(d.timing_reliable for d in group),
-        "timing_note": next((d.timing_note for d in group if d.timing_note), ""),
+        # Disowned timing is sticky against SILENCE — one pass proving the
+        # timecodes impossible is not cancelled by another pass saying nothing.
+        # It is not sticky against a measurement: a range that survives the
+        # physical test beats one that failed it, so a group with any usable
+        # clock keeps it, and only a group with none stays disowned.
+        "timing_reliable": any(d.timing_reliable for d in group),
+        "timing_note": next((d.timing_note for d in timed if d.timing_note), ""),
     }
     return first.model_copy(
         update={
             **richer,
             "time_ranges": ranges,
             "prominence": Prominence(
-                screen_time_s=_screen_time(group, ranges),
+                screen_time_s=_screen_time(timed, ranges),
                 frame_coverage=max(d.prominence.frame_coverage for d in group),
                 centrality=max(d.prominence.centrality for d in group),
                 plot_integral=any(d.prominence.plot_integral for d in group),
