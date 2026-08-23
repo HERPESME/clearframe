@@ -870,6 +870,15 @@ button {
    reads first and it reads plainly — a director should not have to parse a
    score to learn what shipping this uncleared would cost. */
 @keyframes cf-spin { to { transform: rotate(360deg); } }
+.ov-unlocated { color: var(--muted); }
+
+/* Each appearance is its own scrub target — that is how you reach the third
+   shot's box. A dot marks the ones that actually have a rectangle. */
+.tc-jump { background: none; border: 0; padding: 0 10px 0 0; font: inherit;
+  color: inherit; cursor: pointer; }
+.tc-jump:hover { color: var(--amber); text-decoration: underline; }
+.tc-jump.boxed::after { content: " •"; color: var(--amber); }
+
 .spinner { display:inline-block; width:11px; height:11px; margin-right:7px;
   vertical-align:-1px; border:2px solid var(--line); border-top-color: var(--amber);
   border-radius:50%; animation: cf-spin .8s linear infinite; }

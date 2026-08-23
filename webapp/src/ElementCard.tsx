@@ -110,6 +110,7 @@ interface Props {
   onDecide: (elementId: string, action: Action, note: string) => Promise<void>;
   cardRef: (node: HTMLDivElement | null) => void;
   onHover: () => void;
+  onSeek: (seconds: number) => void;
 }
 
 export function ElementCard({
@@ -134,6 +135,7 @@ export function ElementCard({
   onDecide,
   cardRef,
   onHover,
+  onSeek,
 }: Props) {
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
@@ -223,9 +225,20 @@ export function ElementCard({
       <div className="card-body">
         <div className="card-main">
           <div className="tc-line">
-            {element.time_ranges
-              .map((r) => `${tc(r.start_s, fps)}–${tc(r.end_s, fps)}`)
-              .join("  ·  ")}
+            {element.time_ranges.map((r, i) => (
+              <button
+                key={i}
+                className={`tc-jump${r.bbox ? " boxed" : ""}`}
+                onClick={() => onSeek(r.start_s)}
+                title={
+                  r.bbox
+                    ? "Pause here — this appearance has its own box"
+                    : "Pause here. On screen, but its position was not reported."
+                }
+              >
+                {tc(r.start_s, fps)}–{tc(r.end_s, fps)}
+              </button>
+            ))}
           </div>
           <div className="el-desc">{element.description}</div>
         </div>

@@ -31,13 +31,14 @@ SCAN_PROMPT = (
     "time range in which it "
     "appears (seconds), and prominence estimates: total screen time in seconds, "
     "fraction of frame covered (0-1), how central it is to the composition (0-1), "
-    "and whether it is integral to the plot. For anything with a visible "
-    "position in frame, give `bbox` as an object with named edges ymin, xmin, "
-    "ymax, xmax normalised 0-1000, measured at ONE specific moment when the "
-    "element is clearest, and give `at_s` as the timestamp in seconds of that "
-    "exact moment. The box is drawn over the footage at that timestamp, so a "
-    "box measured in one shot and reported for another is worse than none. "
-    "Omit bbox and at_s for audio. "
+    "and whether it is integral to the plot. "
+    "For anything with a visible position in frame, give a `bbox` INSIDE EACH "
+    "time range — an object with named edges ymin, xmin, ymax, xmax normalised "
+    "0-1000, measured where the element sits during THAT appearance. An element "
+    "appearing in four shots needs four boxes: a box measured in one shot and "
+    "reused for another is worse than none, because it points a reviewer at "
+    "empty screen. If an element moves a lot within one range, split it into "
+    "shorter ranges with their own boxes. Omit bbox for audio. "
     "For brands, businesses, places and people, also report how the element is "
     "PORTRAYED as `depiction`: FAVOURABLE (shown positively, reads as an "
     "endorsement), NEUTRAL (simply present), UNFLATTERING (associated with "
@@ -198,6 +199,19 @@ SCAN_RESPONSE_SCHEMA: dict = {
                             "properties": {
                                 "start_s": {"type": "number"},
                                 "end_s": {"type": "number"},
+                                # Per APPEARANCE. An element in four shots
+                                # needs four boxes; one reused across all of
+                                # them points a reviewer at empty screen.
+                                "bbox": {
+                                    "type": "object",
+                                    "properties": {
+                                        "ymin": {"type": "number"},
+                                        "xmin": {"type": "number"},
+                                        "ymax": {"type": "number"},
+                                        "xmax": {"type": "number"},
+                                    },
+                                    "required": ["ymin", "xmin", "ymax", "xmax"],
+                                },
                             },
                             "required": ["start_s", "end_s"],
                         },
@@ -337,8 +351,18 @@ def parse_scan_payload(payload: dict) -> ScanResult:
     skipped = 0
     for entry in payload.get("elements") or []:
         if isinstance(entry, dict):
-            # Parsed separately so a bad rectangle cannot fail the element.
-            entry = {**entry, "bbox": parse_bbox(entry.get("bbox"))}
+            # Boxes are parsed separately at both levels so a malformed
+            # rectangle can never cost us the element OR the appearance.
+            ranges = []
+            for r in entry.get("time_ranges") or []:
+                if isinstance(r, dict):
+                    r = {**r, "bbox": parse_bbox(r.get("bbox"))}
+                ranges.append(r)
+            entry = {
+                **entry,
+                "bbox": parse_bbox(entry.get("bbox")),
+                "time_ranges": ranges,
+            }
         try:
             detections.append(DetectedElement.model_validate(entry))
         except ValidationError:
