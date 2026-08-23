@@ -15,6 +15,7 @@ from clearframe.models import (
     BBox,
     DetectedElement,
     ExposureFinding,
+    SourceWork,
     ScriptMention,
     TimeRange,
 )
@@ -50,6 +51,12 @@ SCAN_PROMPT = (
     "drawn, animated, rendered or otherwise fictional character. The two need "
     "opposite instruments: a real person signs a release, while a character's "
     "design is owned by a studio and must be licensed. "
+    "If this footage appears to BE an existing published work — a scene from a "
+    "released film, series, advert or game, rather than original material that "
+    "merely contains third-party items — say so as `source_work` with its title, "
+    "the studio or rights holder if you know it, your confidence (high/medium/"
+    "low) and the evidence. Only claim it when you actually recognise the work; "
+    "a wrong identification would suppress every finding inside it. "
     "Separately, report anything visible that should probably not be PUBLISHED "
     "at all, as `exposures` — these are not clearance items and nobody owns "
     "them, which is exactly why they get missed. Kinds: MINOR (an identifiable "
@@ -254,6 +261,16 @@ SCAN_RESPONSE_SCHEMA: dict = {
                 "required": ["id", "label", "element_type", "description", "time_ranges", "prominence"],
             },
         },
+        "source_work": {
+            "type": "object",
+            "properties": {
+                "title": {"type": "string"},
+                "rights_holder": {"type": "string"},
+                "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
+                "basis": {"type": "string"},
+            },
+            "required": ["title", "confidence", "basis"],
+        },
         "exposures": {
             "type": "array",
             "items": {
@@ -302,6 +319,9 @@ SCAN_RESPONSE_SCHEMA: dict = {
 class ScanResult(BaseModel):
     detections: list[DetectedElement]
     unscanned_ranges: list[TimeRange]
+    # Set when the footage IS an existing published work rather than original
+    # material containing third-party items. See clearframe/sourcework.py.
+    source_work: SourceWork | None = None
     # Not clearance items — things on screen that should probably not be
     # published at all. Optional so every prior fixture still parses.
     exposures: list[ExposureFinding] = []
@@ -376,8 +396,19 @@ def parse_scan_payload(payload: dict) -> ScanResult:
             exposures.append(ExposureFinding.model_validate(entry))
         except ValidationError:
             skipped += 1
+    work = None
+    raw_work = payload.get("source_work")
+    if isinstance(raw_work, dict) and (raw_work.get("title") or "").strip():
+        try:
+            work = SourceWork.model_validate(raw_work)
+        except ValidationError:
+            work = None
+
     return ScanResult(
-        detections=detections, unscanned_ranges=unscanned, exposures=exposures
+        detections=detections,
+        unscanned_ranges=unscanned,
+        exposures=exposures,
+        source_work=work,
     )
 
 

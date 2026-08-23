@@ -84,6 +84,19 @@ class ScanStage:
         # Not clearance items. Nobody owns a delivery label with your address
         # on it, which is exactly why no clearance tool looks for one.
         ctx.state.exposures = result.exposures + audit.exposures
+        # If the footage IS an existing work, that one fact reframes most of
+        # the findings below it.
+        ctx.state.source_work = result.source_work or audit.source_work
+        if ctx.state.source_work:
+            w = ctx.state.source_work
+            ctx.emit(
+                {
+                    "type": "source_work_identified",
+                    "title": w.title,
+                    "rights_holder": w.rights_holder,
+                    "confidence": w.confidence,
+                }
+            )
         if ctx.state.exposures:
             ctx.emit({"type": "exposures_found", "count": len(ctx.state.exposures)})
         ctx.state.audio_matches = _or_empty(matches, "audio fingerprinting")

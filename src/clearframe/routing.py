@@ -50,6 +50,7 @@ from clearframe.models import (
     Prominence,
     ResearchRoute,
     ResearchTier,
+    SourceWork,
     TriagedElement,
     UseContext,
 )
@@ -527,6 +528,7 @@ def route(
     escalate_material: bool = True,
     use_context: UseContext = UseContext.EXPRESSIVE,
     sponsors: list[str] | None = None,
+    source_work: SourceWork | None = None,
 ) -> ResearchRoute:
     """Decide how one finding gets resolved. Deterministic and reproducible."""
     if corroboration is not None and corroboration.verdict is IdentityVerdict.CONFLICTED:
@@ -541,6 +543,31 @@ def route(
             basis="Identity conflict",
             disposition="A human resolves identity before any research runs.",
         )
+    # If the footage IS someone else's work, its own characters, set dressing
+    # and on-screen text are not separately licensable. Researching them spends
+    # minutes to rediscover the studio we already named.
+    from clearframe.sourcework import subsumed_by
+
+    if subsumed_by(element, source_work):
+        holder = source_work.rights_holder or "the rights holder"
+        return ResearchRoute(
+            element_id=element.id,
+            tier=ResearchTier.LOCAL,
+            owner=source_work.rights_holder or None,
+            rationale=(
+                f"An element of '{source_work.title}', which this footage appears "
+                "to BE rather than merely contain. Its characters and set dressing "
+                "belong to the same studio as the film, so researching them "
+                "separately rediscovers an answer we already have."
+            ),
+            basis=f"Identified source work — {source_work.basis}",
+            disposition=(
+                f"No separate clearance. Obtain a licence to '{source_work.title}' "
+                f"from {holder}; this element is covered by it and cannot be "
+                "licensed on its own."
+            ),
+        )
+
     authorised = _sponsor_authorised(element, knowledge, sponsors or [])
     if authorised is not None:
         return authorised
@@ -624,6 +651,7 @@ def route_all(
     escalate_material: bool = True,
     use_context: UseContext = UseContext.EXPRESSIVE,
     sponsors: list[str] | None = None,
+    source_work: SourceWork | None = None,
 ) -> dict[str, ResearchRoute]:
     corroboration = corroboration or {}
     return {
@@ -634,6 +662,7 @@ def route_all(
             escalate_material,
             use_context,
             sponsors,
+            source_work,
         )
         for el in elements
     }
