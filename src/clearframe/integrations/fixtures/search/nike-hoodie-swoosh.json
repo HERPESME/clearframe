@@ -1,0 +1,21 @@
+{
+  "search_id": "srch_demo_nike",
+  "results": [
+    {
+      "url": "https://www.trademarkia.com/news/fashion/nike-logo-trademark-legal-use",
+      "title": "Can You Use the Nike Logo Legally? Trademark Guide",
+      "excerpts": ["Not without risk - trademark law helps safeguard against consumer confusion and protects brand identity. Under the Lanham Act, which governs U.S. trademark law, unauthorised commercial use of the Swoosh invites an infringement claim."]
+    },
+    {
+      "url": "https://www.tramatm.com/en/trademark-hall-of-fame/nike",
+      "title": "Nike trademark enforcement record",
+      "excerpts": ["Nike alleged trademark infringement, claiming that the design copied the iconic Swoosh logo and other elements associated with Nike's Dunk sneakers, and moved swiftly for injunctive relief."]
+    },
+    {
+      "url": "https://news.example/nike-brand-campaign-2026",
+      "title": "Nike unveils autumn brand campaign",
+      "excerpts": ["The company announced a new global marketing push centred on running, with campaign films launching across streaming platforms this quarter."]
+    }
+  ],
+  "usage": {"requests": 1}
+}

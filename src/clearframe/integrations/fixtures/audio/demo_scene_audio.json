@@ -1,0 +1,34 @@
+[
+  {
+    "at_s": 12.0,
+    "payload": {
+      "status": "success",
+      "result": {
+        "artist": "The Weeknd",
+        "title": "Blinding Lights",
+        "album": "After Hours",
+        "release_date": "2019-11-29",
+        "label": "Republic Records",
+        "timecode": "00:12",
+        "song_link": "https://lis.tn/BlindingLights",
+        "apple_music": {
+          "url": "https://music.apple.com/us/album/blinding-lights/1499378108",
+          "isrc": "USUG11904206",
+          "artistName": "The Weeknd",
+          "albumName": "After Hours"
+        },
+        "spotify": {
+          "id": "0VjIjW4GlUZAMYd2vXMi3b",
+          "name": "Blinding Lights",
+          "external_urls": {
+            "spotify": "https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi3b"
+          }
+        }
+      }
+    }
+  },
+  {
+    "at_s": 40.0,
+    "payload": {"status": "success", "result": null}
+  }
+]

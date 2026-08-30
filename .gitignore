@@ -6,3 +6,24 @@ out/
 out-live/
 .pytest_cache/
 .env
+
+# --- credentials -----------------------------------------------------------
+# `.env` alone was not enough: a file named `env` (no dot) is a different path
+# and has already shown up untracked with a live Parallel key in it. Cover the
+# whole family, and the shapes a cloud credential arrives in.
+env
+*.env
+.env.*
+!.env.example
+*service-account*.json
+*credentials*.json
+*-key.json
+*.pem
+*.p12
+gha-creds-*.json
+
+# --- local run artefacts ---------------------------------------------------
+# Debug snapshots of production state, taken while diagnosing a live run.
+*.bak
+*.bak[0-9]
+*.bak-*

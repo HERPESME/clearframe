@@ -16,7 +16,8 @@ Architecture: **one image, two Cloud Run services**, both `min-instances=0` (cos
 
 ```bash
 gcloud auth login && gcloud config set project <PROJECT_ID> && gcloud config set run/region us-central1
-gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com \
+  aiplatform.googleapis.com secretmanager.googleapis.com videointelligence.googleapis.com
 gcloud artifacts repositories create clearframe --repository-format=docker --location=us-central1
 ```
 
@@ -62,6 +63,23 @@ gcloud run services update clearframe --region us-central1 \
   --set-env-vars CLEARFRAME_MODE=live,GOOGLE_CLOUD_PROJECT=<PROJECT_ID>,GOOGLE_CLOUD_LOCATION=us-central1 \
   --set-secrets PARALLEL_API_KEY=parallel-api-key:latest
 ```
+
+## Live-mode cost model (verified 2026-08-22)
+
+The original "unauthenticated URL + live keys = open spend" fear was reasoned
+from `planner.EST_COST`, which was **~10× Parallel's list price**. Real numbers:
+
+| Item | Price | Full 8-finding demo run |
+| --- | --- | --- |
+| Gemini video scan | $0.019/min (258 tok/s @ $1.25/M) | ~$0.04 (62s, two passes) |
+| Parallel Task | lite $0.005 / base $0.010 / pro $0.100 / ultra $0.300 per run | ~$0.30 |
+| Parallel Search (freshness) | $0.005/request | ~$0.03 |
+| Video Intelligence (corroboration) | $0.15/min — first 1,000 min free | ~$0.15 |
+
+So a public live run is **well under $1**, not $5+. Live mode behind a rate limit
+plus `CLEARFRAME_MAX_RESEARCH` is defensible for a judged demo window. Video
+Intelligence is the priciest per minute — it earns it as an independent identity
+check, never as a cheaper scanner.
 
 ## Costs / rollback
 

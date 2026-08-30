@@ -32,7 +32,9 @@ class DossierStage:
 
         generated_at = self.generated_at or datetime.now(timezone.utc).isoformat()
         dossier = build_dossier(ctx.state, generated_at=generated_at)
-        markers = elements_to_markers(ctx.state.elements, ctx.state.risk)
+        markers = elements_to_markers(
+            ctx.state.elements, ctx.state.risk, ctx.state.corroboration
+        )
         fps = ctx.state.production.fps
 
         self.out_dir.mkdir(parents=True, exist_ok=True)

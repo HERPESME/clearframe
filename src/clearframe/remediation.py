@@ -72,18 +72,28 @@ def draft_options(
         )
 
     if element.category != ClearanceCategory.MUSIC_SYNC:
-        cost = (
-            "$300-$800/shot" if element.prominence.frame_coverage < 0.1 else "$800-$2500/shot"
+        # A paint-out is quoted per shot, and a finding rarely appears once.
+        # The dossier used to print "$300-$800/shot" for a tattoo in seven
+        # separate shots: the label was honest and the number was useless,
+        # because the figure a producer budgets against is the total, and the
+        # appearances were already counted.
+        shots = max(1, len(element.time_ranges))
+        lo, hi = (
+            (300, 800) if element.prominence.frame_coverage < 0.1 else (800, 2500)
         )
+        rate = f"${lo:,}-${hi:,}"
+        cost = f"${lo * shots:,}-${hi * shots:,}"
         options.append(
             RemediationOption(
                 kind="blur",
                 summary="VFX blur / digital replacement in post",
                 detail=(
                     f"Blur or digitally replace '{element.label}' in "
-                    f"{len(element.time_ranges)} shot(s), {tc_in}-{tc_out}. "
-                    f"Estimated VFX cost {cost} at {element.prominence.frame_coverage:.0%} "
-                    "frame coverage."
+                    f"{shots} shot(s), {tc_in}-{tc_out}. "
+                    f"Estimated VFX cost {cost} — {rate} per shot at "
+                    f"{element.prominence.frame_coverage:.0%} frame coverage. "
+                    "Indicative post rates, not a quote: a moving or partly "
+                    "occluded subject costs more than a static one."
                 ),
                 est_cost_band=cost,
             )

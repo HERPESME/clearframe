@@ -22,7 +22,7 @@ from clearframe.pipeline import (
     demo_context,
 )
 from clearframe.review import generate_dossier_async, record_decision
-from clearframe.store import LocalJsonStore
+from clearframe.store import LicenceStore, LocalJsonStore
 
 
 def _now() -> str:
@@ -32,6 +32,7 @@ def _now() -> str:
 def build_server(out_root: Path) -> MCPServer:
     out_root = Path(out_root)
     store = LocalJsonStore(out_root / "state")
+    ledger = LicenceStore(out_root / "state")
 
     server = MCPServer(
         name="clearframe",
@@ -135,6 +136,20 @@ def build_server(out_root: Path) -> MCPServer:
                     "score": state.risk[el.id].score,
                     "owner": research.owner if research else None,
                     "decision": decision.action if decision else None,
+                    "identity": (
+                        state.corroboration[el.id].verdict.value
+                        if el.id in state.corroboration
+                        else None
+                    ),
+                    "resolved_by": (
+                        state.routes[el.id].tier.value if el.id in state.routes else None
+                    ),
+                    "depiction": el.depiction.value if el.depiction else None,
+                    "coverage": (
+                        state.coverage[el.id].status.value
+                        if el.id in state.coverage
+                        else None
+                    ),
                 }
             )
         return {"production_id": production_id, "findings": findings}
@@ -158,6 +173,54 @@ def build_server(out_root: Path) -> MCPServer:
             ],
             "court": opinion.model_dump(mode="json") if opinion else None,
             "decision": decision.model_dump(mode="json") if decision else None,
+            "corroboration": (
+                state.corroboration[element_id].model_dump(mode="json")
+                if element_id in state.corroboration
+                else None
+            ),
+            # Which rung of the escalation ladder answered this, and under what
+            # authority. A finding resolved for free is a documented position,
+            # so a client must be able to read the reasoning, not just the tier.
+            "route": (
+                state.routes[element_id].model_dump(mode="json")
+                if element_id in state.routes
+                else None
+            ),
+            # Not an infringement — a contract exposure. Category exclusivity
+            # means a rival mark in shot can void a sponsorship fee even though
+            # showing it is lawful, and nothing else here would flag it.
+            # What the PLATFORM does, which is not what a court would do.
+            # Exposures are not tied to a clearance element — they are a
+            # separate finding class — so they come back whole rather than
+            # filtered by element id.
+            "on_screen_exposures": [
+                x.model_dump(mode="json") for x in state.assessed_exposures
+            ],
+            "platform_outcome": next(
+                (
+                    o.model_dump(mode="json")
+                    for o in state.platform_outcomes
+                    if o.element_id == element_id
+                ),
+                None,
+            ),
+            "sponsor_conflicts": [
+                c.model_dump(mode="json")
+                for c in state.sponsor_conflicts
+                if c.element_id == element_id
+            ],
+            "freshness": [
+                s.model_dump(mode="json") for s in state.freshness.get(element_id, [])
+            ],
+            "territory_risk": [
+                t.model_dump(mode="json")
+                for t in state.territory_risk.get(element_id, [])
+            ],
+            "coverage": (
+                state.coverage[element_id].model_dump(mode="json")
+                if element_id in state.coverage
+                else None
+            ),
         }
 
     @server.tool(name="record_decision")
@@ -189,6 +252,142 @@ def build_server(out_root: Path) -> MCPServer:
         except Exception as exc:
             raise ValueError(str(exc))
         return {"ok": True, "pending": pending_ids(state)}
+
+    @server.tool()
+    def verify_identities(production_id: str) -> dict:
+        """Identity-corroboration report: which findings a second, independent
+        detector confirmed, and which are disputed.
+
+        A CONFLICTED finding is never auto-researched — researching a disputed
+        mark would attribute rights to the wrong holder. Resolve identity first,
+        then re-run clearance.
+        """
+        state = _state(production_id)
+        rows = []
+        for el in state.elements:
+            c = state.corroboration.get(el.id)
+            if c is None:
+                continue
+            rows.append(
+                {
+                    "id": el.id,
+                    "label": el.label,
+                    "verdict": c.verdict.value,
+                    "detector": c.detector,
+                    "detected_label": c.detected_label,
+                    "confidence": c.confidence,
+                    "note": c.note,
+                }
+            )
+        conflicts = [r for r in rows if r["verdict"] == "CONFLICTED"]
+        return {
+            "production_id": production_id,
+            "findings": rows,
+            "conflicts": len(conflicts),
+            "blocked_from_research": [r["id"] for r in conflicts],
+        }
+
+    @server.tool()
+    def territory_report(production_id: str) -> dict:
+        """Per-territory clearance exposure for the release plan.
+
+        Clearance is jurisdictional: freedom-of-panorama rules mean the same
+        artwork in frame can be LOW in one territory and HIGH in another.
+        Returns each finding banded per territory with the governing authority.
+        """
+        state = _state(production_id)
+        rows = []
+        for el in state.elements:
+            bands = state.territory_risk.get(el.id, [])
+            if not bands:
+                continue
+            rows.append(
+                {
+                    "id": el.id,
+                    "label": el.label,
+                    "baseline": state.risk[el.id].band.value,
+                    "by_territory": {
+                        t.territory: {
+                            "band": t.band.value,
+                            "rationale": t.rationale,
+                            "authority": t.authority,
+                        }
+                        for t in bands
+                    },
+                }
+            )
+        return {
+            "production_id": production_id,
+            "territories": state.territories,
+            "findings": rows,
+        }
+
+    @server.tool()
+    async def check_freshness(production_id: str) -> dict:
+        """Re-run the live Parallel Search pass over every identified rights
+        holder and report enforcement activity found right now.
+
+        Deep research is a snapshot; this is the live check a reviewer runs
+        before signing off. Costs cents per finding, not dollars.
+        """
+        from clearframe.review import refresh_freshness
+
+        state, checked = await refresh_freshness(store, out_root, production_id, at=_now())
+        return {
+            "production_id": production_id,
+            "checked": checked,
+            "material_signals": {
+                eid: sum(1 for s in sigs if s.material)
+                for eid, sigs in state.freshness.items()
+                if any(s.material for s in sigs)
+            },
+        }
+
+    @server.tool()
+    def list_licences() -> dict:
+        """The rights ledger: clearances this deployment already holds."""
+        licences = ledger.load()
+        return {
+            "count": len(licences),
+            "licences": [lic.model_dump(mode="json") for lic in licences],
+        }
+
+    @server.tool()
+    def check_coverage(production_id: str) -> dict:
+        """Which findings are already licensed, and exactly where the gaps are.
+
+        COVERED      a matching grant reaches this use
+        PARTIAL      a grant exists but misses territory, term or media scope
+        NOT_COVERED  rights holder identified, nothing on file
+        UNKNOWN      ownership or identity unresolved, so coverage is unknowable
+        """
+        state = _state(production_id)
+        rows = []
+        for el in state.elements:
+            cov = state.coverage.get(el.id)
+            if cov is None:
+                continue
+            rows.append(
+                {
+                    "id": el.id,
+                    "label": el.label,
+                    "status": cov.status.value,
+                    "licence_id": cov.licence_id,
+                    "gaps": cov.gaps,
+                    "note": cov.note,
+                }
+            )
+        counts: dict[str, int] = {}
+        for row in rows:
+            counts[row["status"]] = counts.get(row["status"], 0) + 1
+        return {
+            "production_id": production_id,
+            "territories": state.territories,
+            "distribution": state.production.distribution,
+            "summary": counts,
+            "findings": rows,
+            "needs_clearance": [r["id"] for r in rows if r["status"] != "COVERED"],
+        }
 
     @server.tool()
     async def generate_dossier(production_id: str) -> dict:

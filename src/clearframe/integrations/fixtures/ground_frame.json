@@ -1,0 +1,8 @@
+{
+  "note": "Recorded grounding response for demo mode. Boxes measured on the demo scene's own frame, so the fixture and live paths exercise the same parser.",
+  "found": [
+    {"label": "Nike hoodie swoosh", "bbox": {"ymin": 402, "xmin": 331, "ymax": 468, "xmax": 447}},
+    {"label": "Coca-Cola can", "bbox": {"ymin": 512, "xmin": 638, "ymax": 640, "xmax": 705}},
+    {"label": "Street mural (unknown artist)", "bbox": {"ymin": 96, "xmin": 42, "ymax": 604, "xmax": 512}}
+  ]
+}

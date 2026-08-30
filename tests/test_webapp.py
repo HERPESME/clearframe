@@ -19,7 +19,7 @@ def _create_demo(client) -> dict:
 
 def test_demo_creation_is_idempotent(client):
     state = _create_demo(client)
-    assert len(state["elements"]) == 7
+    assert len(state["elements"]) == 8
     again = _create_demo(client)
     assert again["production"]["id"] == state["production"]["id"]
     listing = client.get("/api/productions").json()

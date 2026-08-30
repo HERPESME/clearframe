@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Clearance Report — Untitled Production</title>
+<style>
+  body { font-family: Georgia, 'Times New Roman', serif; color: #1a1a1a; margin: 40px auto; max-width: 900px; line-height: 1.5; }
+  h1 { font-size: 26px; margin-bottom: 0; }
+  .meta { color: #555; font-size: 13px; margin-bottom: 18px; }
+  .disclaimer { background: #fdf6e3; border: 1px solid #e0d5a8; padding: 10px 14px; font-size: 12px; margin: 16px 0 28px; }
+  table.summary { border-collapse: collapse; margin-bottom: 30px; }
+  table.summary td, table.summary th { border: 1px solid #ccc; padding: 6px 14px; font-size: 13px; }
+  .entry { border: 1px solid #ddd; border-left: 6px solid #999; padding: 16px 20px; margin-bottom: 22px; page-break-inside: avoid; }
+  .chip { display: inline-block; padding: 2px 10px; border-radius: 10px; color: #fff; font-size: 11px; font-family: Helvetica, Arial, sans-serif; letter-spacing: .5px; }
+  .cat { background: #666; }
+  .label { font-size: 18px; font-weight: bold; margin-right: 8px; }
+  .factors, .tcs { color: #555; font-size: 12px; }
+  .section { margin-top: 10px; font-size: 13px; }
+  .section h4 { margin: 10px 0 4px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #444; }
+  .citation { font-size: 12px; margin: 4px 0 4px 12px; }
+  .citation a { color: #2980b9; }
+  pre.email { background: #f7f7f7; border: 1px solid #e0e0e0; padding: 10px; font-size: 11px; overflow-x: auto; white-space: pre-wrap; }
+  .decision { margin-top: 10px; font-size: 13px; padding: 8px 12px; background: #eef5ee; border: 1px solid #cfe3cf; }
+  .decision.pending { background: #fbeeee; border-color: #e3cfcf; }
+  .unscanned { background: #fbeeee; border: 1px solid #e3cfcf; padding: 10px 14px; font-size: 13px; margin-bottom: 24px; }
+  .verdict { display:inline-block; padding:2px 10px; border-radius:10px; font-size:11px; font-family:Helvetica,Arial,sans-serif; letter-spacing:.5px; color:#fff; }
+  .v-FINGERPRINTED { background:#2980b9; } .v-CORROBORATED { background:#27ae60; }
+  .route { display:inline-block; padding:2px 10px; border-radius:10px; font-size:11px; font-family:Helvetica,Arial,sans-serif; letter-spacing:.5px; color:#fff; background:#34495e; }
+  .r-LOCAL { background:#16a085; } .r-STATUTE { background:#8e44ad; } .r-SEARCH { background:#2980b9; }
+  .r-DEEP { background:#d35400; } .r-BLOCKED { background:#7f8c8d; }
+  .tone { display:inline-block; padding:2px 10px; border-radius:10px; font-size:11px; font-family:Helvetica,Arial,sans-serif; letter-spacing:.5px; color:#fff; }
+  .t-FAVOURABLE { background:#16a085; } .t-NEUTRAL { background:#95a5a6; }
+  .t-UNFLATTERING { background:#e67e22; } .t-DISPARAGING { background:#c0392b; }
+  .exposure { background:#fdeaea; border:1px solid #e9b8b8; padding:10px 14px; margin:18px 0 24px; font-size:13px; }
+  .exposure td, .exposure th { padding:4px 10px 4px 0; text-align:left; font-size:12px; vertical-align:top; }
+  .platform { background:#fbeee6; border:1px solid #e8c4a8; padding:10px 14px; margin:18px 0 24px; font-size:13px; }
+  .platform td, .platform th { padding:4px 10px 4px 0; text-align:left; font-size:12px; vertical-align:top; }
+  .pa-CLAIM_LIKELY { color:#c0392b; font-weight:bold; }
+  .pa-CLAIM_POSSIBLE { color:#e67e22; }
+  .sponsor { background:#fdf2e9; border:1px solid #f0c9a0; padding:10px 14px; margin:18px 0 24px; font-size:13px; }
+  .context { background:#eaf2f8; border:1px solid #b8d4e8; padding:8px 14px; margin:-10px 0 20px; font-size:12px; }
+  .routing { background:#f4f1fa; border:1px solid #d9d2ea; padding:10px 14px; margin:18px 0 24px; font-size:13px; }
+  .routing td, .routing th { padding:3px 10px 3px 0; text-align:left; font-size:12px; } .v-SINGLE_SOURCE { background:#7f8c8d; } .v-CONFLICTED { background:#c0392b; }
+  table.terr { border-collapse: collapse; margin: 6px 0 2px; font-size: 12px; }
+  table.terr td, table.terr th { border: 1px solid #ddd; padding: 4px 10px; text-align: left; }
+  table.terr th { background: #f5f5f5; }
+  .signal { font-size: 12px; margin: 4px 0 4px 12px; }
+  .signal.material { border-left: 3px solid #c0392b; padding-left: 8px; }
+  .conflict-note { background:#fbeeee; border:1px solid #e3cfcf; padding:8px 12px; font-size:12px; margin-top:6px; }
+  .cov { display:inline-block; padding:2px 10px; border-radius:10px; font-size:11px; font-family:Helvetica,Arial,sans-serif; letter-spacing:.5px; color:#fff; }
+  .cov-COVERED { background:#27ae60; } .cov-PARTIAL { background:#e67e22; }
+  .cov-NOT_COVERED { background:#c0392b; } .cov-UNKNOWN { background:#7f8c8d; }
+  .gap { background:#fdf3e7; border:1px solid #e8d3b8; padding:8px 12px; font-size:12px; margin-top:6px; }
+</style>
+</head>
+<body>
+<h1>Clearance Report — “Untitled Production”</h1>
+<div class="meta">Generated 2026-08-23T11:41:28.875009+00:00 · footage out-live-ui/media/upload/footage.mp4 ·
+41.5s @ 24fps · ClearFrame automated clearance pipeline</div>
+<div class="disclaimer">This clearance report is automated decision support generated from AI video analysis and open-web rights research. It is NOT legal advice; all findings require review by qualified clearance counsel before reliance.</div>
+
+<table class="summary">
+<tr><th>CRITICAL</th><th>HIGH</th><th>MEDIUM</th><th>LOW</th><th>Incomplete research</th><th>Pending decisions</th>
+<th>Identity corroborated</th><th>Identity disputed</th><th>Live enforcement signals</th>
+<th>Already licensed</th><th>Licence gaps</th><th>Unlicensed</th></tr>
+<tr><td>0</td><td>0</td><td>0</td>
+<td>0</td><td>0</td><td>0</td>
+<td>0</td><td>0</td>
+<td>0</td>
+<td>0</td><td>0</td>
+<td>0</td></tr>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

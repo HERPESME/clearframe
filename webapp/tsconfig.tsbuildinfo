@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/elementcard.tsx","./src/missioncontrol.tsx","./src/timeline.tsx","./src/api.ts","./src/main.tsx","./src/timecode.ts","./src/types.ts"],"version":"5.9.3"}
+{"root":["./src/app.tsx","./src/elementcard.tsx","./src/frameposition.tsx","./src/missioncontrol.tsx","./src/timeline.tsx","./src/uploader.tsx","./src/videoplayer.tsx","./src/api.ts","./src/main.tsx","./src/timecode.ts","./src/types.ts"],"version":"5.9.3"}

@@ -2,21 +2,74 @@ import { useState } from "react";
 import type {
   Action,
   CandidateEntity,
+  Corroboration,
+  Coverage,
   CourtOpinion,
   Decision,
   Element,
+  FreshnessSignal,
   RemediationOption,
   Research,
   ResearchPlan,
+  LiabilityEstimate,
+  ResearchRoute,
   Risk,
   Role,
+  TerritoryRisk,
 } from "./types";
+import { FramePosition } from "./FramePosition";
 import { tc } from "./timecode";
 
 const HOLDING_TEXT = {
   clear_required: "CLEAR REQUIRED",
   defensible: "DEFENSIBLE",
   escalate: "ESCALATE",
+} as const;
+
+// What answered this finding. LOCAL and STATUTE cost nothing and take no time,
+// which is precisely why they must be labelled rather than left to look like
+// research that quietly did not happen.
+// Rights holders object to how a brand is SHOWN far more often than to its
+// presence. NBC digitally erased In-Sink-Erator from Heroes because a hand got
+// mangled in the disposal, not because the logo was visible.
+const TONE_TEXT: Record<string, string> = {
+  FAVOURABLE: "SHOWN FAVOURABLY",
+  NEUTRAL: "SHOWN NEUTRALLY",
+  UNFLATTERING: "SHOWN UNFLATTERINGLY",
+  DISPARAGING: "SHOWN DISPARAGINGLY",
+};
+
+const ROUTE_TEXT: Record<string, string> = {
+  LOCAL: "OWNER KNOWN LOCALLY",
+  STATUTE: "SETTLED BY LAW",
+  SEARCH: "LIVE SEARCH",
+  DEEP: "DEEP RESEARCH",
+  BLOCKED: "NOT RESEARCHED",
+};
+
+const VERDICT_TEXT = {
+  FINGERPRINTED: "ID FINGERPRINTED",
+  CORROBORATED: "ID CORROBORATED",
+  SINGLE_SOURCE: "ID SINGLE-SOURCE",
+  CONFLICTED: "ID DISPUTED",
+} as const;
+
+const COVERAGE_TEXT: Record<string, string> = {
+  COVERED: "ALREADY LICENSED",
+  PARTIAL: "LICENCE GAP",
+  NOT_COVERED: "UNLICENSED",
+  UNKNOWN: "COVERAGE UNKNOWN",
+};
+
+const VERDICT_HELP = {
+  FINGERPRINTED:
+    "An acoustic fingerprint measured this recording against a database — spectral hashing over the audio itself, not a model's impression of it. This is the strongest identity ClearFrame can produce, and it is what a PRO cue sheet needs.",
+  CORROBORATED:
+    "A second, independent detector named the same thing. Identity is confirmed by two systems, not one model's guess.",
+  SINGLE_SOURCE:
+    "Only the video model identified this. No closed-vocabulary detector covers it (murals, tattoos, music), so identity is unconfirmed — not contradicted.",
+  CONFLICTED:
+    "The detectors named DIFFERENT things. Rights research is blocked: researching a disputed mark would attribute rights to the wrong holder.",
 } as const;
 
 const ACTION_LABEL: Record<Action, string> = {
@@ -43,13 +96,23 @@ interface Props {
   decision: Decision | undefined;
   court: CourtOpinion | undefined;
   plan: ResearchPlan | undefined;
+  route: ResearchRoute | undefined;
+  liability: LiabilityEstimate | undefined;
+  pending: boolean;
+  corroboration: Corroboration | undefined;
+  coverage: Coverage | undefined;
+  freshness: FreshnessSignal[];
+  territory: TerritoryRisk[];
   unscripted: boolean;
+  /** An element of the work this footage IS — cleared by licensing the work. */
+  subsumed: boolean;
   candidates: CandidateEntity[];
   fps: number;
   role: Role;
   onDecide: (elementId: string, action: Action, note: string) => Promise<void>;
   cardRef: (node: HTMLDivElement | null) => void;
   onHover: () => void;
+  onSeek: (seconds: number) => void;
 }
 
 export function ElementCard({
@@ -60,18 +123,32 @@ export function ElementCard({
   decision,
   court,
   plan,
+  route,
+  liability,
+  pending,
+  corroboration,
+  coverage,
+  freshness,
+  territory,
   unscripted,
+  subsumed,
   candidates,
   fps,
   role,
   onDecide,
   cardRef,
   onHover,
+  onSeek,
 }: Props) {
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const canDecide = role === "legal" || role === "producer";
   const complete = research && research.status === "complete";
+  const disputed = corroboration?.verdict === "CONFLICTED";
+  const materialSignals = freshness.filter((s) => s.material);
+  const freeRoute = route?.tier === "LOCAL" || route?.tier === "STATUTE";
+  const divergent =
+    territory.length > 0 && new Set(territory.map((t) => t.band)).size > 1;
 
   const decide = async (action: Action) => {
     setBusy(true);
@@ -83,7 +160,11 @@ export function ElementCard({
   };
 
   return (
-    <div className={`card ${risk.band}`} ref={cardRef} onMouseEnter={onHover}>
+    <div
+      className={`card ${risk.band}${pending ? " pending" : ""}`}
+      ref={cardRef}
+      onMouseEnter={onHover}
+    >
       {decision && (
         <div className={`stamp ${decision.action === "escalate" ? "escalate" : ""}`}>
           {STAMP_LABEL[decision.action]}
@@ -97,6 +178,30 @@ export function ElementCard({
           {risk.band} · {risk.score}
         </span>
         {risk.de_minimis && <span className="badge dim">DE MINIMIS</span>}
+        {subsumed && (
+          <span
+            className="badge subsumed"
+            title="An element of the work this footage IS. Covered by whatever licence you hold to that work — not a separate clearance."
+          >
+            PART OF THE WORK
+          </span>
+        )}
+        {coverage && (
+          <span
+            className={`badge cov ${coverage.status}`}
+            title={coverage.note}
+          >
+            {COVERAGE_TEXT[coverage.status]}
+          </span>
+        )}
+        {corroboration && (
+          <span
+            className={`badge verdict ${corroboration.verdict}`}
+            title={VERDICT_HELP[corroboration.verdict]}
+          >
+            {VERDICT_TEXT[corroboration.verdict]}
+          </span>
+        )}
         {unscripted && (
           <span
             className="badge unscripted"
@@ -105,23 +210,152 @@ export function ElementCard({
             NOT IN SCRIPT
           </span>
         )}
+        {element.depiction && (
+          <span
+            className={`tone-chip ${element.depiction}`}
+            title="How the element is portrayed. Brand owners object to depiction far more often than to presence."
+          >
+            {TONE_TEXT[element.depiction]}
+          </span>
+        )}
+        {route && (
+          <span
+            className={`route-chip ${route.tier}`}
+            title={`${route.rationale}${route.basis ? `\n\nAuthority: ${route.basis}` : ""}`}
+          >
+            {ROUTE_TEXT[route.tier]}
+          </span>
+        )}
         {plan && (
           <span className="plan-chip" title={plan.rationale}>
             research: {plan.processor} · ${plan.est_cost_usd.toFixed(2)}
           </span>
         )}
       </div>
-      <div className="tc-line">
-        {element.time_ranges
-          .map((r) => `${tc(r.start_s, fps)}–${tc(r.end_s, fps)}`)
-          .join("  ·  ")}
+
+      <div className="card-body">
+        <div className="card-main">
+          <div className="tc-line">
+            {element.time_ranges.map((r, i) => (
+              <button
+                key={i}
+                className={`tc-jump${r.bbox ? " boxed" : ""}`}
+                onClick={() => onSeek(r.start_s)}
+                title={
+                  r.bbox
+                    ? "Pause here — this appearance has its own box"
+                    : "Pause here. On screen, but its position was not reported."
+                }
+              >
+                {tc(r.start_s, fps)}–{tc(r.end_s, fps)}
+              </button>
+            ))}
+          </div>
+          <div className="el-desc">{element.description}</div>
+        </div>
+        {element.bbox && (
+          <FramePosition
+            bbox={element.bbox}
+            atS={element.at_s}
+            fps={fps}
+            band={risk.band}
+          />
+        )}
       </div>
-      <div className="el-desc">{element.description}</div>
-      <div className="factors">
-        {Object.entries(risk.factors)
-          .map(([k, v]) => `${k} ${v}`)
-          .join("  ·  ")}
-      </div>
+
+      {disputed && (
+        <div className="conflict-banner">
+          <strong>IDENTITY DISPUTED — research blocked.</strong> {corroboration!.note}
+        </div>
+      )}
+
+      {pending && !liability && (
+        <div className="pending-row">
+          <span className="spinner" />
+          Researching who owns this — the band above is provisional and can only fall
+        </div>
+      )}
+
+      {liability && (
+        <div className="sec cost-block">
+          <div className="sec-title">What this costs you</div>
+          <div className="cost-headline">{liability.headline}</div>
+          <ol className="cost-steps">
+            {liability.escalation.map((line, i) => (
+              <li key={i} className={i === 2 ? "cost-worst" : ""}>
+                {line}
+              </li>
+            ))}
+          </ol>
+          {liability.injunction_risk === "documented" && (
+            <div className="cost-injunction">
+              <strong>A claim like this has stopped a release before.</strong>{" "}
+              An injunction halts distribution whatever the damages would eventually
+              be — which is why these settle.
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Everything below is the evidence. Collapsed by default: a director
+          needs the answer and the price, and only reaches for the citations
+          when they disagree with it or an insurer asks. */}
+      <details className="evidence-fold">
+        <summary>
+          Why this rating — identity, research, jurisdictions, precedent
+        </summary>
+
+        <div className="sec">
+          <div className="sec-title">How the score was reached</div>
+          <div className="factors">
+            {Object.entries(risk.factors)
+              .map(([k, v]) => `${k.replace(/_/g, " ")} ${v}`)
+              .join("  ·  ")}
+          </div>
+          <div className="kv">
+            Multiplied together and scaled to 100. Every factor is stored, so this
+            number stays reproducible from the inputs that produced it.
+          </div>
+        </div>
+
+      {coverage && (
+        <div className="sec">
+          <div className="sec-title">
+            Rights already held
+            {coverage.licence_id && <span className="sec-note"> · {coverage.licence_id}</span>}
+          </div>
+          <div className={coverage.gaps.length ? "gap-note" : "kv"}>
+            {coverage.note}
+            {coverage.gaps.length > 0 && (
+              <ul className="gap-list">
+                {coverage.gaps.map((g, i) => (
+                  <li key={i}>{g}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
+
+      {corroboration && !disputed && (
+        <div className="sec">
+          <div className="sec-title">Identity verification</div>
+          <div className="kv">{corroboration.note}</div>
+        </div>
+      )}
+
+      {route && (
+        <div className={`sec route-note ${freeRoute ? "free" : ""}`}>
+          <div className="sec-title">How this was resolved</div>
+          <div className="kv">{route.rationale}</div>
+          {route.basis && <div className="kv basis">Authority: {route.basis}</div>}
+          {route.disposition && (
+            <div className="disposition">
+              <strong>Required action:</strong> {route.disposition}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="sec evidence">
         <div className="sec-title">Rights research</div>
@@ -154,8 +388,9 @@ export function ElementCard({
         ) : (
           <>
             <div className="incomplete">
-              RESEARCH INCOMPLETE — rights holder not established from open-web sources.
-              Manual investigation required.
+              {disputed
+                ? "NOT RESEARCHED — identity must be resolved first."
+                : "RESEARCH INCOMPLETE — rights holder not established from open-web sources. Manual investigation required."}
             </div>
             {candidates.length > 0 && (
               <div style={{ marginTop: 8 }}>
@@ -172,6 +407,57 @@ export function ElementCard({
           </>
         )}
       </div>
+
+      {freshness.length > 0 && (
+        <div className="sec">
+          <div className="sec-title">
+            Live rights-holder signals
+            <span className="sec-note"> · Parallel Search, checked at review time</span>
+          </div>
+          {materialSignals.length > 0 && (
+            <div className="kv signal-count">
+              {materialSignals.length} enforcement signal
+              {materialSignals.length === 1 ? "" : "s"} found since research ran
+            </div>
+          )}
+          {freshness.map((s, i) => (
+            <div className={`citation ${s.material ? "material" : ""}`} key={i}>
+              {s.material && <span className="sig-flag">ENFORCEMENT</span>}{" "}
+              <a href={s.url}>{s.title}</a>
+              <div>“{s.excerpt}”</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {territory.length > 0 && (
+        <div className="sec">
+          <div className="sec-title">
+            Territory exposure
+            {divergent && <span className="sec-note"> · varies by jurisdiction</span>}
+          </div>
+          <div className="terr-row">
+            {territory.map((t) => (
+              <span className={`terr-chip ${t.band}`} key={t.territory} title={t.rationale}>
+                {t.territory} · {t.band}
+              </span>
+            ))}
+          </div>
+          {divergent && (
+            <details className="option">
+              <summary>Why the band changes across territories</summary>
+              <div className="brief">
+                {territory.map((t) => (
+                  <div className="precedent" key={t.territory}>
+                    · <b>{t.territory}</b> — {t.rationale}
+                    {t.authority && <div className="pull-quote">{t.authority}</div>}
+                  </div>
+                ))}
+              </div>
+            </details>
+          )}
+        </div>
+      )}
 
       {court && (
         <div className="sec">
@@ -222,6 +508,8 @@ export function ElementCard({
           </details>
         ))}
       </div>
+
+      </details>
 
       {decision ? (
         <div className="stamp-note">

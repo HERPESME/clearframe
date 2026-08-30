@@ -1,4 +1,10 @@
-import type { Action, ProductionState, Role } from "./types";
+import type {
+  Action,
+  LicenceGrant,
+  ProductionState,
+  ProductionSummary,
+  Role,
+} from "./types";
 
 let currentRole: Role = "legal";
 
@@ -32,12 +38,24 @@ export class ApiError extends Error {
   }
 }
 
+// FormData must NOT get an explicit Content-Type: the browser has to set the
+// multipart boundary itself.
+async function upload<T>(path: string, form: FormData): Promise<T> {
+  const resp = await fetch(path, {
+    method: "POST",
+    body: form,
+    headers: { "X-ClearFrame-Role": currentRole },
+  });
+  if (!resp.ok) {
+    const body = await resp.json().catch(() => ({}));
+    throw new ApiError(resp.status, body?.detail);
+  }
+  return resp.json() as Promise<T>;
+}
+
 export const api = {
   meta: () => request<{ mode: "demo" | "live"; version: string }>("/api/meta"),
-  listProductions: () =>
-    request<{ id: string; title: string; stage_status: Record<string, string> }[]>(
-      "/api/productions",
-    ),
+  listProductions: () => request<ProductionSummary[]>("/api/productions"),
   createDemo: () => request<ProductionState>("/api/productions/demo", { method: "POST" }),
   startPacedDemo: (paceS: number) =>
     request<{ status: string }>("/api/productions/demo", {
@@ -51,6 +69,41 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ element_id: elementId, action, note }),
     }),
+  uploadFootage: (
+    file: File,
+    opts: {
+      title: string;
+      territories: string;
+      distribution: string;
+      use_context: string;
+      sponsors: string;
+      platform: string;
+    },
+  ) => {
+    const form = new FormData();
+    form.append("file", file);
+    form.append("title", opts.title);
+    form.append("production_id", "upload");
+    form.append("territories", opts.territories);
+    form.append("distribution", opts.distribution);
+    form.append("use_context", opts.use_context);
+    form.append("sponsors", opts.sponsors);
+    form.append("platform", opts.platform);
+    return upload<{ production_id: string; status: string }>("/api/productions", form);
+  },
+  uploadLicences: (file: File, replace: boolean) => {
+    const form = new FormData();
+    form.append("file", file);
+    form.append("replace", String(replace));
+    return upload<{ stored: number; added: number }>("/api/licences", form);
+  },
+  listLicences: () => request<{ licences: LicenceGrant[] }>("/api/licences"),
+  mediaUrl: (pid: string) => `/api/productions/${pid}/media`,
+  checkFreshness: (pid: string) =>
+    request<{ checked: number; holders: number; material_signals: number }>(
+      `/api/productions/${pid}/freshness`,
+      { method: "POST" },
+    ),
   generateDossier: (pid: string) =>
     request<{ artifacts: string[] }>(`/api/productions/${pid}/dossier`, {
       method: "POST",

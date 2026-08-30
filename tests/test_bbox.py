@@ -1,0 +1,185 @@
+"""Bounding boxes: asked for, parsed, and never allowed to lose a detection.
+
+The video player overlays `DetectedElement.bbox`. The demo fixture carries
+hand-written boxes so the overlay looked right — but the scan never asked
+Gemini for one and the response schema had no field for it, so on real footage
+every box was None and the player rendered an empty overlay. A live run
+confirmed it: 11 detections, 0 boxes.
+
+`models.BBox` documented that "Gemini returns [ymin, xmin, ymax, xmax] scaled
+0-1000; the parser divides by 1000". No parser did.
+"""
+
+import pytest
+
+from clearframe.integrations.gemini_client import (
+    SCAN_PROMPT,
+    SCAN_RESPONSE_SCHEMA,
+    parse_scan_payload,
+)
+
+
+def element(**kw):
+    base = {
+        "id": "e1",
+        "label": "Bayer Aspirin",
+        "element_type": "LOGO",
+        "description": "tin on the counter",
+        "time_ranges": [{"start_s": 1.0, "end_s": 6.0}],
+        "prominence": {
+            "screen_time_s": 5.0, "frame_coverage": 0.2,
+            "centrality": 0.6, "plot_integral": False,
+        },
+    }
+    base.update(kw)
+    return {"elements": [base], "unscanned_ranges": []}
+
+
+# ------------------------------------------------------------ it is asked for
+def test_the_prompt_asks_for_a_box():
+    assert "box" in SCAN_PROMPT.lower()
+
+
+def test_the_schema_has_a_field_for_it():
+    props = SCAN_RESPONSE_SCHEMA["properties"]["elements"]["items"]["properties"]
+    assert "bbox" in props
+
+
+# ---------------------------------------------------------------- it is parsed
+def test_geminis_thousand_scale_is_normalised():
+    """[ymin, xmin, ymax, xmax] scaled 0-1000 — Gemini's documented convention."""
+    (d,) = parse_scan_payload(element(bbox=[520, 410, 790, 550])).detections
+    assert d.bbox.ymin == pytest.approx(0.52)
+    assert d.bbox.xmin == pytest.approx(0.41)
+    assert d.bbox.ymax == pytest.approx(0.79)
+    assert d.bbox.xmax == pytest.approx(0.55)
+
+
+def test_an_already_normalised_box_is_left_alone():
+    """Some model versions answer 0-1. Dividing again would collapse the box
+    into the top-left corner, which renders as a dot and looks like a bug in
+    the player rather than in the parser."""
+    (d,) = parse_scan_payload(element(bbox=[0.52, 0.41, 0.79, 0.55])).detections
+    assert d.bbox.ymin == pytest.approx(0.52)
+    assert d.bbox.xmax == pytest.approx(0.55)
+
+
+def test_out_of_range_values_are_clamped():
+    (d,) = parse_scan_payload(element(bbox=[-20, 0, 1200, 1000])).detections
+    assert d.bbox.ymin == 0.0 and d.bbox.ymax == 1.0
+
+
+def test_a_dict_shaped_box_is_accepted_too():
+    (d,) = parse_scan_payload(
+        element(bbox={"ymin": 0.1, "xmin": 0.2, "ymax": 0.3, "xmax": 0.4})
+    ).detections
+    assert d.bbox.ymin == pytest.approx(0.1)
+
+
+# -------------------------------------------- a bad box must not cost a finding
+@pytest.mark.parametrize(
+    "bad",
+    [
+        [500, 400, 500, 400],      # degenerate — zero area
+        [900, 400, 100, 550],      # inverted
+        [1, 2, 3],                 # wrong arity
+        "somewhere on the left",   # not a box at all
+        None,
+    ],
+)
+def test_an_unusable_box_drops_the_box_and_keeps_the_detection(bad):
+    """The recall rule. Losing a real finding because the model returned a
+    malformed rectangle would trade the product's whole safety claim for a
+    UI nicety."""
+    result = parse_scan_payload(element(bbox=bad))
+    assert len(result.detections) == 1, f"detection lost over bbox={bad!r}"
+    assert result.detections[0].label == "Bayer Aspirin"
+    assert result.detections[0].bbox is None
+
+
+def test_no_box_at_all_still_parses():
+    (d,) = parse_scan_payload(element()).detections
+    assert d.bbox is None
+
+
+def test_a_genuinely_invalid_element_is_still_skipped():
+    """The guard above must not turn into "accept anything"."""
+    broken = element()
+    del broken["elements"][0]["label"]
+    assert parse_scan_payload(broken).detections == []
+
+
+# ------------------------------------------------- the axis-order regression
+def test_the_schema_names_the_axes_rather_than_ordering_them():
+    """Found by drawing the stored box on a real frame: it floated in empty
+    wall while the object sat elsewhere. The schema was four ANONYMOUS numbers,
+    so the model had no structural cue and answered [xmin, ymin, xmax, ymax] —
+    the more common convention — despite the prompt saying otherwise. Word
+    order in a prompt is not a contract; a named field is."""
+    props = SCAN_RESPONSE_SCHEMA["properties"]["elements"]["items"]["properties"]
+    bbox = props["bbox"]
+    assert bbox["type"] == "object", "an ordered array leaves the axes ambiguous"
+    assert set(bbox["properties"]) == {"ymin", "xmin", "ymax", "xmax"}
+    assert set(bbox["required"]) == {"ymin", "xmin", "ymax", "xmax"}
+
+
+def test_a_named_box_cannot_be_transposed():
+    (d,) = parse_scan_payload(
+        element(bbox={"xmin": 300, "ymin": 440, "xmax": 440, "ymax": 600})
+    ).detections
+    assert d.bbox.xmin == pytest.approx(0.30)
+    assert d.bbox.ymin == pytest.approx(0.44)
+    assert d.bbox.xmax == pytest.approx(0.44)
+    assert d.bbox.ymax == pytest.approx(0.60)
+
+
+def test_the_legacy_array_form_is_still_accepted():
+    """Stored states from before the schema change must keep loading."""
+    (d,) = parse_scan_payload(element(bbox=[520, 410, 790, 550])).detections
+    assert d.bbox.ymin == pytest.approx(0.52)
+
+
+def test_at_s_survives_for_legacy_states():
+    """Superseded by per-appearance boxes, which are strictly better: `at_s`
+    tied ONE box to ONE moment, so three of four appearances still got nothing.
+    The field stays in the schema so states written against it keep loading."""
+    props = SCAN_RESPONSE_SCHEMA["properties"]["elements"]["items"]["properties"]
+    assert "at_s" in props
+
+
+# ------------------------------------------------- boxes inside appearances
+def test_a_box_is_parsed_inside_each_appearance():
+    payload = element()
+    payload["elements"][0]["time_ranges"] = [
+        {"start_s": 0, "end_s": 5, "bbox": {"ymin": 300, "xmin": 400, "ymax": 440, "xmax": 600}},
+        {"start_s": 23, "end_s": 28, "bbox": {"ymin": 700, "xmin": 100, "ymax": 800, "xmax": 250}},
+    ]
+    (d,) = parse_scan_payload(payload).detections
+    assert d.time_ranges[0].bbox.ymin == pytest.approx(0.30)
+    assert d.time_ranges[1].bbox.ymin == pytest.approx(0.70)
+
+
+def test_a_bad_box_in_one_appearance_costs_only_that_box():
+    """Same recall rule as before, one level down: never lose an appearance
+    over a malformed rectangle."""
+    payload = element()
+    payload["elements"][0]["time_ranges"] = [
+        {"start_s": 0, "end_s": 5, "bbox": [1, 2, 3]},
+        {"start_s": 23, "end_s": 28, "bbox": {"ymin": 700, "xmin": 100, "ymax": 800, "xmax": 250}},
+    ]
+    (d,) = parse_scan_payload(payload).detections
+    assert len(d.time_ranges) == 2
+    assert d.time_ranges[0].bbox is None
+    assert d.time_ranges[1].bbox is not None
+
+
+def test_appearances_without_boxes_still_parse():
+    (d,) = parse_scan_payload(element()).detections
+    assert d.time_ranges[0].bbox is None
+
+
+def test_the_schema_puts_the_box_inside_the_range():
+    props = SCAN_RESPONSE_SCHEMA["properties"]["elements"]["items"]["properties"]
+    tr = props["time_ranges"]["items"]["properties"]
+    assert "bbox" in tr
+    assert set(tr["bbox"]["properties"]) == {"ymin", "xmin", "ymax", "xmax"}

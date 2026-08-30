@@ -211,8 +211,20 @@ class LiveCourtClient:
         )
 
         def _run() -> CourtOpinion:
-            counsel = self._ask_json(COUNSEL_PROMPT.format(**fmt), BRIEF_SCHEMA)
-            advocate = self._ask_json(ADVOCATE_PROMPT.format(**fmt), BRIEF_SCHEMA)
+            # Counsel and advocate argue independently — neither reads the
+            # other's brief, only the judge reads both. Running them in
+            # sequence was paying two model latencies to no purpose; an
+            # adversarial pair is exactly the shape that parallelises.
+            from concurrent.futures import ThreadPoolExecutor
+
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                counsel_f = pool.submit(
+                    self._ask_json, COUNSEL_PROMPT.format(**fmt), BRIEF_SCHEMA
+                )
+                advocate_f = pool.submit(
+                    self._ask_json, ADVOCATE_PROMPT.format(**fmt), BRIEF_SCHEMA
+                )
+                counsel, advocate = counsel_f.result(), advocate_f.result()
             ruling = self._ask_json(
                 JUDGE_PROMPT.format(
                     label=el.label,

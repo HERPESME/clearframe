@@ -662,6 +662,13 @@ button {
   border-color: var(--low);
 }
 
+/* Preliminary-report rows are banded by provisional risk — an upper bound that
+   can only fall once ownership research lands, never rise. */
+.row-chip.band.CRITICAL { color: var(--critical); border-color: var(--critical); }
+.row-chip.band.HIGH { color: var(--high); border-color: var(--high); }
+.row-chip.band.MEDIUM { color: var(--amber); border-color: var(--amber); }
+.row-chip.band.LOW { color: var(--low); border-color: var(--low); }
+
 .mission-foot {
   text-align: center;
   margin-top: 30px;
@@ -845,3 +852,229 @@ button {
     font-size: 18px;
   }
 }
+
+/* ---- identity corroboration, live signals, territory ------------------ */
+.badge.verdict { letter-spacing: .4px; }
+.tone-chip { display:inline-block; padding:2px 8px; border-radius:9px; font-size:10px; letter-spacing:.6px; border:1px solid transparent; }
+.tone-chip.FAVOURABLE { background: rgba(22,160,133,.16); color:#1abc9c; border-color: rgba(22,160,133,.45); }
+.tone-chip.NEUTRAL { background: rgba(127,140,141,.14); color: var(--muted); border-color: rgba(127,140,141,.35); }
+.tone-chip.UNFLATTERING { background: rgba(230,126,34,.16); color:#e67e22; border-color: rgba(230,126,34,.45); }
+.tone-chip.DISPARAGING { background: rgba(192,57,43,.18); color: var(--critical); border-color: rgba(192,57,43,.55); }
+/* The wordmark doubles as the way home. It has to still look like a wordmark,
+   so this strips the button chrome rather than adding any. */
+.brand-home { background: none; border: 0; padding: 0; font: inherit;
+  color: inherit; cursor: pointer; letter-spacing: inherit; }
+.brand-home:hover { opacity: .8; }
+
+/* The cost block is the answer; everything else is the evidence for it. It
+   reads first and it reads plainly — a director should not have to parse a
+   score to learn what shipping this uncleared would cost. */
+@keyframes cf-spin { to { transform: rotate(360deg); } }
+.ov-unlocated { color: var(--muted); }
+/* Detected but not placeable in time — a real finding whose timecodes the
+   scan cannot have measured. Warned rather than muted: a box that never
+   appears reads as a false detection unless the player says otherwise. */
+.ov-untimed { color: var(--high); cursor: help; }
+
+/* Each appearance is its own scrub target — that is how you reach the third
+   shot's box. A dot marks the ones that actually have a rectangle. */
+.tc-jump { background: none; border: 0; padding: 0 10px 0 0; font: inherit;
+  color: inherit; cursor: pointer; }
+.tc-jump:hover { color: var(--amber); text-decoration: underline; }
+.tc-jump.boxed::after { content: " •"; color: var(--amber); }
+
+.spinner { display:inline-block; width:11px; height:11px; margin-right:7px;
+  vertical-align:-1px; border:2px solid var(--line); border-top-color: var(--amber);
+  border-radius:50%; animation: cf-spin .8s linear infinite; }
+
+/* A card whose research has not landed yet. It shows what it already knows —
+   label, timecodes, provisional band — rather than an empty frame, because a
+   blank card reads as a broken app rather than as work in progress. */
+.card.pending { opacity: .92; }
+.pending-row { display:flex; align-items:center; gap:8px; font-family: var(--mono);
+  font-size:11px; letter-spacing:.06em; color: var(--muted); padding:10px 0; }
+
+.cost-block { background: rgba(230,126,34,.07); border: 1px solid rgba(230,126,34,.28);
+  border-radius: 4px; padding: 12px 14px; }
+.cost-headline { font-size: 14px; line-height: 1.5; margin-bottom: 10px; }
+.cost-steps { margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.65; color: var(--muted); }
+.cost-steps li { margin-bottom: 2px; }
+.cost-steps li.cost-worst { color: var(--critical); }
+.cost-injunction { margin-top: 10px; font-size: 12px; color: var(--muted);
+  border-top: 1px solid var(--line); padding-top: 8px; }
+.cost-injunction strong { color: var(--critical); }
+
+/* Collapsed by default. The citations matter enormously to an insurer and
+   almost never to the person deciding whether to reshoot. */
+.evidence-fold { margin-top: 4px; }
+.evidence-fold > summary { cursor: pointer; font-family: var(--mono); font-size: 11px;
+  letter-spacing: .06em; color: var(--muted); padding: 8px 0; list-style: none; }
+.evidence-fold > summary::before { content: "▸ "; }
+.evidence-fold[open] > summary::before { content: "▾ "; }
+.evidence-fold > summary:hover { color: var(--fg); }
+
+.resuming-banner { background: rgba(241,196,15,.10); border:1px solid rgba(241,196,15,.4); border-radius:4px; padding:10px 14px; margin: 0 0 16px; font-size:13px; }
+.resuming-banner strong { color: var(--amber); }
+
+.platform-banner { background: rgba(211,84,0,.10); border:1px solid rgba(211,84,0,.4); border-radius:4px; padding:10px 14px; margin: 0 0 16px; font-size:13px; }
+.platform-banner strong { color:#e67e22; }
+.platform-banner em { color: var(--muted); font-style: normal; }
+.exposure-banner { background: rgba(192,57,43,.10); border:1px solid rgba(192,57,43,.4); border-radius:4px; padding:10px 14px; margin: 0 0 16px; font-size:13px; }
+.exposure-banner strong { color: var(--critical); }
+.exposure-banner em { color: var(--muted); font-style: normal; }
+/* The scan's union box, shown while grounding measures this frame. Dashed and
+   faded because it is a placeholder: one rectangle covers a whole appearance,
+   so it is right about WHAT and only roughly right about WHERE. */
+.ov-box.approx { stroke-dasharray: 6 5; opacity: .55; }
+.ov-warming { color: #4aa3df; }
+.ov-approx { margin-left: 6px; font-size: 9px; letter-spacing: .5px; color: var(--muted); text-transform: uppercase; }
+/* The footage IS someone's work. Leads the findings, because clearing the work
+   clears everything under it and six characters from one anime are one
+   negotiation, not six. */
+.work-banner { background: rgba(142,68,173,.12); border:1px solid rgba(142,68,173,.45); border-radius:4px; padding:10px 14px; margin: 0 0 16px; font-size:13px; }
+.work-banner strong { color:#a569bd; }
+.work-action { margin-top:8px; }
+.work-caveat { margin-top:6px; color: var(--muted); }
+.badge.subsumed { background: rgba(142,68,173,.18); color:#a569bd; border-color: rgba(142,68,173,.5); }
+.cast-banner { background: rgba(41,128,185,.10); border:1px solid rgba(41,128,185,.35); border-radius:4px; padding:10px 14px; margin: 0 0 16px; font-size:13px; }
+.cast-banner strong { color:#4aa3df; }
+.cast-banner ul { margin:8px 0; padding-left:18px; }
+.cast-banner em { color: var(--muted); font-style: italic; }
+.sponsor-banner { background: rgba(230,126,34,.10); border:1px solid rgba(230,126,34,.4); border-radius:4px; padding:10px 14px; margin: 0 0 16px; font-size:13px; }
+.sponsor-banner strong { color:#e67e22; }
+.route-chip { display:inline-block; padding:2px 8px; border-radius:9px; font-size:10px; letter-spacing:.6px; border:1px solid transparent; }
+.route-chip.LOCAL { background: rgba(22,160,133,.16); color:#1abc9c; border-color: rgba(22,160,133,.45); }
+.route-chip.STATUTE { background: rgba(142,68,173,.16); color:#a569bd; border-color: rgba(142,68,173,.45); }
+.route-chip.SEARCH { background: rgba(41,128,185,.16); color:#4aa3df; border-color: rgba(41,128,185,.45); }
+.route-chip.DEEP { background: rgba(211,84,0,.16); color:#e67e22; border-color: rgba(211,84,0,.45); }
+.route-chip.BLOCKED { background: rgba(127,140,141,.16); color: var(--muted); border-color: rgba(127,140,141,.4); }
+.route-note .basis { font-style: italic; }
+.route-note.free { border-left: 2px solid rgba(142,68,173,.5); padding-left: 10px; }
+.route-note .disposition { margin-top: 6px; font-size: 12px; }
+.badge.verdict.FINGERPRINTED { background: rgba(41,128,185,.18); color: #4aa3df; border-color: rgba(41,128,185,.5); }
+.badge.verdict.CORROBORATED { background: rgba(39,174,96,.16); color: var(--low); border-color: rgba(39,174,96,.45); }
+.badge.verdict.SINGLE_SOURCE { background: rgba(127,140,141,.16); color: var(--muted); border-color: rgba(127,140,141,.4); }
+.badge.verdict.CONFLICTED { background: rgba(192,57,43,.18); color: var(--critical); border-color: rgba(192,57,43,.55); }
+
+.conflict-banner {
+  margin: 10px 0 4px; padding: 9px 12px; font-size: 12.5px; line-height: 1.5;
+  background: rgba(192,57,43,.1); border: 1px solid rgba(192,57,43,.45);
+  border-left-width: 3px; border-radius: 3px; color: var(--ink);
+}
+.conflict-banner strong { color: var(--critical); }
+
+.card-body { display: flex; gap: 16px; align-items: flex-start; }
+.card-main { flex: 1; min-width: 0; }
+
+.frame-pos { flex: 0 0 auto; text-align: center; }
+.frame-pos svg { display: block; border-radius: 3px; }
+.frame-bg { fill: rgba(255,255,255,.035); stroke: var(--line); stroke-width: 1; }
+.frame-guide { stroke: var(--line); stroke-width: .5; stroke-dasharray: 2 4; }
+.frame-box { fill-opacity: .3; stroke-width: 1.5; }
+.frame-box.CRITICAL { fill: var(--critical); stroke: var(--critical); }
+.frame-box.HIGH { fill: var(--high); stroke: var(--high); }
+.frame-box.MEDIUM { fill: var(--medium); stroke: var(--medium); }
+.frame-box.LOW { fill: var(--low); stroke: var(--low); }
+.frame-cap { font-family: var(--mono); font-size: 9.5px; color: var(--muted); margin-top: 4px; }
+
+.sec-note { font-weight: normal; text-transform: none; letter-spacing: 0; color: var(--muted); }
+.signal-count { color: var(--high); }
+.citation.material { border-left: 2px solid var(--critical); padding-left: 8px; }
+.sig-flag {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .5px;
+  background: rgba(192,57,43,.2); color: var(--critical);
+  border: 1px solid rgba(192,57,43,.5); border-radius: 3px; padding: 1px 5px;
+}
+
+.terr-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 4px 0 6px; }
+.terr-chip {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .4px;
+  padding: 3px 9px; border-radius: 3px; border: 1px solid var(--line); cursor: help;
+}
+.terr-chip.CRITICAL { color: var(--critical); border-color: rgba(192,57,43,.5); }
+.terr-chip.HIGH { color: var(--high); border-color: rgba(230,126,34,.5); }
+.terr-chip.MEDIUM { color: var(--medium); border-color: rgba(41,128,185,.5); }
+.terr-chip.LOW { color: var(--low); border-color: rgba(39,174,96,.5); }
+
+.chip.ok { color: var(--low); border-color: rgba(39,174,96,.5); }
+
+button.secondary {
+  background: transparent; color: var(--ink); border: 1px solid var(--line);
+  border-radius: 3px; padding: 9px 16px; font-size: 12.5px; cursor: pointer;
+  font-family: inherit; margin-right: 10px;
+}
+button.secondary:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+button.secondary:disabled { opacity: .5; cursor: default; }
+.fresh-note { font-size: 12px; color: var(--muted); margin-left: 14px; }
+
+/* The decision stamp is absolutely positioned; with the identity/territory
+   badges the header now runs under it. Reserve the corner. */
+.card-head { padding-right: 190px; }
+.card:has(.stamp) .card-body { padding-top: 2px; }
+@media (max-width: 900px) {
+  .card-head { padding-right: 0; }
+  .stamp { position: static; display: inline-block; transform: none; margin-bottom: 8px; }
+  .card-body { flex-direction: column; }
+  .frame-pos { align-self: flex-start; }
+}
+
+/* ---- video player + overlay ------------------------------------------ */
+.player-wrap { padding: 14px 24px 4px; background: var(--panel, #111); border-bottom: 1px solid var(--line); }
+.player-frame { position: relative; max-width: 900px; margin: 0 auto; line-height: 0; }
+.player-frame video { width: 100%; height: auto; display: block; border-radius: 4px; background: #000; }
+/* Positioned in JS to the RENDERED picture, not the element. `inset: 0` was
+   only ever correct while the video element was exactly the size of the
+   picture inside it; full screen letterboxes it and every box was then drawn
+   against the screen instead of the frame. */
+.player-overlay { position: absolute; pointer-events: none; }
+/* The native control can only fullscreen the <video>, which leaves the overlay
+   — a sibling — behind on the page. Ours takes the wrapper. */
+.player-frame video::-webkit-media-controls-fullscreen-button { display: none; }
+.player-fs { position: absolute; right: 10px; top: 10px; z-index: 3; background: rgba(0,0,0,.55);
+  color: #fff; border: 1px solid rgba(255,255,255,.25); border-radius: 4px; width: 30px; height: 30px;
+  font-size: 14px; line-height: 1; cursor: pointer; opacity: .65; }
+.player-fs:hover { opacity: 1; }
+.player-frame:fullscreen { max-width: none; width: 100vw; height: 100vh; display: grid; place-items: center; background: #000; }
+.player-frame:fullscreen video { width: 100vw; height: 100vh; object-fit: contain; }
+.ov-g { pointer-events: auto; cursor: pointer; }
+.ov-box { fill: transparent; stroke-width: 2; }
+.ov-box.CRITICAL { stroke: var(--critical); } .ov-box.HIGH { stroke: var(--high); }
+.ov-box.MEDIUM { stroke: var(--medium); }   .ov-box.LOW { stroke: var(--low); }
+.ov-box.active { stroke-width: 3; fill: rgba(255,255,255,.07); }
+.ov-label {
+  position: absolute; transform: translateY(-110%);
+  font-family: var(--mono); font-size: 10px; line-height: 1.4;
+  background: rgba(10,10,10,.86); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 3px;
+  padding: 2px 7px; cursor: pointer; white-space: nowrap; max-width: 92%;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.ov-label.CRITICAL { border-color: var(--critical); } .ov-label.HIGH { border-color: var(--high); }
+.ov-label.MEDIUM { border-color: var(--medium); }     .ov-label.LOW { border-color: var(--low); }
+.ov-flag { margin-left: 6px; color: var(--critical); font-weight: 700; }
+.ov-cov { margin-left: 6px; font-size: 9px; letter-spacing: .3px; }
+.ov-cov.COVERED { color: var(--low); } .ov-cov.PARTIAL { color: var(--high); }
+.ov-cov.NOT_COVERED { color: var(--critical); } .ov-cov.UNKNOWN { color: var(--muted); }
+.player-status { max-width: 900px; margin: 6px auto 0; font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
+
+/* ---- coverage --------------------------------------------------------- */
+.badge.cov.COVERED { background: rgba(39,174,96,.16); color: var(--low); border-color: rgba(39,174,96,.5); }
+.badge.cov.PARTIAL { background: rgba(230,126,34,.16); color: var(--high); border-color: rgba(230,126,34,.5); }
+.badge.cov.NOT_COVERED { background: rgba(192,57,43,.16); color: var(--critical); border-color: rgba(192,57,43,.5); }
+.badge.cov.UNKNOWN { background: rgba(127,140,141,.14); color: var(--muted); border-color: rgba(127,140,141,.4); }
+.gap-note { font-size: 12.5px; line-height: 1.55; background: rgba(230,126,34,.08); border: 1px solid rgba(230,126,34,.4); border-left-width: 3px; border-radius: 3px; padding: 8px 12px; }
+.gap-list { margin: 6px 0 0 18px; color: var(--high); }
+
+/* ---- uploader --------------------------------------------------------- */
+.hero-actions { display: flex; gap: 12px; justify-content: center; margin-top: 8px; }
+.uploader { display: grid; gap: 18px; max-width: 640px; margin: 26px auto 0; text-align: left; }
+.up-block { border: 1px solid var(--line); border-radius: 4px; padding: 16px 18px; background: rgba(255,255,255,.02); }
+.up-block input[type="file"] { display: block; margin: 10px 0; font-size: 12px; color: var(--muted); }
+.up-text { width: 100%; padding: 8px 10px; margin: 8px 0; background: transparent; border: 1px solid var(--line); border-radius: 3px; color: var(--ink); font-family: inherit; font-size: 13px; }
+.up-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+.up-label { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-right: 4px; }
+.up-chip { font-family: var(--mono); font-size: 10px; padding: 4px 9px; border-radius: 3px; border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; }
+.up-chip.on { border-color: var(--accent); color: var(--accent); }
+.up-help { font-size: 12.5px; line-height: 1.6; color: var(--muted); margin: 6px 0 10px; }
+.up-code { display: block; font-family: var(--mono); font-size: 10px; color: var(--muted); background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 3px; padding: 7px 9px; overflow-x: auto; }
+.up-ok { font-size: 12px; color: var(--low); margin-top: 6px; }

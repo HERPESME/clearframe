@@ -20,11 +20,17 @@ class MarkerEntry:
     label: str
     band: RiskBand
     category: ClearanceCategory
+    identity: str = ""
 
 
 def elements_to_markers(
-    elements: list[TriagedElement], risk: dict[str, RiskAssessment]
+    elements: list[TriagedElement],
+    risk: dict[str, RiskAssessment],
+    corroboration: dict | None = None,
 ) -> list[MarkerEntry]:
+    """Markers carry the identity verdict so an assistant editor pulling
+    shots can see which identifications are still disputed."""
+    corroboration = corroboration or {}
     markers = [
         MarkerEntry(
             start_s=r.start_s,
@@ -32,6 +38,9 @@ def elements_to_markers(
             label=el.label,
             band=risk[el.id].band,
             category=el.category,
+            identity=(
+                corroboration[el.id].verdict.value if el.id in corroboration else ""
+            ),
         )
         for el in elements
         for r in el.time_ranges

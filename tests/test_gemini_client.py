@@ -5,11 +5,13 @@ from clearframe.integrations.gemini_client import FixtureGeminiClient, parse_sca
 FIXTURES = Path("src/clearframe/integrations/fixtures")
 
 
-async def test_fixture_scan_returns_six_elements():
+async def test_fixture_scan_returns_seven_elements():
     result = await FixtureGeminiClient(FIXTURES).scan("demo://salted-scene", 62.0)
-    assert len(result.detections) == 6
+    assert len(result.detections) == 7
     labels = [d.label for d in result.detections]
-    assert "Blinding Lights - The Weeknd" in labels
+    # The video model names music only descriptively — that is the real-world
+    # behaviour that motivated fingerprinting, and the fixture mirrors it.
+    assert "Upbeat electronic music" in labels
 
 
 async def test_fixture_audit_scan_finds_missed_element():

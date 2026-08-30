@@ -1,14 +1,19 @@
 """Deterministic pipeline orchestrator: fixed stage order, resumable, persisted per stage."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Protocol
 
+from clearframe.integrations.audio_client import AudioIdClient, FixtureAudioClient
 from clearframe.integrations.court_client import CourtClient, FixtureCourtClient
 from clearframe.integrations.gemini_client import FixtureGeminiClient, GeminiClient
 from clearframe.integrations.parallel_client import FixtureParallelClient, ParallelClient
+from clearframe.integrations.vision_client import (
+    CorroborationClient,
+    FixtureVisionClient,
+)
 from clearframe.models import Production, ProductionState
-from clearframe.store import LocalJsonStore
+from clearframe.store import LicenceStore, LocalJsonStore
 
 FIXTURES_DIR = Path(__file__).parent / "integrations" / "fixtures"
 
@@ -16,9 +21,14 @@ ANALYSIS_STAGES = (
     "script",
     "scan",
     "triage",
+    "corroborate",
     "drift",
+    "preview",
     "research",
+    "freshness",
     "risk",
+    "territory",
+    "coverage",
     "remediation",
     "court",
 )
@@ -31,6 +41,9 @@ class PipelineContext:
     parallel: ParallelClient
     store: LocalJsonStore
     court: "CourtClient | None" = None
+    corroborator: "CorroborationClient | None" = None
+    audio: "AudioIdClient | None" = None
+    licences: list = field(default_factory=list)
     listener: "Callable[[dict], None] | None" = None
 
     def emit(self, event: dict) -> None:
@@ -75,9 +88,14 @@ def build_demo_pipeline(max_research: int | None = None) -> list[Stage]:
     from clearframe.stages.scan import ScanStage
     from clearframe.stages.triage_stage import TriageStage
 
+    from clearframe.stages.corroborate import CorroborateStage
     from clearframe.stages.court import CourtStage
+    from clearframe.stages.coverage import CoverageStage
     from clearframe.stages.drift_stage import DriftStage
+    from clearframe.stages.freshness import FreshnessStage
+    from clearframe.stages.preview import PreviewStage
     from clearframe.stages.script import ScriptStage
+    from clearframe.stages.territory_stage import TerritoryStage
 
     if max_research is None:
         max_research = int(os.environ.get("CLEARFRAME_MAX_RESEARCH", "25"))
@@ -85,9 +103,14 @@ def build_demo_pipeline(max_research: int | None = None) -> list[Stage]:
         ScriptStage(),
         ScanStage(),
         TriageStage(),
+        CorroborateStage(),
         DriftStage(),
+        PreviewStage(),
         ResearchStage(max_research=max_research),
+        FreshnessStage(),
         RiskStage(),
+        TerritoryStage(),
+        CoverageStage(),
         RemediationStage(),
         CourtStage(),
     ]
@@ -108,16 +131,33 @@ def build_context(cfg, production: Production, out_root: Path) -> PipelineContex
         court: CourtClient = LiveCourtClient(
             project=cfg.project, location=cfg.location, model=cfg.gemini_model
         )
+        from clearframe.integrations.vision_client import LiveVideoIntelligenceClient
+
+        corroborator: CorroborationClient = LiveVideoIntelligenceClient()
+
+        # Fingerprinting is optional: without a token music stays SINGLE_SOURCE,
+        # which is the honest state, not a failure.
+        if cfg.audd_api_token:
+            from clearframe.integrations.audio_client import LiveAudDClient
+
+            audio: AudioIdClient | None = LiveAudDClient(api_token=cfg.audd_api_token)
+        else:
+            audio = None
     else:
         gemini = FixtureGeminiClient(FIXTURES_DIR)
         parallel = FixtureParallelClient(FIXTURES_DIR)
         court = FixtureCourtClient(FIXTURES_DIR)
+        corroborator = FixtureVisionClient(FIXTURES_DIR)
+        audio = FixtureAudioClient(FIXTURES_DIR)
     return PipelineContext(
         state=ProductionState(production=production),
         gemini=gemini,
         parallel=parallel,
         store=LocalJsonStore(Path(out_root) / "state"),
         court=court,
+        corroborator=corroborator,
+        audio=audio,
+        licences=LicenceStore(Path(out_root) / "state").load(),
     )
 
 
@@ -128,6 +168,7 @@ def demo_context(out_root: Path) -> PipelineContext:
         footage_uri="demo://salted-scene",
         duration_s=62.0,
         script_uri="demo://golden-hour-script",
+        release_territories=["US", "DE", "FR"],
     )
     return PipelineContext(
         state=ProductionState(production=production),
@@ -135,4 +176,7 @@ def demo_context(out_root: Path) -> PipelineContext:
         parallel=FixtureParallelClient(FIXTURES_DIR),
         store=LocalJsonStore(Path(out_root) / "state"),
         court=FixtureCourtClient(FIXTURES_DIR),
+        corroborator=FixtureVisionClient(FIXTURES_DIR),
+        audio=FixtureAudioClient(FIXTURES_DIR),
+        licences=LicenceStore(Path(out_root) / "state").seed_demo(),
     )

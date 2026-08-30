@@ -19,7 +19,7 @@ async def test_pipeline_computes_drift(tmp_path):
     assert len(state.script_mentions) == 3
     assert state.drift is not None
     # hoodie, mural, TV broadcast were never in the script; faces excluded
-    assert set(state.drift.unscripted_element_ids) == {"e3", "e5", "e7"}
+    assert set(state.drift.unscripted_element_ids) == {"e3", "e5", "e7", "e8"}
     assert state.drift.scripted_not_seen == []
 
 

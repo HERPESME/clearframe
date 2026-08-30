@@ -1,10 +1,14 @@
 """Rule-based clearance triage and cross-shot duplicate merging."""
 
+from clearframe.matching import labels_match, tokens
+from clearframe.overlay import locates
 from clearframe.models import (
+    BBox,
     ClearanceCategory,
     DetectedElement,
     ElementType,
     Prominence,
+    TimeRange,
     TriagedElement,
 )
 
@@ -13,39 +17,293 @@ CATEGORY_RULES: dict[ElementType, ClearanceCategory] = {
     ElementType.ARTWORK: ClearanceCategory.COPYRIGHT_ART,
     ElementType.MUSIC: ClearanceCategory.MUSIC_SYNC,
     ElementType.FACE: ClearanceCategory.RIGHT_OF_PUBLICITY,
+    ElementType.CHARACTER: ClearanceCategory.COPYRIGHT_ART,
     ElementType.TATTOO: ClearanceCategory.COPYRIGHT_ART,
     ElementType.LOCATION: ClearanceCategory.LOCATION,
     ElementType.TEXT: ClearanceCategory.TEXT_ON_SCREEN,
 }
 
 
-def _merge(group: list[DetectedElement]) -> DetectedElement:
-    first = group[0]
-    ranges = sorted(
-        (r for d in group for r in d.time_ranges), key=lambda r: (r.start_s, r.end_s)
+def _union(ranges: list[TimeRange]) -> list[TimeRange]:
+    """Overlapping sightings of one thing are one sighting.
+
+    Two independent scan passes both report the whole element, so the same
+    ten seconds arrives twice. Concatenating them made a 10s tattoo read as
+    20s, and prominence drives the risk score.
+    """
+    out: list[TimeRange] = []
+    for r in sorted(ranges, key=lambda r: (r.start_s, r.end_s)):
+        if out and r.start_s <= out[-1].end_s:
+            if r.end_s > out[-1].end_s:
+                # Keep the earlier box: it was measured, and a merged range
+                # spans more than either box was drawn for.
+                out[-1] = out[-1].model_copy(update={"end_s": r.end_s})
+            continue
+        out.append(r)
+    return out
+
+
+def _overlaps(a: DetectedElement, b: DetectedElement) -> bool:
+    return any(
+        r.start_s < q.end_s and q.start_s < r.end_s
+        for r in a.time_ranges
+        for q in b.time_ranges
     )
-    return DetectedElement(
-        id=first.id,
-        label=first.label,
-        element_type=first.element_type,
-        description=first.description,
-        time_ranges=ranges,
-        prominence=Prominence(
-            screen_time_s=sum(d.prominence.screen_time_s for d in group),
-            frame_coverage=max(d.prominence.frame_coverage for d in group),
-            centrality=max(d.prominence.centrality for d in group),
-            plot_integral=any(d.prominence.plot_integral for d in group),
+
+
+# A label that names the same thing in both passes, allowing only for
+# punctuation and word order. Deliberately far above MATCH_THRESHOLD: this is
+# the only evidence permitted to merge across a type disagreement.
+_NAMES_THE_SAME = 0.9
+
+# The floor for treating a shared instant and a shared place as CORROBORATION.
+# Colocation promotes a label agreement that fell just short of
+# MATCH_THRESHOLD; it never manufactures one. Without this, two people standing
+# in one frame overlapped — which is what standing next to someone looks like —
+# and Lelouch was merged with C.C., and a cat named Arthur with a pizza
+# delivery guy. Both absorbed findings were deleted from the report.
+_WEAK_AGREEMENT = 0.3
+
+
+# How much two rectangles must agree when there is no usable clock behind
+# them. Anchored on the two pairs that set it, both from one live re-run:
+# the same face tattoo measured by both passes scores 0.56, while aviator
+# sunglasses and a sticker on a water heater — which clip a corner — score
+# 0.06. Only used when the timing has been disowned; a pair that shares an
+# instant needs no more than an overlap.
+SAME_REGION_IOU = 0.3
+
+
+def _boxes_overlap(a: BBox, b: BBox) -> bool:
+    return a.xmin < b.xmax and b.xmin < a.xmax and a.ymin < b.ymax and b.ymin < a.ymax
+
+
+def _iou(a: BBox, b: BBox) -> float:
+    if not _boxes_overlap(a, b):
+        return 0.0
+    inter = (min(a.xmax, b.xmax) - max(a.xmin, b.xmin)) * (
+        min(a.ymax, b.ymax) - max(a.ymin, b.ymin)
+    )
+    area_a = (a.xmax - a.xmin) * (a.ymax - a.ymin)
+    area_b = (b.xmax - b.xmin) * (b.ymax - b.ymin)
+    return inter / (area_a + area_b - inter)
+
+
+def _colocated(a: DetectedElement, b: DetectedElement) -> bool:
+    """On screen at the same moment AND in the same part of the frame.
+
+    The objection to matching on time alone is that two distinct logos share a
+    shot. They do — and they are not in the same place in it, which is what
+    this adds. Both sightings must carry a box that LOCATES: an absent box is
+    not agreement, and neither is a box around the whole frame, which overlaps
+    every other box in the picture.
+
+    That last clause is not defensive. Replaying a real run's detections found
+    "Stu Price (Ed Helms)" boxed at {0, 0, 1, 1} while sharing a tenth of a
+    second with "Alan Garner (Zach Galifianakis)" — two actors, merged into
+    one, and one of them deleted from the report. Over-merging is the failure
+    this whole rule is written around.
+    """
+    # A clock we have already disowned cannot testify that two sightings are
+    # different. One live re-run returned the second pass's timecodes as
+    # seconds DIVIDED BY 100 — 0.04971 for 4.971s — so the two passes' ranges
+    # never overlapped and the same tattoo stayed two findings. `timeline.py`
+    # had already proved those timecodes impossible; using them anyway to keep
+    # the findings apart was reading meaning into the same numbers we refused
+    # to trust.
+    unclocked = not (a.timing_reliable and b.timing_reliable)
+    pairs = [
+        (r.bbox, q.bbox)
+        for r in a.time_ranges
+        for q in b.time_ranges
+        if (unclocked or (r.start_s < q.end_s and q.start_s < r.end_s))
+        and locates(r.bbox) and locates(q.bbox)
+    ]
+    if unclocked:
+        # The rectangle is the whole of the evidence, so it has to describe the
+        # same region rather than merely touch one.
+        return any(_iou(r, q) >= SAME_REGION_IOU for r, q in pairs)
+    return any(_boxes_overlap(r, q) for r, q in pairs)
+
+
+def _same_finding(a: DetectedElement, b: DetectedElement) -> bool:
+    """Are these two sightings of one object?
+
+    Two rules beyond the label, each added for a pair that survived on a live
+    run and was routed, scored and reported twice.
+
+    Same type, same instant, same rectangle. "Mike Tyson face tattoo" and
+    "Stu's Face Tattoo" share {face, tattoo} — 2 of 4 tokens, 0.5 against a
+    0.6 threshold — so the label alone says no. They are the same square inch
+    of the same face at the same second, and the grounding pass returned the
+    identical box for both.
+
+    Or one of them is TEXT. TEXT_ON_SCREEN is what the scan produces when it
+    reads letters rather than recognising the thing wearing them, so a mark
+    the second pass spelled out is the mark, not a separate finding — but only
+    on an all-but-identical label, because that is the whole of the evidence.
+    """
+    if a.element_type is b.element_type:
+        if labels_match(a.label, b.label):
+            return True
+        # Corroboration, not substitution: the labels must already half agree.
+        return labels_match(a.label, b.label, _WEAK_AGREEMENT) and _colocated(a, b)
+    if ElementType.TEXT in (a.element_type, b.element_type):
+        return labels_match(a.label, b.label, _NAMES_THE_SAME) and _overlaps(a, b)
+    return False
+
+
+def _screen_time(group: list[DetectedElement], ranges: list[TimeRange]) -> float:
+    """Measured from the merged ranges, not summed from each pass's claim.
+
+    Summing was right while the only merge was scan + auditor finding DIFFERENT
+    appearances. Two independent passes both report the whole element, so the
+    same ten seconds arrives twice and a 10s tattoo read as 20s — and
+    prominence drives the risk score.
+
+    The union of the ranges answers it directly: overlapping sightings count
+    once, separate ones still add up. It is also the more honest number, since
+    an element cannot be on screen longer than the timecodes saying where it
+    is. Every element in the demo fixture already agrees with its own ranges to
+    the decimal, and seven of eight did on the last live clip; the eighth was
+    the tattoo whose timecodes `timeline.py` disowns.
+
+    Falls back to the largest claim when there are no usable ranges at all.
+    """
+    measured = sum(r.duration_s for r in ranges)
+    return measured or max(d.prominence.screen_time_s for d in group)
+
+
+def _shared_label(group: list[DetectedElement]) -> str:
+    """The label that is true of every member, or the fullest if none is.
+
+    Two rules pulling opposite ways, and both are right for their own case.
+
+    Two passes describing ONE object: "Stu's Face Tattoo" knows something
+    "Face Tattoo" does not, so the fuller label wins. That is what this used
+    to do unconditionally.
+
+    One MARK on several objects: a live Code Geass clip put Pizza Hut on a
+    delivery scooter, on the delivery man's cap and on the pizza box. Merging
+    them is right — it is one trademark and one clearance — but the longest
+    label won, so the group was called "Pizza Hut Delivery Scooter" and at 4s
+    that label sat on a rectangle round the man's hat. It reads as the tool
+    losing track of the scooter.
+
+    A label whose tokens are contained in every other member's is true of all
+    of them; "Pizza Hut" is, and "Pizza Hut Delivery Scooter" is not. Where no
+    such label exists, nothing has been generalised and the fullest still wins.
+    """
+    labels = [d.label for d in group if d.label]
+    if not labels:
+        return group[0].label
+    sets = [(label, tokens(label)) for label in labels]
+    general = [
+        label
+        for label, own in sets
+        if own and all(own <= other for _, other in sets if other)
+    ]
+    if general:
+        # Shortest among equals: the same mark spelled two ways generalises to
+        # the plainer spelling rather than an arbitrary one.
+        return min(general, key=len)
+    return max(labels, key=len)
+
+
+def _merge(group: list[DetectedElement]) -> DetectedElement:
+    # Keep the id and position of the first sighting, but take the fullest
+    # label and description in the group: routing reads the description, and a
+    # pass that wrote "replicating Mike Tyson's famous tattoo" knows something
+    # the pass that wrote "a tribal tattoo" does not.
+    first = group[0]
+    richest = max(group, key=lambda d: len(d.description or ""))
+    label = _shared_label(group)
+    # A pass whose timecodes failed the physical test contributes none of them.
+    # Unioning them in produced a range set spanning both units at once, and
+    # the stickiness rule below then disowned the whole finding — so a sighting
+    # that HAD been measured correctly stopped drawing a box. Three findings
+    # lost their boxes that way on one live re-run.
+    timed = [d for d in group if d.timing_reliable] or group
+    ranges = _union([r for d in timed for r in d.time_ranges])
+    # Screen time comes from the ranges rather than from the sum of what each
+    # pass claimed: an element cannot be on screen longer than the timecodes
+    # saying where it is.
+    # Copied from `first` rather than rebuilt field by field. Rebuilding
+    # silently dropped everything the constructor did not name — siting,
+    # depiction, bbox, at_s, timing_reliable — which stayed invisible while
+    # merges were rare and became routine the moment a second independent scan
+    # pass was added. The demo mural lost its siting and Germany stopped
+    # applying freedom of panorama to the one element written for it.
+    richer = {
+        "label": label,
+        "description": richest.description,
+        # A brand read as lettering is still the brand. TEXT is the fallback
+        # type, so it never decides the category of a group that contains a
+        # type naming an actual rights subject.
+        "element_type": next(
+            (d.element_type for d in group if d.element_type is not ElementType.TEXT),
+            first.element_type,
         ),
+        # Prefer whichever pass actually reported these; a default is not an
+        # observation, and the first pass is not authoritative over the second.
+        "siting": next(
+            (d.siting for d in group if d.siting != "unknown"), first.siting
+        ),
+        "depiction": next(
+            (d.depiction for d in group if d.depiction is not None), first.depiction
+        ),
+        "bbox": next((d.bbox for d in group if d.bbox is not None), first.bbox),
+        "at_s": next((d.at_s for d in group if d.at_s is not None), first.at_s),
+        # Disowned timing is sticky against SILENCE — one pass proving the
+        # timecodes impossible is not cancelled by another pass saying nothing.
+        # It is not sticky against a measurement: a range that survives the
+        # physical test beats one that failed it, so a group with any usable
+        # clock keeps it, and only a group with none stays disowned.
+        "timing_reliable": any(d.timing_reliable for d in group),
+        "timing_note": next((d.timing_note for d in timed if d.timing_note), ""),
+    }
+    return first.model_copy(
+        update={
+            **richer,
+            "time_ranges": ranges,
+            "prominence": Prominence(
+                screen_time_s=_screen_time(timed, ranges),
+                frame_coverage=max(d.prominence.frame_coverage for d in group),
+                centrality=max(d.prominence.centrality for d in group),
+                plot_integral=any(d.prominence.plot_integral for d in group),
+            ),
+        }
     )
 
 
 def triage(detections: list[DetectedElement]) -> list[TriagedElement]:
-    groups: dict[tuple[ElementType, str], list[DetectedElement]] = {}
+    """Group sightings of one thing, then assign its clearance category.
+
+    Grouping used to be exact string equality on `(element_type, label)`, which
+    worked while the only two sources were the scan and its auditor — the
+    auditor is primed with the first pass's labels and echoes them. A second
+    independent pass is not, and phrases things its own way: one live run
+    produced "Stu's Face Tattoo" and "Face Tattoo" as separate findings with
+    separate routes, disagreeing with each other about whether it was the
+    Whitmill fact pattern.
+
+    Matching is deliberately conservative. Under-merging leaves a duplicate,
+    which is annoying and costs a research run. Over-merging DELETES a finding,
+    which is the failure this product exists to prevent. `_same_finding` holds
+    the whole rule: a shared label, or the same rectangle at the same instant,
+    or an all-but-identical label where one pass fell back to TEXT.
+    """
+    groups: list[list[DetectedElement]] = []
     for d in detections:
-        groups.setdefault((d.element_type, d.label.casefold().strip()), []).append(d)
+        for g in groups:
+            if _same_finding(g[0], d):
+                g.append(d)
+                break
+        else:
+            groups.append([d])
 
     out: list[TriagedElement] = []
-    for group in groups.values():
+    for group in groups:
         merged = _merge(group) if len(group) > 1 else group[0]
         out.append(
             TriagedElement(**merged.model_dump(), category=CATEGORY_RULES[merged.element_type])
