@@ -90,7 +90,11 @@ export const api = {
     const form = new FormData();
     form.append("file", file);
     form.append("title", opts.title);
-    form.append("production_id", "upload");
+    // No `production_id`. It used to be the literal "upload" from here, meeting
+    // the same default on the server, so every user's footage landed in one
+    // slot — the same state file and media directory, with each upload deleting
+    // the last one's cached boxes and thumbnails. The server issues an id now
+    // and returns it; this call already reads it back from the response.
     form.append("territories", opts.territories);
     form.append("distribution", opts.distribution);
     form.append("use_context", opts.use_context);

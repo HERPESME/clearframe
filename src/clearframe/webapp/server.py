@@ -5,6 +5,7 @@ import hmac
 import json
 import logging
 import os
+import secrets
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
@@ -38,7 +39,15 @@ from clearframe.review import (
     record_watch_alert,
     refresh_freshness,
 )
+from clearframe.events import EventLog
 from clearframe.stages.dossier import ReviewPendingError
+from clearframe.storage import (
+    AnalysisJob,
+    Backends,
+    IndexRow,
+    build_backends,
+    build_queue,
+)
 from clearframe.store import LicenceStore, LocalJsonStore
 from clearframe.timeline import timing_is_reliable
 
@@ -82,6 +91,14 @@ DIST_DIR = _find_dist_dir()
 # Overridable because the right number depends on how long the footage is and
 # how much the operator wants to spend before anyone clicks.
 PREGROUND_MAX_FRAMES = int(os.environ.get("CLEARFRAME_PREGROUND_MAX", "150"))
+
+# How often the event stream looks for new progress, and how long it will stay
+# silent before sending a comment frame. The poll exists because the producer
+# may be another container; the keepalive because Cloud Run and intermediate
+# proxies close a stream that says nothing, and some stages are quiet for
+# minutes.
+SSE_POLL_S = 0.25
+SSE_KEEPALIVE_S = 15.0
 
 
 class _ShellFiles(StaticFiles):
@@ -200,26 +217,100 @@ def build_grounding_client(cfg):
     )
 
 
-def create_app(out_root: Path) -> FastAPI:
+def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
     out_root = Path(out_root)
     store = LocalJsonStore(out_root / "state")
     app = FastAPI(title="ClearFrame Review")
+    # Blobs and the production index. Local by default, so an existing working
+    # directory keeps working and the credential-free suite is unaffected;
+    # `backends` is the injection point for tests that want to prove otherwise.
+    backends = backends or build_backends(
+        ClearFrameConfig.from_env(os.environ), out_root
+    )
+    index = backends.index
     # Serializes every load-modify-save of production state; without it,
     # concurrent decision posts (threadpool) and dossier generation could
     # silently clobber each other's saves.
     state_lock = asyncio.Lock()
-    event_queues: dict[str, asyncio.Queue] = {}
-    # Productions with a pipeline task actually in flight in this process. A
-    # restart empties it, which is the point: nothing here survives the process
-    # that was doing the work, so neither should the claim that work is
-    # happening.
-    _live_runs: set[str] = set()
 
-    def _load(pid: str):
+    # ONE queue for the whole app — the cap is a property of the deployment, not
+    # of a request. Building one per upload would give every upload its own
+    # semaphore, which is the same as having no cap at all.
+    #
+    # The runner looks the work up rather than carrying it, because a job has to
+    # be describable to a worker in another container and a closure is not.
+    _pending_runs: dict[str, object] = {}
+
+    async def _dispatch(job: AnalysisJob) -> None:
+        run = _pending_runs.pop(job.production_id, None)
+        if run is None:
+            log.warning("no pending run for %s", job.production_id)
+            return
+        await run(job)
+
+    _queue = build_queue(ClearFrameConfig.from_env(os.environ), _dispatch)
+
+    def _owner_of(pid: str) -> str | None:
+        row = index.get(pid)
+        return row.owner_uid if row else None
+
+    def _require_owner(request, pid: str) -> None:
+        """404 for somebody else's production — never 403.
+
+        403 would confirm the id exists, which turns a guessable id into an
+        existence oracle. It is also the lower-churn answer: an unknown
+        production is already a 404 everywhere in this file.
+
+        Three things deliberately do not scope. With authentication off there is
+        no user to scope to and the app must behave exactly as it did before
+        ownership existed — that property is what keeps demo mode and the
+        credential-free smoke script green. A production with no owner (the
+        demo, anything the CLI or MCP wrote) belongs to everybody. And a
+        production nobody has claimed cannot be stolen by checking it.
+        """
+        if not auth.auth_enabled():
+            return
+        owner = _owner_of(pid)
+        if not owner:
+            return
+        user = _current_user(request)
+        if user is None or user.uid != owner:
+            raise HTTPException(status_code=404, detail=f"Unknown production: {pid}")
+
+    def _load(pid: str, request=None):
+        if request is not None:
+            _require_owner(request, pid)
         try:
             return store.load(pid)
         except FileNotFoundError:
             raise HTTPException(status_code=404, detail=f"Unknown production: {pid}")
+
+    def _listener_for(pid: str, log_: EventLog):
+        """The `ctx.listener`: publish progress, and say we are still alive.
+
+        Two jobs in one callback because they have the same trigger. The event
+        log is what Mission Control reads; the index is what the dashboard
+        reads, and its heartbeat is the only thing that can distinguish a run in
+        progress from one whose process died — a distinction that used to come
+        from a set in this process and therefore could not survive the work
+        moving to a worker container.
+
+        The heartbeat rides on stage boundaries rather than a timer because
+        `Pipeline.run` already persists after each stage, so it costs nothing
+        and there is no extra task to supervise.
+        """
+
+        def listen(event: dict) -> None:
+            log_.append(event)
+            kind = event.get("type")
+            stage = event.get("stage")
+            if stage and kind in ("stage_start", "stage_complete"):
+                index.record_stage(
+                    pid, stage, "complete" if kind == "stage_complete" else "running"
+                )
+                index.heartbeat(pid)
+
+        return listen
 
     # ---------------------------------------------------------------- auth --
     #
@@ -401,61 +492,56 @@ def create_app(out_root: Path) -> FastAPI:
         return state.model_copy(update={"elements": checked}) if changed else state
 
     @app.get("/api/productions")
-    def list_productions():
-        """Newest first, each flagged with whether its run is still going.
+    def list_productions(request: Request):
+        """Your productions, newest first, each flagged with its run state.
 
         The client restores the first row on load. When this returned store
         order, "demo" sorted ahead of a user's upload — so refreshing the page
         mid-analysis appeared to lose the production entirely. It was never
         lost: the pipeline runs server-side and every stage persists. The
         client was simply handed the wrong one.
+
+        Two of the three facts here used to be answerable only by the process
+        running the analysis. `updated_at` was the state file's mtime, and
+        `running` was membership of an in-process set — correct for "is THIS
+        process running it", wrong for "is anyone running it", and those stop
+        being the same question the moment the pipeline moves to a worker
+        container. Both now come from the index, which any container can read.
         """
-        out = []
-        for pid in store.production_ids():
-            state = store.load(pid)
-            path = store.root / f"{pid}.json"
-            done = all(
-                state.stage_status.get(stage) == "complete"
-                for stage in ANALYSIS_STAGES
-            )
-            out.append(
-                {
-                    "id": state.production.id,
-                    "title": state.production.title,
-                    "stage_status": state.stage_status,
-                    "updated_at": path.stat().st_mtime if path.exists() else 0.0,
-                    # Actually in flight IN THIS PROCESS, not merely unfinished.
-                    # This was `not done`, read from the persisted state alone,
-                    # so a run interrupted by a restart reported itself running
-                    # for ever — and the client, which restores the newest
-                    # running production on load, returned the reviewer to a
-                    # dead analysis every time and never showed them the upload
-                    # form. Exactly the refresh bug this endpoint was ordered to
-                    # fix, one level down: last time the client was handed the
-                    # wrong row, this time no row was right.
-                    "running": not done and pid in _live_runs,
-                    # Unfinished and nobody is working on it. Distinct from
-                    # complete, because silence here would read as a finished
-                    # analysis and the missing stages would never be noticed.
-                    "interrupted": not done and pid not in _live_runs,
-                }
-            )
-        return sorted(out, key=lambda r: r["updated_at"], reverse=True)
+        user = _current_user(request)
+        rows = index.list_for(user.uid if user else None)
+        return [
+            {
+                "id": row.id,
+                "title": row.title,
+                "stage_status": row.stage_status,
+                "updated_at": row.updated_at,
+                # Something is holding the lease. Survives a restart of *this*
+                # process and, unlike the set it replaces, is true across the
+                # container boundary.
+                "running": row.is_running(),
+                # Part-way through and nothing is working on it. Distinct from
+                # complete, because silence would read as a finished analysis
+                # and the missing stages would never be noticed.
+                "interrupted": row.is_interrupted(),
+            }
+            for row in rows
+        ]
 
     async def _run_paced_demo(pace_s: float, declared: dict | None = None) -> None:
-        queue = event_queues["demo"]
+        log_ = EventLog(backends.blobs, "demo")
         ctx = demo_context(out_root)
         if declared:
             ctx.state.production = ctx.state.production.model_copy(update=declared)
         ctx.store = store
-        ctx.listener = queue.put_nowait
+        ctx.listener = _listener_for("demo", log_)
         stages = [_PacedStage(s, pace_s) for s in build_demo_pipeline()]
-        _live_runs.add("demo")
+        index.heartbeat("demo")
         try:
             await Pipeline(stages).run(ctx)
         finally:
-            _live_runs.discard("demo")
-            queue.put_nowait({"type": "run_complete"})
+            index.clear_heartbeat("demo")
+            log_.append({"type": "run_complete"})
 
     @app.post("/api/productions/demo")
     async def create_demo(body: DemoRunRequest | None = None):
@@ -480,7 +566,11 @@ def create_app(out_root: Path) -> FastAPI:
             state_path = store.root / "demo.json"
             if state_path.exists():
                 state_path.unlink()
-            event_queues["demo"] = asyncio.Queue()
+            # A replay starts from nothing: the previous run's events must not
+            # be prepended to this one, and the row has to exist before the
+            # first heartbeat or there is nothing to beat against.
+            EventLog.clear(backends.blobs, "demo")
+            index.put(IndexRow(id="demo", owner_uid=None, title="Golden Hour"))
             declared: dict = {}
             if body is not None:
                 if body.use_context is not None:
@@ -520,6 +610,7 @@ def create_app(out_root: Path) -> FastAPI:
 
     @app.post("/api/productions")
     async def create_production(
+        request: Request,
         file: UploadFile = File(...),
         title: str = Form("Untitled Production"),
         production_id: str = Form("upload"),
@@ -554,7 +645,19 @@ def create_app(out_root: Path) -> FastAPI:
                 detail="Live mode is not configured. Missing: " + ", ".join(missing),
             )
 
+        user = _current_user(request)
         pid = "".join(c for c in production_id if c.isalnum() or c in "-_") or "upload"
+        # A signed-in upload gets an id of its own. `"upload"` was the default
+        # AND the only value the client ever sent, so every user's footage
+        # landed in one slot — the same state file, the same media directory,
+        # and an upload actively deleted the previous occupant's caches and
+        # thumbnails. Two people using this at once overwrote each other.
+        #
+        # Unsigned uploads keep the old id: the CLI, the MCP server and the
+        # smoke script all address `upload` by name, and demo mode has no user
+        # to attribute one to.
+        if user is not None and production_id == "upload":
+            pid = f"p-{secrets.token_hex(4)}"
         name = _safe_media_name(file.filename or "")
         media_dir = out_root / "media" / pid
         media_dir.mkdir(parents=True, exist_ok=True)
@@ -619,10 +722,23 @@ def create_app(out_root: Path) -> FastAPI:
 
         ctx = build_context(cfg.model_copy(update={"mode": "live"}), production, out_root)
         ctx.store = store
-        event_queues[pid] = asyncio.Queue()
+        EventLog.clear(backends.blobs, pid)
+        run_log = EventLog(backends.blobs, pid)
+        publish = _listener_for(pid, run_log)
+        # The row has to exist before the run starts: it is what the dashboard
+        # lists, what carries the owner, and what the heartbeat beats against.
+        index.put(
+            IndexRow(
+                id=pid,
+                owner_uid=(user.uid if user else None),
+                title=production.title,
+                has_media=True,
+                media_version=_media_version(pid),
+            )
+        )
 
         def _listen(event: dict) -> None:
-            event_queues[pid].put_nowait(event)
+            publish(event)
             # Warm the boxes at the EARLIEST moment they are final, which is
             # triage — not when the run ends, and not when preview does.
             #
@@ -647,21 +763,32 @@ def create_app(out_root: Path) -> FastAPI:
 
         ctx.listener = _listen
 
-        async def _run() -> None:
+        async def _run(job) -> None:
+            index.heartbeat(job.production_id)
             try:
                 await Pipeline(build_demo_pipeline()).run(ctx)
             finally:
-                _live_runs.discard(pid)
-                event_queues[pid].put_nowait({"type": "run_complete"})
+                index.clear_heartbeat(job.production_id)
+                run_log.append({"type": "run_complete"})
 
-        _live_runs.add(pid)
-        asyncio.create_task(_run())
-        return {"production_id": pid, "status": "running", "media": name}
+        # Queued, not launched. Nothing counted in-flight analyses before this,
+        # and each one is three Gemini video passes plus research plus up to 150
+        # grounding calls — the deployed `--max-instances=2 --concurrency=80`
+        # would have admitted a hundred and sixty of them.
+        #
+        # The run goes into a registry rather than into the job, because the
+        # queue is one object for the whole app and a job has to survive being
+        # handed to a worker in another container, where a closure cannot go.
+        _pending_runs[pid] = _run
+        await _queue.enqueue(
+            AnalysisJob(production_id=pid, owner_uid=user.uid if user else None)
+        )
+        return {"production_id": pid, "status": "queued", "media": name}
 
     @app.get("/api/productions/{pid}/media")
-    def get_media(pid: str):
+    def get_media(pid: str, request: Request):
         """Serve the uploaded footage so the review UI can play it."""
-        _load(pid)
+        _load(pid, request)
         found = _stored_media(pid)
         if found is None:
             raise HTTPException(
@@ -694,7 +821,7 @@ def create_app(out_root: Path) -> FastAPI:
         return round(duration * 0.4, 2) if duration else 1.0
 
     @app.get("/api/productions/{pid}/thumbnail")
-    async def get_thumbnail(pid: str):
+    async def get_thumbnail(pid: str, request: Request):
         """A poster for this production, taken from its own footage.
 
         The dashboard needs a picture per production and the only honest one is
@@ -705,7 +832,7 @@ def create_app(out_root: Path) -> FastAPI:
         404 rather than a placeholder when there is nothing to extract: the
         fallback art belongs to the client, which draws it.
         """
-        state = await asyncio.to_thread(_load, pid)
+        state = await asyncio.to_thread(_load, pid, request)
         found = _stored_media(pid)
         if found is None:
             raise HTTPException(status_code=404, detail="No footage stored")
@@ -809,12 +936,12 @@ def create_app(out_root: Path) -> FastAPI:
         return body
 
     @app.get("/api/productions/{pid}/ground")
-    async def ground_frame_at(pid: str, at_s: float = 0.0):
+    async def ground_frame_at(pid: str, request: Request, at_s: float = 0.0):
         # In a thread: reading and validating a state file is not free, and a
         # sync handler would land in the threadpool anyway. Doing it inline in
         # an `async def` stalled every other request for the length of it —
         # the same mistake the ffmpeg and Gemini calls below already avoid.
-        state = await asyncio.to_thread(_load, pid)
+        state = await asyncio.to_thread(_load, pid, request)
 
         # Only ask about elements the analysis says are on screen here. A model
         # asked to place something that is not in the frame will sometimes
@@ -976,14 +1103,15 @@ def create_app(out_root: Path) -> FastAPI:
         log.info("pre-grounding complete for %s (%d cached)", pid, len(_ground_cache))
 
     @app.get("/api/productions/{pid}/preground")
-    def preground_progress(pid: str):
+    def preground_progress(pid: str, request: Request):
         """How much of this production has had its boxes measured."""
+        _require_owner(request, pid)
         return _preground_progress.get(
             pid, {"total": 0, "done": 0, "running": False, "skipped": 0}
         )
 
     @app.post("/api/productions/{pid}/preground")
-    async def preground(pid: str):
+    async def preground(pid: str, request: Request):
         """Warm the boxes on demand — used by the UI once a run finishes.
 
         Refuses to stack. Triage starts one, the SPA starts one when the
@@ -992,7 +1120,7 @@ def create_app(out_root: Path) -> FastAPI:
         exceed `total` and whichever finished first reported the whole warm-up
         complete while measurement was still in flight.
         """
-        state = await asyncio.to_thread(_load, pid)
+        state = await asyncio.to_thread(_load, pid, request)
         running = _preground_progress.get(pid)
         if running and running.get("running"):
             return {"status": "already-warming", **running}
@@ -1049,25 +1177,62 @@ def create_app(out_root: Path) -> FastAPI:
         return {"stored": len(merged), "added": len(parsed), "replaced": replace}
 
     @app.get("/api/productions/{pid}/events")
-    async def stream_events(pid: str):
-        queue = event_queues.get(pid)
-        if queue is None:
+    async def stream_events(pid: str, request: Request):
+        """Mission Control's stream, tailed from the log rather than a queue.
+
+        The producer may be a different container, so this cannot await an
+        in-process `asyncio.Queue` — it reads the log the run appends to and
+        keeps its own cursor.
+
+        Two behaviours change for the better as a side effect. Every reader gets
+        every event, where `queue.get()` used to consume it so two tabs on one
+        run split the stream between them. And the log is not deleted at
+        `run_complete`, so a reader who arrives late replays from the top
+        instead of getting a 404 — Mission Control's handlers are all setters,
+        so a replay converges on the same screen.
+        """
+        _require_owner(request, pid)
+        if not EventLog.exists(backends.blobs, pid):
             raise HTTPException(status_code=404, detail="No active run for this production")
 
         async def gen():
+            cursor = 0
+            idle = 0.0
             while True:
-                event = await queue.get()
-                yield f"data: {json.dumps(event)}\n\n"
-                if event.get("type") == "run_complete":
-                    event_queues.pop(pid, None)
+                events = EventLog.read(backends.blobs, pid)
+                if len(events) > cursor:
+                    idle = 0.0
+                    for event in events[cursor:]:
+                        yield f"data: {json.dumps(event)}\n\n"
+                    cursor = len(events)
+                    if events[-1].get("type") == "run_complete":
+                        break
+                else:
+                    await asyncio.sleep(SSE_POLL_S)
+                    idle += SSE_POLL_S
+                    # A comment frame keeps proxies and Cloud Run from closing
+                    # an idle stream during a long silent stage.
+                    if idle >= SSE_KEEPALIVE_S:
+                        idle = 0.0
+                        yield ": keepalive\n\n"
+                        # Nothing is holding the lease and nothing has arrived:
+                        # the run died with its container. Ending the stream is
+                        # honest; hanging on it for ever is what the old
+                        # in-process set was invented to avoid.
+                        row = index.get(pid)
+                        if row is not None and not row.is_running():
+                            break
+                if await request.is_disconnected():
                     break
 
         return StreamingResponse(gen(), media_type="text/event-stream")
 
     @app.get("/api/productions/{pid}")
-    def get_production(pid: str):
+    def get_production(pid: str, request: Request):
         return JSONResponse(
-            _with_timing_verdicts(_with_media_flag(_load(pid))).model_dump(mode="json")
+            _with_timing_verdicts(_with_media_flag(_load(pid, request))).model_dump(
+                mode="json"
+            )
         )
 
     @app.post("/api/productions/{pid}/decisions")
@@ -1101,13 +1266,14 @@ def create_app(out_root: Path) -> FastAPI:
             return {"ok": True, "pending": pending_ids(state)}
 
     @app.post("/api/productions/{pid}/freshness")
-    async def check_freshness(pid: str):
+    async def check_freshness(pid: str, request: Request):
         """Live Parallel Search pass over every identified rights holder.
 
         Deep research is a snapshot from pipeline time; this is the real-time
         check a reviewer runs before signing off. Priced per request, so it is
         affordable to call on demand from the review screen.
         """
+        _require_owner(request, pid)
         async with state_lock:
             try:
                 state, checked = await refresh_freshness(
@@ -1125,7 +1291,8 @@ def create_app(out_root: Path) -> FastAPI:
         }
 
     @app.post("/api/productions/{pid}/dossier")
-    async def generate_dossier(pid: str):
+    async def generate_dossier(pid: str, request: Request):
+        _require_owner(request, pid)
         async with state_lock:
             try:
                 await generate_dossier_async(
@@ -1171,8 +1338,8 @@ def create_app(out_root: Path) -> FastAPI:
         raise HTTPException(status_code=404, detail=f"No watch for monitor {body.monitor_id}")
 
     @app.get("/api/productions/{pid}/artifacts/{name}")
-    def get_artifact(pid: str, name: str):
-        _load(pid)
+    def get_artifact(pid: str, name: str, request: Request):
+        _load(pid, request)
         if name not in ARTIFACT_WHITELIST or not (out_root / name).exists():
             raise HTTPException(status_code=404, detail="Unknown artifact")
         media = "text/html" if name.endswith(".html") else "text/plain"
