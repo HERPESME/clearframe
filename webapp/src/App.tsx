@@ -3,11 +3,18 @@ import { api, ApiError, setRole } from "./api";
 import { ElementCard } from "./ElementCard";
 import { MissionControl } from "./MissionControl";
 import { Timeline } from "./Timeline";
-import { Uploader } from "./Uploader";
+import { Dashboard } from "./Dashboard";
 import { SignIn } from "./SignIn";
 import { signOut, type SessionUser } from "./auth";
 import { VideoPlayer } from "./VideoPlayer";
-import type { Action, ProductionState, Risk, RiskBand, Role } from "./types";
+import type {
+  Action,
+  ProductionState,
+  ProductionSummary,
+  Risk,
+  RiskBand,
+  Role,
+} from "./types";
 
 const BANDS: RiskBand[] = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
 
@@ -22,9 +29,6 @@ export default function App() {
   const [checking, setChecking] = useState(false);
   const [freshNote, setFreshNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  // The upload form is the point of the home screen, so it is open by
-  // default rather than hidden behind a second click.
-  const [showUpload, setShowUpload] = useState(true);
   const [resuming, setResuming] = useState<string | null>(null);
   // Restored a run that never finished. Distinct from "still analysing": there
   // is no server-side task to wait for, so polling would never end — which is
@@ -38,6 +42,9 @@ export default function App() {
   // This deployment lets a visitor choose a role rather than be granted one.
   // A demo has nobody to ask; it must be labelled, never assumed.
   const [openRoles, setOpenRoles] = useState(false);
+  // Every analysis, not just the newest. The list was always fetched and all
+  // but `list[0]` discarded, so there was no way back to an earlier one.
+  const [productions, setProductions] = useState<ProductionSummary[]>([]);
   const [user, setUser] = useState<SessionUser | null>(null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -65,11 +72,17 @@ export default function App() {
     api
       .listProductions()
       .then(async (list) => {
-        if (list.length === 0) return;
+        setProductions(list);
+        // Only jump straight into a production that is STILL RUNNING — you
+        // want to watch that finish. Anything else and the dashboard is the
+        // right landing place, because dropping someone into whichever
+        // analysis happened to be newest is not navigation.
         const newest = list[0];
-        setState(await api.getProduction(newest.id));
-        if (newest.running) setResuming(newest.id);
-        setInterrupted(Boolean(newest.interrupted));
+        if (newest?.running) {
+          setState(await api.getProduction(newest.id));
+          setResuming(newest.id);
+          setInterrupted(Boolean(newest.interrupted));
+        }
       })
       .catch(() => setError("Could not reach the ClearFrame API. Is the server running?"))
       .finally(() => setLoading(false));
@@ -122,8 +135,8 @@ export default function App() {
   const newProduction = () => {
     setState(null);
     setMission(null);
-    setShowUpload(true);
     setError(null);
+    void api.listProductions().then(setProductions).catch(() => {});
   };
 
   const loadDemo = async () => {
@@ -146,8 +159,10 @@ export default function App() {
       // Handing over at the preliminary report means the run is still going.
       // Keep pulling so the cards fill in rather than freezing half-done.
       const list = await api.listProductions();
+      setProductions(list);
       const row = list.find((r) => r.id === pid);
       if (row?.running) setResuming(pid);
+      setInterrupted(Boolean(row?.interrupted));
     } catch {
       setError("Could not load the finished production.");
     }
@@ -235,39 +250,20 @@ export default function App() {
 
   if (!state) {
     return (
-      <div className="hero">
-        <div className="slate">ClearFrame · automated clearance department</div>
-        {mode === "demo" && (
-          <div className="mode-chip" title="Replays recorded Gemini/Parallel responses through the identical pipeline code path — live mode swaps only the two API clients.">
-            DEMO MODE · recorded fixtures, identical code path
-          </div>
-        )}
-        <h1>
-          Every frame, <em>cleared.</em>
-        </h1>
-        <p>
-          Gemini watches the footage and finds everything that needs legal clearance.
-          Parallel researches who owns it. You make the call — with evidence attached.
-        </p>
-        <div className="hero-actions">
-          <button className="generate" onClick={loadDemo}>
-            Run the demo scene
-          </button>
-          <button className="secondary" onClick={() => setShowUpload((v) => !v)}>
-            {showUpload ? "Hide upload" : "Upload my own footage"}
-          </button>
-        </div>
-        {showUpload && (
-          <Uploader
-            onStarted={(pid) => {
-              setState(null);
-              setMission(pid);
-            }}
-            onLedger={() => {}}
-          />
-        )}
-        {error && <div className="error-banner">{error}</div>}
-      </div>
+      <>
+        <Dashboard
+          productions={productions}
+          demoMode={mode === "demo"}
+          onOpen={enterReview}
+          onDemo={loadDemo}
+          onStarted={(pid) => {
+            setState(null);
+            setMission(pid);
+          }}
+          onLedger={() => {}}
+        />
+        {error && <div className="error-banner dash-error">{error}</div>}
+      </>
     );
   }
 

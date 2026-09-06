@@ -612,6 +612,10 @@ def create_app(out_root: Path) -> FastAPI:
         for warmed in [k for k in _pregrounded if k[0] == pid]:
             _pregrounded.discard(warmed)
         _preground_progress.pop(pid, None)
+        # The poster is keyed by media version so a stale one is never SERVED,
+        # but it would sit on disk for the life of the deployment otherwise.
+        for stale in target.parent.glob("thumb-*.jpg"):
+            stale.unlink(missing_ok=True)
 
         ctx = build_context(cfg.model_copy(update={"mode": "live"}), production, out_root)
         ctx.store = store
@@ -670,6 +674,60 @@ def create_app(out_root: Path) -> FastAPI:
         # a fresh page from asking at all.
         return FileResponse(
             path, media_type=media_type, headers={"Cache-Control": "no-cache"}
+        )
+
+    def _poster_moment(state) -> float:
+        """Which second of this footage represents it.
+
+        The middle of the first finding's first appearance, because that is
+        what the analysis says the footage is ABOUT — a card showing the frame
+        where the trademark actually appears says more than second one, which
+        on most clips is a fade from black.
+        """
+        for el in state.elements:
+            if not getattr(el, "timing_reliable", True):
+                continue
+            for r in el.time_ranges:
+                return round((r.start_s + r.end_s) / 2, 2)
+        duration = state.production.duration_s or 0.0
+        # Far enough in to be past a title card, short of the credits.
+        return round(duration * 0.4, 2) if duration else 1.0
+
+    @app.get("/api/productions/{pid}/thumbnail")
+    async def get_thumbnail(pid: str):
+        """A poster for this production, taken from its own footage.
+
+        The dashboard needs a picture per production and the only honest one is
+        a frame the production already contains — this is a rights-clearance
+        tool, so shipping somebody else's marketing art as decoration would be
+        a poor joke at its own expense.
+
+        404 rather than a placeholder when there is nothing to extract: the
+        fallback art belongs to the client, which draws it.
+        """
+        state = await asyncio.to_thread(_load, pid)
+        found = _stored_media(pid)
+        if found is None:
+            raise HTTPException(status_code=404, detail="No footage stored")
+
+        # Cached on disk under the media version, so a re-upload at the same
+        # production id gets a new picture — the rule the video URL and the box
+        # cache already follow, for the same reason.
+        cached = found[0].parent / f"thumb-{_media_version(pid)}.jpg"
+        if not cached.exists():
+            frame = await asyncio.to_thread(
+                extract_frame, found[0], _poster_moment(state)
+            )
+            if not frame:
+                raise HTTPException(status_code=404, detail="No frame available")
+            await asyncio.to_thread(cached.write_bytes, frame)
+
+        return FileResponse(
+            cached,
+            media_type="image/jpeg",
+            # The filename carries the version, so this URL's bytes never
+            # change and the client busts it with ?v= exactly like the video.
+            headers={"Cache-Control": "public, max-age=31536000, immutable"},
         )
 
     # Boxes measured on the paused frame, cached per whole second.
