@@ -1379,7 +1379,10 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
                 )
             except FileNotFoundError:
                 raise HTTPException(status_code=404, detail=f"Unknown production: {pid}")
-        artifacts = [n for n in ARTIFACT_WHITELIST if (out_root / n).exists()]
+        artifacts = [
+            n for n in ARTIFACT_WHITELIST
+            if (out_root / "artifacts" / pid / n).exists()
+        ]
         return {"artifacts": artifacts}
 
     @app.post("/api/webhooks/parallel-monitor")
@@ -1415,10 +1418,16 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
     @app.get("/api/productions/{pid}/artifacts/{name}")
     def get_artifact(pid: str, name: str, request: Request):
         _load(pid, request)
-        if name not in ARTIFACT_WHITELIST or not (out_root / name).exists():
+        # The whitelist is checked BEFORE a path is built, which is what makes
+        # `..%2Fpyproject.toml` a 404 rather than a traversal — it must stay a
+        # membership test, never a normalisation.
+        if name not in ARTIFACT_WHITELIST:
+            raise HTTPException(status_code=404, detail="Unknown artifact")
+        path = out_root / "artifacts" / pid / name
+        if not path.exists():
             raise HTTPException(status_code=404, detail="Unknown artifact")
         media = "text/html" if name.endswith(".html") else "text/plain"
-        return FileResponse(out_root / name, media_type=media)
+        return FileResponse(path, media_type=media)
 
     if DIST_DIR is not None:
         app.mount("/", _ShellFiles(directory=DIST_DIR, html=True), name="ui")

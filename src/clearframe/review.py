@@ -144,13 +144,19 @@ async def generate_dossier_async(
     ctx = _dossier_ctx(out_root, state)
     ctx.store = store
     ctx.state = state
-    await DossierStage(out_dir=out_root, generated_at=at).run(ctx)
+    # Under the production, not flat at the root. Five fixed filenames with no
+    # pid meant every production overwrote the same dossier.html — and the
+    # artifact route, which checks ownership on the pid and then ignored it when
+    # resolving the file, handed you whichever one was generated last, by
+    # anyone. A collision and a cross-account leak from one missing path segment.
+    artifacts_dir = out_root / "artifacts" / production_id
+    await DossierStage(out_dir=artifacts_dir, generated_at=at).run(ctx)
     state.audit_log.append(
         AuditEvent(at=at, actor="system", role="system", event="dossier_generated", detail="")
     )
     await create_watches(ctx, state, at)
     store.save(state)
-    return [p.name for p in sorted(out_root.iterdir()) if p.is_file()]
+    return [p.name for p in sorted(artifacts_dir.iterdir()) if p.is_file()]
 
 
 def record_watch_alert(

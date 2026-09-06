@@ -324,3 +324,39 @@ def test_an_upload_cannot_claim_someone_elses_production(tmp_path, monkeypatch, 
     from clearframe.config import ClearFrameConfig as _cfg
     row = _bb(_cfg.from_env({}), tmp_path).index.get("p1")
     assert row.owner_uid == "alice-uid", "ownership was reassigned by an upload"
+
+
+# --- the dossier that belonged to everybody ------------------------------------
+
+
+async def test_one_productions_dossier_is_not_anothers(tmp_path):
+    """`DossierStage` wrote five fixed filenames flat at `out_root` with no pid,
+    so every production overwrote the same report — and the artifact route,
+    which checks ownership on the pid and then ignored the pid when resolving
+    the file, handed you whichever had been generated last, by anyone.
+
+    A collision and a cross-account leak from one missing path segment.
+    """
+    from clearframe.pipeline import Pipeline, build_demo_pipeline, demo_context
+    from clearframe.review import generate_dossier_async
+    from clearframe.store import LocalJsonStore
+
+    store = LocalJsonStore(tmp_path / "state")
+    for pid in ("alpha", "beta"):
+        ctx = demo_context(tmp_path)
+        ctx.store = store
+        ctx.state.production = ctx.state.production.model_copy(
+            update={"id": pid, "title": f"Film {pid}"}
+        )
+        await Pipeline(build_demo_pipeline()).run(ctx)
+        from clearframe.dossier import auto_decisions
+        state = store.load(pid)
+        state.decisions = auto_decisions(state)
+        store.save(state)
+        await generate_dossier_async(store, tmp_path, pid, at="2026-09-06T00:00:00Z")
+
+    alpha = (tmp_path / "artifacts" / "alpha" / "dossier.html").read_text()
+    beta = (tmp_path / "artifacts" / "beta" / "dossier.html").read_text()
+
+    assert "Film alpha" in alpha and "Film beta" not in alpha
+    assert "Film beta" in beta and "Film alpha" not in beta

@@ -66,7 +66,10 @@ async def test_dossier_html_includes_audit_trail(tmp_path):
     for el in state.elements:
         record_decision(store, "demo", el.id, "license", "", role="legal", reviewer="x", at=AT)
     await generate_dossier_async(store, tmp_path, "demo", at=AT)
-    html = (tmp_path / "dossier.html").read_text()
+    # Under the production now: five fixed filenames flat at the root meant
+    # every production overwrote the same dossier, and the artifact route
+    # served whichever was written last regardless of who asked.
+    html = (tmp_path / "artifacts" / "demo" / "dossier.html").read_text()
     assert "Audit trail" in html
 
 
