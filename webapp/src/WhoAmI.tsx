@@ -24,10 +24,13 @@ import { signOut, type SessionUser } from "./auth";
 export function WhoAmI({
   user,
   openRoles,
+  chosenRole,
   onSignedOut,
 }: {
   user: SessionUser | null;
   openRoles: boolean;
+  /** The role actually in effect. Only meaningful when roles are open. */
+  chosenRole?: string;
   onSignedOut: () => void;
 }) {
   const [busy, setBusy] = useState(false);
@@ -36,7 +39,16 @@ export function WhoAmI({
   if (!user) return null;
 
   const who = user.name || user.email || user.uid;
-  const how = openRoles ? `${user.role} (chosen)` : user.role;
+  // The role that is ACTUALLY in effect, which is not the same field in the two
+  // modes. With roles granted, the server decides and `user.role` is the answer.
+  // With roles open, the client's selection is what every request carries — and
+  // `user.role` is then always the least-privilege default, so showing it said
+  // "editor (chosen)" to somebody who had just chosen legal. A label that names
+  // the wrong role is worse than no label, because "(chosen)" asserts that the
+  // thing beside it is what they chose.
+  const how = openRoles
+    ? `${chosenRole ?? user.role} (chosen)`
+    : user.role;
 
   return (
     <button

@@ -282,7 +282,12 @@ export default function App() {
   // the dashboard is where signing in lands you, so those were exactly the two
   // places the way out had to be and wasn't.
   const account = (
-    <WhoAmI user={user} openRoles={openRoles} onSignedOut={() => setUser(null)} />
+    <WhoAmI
+      user={user}
+      openRoles={openRoles}
+      chosenRole={role}
+      onSignedOut={() => setUser(null)}
+    />
   );
 
   if (mission) {
@@ -467,7 +472,12 @@ export default function App() {
               {role === "editor" ? "read-only" : "can record decisions"}
             </span>
             {openRoles && (
-              <WhoAmI user={user} openRoles onSignedOut={() => setUser(null)} />
+              <WhoAmI
+                user={user}
+                openRoles
+                chosenRole={role}
+                onSignedOut={() => setUser(null)}
+              />
             )}
           </>
         )}
