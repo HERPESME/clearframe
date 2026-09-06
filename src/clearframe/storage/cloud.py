@@ -133,7 +133,22 @@ def _is_missing(exc: Exception) -> bool:
 
 
 class FirestoreProductionIndex:
-    """One small document per production. Never the state — see `index.py`."""
+    """One small document per production. Never the state — see `index.py`.
+
+    **There is deliberately no backfill here, and that asymmetry with
+    `LocalProductionIndex` is not an oversight.** The local twin reconstructs a
+    missing row from `state/{pid}.json`, which is what keeps a production
+    written by the CLI or by a test visible on the dashboard. That cannot work
+    in the cloud, because `ProductionState` carries no uid — ownership lives in
+    this index precisely so it stays out of the E&O record — so a row rebuilt
+    from a state blob could only be attributed to everybody or to nobody, and
+    the first of those is a data leak.
+
+    So the answer to a lost row is to make losing one impossible rather than to
+    recover from it: every partial write carries the `id` that keeps the
+    document valid, the state save merges instead of overwriting, and a row that
+    still fails to parse is logged rather than silently skipped.
+    """
 
     def __init__(self, project: str | None = None):
         self._project = project
@@ -166,29 +181,80 @@ class FirestoreProductionIndex:
         # `order_by` on a different field demands a composite index and a
         # console round trip to create it; a user has tens of productions, not
         # thousands, so the sort is free and the deploy is one step shorter.
-        query = self._c()
-        if owner_uid is not None:
+        #
+        # TWO queries, not one with a null in the array. Firestore's `IN` is a
+        # disjunction of *equality* comparisons on a field, and a null-valued
+        # field is not equal to anything — so `in [uid, None, ""]` silently
+        # returned no unowned rows at all. `== None` is the only thing that
+        # expresses IS_NULL, and it cannot be combined into the same `in`.
+        # `LocalProductionIndex.list_for` does this predicate in Python and gets
+        # it right, so every test passed against semantics the deployment did
+        # not have.
+        if owner_uid is None:
+            queries = [self._c()]
+        else:
             from google.cloud.firestore_v1.base_query import FieldFilter
 
-            query = query.where(filter=FieldFilter("owner_uid", "in", [owner_uid, None, ""]))
-        rows = []
-        for snap in query.stream():
-            try:
-                rows.append(IndexRow.model_validate(snap.to_dict()))
-            except Exception:
-                continue
-        return sorted(rows, key=lambda r: r.updated_at, reverse=True)
+            queries = [
+                self._c().where(filter=FieldFilter("owner_uid", "in", [owner_uid, ""])),
+                self._c().where(filter=FieldFilter("owner_uid", "==", None)),
+            ]
+
+        seen: dict[str, IndexRow] = {}
+        for query in queries:
+            for snap in query.stream():
+                data = snap.to_dict()
+                try:
+                    row = IndexRow.model_validate(data)
+                except Exception:
+                    # Loudly. A bare `continue` here meant a production vanished
+                    # from its owner's dashboard with no evidence anywhere — not
+                    # a log line, not a metric — while its state blob sat in the
+                    # bucket looking perfectly healthy.
+                    log.warning(
+                        "dropping an unreadable index row from the listing: %s",
+                        data.get("id") or getattr(snap, "id", "?"),
+                    )
+                    continue
+                seen[row.id] = row
+        return sorted(seen.values(), key=lambda r: r.updated_at, reverse=True)
+
+    def _merge(self, pid: str, fields: dict) -> None:
+        """A partial write that always leaves a VALID row behind.
+
+        `set(..., merge=True)` creates the document when it is absent, and the
+        three callers below used to create one holding only their own field —
+        no `id`. `id` is required on `IndexRow`, so such a document failed
+        validation for ever: dropped from every listing, `None` from `get()`,
+        and then rebuilt from defaults by `BlobStateStore.save`, which lost the
+        owner too. Stamping the id on every partial write costs nothing and
+        makes that shape unconstructible.
+        """
+        self._c().document(pid).set({"id": pid, **fields}, merge=True)
 
     def record_stage(self, pid: str, stage: str, status: str) -> None:
-        self._c().document(pid).set(
-            {"stage_status": {stage: status}, "updated_at": time.time()}, merge=True
+        self._merge(pid, {"stage_status": {stage: status}, "updated_at": time.time()})
+
+    def record_progress(self, pid: str, title: str, stage_status: dict) -> None:
+        """What `BlobStateStore.save` owns, and nothing else.
+
+        A merge rather than a read-modify-write with a full `.set()`. The old
+        shape reverted anything written between the read and the write — most
+        consequentially the heartbeat, which the beat timer writes every thirty
+        seconds while `Pipeline.run` saves after every stage, so the two collide
+        by design. And on a read miss it rebuilt the row from defaults and
+        dropped `owner_uid`, which is the field the listing filters on.
+        """
+        self._merge(
+            pid,
+            {"title": title, "stage_status": dict(stage_status), "updated_at": time.time()},
         )
 
     def heartbeat(self, pid: str) -> None:
-        self._c().document(pid).set({"heartbeat_at": time.time()}, merge=True)
+        self._merge(pid, {"heartbeat_at": time.time()})
 
     def clear_heartbeat(self, pid: str) -> None:
-        self._c().document(pid).set({"heartbeat_at": None}, merge=True)
+        self._merge(pid, {"heartbeat_at": None})
 
     def delete(self, pid: str) -> None:
         self._c().document(pid).delete()

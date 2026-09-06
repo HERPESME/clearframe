@@ -56,15 +56,16 @@ class BlobStateStore:
         # `Pipeline.run` saves after every stage, so this is where progress
         # becomes visible to the dashboard — including for a run executing in a
         # different container, which is the entire point.
-        row = self._index.get(pid) or IndexRow(id=pid)
-        self._index.put(
-            row.model_copy(
-                update={
-                    "title": state.production.title,
-                    "stage_status": dict(state.stage_status),
-                    "updated_at": time.time(),
-                }
-            )
+        #
+        # Writing only the three fields this caller owns, not the whole row.
+        # The old shape — read, `model_copy`, full `.set()` — reverted anything
+        # written in between, and the beat timer writes every thirty seconds
+        # while this runs after every stage, so they collide by design. Worse,
+        # on a read MISS it rebuilt the row from defaults and dropped
+        # `owner_uid`, which is the field the listing filters on: one unreadable
+        # row became a permanently invisible production.
+        self._index.record_progress(
+            pid, state.production.title, dict(state.stage_status)
         )
 
     def load(self, production_id: str) -> ProductionState:

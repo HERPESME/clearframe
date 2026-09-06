@@ -98,6 +98,15 @@ class ProductionIndex(Protocol):
 
     def record_stage(self, pid: str, stage: str, status: str) -> None: ...
 
+    def record_progress(self, pid: str, title: str, stage_status: dict) -> None:
+        """What a state save owns — title, progress, timestamp — and nothing else.
+
+        Narrow on purpose. `BlobStateStore.save` used to read the whole row and
+        write the whole row back, which reverted anything that had landed in
+        between: the heartbeat, most of all, since the beat timer writes every
+        thirty seconds while `Pipeline.run` saves after every stage.
+        """
+
     def heartbeat(self, pid: str) -> None: ...
 
     def clear_heartbeat(self, pid: str) -> None: ...
@@ -229,6 +238,22 @@ class LocalProductionIndex:
         status_map[stage] = status
         self._write(
             row.model_copy(update={"stage_status": status_map, "updated_at": time.time()})
+        )
+
+    def record_progress(self, pid: str, title: str, stage_status: dict) -> None:
+        """The local twin of the Firestore merge. One filesystem, one writer at
+        a time, so `get` cannot miss the way a Firestore read can — but the
+        interface has to match, and `get` backfills from the state document
+        here, so a lost row repairs itself."""
+        row = self.get(pid) or IndexRow(id=pid)
+        self._write(
+            row.model_copy(
+                update={
+                    "title": title,
+                    "stage_status": dict(stage_status),
+                    "updated_at": time.time(),
+                }
+            )
         )
 
     def heartbeat(self, pid: str) -> None:
