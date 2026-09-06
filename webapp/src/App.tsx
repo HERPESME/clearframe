@@ -4,6 +4,8 @@ import { ElementCard } from "./ElementCard";
 import { MissionControl } from "./MissionControl";
 import { Timeline } from "./Timeline";
 import { Uploader } from "./Uploader";
+import { SignIn } from "./SignIn";
+import { signOut, type SessionUser } from "./auth";
 import { VideoPlayer } from "./VideoPlayer";
 import type { Action, ProductionState, Risk, RiskBand, Role } from "./types";
 
@@ -29,11 +31,23 @@ export default function App() {
   // what used to happen, re-rendering this production every three seconds and
   // overwriting the upload form the moment it was opened.
   const [interrupted, setInterrupted] = useState(false);
+  // Authentication, when the deployment has it switched on. `null` while we do
+  // not yet know, so the app never flashes a sign-in screen at someone who is
+  // already signed in — or a review screen at someone who is not.
+  const [authOn, setAuthOn] = useState<boolean | null>(null);
+  const [user, setUser] = useState<SessionUser | null>(null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
-    api.meta().then((m) => setMode(m.mode)).catch(() => {});
+    api
+      .meta()
+      .then((m) => {
+        setMode(m.mode);
+        setAuthOn(m.auth);
+        setUser(m.user);
+      })
+      .catch(() => setAuthOn(false));
     // ?autorun starts a fresh paced pipeline run on load — used for demo
     // recordings so Mission Control opens without a click.
     if (new URLSearchParams(window.location.search).has("autorun")) {
@@ -188,12 +202,19 @@ export default function App() {
     }
   };
 
-  if (loading) {
+  if (loading || authOn === null) {
     return (
       <div className="hero">
         <div className="slate">Loading…</div>
       </div>
     );
+  }
+
+  // The gate, above every other screen: a deployment with authentication on
+  // has nothing to show a stranger — not the findings, not the footage, and
+  // certainly not the upload form that starts a paid pipeline run.
+  if (authOn && !user) {
+    return <SignIn onSignedIn={setUser} />;
   }
 
   if (mission) {
@@ -371,23 +392,41 @@ export default function App() {
           findings
         </span>
         <span className="spacer" />
-        <nav className="roles" aria-label="Reviewer role">
-          {(["legal", "producer", "editor"] as Role[]).map((r) => (
+        {authOn && user ? (
+          // A role you can prove. The switcher below is honest only when there
+          // is nobody to ask — with auth on, the server decides and the client
+          // saying otherwise is exactly the bypass that was closed.
+          <div className="whoami" title={user.email ?? user.uid}>
+            <span className="whoami-name">{user.name || user.email || user.uid}</span>
+            <span className="whoami-role">{user.role}</span>
             <button
-              key={r}
-              className={role === r ? "active" : ""}
-              onClick={() => changeRole(r)}
+              type="button"
+              className="topbtn"
+              onClick={() => void signOut().then(() => setUser(null))}
             >
-              {r}
+              sign out
             </button>
-          ))}
-        </nav>
-        <span className="role-hint">
-          {role === "editor" ? "read-only" : "can record decisions"}
-        </span>
+          </div>
+        ) : (
+          <>
+            <nav className="roles" aria-label="Reviewer role">
+              {(["legal", "producer", "editor"] as Role[]).map((r) => (
+                <button
+                  key={r}
+                  className={role === r ? "active" : ""}
+                  onClick={() => changeRole(r)}
+                >
+                  {r}
+                </button>
+              ))}
+            </nav>
+            <span className="role-hint">
+              {role === "editor" ? "read-only" : "can record decisions"}
+            </span>
+          </>
+        )}
         <button
-          className="roles"
-          style={{ padding: "5px 12px", background: "transparent", color: "var(--muted)" }}
+          className="topbtn"
           onClick={newProduction}
           title="Clear this production and upload another"
         >
@@ -395,8 +434,7 @@ export default function App() {
         </button>
         {isDemo && (
           <button
-            className="roles"
-            style={{ padding: "5px 12px", background: "transparent", color: "var(--muted)" }}
+            className="topbtn"
             onClick={loadDemo}
             title="Run the demo pipeline again from scratch"
           >

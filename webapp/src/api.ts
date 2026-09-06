@@ -54,7 +54,13 @@ async function upload<T>(path: string, form: FormData): Promise<T> {
 }
 
 export const api = {
-  meta: () => request<{ mode: "demo" | "live"; version: string }>("/api/meta"),
+  meta: () =>
+    request<{
+      mode: "demo" | "live";
+      version: string;
+      auth: boolean;
+      user: { uid: string; email: string | null; name: string | null; role: string } | null;
+    }>("/api/meta"),
   listProductions: () => request<ProductionSummary[]>("/api/productions"),
   createDemo: () => request<ProductionState>("/api/productions/demo", { method: "POST" }),
   startPacedDemo: (paceS: number) =>
