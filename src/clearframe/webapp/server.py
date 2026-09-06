@@ -417,30 +417,50 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
             "user": user.model_dump() if user else None,
         }
 
-    def _stored_media(pid: str):
-        """The footage file for this production, if one is on disk."""
-        media_dir = out_root / "media" / pid
-        for suffix, media_type in MEDIA_TYPES.items():
-            candidate = media_dir / f"footage{suffix}"
-            if candidate.exists():
-                return candidate, media_type
+    def _media_key(pid: str) -> str | None:
+        """The blob key of this production's footage, if it has any."""
+        for suffix in MEDIA_TYPES:
+            key = f"media/{pid}/footage{suffix}"
+            if backends.blobs.exists(key):
+                return key
         return None
+
+    def _stored_media(pid: str):
+        """The footage for this production as a real path, if it has any.
+
+        Through the blob store now, not a directory. Both containers run
+        `--out /tmp/out`, a per-instance tmpfs, so while footage was written
+        straight to disk the WORKER could not see what the API had just
+        received — every live upload on Cloud Run would have failed at the scan.
+
+        Still a path rather than bytes because the three consumers are ffmpeg
+        (an argv), `FileResponse` (streams after the handler returns) and audio
+        fingerprinting (which refuses a `gs://` URI outright). Locally that is
+        the real file at no cost; in the cloud it is a version-keyed download
+        cached per container.
+        """
+        key = _media_key(pid)
+        if key is None:
+            return None
+        path = backends.blobs.local_path(key)
+        if path is None:
+            return None
+        return path, MEDIA_TYPES[Path(key).suffix]
 
     def _media_version(pid: str) -> str:
         """Which FOOTAGE this production currently holds.
 
-        Size and write time together: whole seconds collide when two uploads
-        land in the same second, which a test does routinely and an impatient
-        user manages too. Every upload from the UI lands at the same production
-        id, so this string is the only thing that distinguishes one film from
-        the next — which is why the box cache is keyed by it and not just by
-        the id.
+        The store's own answer: a GCS generation, or size and nanosecond write
+        time locally. Whole seconds collide when two uploads land in the same
+        one, which a test does routinely and an impatient user manages too.
+
+        This string is what distinguishes one film from the next at a stable
+        production id, which is why the box cache, the thumbnail filename, the
+        pre-ground set and the video URL are all keyed by it rather than by the
+        id alone.
         """
-        found = _stored_media(pid)
-        if not found:
-            return ""
-        st = found[0].stat()
-        return f"{st.st_size}-{st.st_mtime_ns}"
+        key = _media_key(pid)
+        return (backends.blobs.version(key) or "") if key else ""
 
     def _with_media_flag(state):
         """Answer `has_media` by looking for the file, not by trusting a flag.
@@ -665,22 +685,35 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
         # every other ownership refusal here: a 403 would confirm the id exists.
         _require_owner(request, pid)
         name = _safe_media_name(file.filename or "")
-        media_dir = out_root / "media" / pid
-        media_dir.mkdir(parents=True, exist_ok=True)
-        target = media_dir / name
+        media_key = f"media/{pid}/{name}"
 
+        # Stream to a temporary file first, then hand the finished file to the
+        # store. Streaming lets the size cap stop a hostile upload part-way
+        # instead of after 512MB has been accepted, and a completed file is what
+        # `put_file` wants — the cloud store uploads it without ever holding the
+        # whole clip in a container sized for an API.
+        import tempfile as _tempfile
+
+        fd, staged_name = _tempfile.mkstemp(suffix=Path(name).suffix)
+        staged = Path(staged_name)
         written = 0
-        with open(target, "wb") as out:
-            while chunk := await file.read(1024 * 1024):
-                written += len(chunk)
-                if written > MAX_UPLOAD_BYTES:
-                    out.close()
-                    target.unlink(missing_ok=True)
-                    raise HTTPException(
-                        status_code=413,
-                        detail=f"Footage exceeds {MAX_UPLOAD_BYTES // (1024 * 1024)}MB.",
-                    )
-                out.write(chunk)
+        try:
+            with os.fdopen(fd, "wb") as out:
+                while chunk := await file.read(1024 * 1024):
+                    written += len(chunk)
+                    if written > MAX_UPLOAD_BYTES:
+                        raise HTTPException(
+                            status_code=413,
+                            detail=f"Footage exceeds {MAX_UPLOAD_BYTES // (1024 * 1024)}MB.",
+                        )
+                    out.write(chunk)
+            await asyncio.to_thread(backends.blobs.put_file, media_key, staged)
+        finally:
+            staged.unlink(missing_ok=True)
+
+        target = backends.blobs.local_path(media_key)
+        if target is None:  # pragma: no cover - the store just wrote it
+            raise HTTPException(status_code=500, detail="Footage could not be stored.")
 
         # One ffmpeg call for both numbers, in a thread. It was two spawns
         # parsing the same banner, run synchronously inside an async handler —
@@ -722,9 +755,10 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
             _pregrounded.discard(warmed)
         _preground_progress.pop(pid, None)
         # The poster is keyed by media version so a stale one is never SERVED,
-        # but it would sit on disk for the life of the deployment otherwise.
-        for stale in target.parent.glob("thumb-*.jpg"):
-            stale.unlink(missing_ok=True)
+        # but it would sit in the bucket for the life of the deployment
+        # otherwise — and there it costs money rather than a few inodes.
+        for stale in backends.blobs.list(f"media/{pid}/thumb-"):
+            backends.blobs.delete(stale)
 
         ctx = build_context(
             cfg.model_copy(update={"mode": "live"}),
@@ -861,14 +895,17 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
         # Cached on disk under the media version, so a re-upload at the same
         # production id gets a new picture — the rule the video URL and the box
         # cache already follow, for the same reason.
-        cached = found[0].parent / f"thumb-{_media_version(pid)}.jpg"
-        if not cached.exists():
+        thumb_key = f"media/{pid}/thumb-{_media_version(pid)}.jpg"
+        if not backends.blobs.exists(thumb_key):
             frame = await asyncio.to_thread(
                 extract_frame, found[0], _poster_moment(state)
             )
             if not frame:
                 raise HTTPException(status_code=404, detail="No frame available")
-            await asyncio.to_thread(cached.write_bytes, frame)
+            await asyncio.to_thread(backends.blobs.put, thumb_key, frame)
+        cached = backends.blobs.local_path(thumb_key)
+        if cached is None:  # pragma: no cover - just written
+            raise HTTPException(status_code=404, detail="No frame available")
 
         return FileResponse(
             cached,

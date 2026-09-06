@@ -74,24 +74,34 @@ class GcsBlobStore:
                 raise KeyError(key) from exc
             raise
 
-    @contextlib.contextmanager
-    def open_local(self, key: str) -> Iterator[Path]:
-        """Materialise the object as a real file, for ffmpeg and fingerprinting.
+    def local_path(self, key: str) -> Path | None:
+        """Materialise the object as a real file, for ffmpeg and FileResponse.
 
         Cached by key AND version, so re-uploaded footage never serves the
         previous film's frames — the same rule the box cache learned the hard
         way — and a second grounding call on the same clip pays nothing.
+
+        The download goes to a `.part` and is renamed, because a half-downloaded
+        mp4 that ffmpeg reads as a whole one produces a plausible wrong answer
+        rather than an error.
         """
         version = self.version(key)
         if version is None:
-            raise KeyError(key)
+            return None
         self._cache_dir.mkdir(parents=True, exist_ok=True)
         stamp = hashlib.sha1(f"{key}@{version}".encode()).hexdigest()[:16]
         local = self._cache_dir / f"{stamp}{Path(key).suffix}"
         if not local.exists():
             tmp = local.with_suffix(local.suffix + ".part")
             self._b().blob(check_key(key)).download_to_filename(str(tmp))
-            os.replace(tmp, local)  # never let a half-download be read as whole
+            os.replace(tmp, local)
+        return local
+
+    @contextlib.contextmanager
+    def open_local(self, key: str) -> Iterator[Path]:
+        local = self.local_path(key)
+        if local is None:
+            raise KeyError(key)
         yield local
 
     def exists(self, key: str) -> bool:

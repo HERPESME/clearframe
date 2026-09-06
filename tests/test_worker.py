@@ -287,3 +287,51 @@ def test_a_token_from_the_wrong_account_is_refused(tmp_path, ran, monkeypatch):
 
     assert resp.status_code == 401
     assert ran == []
+
+
+def test_footage_reaches_the_blob_store_not_just_the_container_disk(tmp_path, monkeypatch):
+    """The other half of the handover, and the one that breaks Cloud Run.
+
+    The API and the worker are separate services, both started with
+    `--out /tmp/out` — a per-instance tmpfs. Footage written straight to that
+    directory is invisible to the worker, so every live upload would reach the
+    scan with no file to scan. `put_file`/`open_local` were defined for exactly
+    this and had zero callers.
+
+    Asserted through the store rather than the filesystem, because locally the
+    two are the same path and only the store's answer is true in both profiles.
+    """
+    from fastapi.testclient import TestClient as _TestClient
+
+    from clearframe.config import ClearFrameConfig
+    from clearframe.storage import build_backends
+    from clearframe.webapp.server import create_app
+
+    monkeypatch.setenv("CLEARFRAME_MODE", "live")
+    monkeypatch.setenv("GOOGLE_CLOUD_PROJECT", "a-project")
+    monkeypatch.setenv("PARALLEL_API_KEY", "a-key")
+
+    class _Recording:
+        async def enqueue(self, job):
+            return job.production_id
+
+    monkeypatch.setattr(
+        "clearframe.webapp.server.build_queue", lambda cfg, runner: _Recording()
+    )
+    monkeypatch.setattr(
+        "clearframe.webapp.server.probe_media", lambda path: (10.0, 24.0)
+    )
+    client = _TestClient(create_app(out_root=tmp_path))
+
+    client.post(
+        "/api/productions",
+        files={"file": ("clip.mp4", b"\x00" * 4096, "video/mp4")},
+        data={"title": "Handover", "production_id": "handover"},
+    )
+
+    blobs = build_backends(ClearFrameConfig.from_env({}), tmp_path).blobs
+    assert blobs.exists("media/handover/footage.mp4"), (
+        "the worker would find no footage to scan"
+    )
+    assert len(blobs.get("media/handover/footage.mp4")) == 4096
+    assert blobs.version("media/handover/footage.mp4")

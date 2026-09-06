@@ -51,6 +51,18 @@ class BlobStore(Protocol):
     def open_local(self, key: str) -> contextlib.AbstractContextManager[Path]:
         """Yield a real filesystem path for the blob, for subprocess consumers."""
 
+    def local_path(self, key: str) -> Path | None:
+        """A real path for the blob that outlives a `with` block, or None.
+
+        `open_local` is the honest shape for a temporary materialisation, and it
+        is the wrong shape for three callers here. `FileResponse` streams the
+        file after the handler has returned. The thumbnail cache writes a sibling
+        file next to the footage. And the grounding path hands a path to ffmpeg
+        from inside a thread. All of them need the file to still be there
+        afterwards, so the cloud store keeps its download in a version-keyed
+        cache rather than a temporary directory.
+        """
+
     def exists(self, key: str) -> bool: ...
 
     def delete(self, key: str) -> None:
@@ -116,10 +128,14 @@ class LocalBlobStore:
         except FileNotFoundError as exc:
             raise KeyError(key) from exc
 
+    def local_path(self, key: str) -> Path | None:
+        path = self._path(key)
+        return path if path.exists() else None
+
     @contextlib.contextmanager
     def open_local(self, key: str) -> Iterator[Path]:
-        path = self._path(key)
-        if not path.exists():
+        path = self.local_path(key)
+        if path is None:
             raise KeyError(key)
         yield path  # already a real file; copying it would be pure waste
 
