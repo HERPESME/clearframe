@@ -1,6 +1,7 @@
 """Clearance review web app: API over production state with server-side role gating."""
 
 import asyncio
+import hmac
 import json
 import logging
 import os
@@ -8,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
 
-from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, Header, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -21,6 +22,7 @@ from clearframe.media import extract_frame, probe_media
 log = logging.getLogger("clearframe.webapp")
 from clearframe.models import Production
 from clearframe.overlay import bind_ground_boxes
+from clearframe.webapp import auth
 from clearframe.pipeline import (
     ANALYSIS_STAGES,
     Pipeline,
@@ -219,15 +221,95 @@ def create_app(out_root: Path) -> FastAPI:
         except FileNotFoundError:
             raise HTTPException(status_code=404, detail=f"Unknown production: {pid}")
 
+    # ---------------------------------------------------------------- auth --
+    #
+    # One middleware rather than a dependency on seventeen routes, because the
+    # routes that most needed guarding were the ones nobody had remembered to
+    # decorate: the upload that runs the whole live pipeline, the grounding
+    # calls, the freshness search. A default-closed gate cannot be forgotten.
+
+    @app.middleware("http")
+    async def _require_session(request, call_next):
+        if not auth.auth_enabled() or not request.url.path.startswith("/api/"):
+            return await call_next(request)
+        if auth.is_open(request.url.path):
+            return await call_next(request)
+        if auth.user_from_request(request) is None:
+            return JSONResponse({"detail": "Sign in required."}, status_code=401)
+        return await call_next(request)
+
+    def _current_user(request):
+        return auth.user_from_request(request) if auth.auth_enabled() else None
+
+    def _role_for(request, header_role: str) -> str:
+        """The role this request may act with.
+
+        With auth on it comes from the verified user and the header stops being
+        evidence — that header was the entire bypass. With auth off it is the
+        header, unchanged, because demo mode has nobody to ask.
+        """
+        user = _current_user(request)
+        return user.role if user else header_role
+
+    def _actor_for(request, header_role: str) -> str:
+        """What the audit trail records: a person if we know one."""
+        user = _current_user(request)
+        return user.actor if user else header_role.lower()
+
+    @app.get("/api/auth/config")
+    def auth_config():
+        """What the browser needs to start a sign-in, and whether to bother."""
+        return {"enabled": auth.auth_enabled(), "firebase": auth.firebase_web_config()}
+
+    @app.get("/api/auth/me")
+    def auth_me(request: Request):
+        user = _current_user(request)
+        if user is None:
+            raise HTTPException(status_code=401, detail="Not signed in.")
+        return user.model_dump()
+
+    @app.post("/api/auth/session")
+    def auth_session(request: Request, body: dict):
+        """Exchange a verified Firebase ID token for a cookie session."""
+        if not auth.auth_enabled():
+            raise HTTPException(status_code=400, detail="Authentication is not enabled.")
+        raw = (body or {}).get("idToken") or ""
+        try:
+            user = auth.user_from_token(raw)
+        except Exception:
+            raise HTTPException(status_code=401, detail="Could not verify that sign-in.")
+        response = JSONResponse(user.model_dump())
+        response.set_cookie(
+            auth.SESSION_COOKIE,
+            raw,
+            httponly=True,
+            samesite="lax",
+            # Not Secure on plain HTTP, or local development cannot sign in at
+            # all; Cloud Run terminates TLS, so this is set there.
+            secure=request.url.scheme == "https",
+            max_age=60 * 60,  # an ID token's own lifetime; the client refreshes
+            path="/",
+        )
+        return response
+
+    @app.post("/api/auth/signout")
+    def auth_signout():
+        response = JSONResponse({"status": "signed-out"})
+        response.delete_cookie(auth.SESSION_COOKIE, path="/")
+        return response
+
     @app.get("/api/meta")
-    def meta():
+    def meta(request: Request):
         import os
 
         import clearframe
 
+        user = _current_user(request)
         return {
             "mode": "live" if os.environ.get("CLEARFRAME_MODE") == "live" else "demo",
             "version": clearframe.__version__,
+            "auth": auth.auth_enabled(),
+            "user": user.model_dump() if user else None,
         }
 
     def _stored_media(pid: str):
@@ -858,6 +940,7 @@ def create_app(out_root: Path) -> FastAPI:
 
     @app.post("/api/licences")
     async def upload_licences(
+        request: Request,
         file: UploadFile = File(...),
         replace: bool = Form(True),
         x_clearframe_role: str = Header(default="editor"),
@@ -868,7 +951,7 @@ def create_app(out_root: Path) -> FastAPI:
         starts, expires, reference, notes. Territories and media are
         pipe- or semicolon-separated (e.g. "US|DE|FR").
         """
-        if x_clearframe_role.lower() not in {"legal", "producer"}:
+        if _role_for(request, x_clearframe_role).lower() not in {"legal", "producer"}:
             raise HTTPException(
                 status_code=403,
                 detail="Only legal or producer may change the rights ledger.",
@@ -917,6 +1000,7 @@ def create_app(out_root: Path) -> FastAPI:
 
     @app.post("/api/productions/{pid}/decisions")
     async def post_decision(
+        request: Request,
         pid: str,
         body: DecisionRequest,
         x_clearframe_role: str = Header(default="editor"),
@@ -929,8 +1013,11 @@ def create_app(out_root: Path) -> FastAPI:
                     body.element_id,
                     body.action,
                     body.note,
-                    role=x_clearframe_role,
-                    reviewer=x_clearframe_role.lower(),
+                    role=_role_for(request, x_clearframe_role),
+                    # A person, once we know one. This was the role WORD, so an
+                    # E&O audit trail recorded that "legal" signed off — and a
+                    # job title cannot sign anything.
+                    reviewer=_actor_for(request, x_clearframe_role),
                     at=datetime.now(timezone.utc).isoformat(),
                 )
             except RoleNotPermittedError as exc:
@@ -982,9 +1069,21 @@ def create_app(out_root: Path) -> FastAPI:
         return {"artifacts": artifacts}
 
     @app.post("/api/webhooks/parallel-monitor")
-    async def monitor_webhook(body: MonitorAlertRequest):
+    async def monitor_webhook(
+        body: MonitorAlertRequest,
+        x_clearframe_signature: str = Header(default=""),
+    ):
         # Parallel Monitor webhook: an outside-world change on a watched finding
         # reopens review so the dossier can't go silently stale.
+        #
+        # A shared secret rather than a user session, because the caller is
+        # Parallel and not a browser. Unset leaves the endpoint open, which is
+        # the existing behaviour and what keeps the smoke script running — but
+        # this writes to the audit trail and can reopen a signed-off dossier,
+        # and monitor ids are readable from an endpoint anyone can reach.
+        secret = auth.webhook_secret()
+        if secret and not hmac.compare_digest(secret, x_clearframe_signature or ""):
+            raise HTTPException(status_code=401, detail="Bad webhook signature.")
         async with state_lock:
             for pid in store.production_ids():
                 reopened = record_watch_alert(
