@@ -106,8 +106,30 @@ class EventLog:
         return events if isinstance(events, list) else []
 
     @staticmethod
+    async def read_async(blobs: BlobStore, pid: str) -> list[dict]:
+        """`read`, off the event loop.
+
+        The event stream polls this four times a second for the length of a run,
+        and in the cloud profile it is `download_as_bytes()` against GCS — a
+        synchronous round trip. Called inline from the SSE generator it stopped
+        the API's single event loop on every poll, so nothing else the service
+        does got a turn in between: not the production listing, not the media,
+        not a grounding request. Same defect `ground_frame` had, in a place
+        where it looks like a file read.
+        """
+        import asyncio
+
+        return await asyncio.to_thread(EventLog.read, blobs, pid)
+
+    @staticmethod
     def exists(blobs: BlobStore, pid: str) -> bool:
         return blobs.exists(key_for(pid))
+
+    @staticmethod
+    async def exists_async(blobs: BlobStore, pid: str) -> bool:
+        import asyncio
+
+        return await asyncio.to_thread(EventLog.exists, blobs, pid)
 
     @staticmethod
     def clear(blobs: BlobStore, pid: str) -> None:

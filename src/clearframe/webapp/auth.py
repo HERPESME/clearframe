@@ -200,6 +200,32 @@ def user_from_request(request, env=None) -> AuthUser | None:
         return None
 
 
+async def user_from_token_async(raw: str, env=None) -> AuthUser | None:
+    """`user_from_token`, off the event loop, returning None on a bad token.
+
+    `verify_token` fetches Google's signing certificates when its cache is cold
+    and then verifies an RSA signature — network and CPU, both synchronous. It
+    was called from an `async def` middleware on every single request, so the
+    gate added to protect the expensive endpoints became a serialiser in front
+    of all of them: one slow certificate fetch stalls every request in flight on
+    a service deployed with one CPU and a concurrency of eighty.
+    """
+    import asyncio
+
+    try:
+        return await asyncio.to_thread(user_from_token, raw, env)
+    except Exception:
+        return None
+
+
+async def user_from_request_async(request, env=None) -> AuthUser | None:
+    """The signed-in user for this request, without holding the loop."""
+    raw = request.cookies.get(SESSION_COOKIE)
+    if not raw:
+        return None
+    return await user_from_token_async(raw, env)
+
+
 # Paths that must answer before anyone can sign in. A login page that requires
 # a login cannot be used, and `/api/meta` is how the client learns whether it
 # needs one at all. Webhooks are machine callers with their own secret.

@@ -177,6 +177,28 @@ class _PacedStage:
         await asyncio.sleep(self._pace_s)
 
 
+def _purge_stale_posters(blobs, pid: str) -> None:
+    """Drop the previous cut's poster frames. One list plus N deletes.
+
+    Kept as a plain function so the whole sweep goes to a single thread rather
+    than the caller awaiting each delete — and so it cannot be accidentally
+    called from a coroutine without one.
+    """
+    for stale in blobs.list(f"media/{pid}/thumb-"):
+        blobs.delete(stale)
+
+
+async def index_get_async(index, pid: str):
+    """`index.get`, off the event loop.
+
+    Firestore in the cloud profile, so a round trip. It is read from the event
+    stream's keepalive branch — once every fifteen seconds per open stream, and
+    precisely when a stage has gone quiet, which is when the reviewer is most
+    likely to be clicking on something else.
+    """
+    return await asyncio.to_thread(index.get, pid)
+
+
 def _use_context(raw: str):
     """Parse a declared use context, defaulting to the calibration baseline.
 
@@ -327,12 +349,29 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
             return await call_next(request)
         if auth.is_open(request.url.path):
             return await call_next(request)
-        if auth.user_from_request(request) is None:
+        user = await auth.user_from_request_async(request)
+        if user is None:
             return JSONResponse({"detail": "Sign in required."}, status_code=401)
+        # Verified once, then carried. Handlers used to call `_current_user`
+        # and re-verify the same cookie a second time — network plus RSA,
+        # twice, for every authenticated request.
+        request.state.clearframe_user = user
         return await call_next(request)
 
     def _current_user(request):
-        return auth.user_from_request(request) if auth.auth_enabled() else None
+        """Who is making this request.
+
+        Prefers what the middleware already verified. The fallback is for the
+        open paths — `/api/auth/session` and friends — which never reach the
+        branch above and so have nothing stashed; those verify once here rather
+        than twice.
+        """
+        if not auth.auth_enabled():
+            return None
+        stashed = getattr(request.state, "clearframe_user", None)
+        if stashed is not None:
+            return stashed
+        return auth.user_from_request(request)
 
     def _role_for(request, header_role: str) -> str:
         """The role this request may act with.
@@ -729,7 +768,10 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
         finally:
             staged.unlink(missing_ok=True)
 
-        target = backends.blobs.local_path(media_key)
+        # In a thread: in the cloud profile this DOWNLOADS the clip back out
+        # of the bucket into the container's cache, which for a 512MB upload
+        # is not a file open, it is a transfer.
+        target = await asyncio.to_thread(backends.blobs.local_path, media_key)
         if target is None:  # pragma: no cover - the store just wrote it
             raise HTTPException(status_code=500, detail="Footage could not be stored.")
 
@@ -775,8 +817,7 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
         # The poster is keyed by media version so a stale one is never SERVED,
         # but it would sit in the bucket for the life of the deployment
         # otherwise — and there it costs money rather than a few inodes.
-        for stale in backends.blobs.list(f"media/{pid}/thumb-"):
-            backends.blobs.delete(stale)
+        await asyncio.to_thread(_purge_stale_posters, backends.blobs, pid)
 
         ctx = build_context(
             cfg.model_copy(update={"mode": "live"}),
@@ -795,8 +836,8 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
         # without this it answers "no such production" and acks a job that never
         # runs. Found by actually running the split topology; no unit test could
         # see it, because they all write the state file themselves.
-        store.save(ctx.state)
-        EventLog.clear(backends.blobs, pid)
+        await asyncio.to_thread(store.save, ctx.state)
+        await asyncio.to_thread(EventLog.clear, backends.blobs, pid)
         run_log = EventLog(backends.blobs, pid)
         publish = _listener_for(pid, run_log)
         # Open the log BEFORE responding, so the stream exists the moment the
@@ -810,17 +851,18 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
         # got a 404, and `MissionControl` closes on error and never retries, so
         # the analysis ran to completion behind a screen that said "Standing
         # by". Seen on the deployed site: one 404, no second attempt.
-        run_log.append({"type": "queued", "production_id": pid})
+        await asyncio.to_thread(run_log.append, {"type": "queued", "production_id": pid})
         # The row has to exist before the run starts: it is what the dashboard
         # lists, what carries the owner, and what the heartbeat beats against.
-        index.put(
+        await asyncio.to_thread(
+            index.put,
             IndexRow(
                 id=pid,
                 owner_uid=(user.uid if user else None),
                 title=production.title,
                 has_media=True,
-                media_version=_media_version(pid),
-            )
+                media_version=await asyncio.to_thread(_media_version, pid),
+            ),
         )
 
         def _listen(event: dict) -> None:
@@ -1307,14 +1349,17 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
         so a replay converges on the same screen.
         """
         _require_owner(request, pid)
-        if not EventLog.exists(backends.blobs, pid):
+        if not await EventLog.exists_async(backends.blobs, pid):
             raise HTTPException(status_code=404, detail="No active run for this production")
 
         async def gen():
             cursor = 0
             idle = 0.0
             while True:
-                events = EventLog.read(backends.blobs, pid)
+                # Off the loop. This is a bucket round trip four times a
+                # second for the length of a run; inline it stopped the
+                # API's single event loop on every poll.
+                events = await EventLog.read_async(backends.blobs, pid)
                 if len(events) > cursor:
                     idle = 0.0
                     for event in events[cursor:]:
@@ -1334,7 +1379,7 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
                         # the run died with its container. Ending the stream is
                         # honest; hanging on it for ever is what the old
                         # in-process set was invented to avoid.
-                        row = index.get(pid)
+                        row = await index_get_async(index, pid)
                         if row is not None and not row.is_running():
                             break
                 if await request.is_disconnected():
