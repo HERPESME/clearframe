@@ -9,8 +9,11 @@
 # video passes plus research plus up to 150 grounding calls, and on one service
 # that competes with the requests drawing the review screen.
 #
-# Deployed in DEMO mode by default. Live keys behind an unauthenticated URL is
-# open spend; see .claude/skills/deploy-cloud for the flip.
+# The mode is NOT set here, deliberately. `ENV CLEARFRAME_MODE=demo` in the
+# Dockerfile makes a brand-new service demo by default — safe — while an
+# existing service keeps whatever it was given. Setting it in this file meant
+# every CI build silently reverted a live deployment back to fixtures, which
+# is a very quiet way to make a demo look broken and a live one look free.
 steps:
   - id: build
     name: gcr.io/cloud-builders/docker
@@ -49,7 +52,6 @@ steps:
       - --timeout=900
       - --execution-environment=gen2
       - --service-account=clearframe-api@$PROJECT_ID.iam.gserviceaccount.com
-      - --update-env-vars=CLEARFRAME_MODE=demo
       - --command=python
       - --args=-m,clearframe,serve,--host,0.0.0.0,--port,8080,--out,/tmp/out
 
@@ -84,7 +86,6 @@ steps:
       - --timeout=1800
       - --execution-environment=gen2
       - --service-account=clearframe-worker@$PROJECT_ID.iam.gserviceaccount.com
-      - --update-env-vars=CLEARFRAME_MODE=demo
       - --command=python
       - --args=-m,clearframe,worker,--host,0.0.0.0,--port,8080,--out,/tmp/out
 
@@ -104,7 +105,6 @@ steps:
       - --memory=512Mi
       - --timeout=900
       - --execution-environment=gen2
-      - --update-env-vars=CLEARFRAME_MODE=demo
       - --command=python
       - --args=-m,clearframe.mcp,--transport,http,--port,8080,--out,/tmp/out
 
