@@ -1,9 +1,13 @@
 .venv/
 .git/
-out/
 webapp/node_modules/
 webapp/src/
 docs/
 tests/
 __pycache__/
 *.egg-info/
+
+# Run output and uploaded footage — see .gcloudignore for why the glob matters.
+out/
+out-*/
+testdata/

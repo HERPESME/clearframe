@@ -1323,13 +1323,6 @@ button.secondary:disabled { opacity: .5; cursor: default; }
   border: 1px solid var(--line); border-radius: var(--r-pill);
   font-family: var(--mono); font-size: 11px; letter-spacing: .08em; }
 .topbtn:hover { border-color: var(--accent); color: var(--accent); }
-.whoami { display: flex; align-items: center; gap: var(--s-2); }
-.whoami-name { font-size: 12px; color: var(--ink); max-width: 200px;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.whoami-role { font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
-  text-transform: uppercase; padding: 2px 8px; border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
-  color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); }
 .auth-roles { border: 1px solid var(--line); border-radius: var(--r-md);
   padding: var(--s-3); margin-top: var(--s-3); }
 .auth-roles-label { font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
@@ -1342,20 +1335,29 @@ button.secondary:disabled { opacity: .5; cursor: default; }
   border-color: var(--accent); color: var(--accent); }
 .auth-roles-note { font-size: 11.5px; line-height: 1.5; color: var(--muted);
   margin: var(--s-2) 0 0; }
-.whoami-role.open { background: color-mix(in srgb, var(--yellow) 16%, transparent);
-  color: var(--yellow); border-color: color-mix(in srgb, var(--yellow) 40%, transparent); }
 
-/* The account strip on the screens that have no topbar of their own — the
+/* Sign out. Deliberately NOT `.topbtn`, which is shared with "+ New" and
+   "Re-run demo" — restyling that would move three buttons to change one.
+   Accent-tinted so it reads as part of the palette rather than a warning,
+   filling on hover like `.auth-google` does on the sign-in screen. */
+.signout { padding: 7px 16px; border-radius: var(--r-pill);
+  font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
+  color: var(--accent); cursor: pointer;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  transition: background .15s ease, border-color .15s ease, color .15s ease; }
+.signout:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+  border-color: var(--accent); color: var(--fg); }
+.signout:disabled { opacity: .6; cursor: default; }
+
+/* The account control on the screens with no topbar of their own — the
    dashboard and Mission Control. Floated over the hero rather than pushing it
    down, so the landing composition is unchanged and the way out is still one
-   glance away. */
+   glance away. It used to carry a glass pill around a name, a chip and a
+   button; with one button the pill was a frame around a frame. */
 .screen-account { position: absolute; top: var(--s-4); right: var(--s-5);
-  z-index: 30; display: flex; align-items: center; gap: var(--s-2);
-  padding: 6px 8px; border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--bg) 72%, transparent);
-  border: 1px solid var(--line); backdrop-filter: blur(8px); }
-.screen-account .whoami-name { color: var(--fg); }
+  z-index: 30; }
 @media (max-width: 640px) {
   .screen-account { top: var(--s-3); right: var(--s-3); }
-  .screen-account .whoami-name { display: none; }
 }

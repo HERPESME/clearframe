@@ -2,7 +2,6 @@
 .venv/
 webapp/node_modules/
 webapp/src/
-out/
 docs/
 tests/
 scripts/
@@ -11,3 +10,14 @@ __pycache__/
 .pytest_cache/
 .env
 .claude/
+
+# Run output, INCLUDING uploaded footage. `out/` alone was not enough: the real
+# working directories are `out-live-ui/`, `out-ui/` and `out-mvp/`, and they hold
+# the clips people uploaded — a third-party film among them. Without this a
+# `gcloud builds submit` posts that footage to the Cloud Build staging bucket,
+# which is the same mistake as leaving it in git history, with a shorter fuse.
+out/
+out-*/
+
+# Public-domain test clips: ~10MB the image has no use for.
+testdata/

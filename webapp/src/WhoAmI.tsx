@@ -1,18 +1,25 @@
+import { useState } from "react";
 import { signOut, type SessionUser } from "./auth";
 
 /**
- * Who you are signed in as, and the way out.
+ * The way out. One button, top right, on every screen behind the gate.
  *
- * This lived inline in the review topbar and nowhere else, so the two screens
- * you actually land on — the dashboard you arrive at after signing in, and
- * Mission Control while a run executes — offered no way to sign out at all.
- * The only exit was to open a production and find the button in its header,
- * which is not a thing anyone would guess.
+ * This began as a name, a role chip and a button in a glass pill, and the pill
+ * was doing the work of a header on screens that have no header. The identity
+ * did not need to be pinned to the layout to be true: it moved into the
+ * button's tooltip, where a reviewer can still check who the app thinks they
+ * are without it occupying the corner of every page.
  *
- * The role chip says how the role was arrived at, not just what it is. A role
- * the server granted is stated plainly; one the visitor chose for themselves on
- * an open-roles deployment is labelled `chosen`, because self-selection
- * presented as governance is worse than no governance at all.
+ * What is NOT lost with the chip: the sign-in role picker still labels a
+ * self-selected role as such, and the audit trail still records the verified
+ * email rather than the job title. Those are the two places the honesty
+ * actually has to live — a decision is recorded against a person, and the
+ * person was told how they got their role when they chose it.
+ *
+ * The pending state matters more than it looks. `signOut()` swallows Firebase
+ * SDK failures internally, but the `POST /api/auth/signout` that clears the
+ * cookie can still reject — and then `onSignedOut` never fires and the button
+ * silently does nothing. Better to say so.
  */
 export function WhoAmI({
   user,
@@ -23,27 +30,34 @@ export function WhoAmI({
   openRoles: boolean;
   onSignedOut: () => void;
 }) {
+  const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
+
   if (!user) return null;
+
+  const who = user.name || user.email || user.uid;
+  const how = openRoles ? `${user.role} (chosen)` : user.role;
+
   return (
-    <div className="whoami" title={user.email ?? user.uid}>
-      <span className="whoami-name">{user.name || user.email || user.uid}</span>
-      {openRoles ? (
-        <span
-          className="whoami-role open"
-          title="Roles are open on this deployment so anyone can try every control. Your decisions are still recorded against your email."
-        >
-          chosen
-        </span>
-      ) : (
-        <span className="whoami-role">{user.role}</span>
-      )}
-      <button
-        type="button"
-        className="topbtn"
-        onClick={() => void signOut().then(onSignedOut)}
-      >
-        sign out
-      </button>
-    </div>
+    <button
+      type="button"
+      className="signout"
+      disabled={busy}
+      title={
+        failed
+          ? "Sign-out failed — check your connection and try again"
+          : `Signed in as ${who} · role: ${how}`
+      }
+      onClick={() => {
+        setBusy(true);
+        setFailed(false);
+        void signOut()
+          .then(onSignedOut)
+          .catch(() => setFailed(true))
+          .finally(() => setBusy(false));
+      }}
+    >
+      {failed ? "Retry sign out" : busy ? "Signing out…" : "Sign out"}
+    </button>
   );
 }
