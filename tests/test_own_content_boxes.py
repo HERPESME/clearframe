@@ -117,3 +117,71 @@ def test_the_scope_is_the_same_one_routing_already_uses():
 
     assert out[0].own_content is False
     assert box_at(out[0], 9.2) is not None
+
+
+# --- the scan does not always label a subtitle "subtitle" --------------------
+
+
+def _subtitle_line(text):
+    """What the scan actually produced on a deployed run: the SUBTITLE'S WORDS
+    as the label, and the fact that it is a subtitle only in the description."""
+    return _det(
+        text, ElementType.TEXT, _SUBTITLE_BAR,
+        f"The text '{text}' appears as a subtitle at the bottom of the frame.",
+    )
+
+
+def test_a_subtitle_labelled_with_its_own_words_is_still_own_content():
+    """One deployed run produced EIGHT subtitle findings and the rule caught one.
+
+    `On-screen subtitles` matched because "subtitles" is in its label. The other
+    seven were labelled with the dialogue itself — `Oh, holy sh*t.`, `Alan!`,
+    `He's bald!` — and only their descriptions say "appears as a subtitle".
+    `is_own_content` checked its PHRASES against label+description but its
+    TOKENS against the label alone, so every one of them fell through: a box on
+    the subtitle, and a Parallel Search asking whether "Oh, holy sh*t." is a
+    registered trademark.
+    """
+    out = triage([_subtitle_line("Oh, holy sh*t.")])
+
+    assert out[0].own_content is True
+    assert box_at(out[0], 9.2) is None
+
+
+def test_an_ambiguous_word_in_a_description_is_not_evidence():
+    """The vocabulary holds `lower`, `third`, `super` and `bug`, and a
+    description is a whole sentence of ordinary English. Reading those tokens
+    anywhere but the label would call a poster on a lower shelf our own graphic
+    — so only the unambiguous ones (subtitle, caption, chyron, watermark) are
+    read from the description."""
+    out = triage([
+        _det("Movie poster", ElementType.TEXT, _ON_THE_HEATER,
+             "A poster on the lower third of the shelf, beside a bug zapper."),
+    ])
+
+    assert out[0].own_content is False
+
+
+def test_the_words_alone_are_not_enough():
+    """Dialogue quoted on a prop — a note, a headline — is not a subtitle just
+    because it is text. The description has to actually say what it is."""
+    out = triage([
+        _det("He's bald!", ElementType.TEXT, _ON_THE_HEATER,
+             "Handwritten on a note taped to the mirror."),
+    ])
+
+    assert out[0].own_content is False
+
+
+def test_routing_stops_searching_the_films_own_dialogue():
+    """The same fix, where the money is. A deployed run sent seven Parallel
+    Searches asking whether lines of its own dialogue were registered marks."""
+    from clearframe.knowledge import load_knowledge
+    from clearframe.models import ResearchTier
+    from clearframe.routing import route
+
+    el = triage([_subtitle_line("Alan!")])[0]
+    r = route(el, load_knowledge())
+
+    assert r.tier is ResearchTier.STATUTE
+    assert r.est_cost_usd == 0.0
