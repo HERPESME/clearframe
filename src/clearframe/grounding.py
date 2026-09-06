@@ -151,11 +151,16 @@ def elements_at(state, at_s: float) -> list:
     Only these are named to the model. Asked to place something that is not in
     the frame it will sometimes oblige, and asking costs a call. A finding whose
     timecodes were disowned has no instant to be at, so it is never named.
+
+    Nor is the production's own text. That saves a call, but the reason is that
+    a measured rectangle could otherwise land on a subtitle and be presented as
+    a located finding — and nothing about a subtitle needs locating.
     """
     return [
         el
         for el in state.elements
         if el.timing_reliable
+        and not getattr(el, "own_content", False)
         and any(r.start_s <= at_s <= r.end_s for r in el.time_ranges)
     ]
 
@@ -170,7 +175,7 @@ def plan_seconds(state) -> list[int]:
     """
     midpoints, filler = set(), set()
     for el in state.elements:
-        if not el.timing_reliable:
+        if not el.timing_reliable or getattr(el, "own_content", False):
             continue
         for r in el.time_ranges:
             midpoints.add(int((r.start_s + r.end_s) / 2))
@@ -245,6 +250,39 @@ async def measure_frame(footage, at_s: float, here: list, client) -> dict | None
 # already persisted it. The API passes the second kind: its own `_ground_second`
 # has to write the blob anyway, since a reviewer pausing on a cold frame must
 # leave a measurement behind for everyone else.
+def measure_instant(state, second: int) -> float:
+    """Which instant of this whole second to actually look at.
+
+    One rectangle is measured per second and then served for the entire second,
+    marked `grounded: true` — so it is drawn solid, as measured truth, not
+    dashed as an approximation. Measuring at `float(second)` therefore showed a
+    reviewer paused at 32.9s a box measured at 32.0s: up to a full second of
+    subject movement. On a 30fps close-up that is plainly visible, and it is the
+    residual error left over once the scan's union box is out of the picture.
+
+    The midpoint halves both the worst case and the average, for the same number
+    of calls and the same money.
+
+    Clamped into the part of the second an element is actually on screen, which
+    is not fussiness: an appearance running 4.0-4.2s is gone by 4.5, and a model
+    asked to place it there would correctly report nothing — spending the call
+    and leaving the second unmeasured. Only findings that will really be
+    measured get a vote, so a disowned clock or the production's own subtitles
+    cannot drag the instant somewhere useless.
+    """
+    lo, hi = float(second), float(second) + 1.0
+    spans = [
+        (max(lo, r.start_s), min(hi, r.end_s))
+        for el in state.elements
+        if el.timing_reliable and not getattr(el, "own_content", False)
+        for r in el.time_ranges
+        if r.start_s < hi and lo < r.end_s
+    ]
+    if not spans:
+        return lo
+    return (min(s for s, _ in spans) + max(e for _, e in spans)) / 2
+
+
 Measurer = Callable[[float, list], Awaitable[dict | None]]
 
 
@@ -306,7 +344,10 @@ async def warm(
             # separately for the same frame.
             if store.read(second) is not None:
                 return
-            at_s = float(second)
+            # The middle of the second, not its first frame: this one
+            # rectangle answers for the whole second and is presented as
+            # measured, so it should be measured where it is least wrong.
+            at_s = measure_instant(state, second)
             here = elements_at(state, at_s)
             if not here:
                 return

@@ -270,6 +270,11 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
   const boxesAt = (el: Element): BBox[] | null => {
     // Timecodes the scan cannot have measured place a box nowhere real.
     if (el.timing_reliable === false) return null;
+    // The film's own subtitles and supers. A live run drew seventeen boxes on
+    // them — over the very words they were describing — while the routing for
+    // the same element said "Own work — no third-party right implicated". The
+    // finding stays in the list and in the report; only the rectangle goes.
+    if (el.own_content === true) return null;
     const grounded = groundedBoxes(el);
     // Once a frame HAS been grounded its answer is the whole answer, including
     // "not in this frame". Falling back then would put the video pass's guess

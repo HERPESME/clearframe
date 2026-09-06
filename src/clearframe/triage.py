@@ -483,7 +483,30 @@ def triage(detections: list[DetectedElement]) -> list[TriagedElement]:
     out: list[TriagedElement] = []
     for group in groups:
         merged = _merge(group) if len(group) > 1 else group[0]
-        out.append(
-            TriagedElement(**merged.model_dump(), category=CATEGORY_RULES[merged.element_type])
-        )
+        category = CATEGORY_RULES[merged.element_type]
+        fields = merged.model_dump()
+        fields["own_content"] = _is_own_content(merged, category)
+        out.append(TriagedElement(**fields, category=category))
     return out
+
+
+def _is_own_content(element: DetectedElement, category: ClearanceCategory) -> bool:
+    """A graphic the production authored, rather than one the camera recorded.
+
+    Decided here because this is the module that decides what a finding IS, and
+    because it has to be settled before anything reads a box — `plan_seconds`
+    runs at triage, long before routing exists.
+
+    **Scoped to TEXT_ON_SCREEN, exactly as `_route_text` scopes it**, and that
+    is not caution for its own sake: the vocabulary behind `is_own_content`
+    holds `lower`, `third`, `super` and `bug`, which are ordinary words. Asking
+    it about every element type would quietly strip the rectangle off a
+    `LOCATION` called "Lower East Side". Keeping the scope identical to the one
+    already in production keeps the blast radius identical too — all this adds
+    is a second consequence for a classification that was already being made.
+    """
+    from clearframe.routing import is_own_content
+
+    return category is ClearanceCategory.TEXT_ON_SCREEN and is_own_content(
+        element.label, element.description
+    )

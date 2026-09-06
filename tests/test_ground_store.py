@@ -181,7 +181,9 @@ async def test_warming_measures_every_second_and_persists_each_one(tmp_path):
 
     progress = await warm(store, _state(), measure, cap=150)
 
-    assert sorted(asked) == [4.0, 5.0, 6.0, 7.0, 8.0]
+    # Midpoints, not first frames — see `measure_instant`. The last is
+    # clamped to the end of the appearance rather than running past it.
+    assert sorted(asked) == [4.5, 5.5, 6.5, 7.5, 8.0]
     assert progress["done"] == 5 and progress["running"] is False
     assert store.read(6) == _boxes()
     assert store.read_progress()["done"] == 5
@@ -213,7 +215,7 @@ async def test_one_failed_frame_does_not_stop_the_warm_up(tmp_path):
     store = GroundStore(LocalBlobStore(tmp_path / "b"), "p1", "v1")
 
     async def measure(at_s, here):
-        if at_s == 6.0:
+        if int(at_s) == 6:
             raise RuntimeError("the model said no")
         return _boxes()
 
@@ -355,4 +357,75 @@ async def test_the_warm_up_finishes_before_the_request_does(tmp_path, monkeypatc
     assert len(finished) == 5, (
         f"the run returned with {len(finished)}/5 frames measured; the rest "
         "would be frozen by the CPU throttle"
+    )
+
+
+# --- which INSTANT of a second gets measured ---------------------------------
+
+
+def test_a_second_is_measured_at_its_midpoint_not_its_first_frame():
+    """The box is served for a whole second, so measure the middle of it.
+
+    `warm` measured each whole second at exactly `float(second)` and the cache
+    then answered every request in `[N, N+1)` with that rectangle — marked
+    `grounded: true`, so drawn solid rather than dashed. A reviewer paused at
+    32.9s was shown a box measured at 32.0s: up to a full second of subject
+    movement, presented as measured truth. On a 30fps close-up that is visible.
+
+    The midpoint halves both the worst case and the average, for the same number
+    of calls and the same money.
+    """
+    from clearframe.grounding import measure_instant
+
+    assert measure_instant(_state(), 5) == pytest.approx(5.5)
+
+
+def test_the_instant_is_clamped_into_the_part_actually_on_screen():
+    """A naive `second + 0.5` measures a moment the element has already left.
+
+    An appearance running 4.0-4.2s is gone by 4.5, and the model would correctly
+    report nothing there — costing a call and leaving the second unmeasured.
+    """
+    from clearframe.grounding import measure_instant
+
+    state = _state()
+    state.elements[0].time_ranges = [TimeRange(start_s=4.0, end_s=4.2)]
+
+    assert measure_instant(state, 4) == pytest.approx(4.1)
+
+
+def test_a_second_covered_by_nothing_falls_back_to_its_start():
+    """No appearance means no midpoint to take. `warm` skips these anyway —
+    this only has to not raise."""
+    from clearframe.grounding import measure_instant
+
+    assert measure_instant(_state(), 30) == pytest.approx(30.0)
+
+
+def test_disowned_and_own_content_do_not_drag_the_instant():
+    """Only findings that will actually be measured may decide where to look."""
+    from clearframe.grounding import measure_instant
+
+    state = _state()
+    # the disowned element sits at 1.0-2.0; it must not make second 1 measurable
+    assert measure_instant(state, 1) == pytest.approx(1.0)
+
+
+@pytest.mark.asyncio
+async def test_warming_measures_at_the_midpoint(tmp_path):
+    """The helper is wired in, not merely defined."""
+    from clearframe.grounding import GroundStore, warm
+
+    store = GroundStore(LocalBlobStore(tmp_path / "b"), "p1", "v1")
+    asked: list[float] = []
+
+    async def measure(at_s, here):
+        asked.append(at_s)
+        return _boxes()
+
+    await warm(store, _state(), measure, cap=150)
+
+    assert sorted(asked) == [4.5, 5.5, 6.5, 7.5, 8.0], (
+        f"measured at {sorted(asked)}; the last is clamped to the end of the "
+        "appearance, the rest are midpoints"
     )

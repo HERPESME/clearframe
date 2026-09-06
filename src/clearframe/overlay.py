@@ -141,6 +141,14 @@ def box_at(element: DetectedElement, at_s: float) -> BBox | None:
     # finding is kept; the rectangle is not drawn.
     if not element.timing_reliable:
         return None
+    # The production's own subtitles, captions and supers. Same reasoning as
+    # the whole-frame guard below: a box exists so a reviewer can find
+    # something they must act on, and the route for these already says "No
+    # action. Recorded so the dossier is complete, not because it is a risk."
+    # A live run drew seventeen of them over a film's own subtitles, on top of
+    # the words they were describing.
+    if getattr(element, "own_content", False):
+        return None
     appearance = _containing(element, at_s)
     if appearance is None:
         return None
