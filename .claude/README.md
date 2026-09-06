@@ -5,7 +5,7 @@ project context, conventions, the status tracker vs the hackathon resources guid
 and the agreed roadmap. Read it first — especially "Live-mode gotchas" and
 "Environment facts", which record what already went wrong so it doesn't twice.
 
-Current shape: a deterministic **13-stage** pipeline, **702 tests**, a 7-section
+Current shape: a deterministic **13-stage** pipeline, **715 tests**, a 7-section
 smoke script, three transports (CLI / web / MCP with 11 tools), and two Cloud Run
 services. Live validation, MCP, webapp expansion, audio fingerprinting, two-phase
 reporting and the escalation ladder are DONE. Open fronts: **recall** (~60% per
