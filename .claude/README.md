@@ -5,12 +5,13 @@ project context, conventions, the status tracker vs the hackathon resources guid
 and the agreed roadmap. Read it first — especially "Live-mode gotchas" and
 "Environment facts", which record what already went wrong so it doesn't twice.
 
-Current shape: a deterministic **13-stage** pipeline, **611 tests**, a 7-section
+Current shape: a deterministic **13-stage** pipeline, **674 tests**, a 7-section
 smoke script, three transports (CLI / web / MCP with 11 tools), and two Cloud Run
 services. Live validation, MCP, webapp expansion, audio fingerprinting, two-phase
 reporting and the escalation ladder are DONE. Open fronts: **recall** (~60% per
-pass, and it is the product's central claim), scene chunking for feature-length
-footage, and cloud wiring (Firestore/Pub-Sub/IAP).
+pass, and it is the product's central claim — three passes and detector
+promotion now ship, but neither has been measured live), scene chunking for
+feature-length footage, and cloud wiring (Firestore/Pub-Sub/IAP).
 
 **Before claiming a UI change works, open the app.** A whole class of defects
 this project has shipped — transposed bounding boxes, an upload endpoint that
@@ -18,10 +19,12 @@ this project has shipped — transposed bounding boxes, an upload endpoint that
 smoke script that killed the user's dev server — passed a green suite and were
 found by a human clicking. `CLAUDE.md` → "UI-mode gotchas" lists them.
 
-Where to pick up (as of Aug 23 evening): the backend and the built SPA are in
-sync, everything is committed, and the open thread is that **one finding can
-only draw one box per frame** — `parse_ground_payload` discards extra matches,
-so a mark in two places shows one. See `CLAUDE.md` -> NOT DONE.
+Where to pick up (as of Sep 6): the backend and the built SPA are in sync and
+everything is committed. Phase 13 closed the box path — the merge was destroying
+per-shot rectangles, the ground cache was serving the previous film's boxes, and
+one finding can now draw several. The open thread is **recall measured on live
+footage**: three passes and Video Intelligence promotion ship untested against
+real film, and the 60% figure predates both. See `CLAUDE.md` -> NOT DONE.
 
 **Box accuracy is solved; box DELIVERY was the problem.** Grounding a still is
 accurate (verified by drawing rectangles onto real frames on three separate
