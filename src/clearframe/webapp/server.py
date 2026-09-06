@@ -796,6 +796,18 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
         EventLog.clear(backends.blobs, pid)
         run_log = EventLog(backends.blobs, pid)
         publish = _listener_for(pid, run_log)
+        # Open the log BEFORE responding, so the stream exists the moment the
+        # client asks for it.
+        #
+        # In one process this was free: the event queue was created here,
+        # synchronously, and the endpoint could never 404 for a run that had
+        # just started. With the work queued to another container the first real
+        # event is several seconds away — dispatch plus a 4Gi cold start — and
+        # the client opens its EventSource the instant this response lands. It
+        # got a 404, and `MissionControl` closes on error and never retries, so
+        # the analysis ran to completion behind a screen that said "Standing
+        # by". Seen on the deployed site: one 404, no second attempt.
+        run_log.append({"type": "queued", "production_id": pid})
         # The row has to exist before the run starts: it is what the dashboard
         # lists, what carries the owner, and what the heartbeat beats against.
         index.put(
