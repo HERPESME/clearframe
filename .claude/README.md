@@ -5,7 +5,7 @@ project context, conventions, the status tracker vs the hackathon resources guid
 and the agreed roadmap. Read it first — especially "Live-mode gotchas" and
 "Environment facts", which record what already went wrong so it doesn't twice.
 
-Current shape: a deterministic **13-stage** pipeline, **674 tests**, a 7-section
+Current shape: a deterministic **13-stage** pipeline, **702 tests**, a 7-section
 smoke script, three transports (CLI / web / MCP with 11 tools), and two Cloud Run
 services. Live validation, MCP, webapp expansion, audio fingerprinting, two-phase
 reporting and the escalation ladder are DONE. Open fronts: **recall** (~60% per
@@ -18,6 +18,12 @@ this project has shipped — transposed bounding boxes, an upload endpoint that
 500'd on a NameError, a page refresh that appeared to delete the analysis, a
 smoke script that killed the user's dev server — passed a green suite and were
 found by a human clicking. `CLAUDE.md` → "UI-mode gotchas" lists them.
+
+Authentication is opt-in and default OFF (`CLEARFRAME_AUTH=firebase`). That is
+deliberate: it keeps a credential-free suite and smoke script green and the
+public demo reachable by a judge with no account. Before it, the role was a
+header the browser set — checked on two of seventeen endpoints, while every
+endpoint that spent money had no check at all.
 
 Where to pick up (as of Sep 6): the backend and the built SPA are in sync and
 everything is committed. Phase 13 closed the box path — the merge was destroying
