@@ -1,6 +1,16 @@
-# ClearFrame CI/CD — build once, deploy webapp + MCP to Cloud Run (scale-to-zero).
+# ClearFrame CI/CD — build once, deploy three services to Cloud Run.
 # Runs on every push to main via a Cloud Build GitHub trigger, or manually:
 #   gcloud builds submit --config cloudbuild.yaml .
+#
+# One image, three entrypoints. `clearframe` serves the interface and stays
+# responsive; `clearframe-worker` runs analyses one at a time and is where all
+# the expensive work happens; `clearframe-mcp` exposes the pipeline as MCP
+# tools. Splitting them is not tidiness — an analysis is three concurrent Gemini
+# video passes plus research plus up to 150 grounding calls, and on one service
+# that competes with the requests drawing the review screen.
+#
+# Deployed in DEMO mode by default. Live keys behind an unauthenticated URL is
+# open spend; see .claude/skills/deploy-cloud for the flip.
 steps:
   - id: build
     name: gcr.io/cloud-builders/docker
@@ -16,6 +26,7 @@ steps:
     name: gcr.io/cloud-builders/docker
     args: [push, --all-tags, "${_REGION}-docker.pkg.dev/$PROJECT_ID/clearframe/app"]
 
+  # The interface. Small, many requests at once, never doing the heavy work.
   - id: deploy-webapp
     name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
     entrypoint: gcloud
@@ -31,9 +42,49 @@ steps:
       - --cpu=1
       - --memory=512Mi
       - --concurrency=80
-      - --set-env-vars=CLEARFRAME_MODE=demo
+      # 900s, not the 300s default. The event stream is a long-lived response
+      # and a quiet stage can run for minutes; at the default it was cut mid-run
+      # and Mission Control froze with no error, because EventSource retry is
+      # deliberately disabled client-side.
+      - --timeout=900
+      - --execution-environment=gen2
+      - --update-env-vars=CLEARFRAME_MODE=demo
       - --command=python
       - --args=-m,clearframe,serve,--host,0.0.0.0,--port,8080,--out,/tmp/out
+
+  # The heavy container. One analysis per instance, at most five at once.
+  - id: deploy-worker
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - clearframe-worker
+      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/clearframe/app:$BUILD_ID
+      - --region=${_REGION}
+      # Reachable only by the queue's service account. The in-app OIDC check is
+      # defence in depth; THIS is the gate.
+      - --no-allow-unauthenticated
+      - --min-instances=0
+      # One request per instance × five instances = five concurrent analyses,
+      # which is the same number the Cloud Tasks queue is configured to
+      # dispatch. The cap is a spend ceiling, not a throughput target.
+      - --concurrency=1
+      - --max-instances=5
+      - --cpu=2
+      # 4Gi because the scan still inlines the whole mp4 for Gemini
+      # (`Part.from_bytes(path.read_bytes())`) against a 512MB upload cap. Drop
+      # this only after the Files API work, not before.
+      - --memory=4Gi
+      # 1800s: the ceiling Cloud Tasks will hold an HTTP task open for is 30
+      # minutes, so a longer timeout here could not be used anyway. A run that
+      # exceeds it is retried and RESUMES — every stage persists — rather than
+      # restarting and paying for the scan twice.
+      - --timeout=1800
+      - --execution-environment=gen2
+      - --update-env-vars=CLEARFRAME_MODE=demo
+      - --command=python
+      - --args=-m,clearframe,worker,--host,0.0.0.0,--port,8080,--out,/tmp/out
 
   - id: deploy-mcp
     name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
@@ -49,7 +100,9 @@ steps:
       - --max-instances=1
       - --cpu=1
       - --memory=512Mi
-      - --set-env-vars=CLEARFRAME_MODE=demo
+      - --timeout=900
+      - --execution-environment=gen2
+      - --update-env-vars=CLEARFRAME_MODE=demo
       - --command=python
       - --args=-m,clearframe.mcp,--transport,http,--port,8080,--out,/tmp/out
 

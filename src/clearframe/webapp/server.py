@@ -722,6 +722,15 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
 
         ctx = build_context(cfg.model_copy(update={"mode": "live"}), production, out_root)
         ctx.store = store
+        # Persist the production BEFORE handing the job over.
+        #
+        # In-process this was unnecessary: the run held the state in memory and
+        # the first stage wrote it. A worker in another container has no memory
+        # to share — it is given a production id and loads what is on disk — so
+        # without this it answers "no such production" and acks a job that never
+        # runs. Found by actually running the split topology; no unit test could
+        # see it, because they all write the state file themselves.
+        store.save(ctx.state)
         EventLog.clear(backends.blobs, pid)
         run_log = EventLog(backends.blobs, pid)
         publish = _listener_for(pid, run_log)

@@ -151,6 +151,23 @@ def _cmd_serve(args) -> int:
     return 0
 
 
+def _cmd_worker(args) -> int:
+    """The heavy container. Same image as `serve`, different entrypoint.
+
+    Point the API at it with `CLEARFRAME_WORKER_URL` and the two-service
+    topology runs on a laptop with no queue and no GCP account — which is where
+    the parts that are hard to get right (progress crossing a process boundary,
+    a lease deciding what "running" means, resume on retry) are cheap to debug.
+    """
+    import uvicorn
+
+    from clearframe.worker import create_worker_app
+
+    app = create_worker_app(out_root=args.out, max_concurrent=args.max_concurrent)
+    uvicorn.run(app, host=args.host, port=args.port)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="clearframe")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -216,6 +233,22 @@ def main(argv: list[str] | None = None) -> int:
     serve.add_argument("--host", default="127.0.0.1")
     serve.add_argument("--port", type=int, default=8000)
     serve.set_defaults(func=_cmd_serve)
+
+    worker = sub.add_parser(
+        "worker",
+        help="Run analyses handed over by a queue (the heavy container)",
+    )
+    worker.add_argument("--out", type=Path, default=Path("out"))
+    worker.add_argument("--host", default="127.0.0.1")
+    worker.add_argument("--port", type=int, default=8001)
+    worker.add_argument(
+        "--max-concurrent",
+        type=int,
+        default=5,
+        help="Analyses at once. In Cloud Run the queue and --concurrency=1 "
+        "decide this; the flag binds when one worker serves the whole load.",
+    )
+    worker.set_defaults(func=_cmd_worker)
 
     args = parser.parse_args(argv)
     if args.command == "run" and not (args.demo or args.live):
