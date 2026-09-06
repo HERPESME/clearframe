@@ -56,7 +56,20 @@ def test_the_newest_production_comes_first(client, tmp_path):
     assert rows[0]["id"] == "upload", [r["id"] for r in rows]
 
 
-def test_a_partial_run_is_flagged_running(client, tmp_path):
+def test_a_partial_run_is_distinguishable_from_a_finished_one(client, tmp_path):
+    """It used to assert `running is True` here, and that was the bug.
+
+    "Running" was read from the persisted stage status alone, so a run whose
+    process had died — nothing in flight, nobody working on it — claimed to be
+    running for ever. The client restores the newest running production and
+    polls it every three seconds, so a reviewer was returned to a dead analysis
+    on every load and the upload form was overwritten seconds after they opened
+    it. The state on disk cannot tell you whether work is happening; only the
+    process doing the work can.
+
+    Unfinished is still not finished, so it is reported as INTERRUPTED rather
+    than passed over in silence.
+    """
     from clearframe.store import LocalJsonStore
 
     store = LocalJsonStore(tmp_path / "state")
@@ -66,4 +79,5 @@ def test_a_partial_run_is_flagged_running(client, tmp_path):
     store.save(partial)
 
     row = next(r for r in client.get("/api/productions").json() if r["id"] == "midrun")
-    assert row["running"] is True
+    assert row["running"] is False
+    assert row["interrupted"] is True

@@ -169,10 +169,27 @@ _ANONYMOUS = {
 }
 
 # Graphics the production made itself. Its own copyright; nothing to clear.
+#
+# Split in two, because the scan does not reliably put the giveaway word in the
+# LABEL. A deployed run produced eight subtitle findings: one labelled
+# "On-screen subtitles" and seven labelled with the dialogue itself — `Alan!`,
+# `He's bald!`, `Oh, holy sh*t.` — whose only clue is the sentence underneath,
+# "The text '…' appears as a subtitle at the bottom of the frame." Reading the
+# label alone caught one of eight, drew boxes on the other seven, and sent seven
+# Parallel Searches asking whether lines of the film's own dialogue were
+# registered marks.
+#
+# These are safe to read from the description as well as the label. No ordinary
+# object is described as a subtitle or a chyron.
+_OWN_CONTENT_ANYWHERE = {
+    "subtitle", "subtitles", "caption", "captions", "chyron", "watermark",
+    "titlecard", "supers",
+}
+# These are only read from the LABEL, because a description is a whole sentence
+# of ordinary English: a poster on a "lower" shelf, a "super" soaker, a "bug"
+# on the windscreen, the "credits" on a bill.
 _OWN_CONTENT = {
-    "overlay", "overlays", "caption", "captions", "subtitle", "subtitles",
-    "credits", "chyron", "watermark", "lower", "third", "supers", "super",
-    "titlecard", "slate", "bug",
+    "overlay", "overlays", "credits", "lower", "third", "super", "slate", "bug",
 }
 _OWN_CONTENT_PHRASES = (
     "title card", "end card", "thank you", "call to action", "subscribe",
@@ -305,8 +322,18 @@ def is_de_minimis(p: Prominence) -> bool:
 
 
 def is_own_content(label: str, description: str = "") -> bool:
+    """Did the production author this graphic, or did the camera record it?
+
+    The description is read for the unambiguous words and the label for the
+    ambiguous ones. That asymmetry is the whole point: the scan writes the
+    giveaway ("appears as a subtitle") in the sentence far more reliably than in
+    the label, but a sentence is also where an ordinary word like "lower" or
+    "bug" is most likely to mean something else entirely.
+    """
     haystack = f"{label} {description}".casefold()
     if any(phrase in haystack for phrase in _OWN_CONTENT_PHRASES):
+        return True
+    if _any_token(f"{label} {description}", _OWN_CONTENT_ANYWHERE):
         return True
     return _any_token(label, _OWN_CONTENT)
 

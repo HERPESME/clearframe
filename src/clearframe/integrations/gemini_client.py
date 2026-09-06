@@ -11,7 +11,7 @@ from typing import Protocol
 
 from pydantic import BaseModel, ValidationError
 
-from clearframe.matching import labels_match
+from clearframe.matching import labels_match, tokens
 from clearframe.overlay import locates
 from clearframe.models import (
     BBox,
@@ -184,14 +184,30 @@ SCRIPT_RESPONSE_SCHEMA: dict = {
     "required": ["mentions"],
 }
 
+# The auditor answers with the same schema as the scan, but "use the same JSON
+# format" was carrying all of the weight: none of the fields that decide how a
+# finding is GOVERNED were named here, and the schema makes them optional. So
+# the findings unique to this pass — the whole reason it runs — arrived with
+# siting "unknown" and no depiction, which silently disables freedom of
+# panorama and the adverse-depiction escalation for exactly them. A prompt is
+# not a contract, but an instruction that was never given cannot be followed.
 AUDIT_PROMPT_TEMPLATE = (
     "You are the studio's E&O clearance AUDITOR, reviewing another coordinator's "
     "work on this footage. The first pass found these elements: {found}. "
     "Watch the footage again and report ONLY clearable elements the first pass "
     "MISSED — background screens playing copyrighted content, reflections, "
     "quiet audio, partially visible artwork, signage, tattoos, or faces they "
-    "overlooked. Use the same JSON format. If nothing was missed, return an "
-    "empty elements list. Do not repeat elements already found."
+    "overlooked. Use the same JSON format, and fill it in completely for every "
+    "element you add: every time range it appears in, each with its own bbox "
+    "measured where the element sits during THAT appearance (named edges ymin, "
+    "xmin, ymax, xmax, 0-1000); siting for ARTWORK and LOCATION; depiction for "
+    "brands, businesses, places and people; and FACE only for a real person, "
+    "CHARACTER for a drawn or animated one. Also report any exposures the first "
+    "pass missed (minors, personal data, documents, screens, plates), any "
+    "unscanned_ranges you could not analyse, and source_work only if you "
+    "recognise the footage as an existing published work it did not name. "
+    "If nothing was missed, return an empty elements list. Do not repeat "
+    "elements already found."
 )
 
 SCAN_RESPONSE_SCHEMA: dict = {
@@ -470,11 +486,13 @@ GROUND_PROMPT = (
     "known to appear somewhere in the footage:\n{labels}\n\n"
     "For each one that is visible IN THIS IMAGE, return its bounding box as an "
     "object with named edges ymin, xmin, ymax, xmax, normalised 0-1000, "
-    "measured on this frame. Use the label exactly as given. Omit anything you "
-    "cannot see here — a missing entry is correct and expected, since these "
-    "elements appear at different points in the film. Do NOT report anything "
-    "that is not on the list: this pass locates known elements, it does not "
-    "look for new ones."
+    "measured on this frame. Use the label exactly as given. If one element is "
+    "visible in more than one place in this frame — the same mark on a cap and "
+    "again on a box — return one entry per place, repeating the label. Omit "
+    "anything you cannot see here — a missing entry is correct and expected, "
+    "since these elements appear at different points in the film. Do NOT report "
+    "anything that is not on the list: this pass locates known elements, it "
+    "does not look for new ones."
 )
 
 GROUND_RESPONSE_SCHEMA = {
@@ -505,7 +523,40 @@ GROUND_RESPONSE_SCHEMA = {
 }
 
 
-def parse_ground_payload(payload: dict, known: list[str]) -> dict[str, BBox]:
+# One label, several rectangles, because one mark can be in two places at
+# once. Past this many the model is repeating itself rather than finding more:
+# a frame does not hold eight distinct sightings of one trademark.
+MAX_BOXES_PER_LABEL = 8
+
+
+def _best_known(label: str, known: list[str]) -> str | None:
+    """Which known label this answer is about.
+
+    Exact first. `labels_match` is deliberately fuzzy — the model rarely echoes
+    a label verbatim, and "Nike swoosh on the hoodie" is "Nike hoodie swoosh" —
+    but fuzziness cuts both ways: "Pizza Hut" also matches "Pizza Hut Delivery
+    Scooter", and taking the first match meant the answer went to whichever the
+    state happened to list first. Among fuzzy candidates the strongest token
+    agreement wins, so the plainer label beats the one carrying extra words.
+    """
+    lowered = label.casefold().strip()
+    for k in known:
+        if k.casefold().strip() == lowered:
+            return k
+    best, best_score = None, 0.0
+    for k in known:
+        if not labels_match(label, k):
+            continue
+        a, b = tokens(label), tokens(k)
+        if not a or not b:
+            continue
+        score = len(a & b) / min(len(a), len(b))
+        if score > best_score:
+            best, best_score = k, score
+    return best
+
+
+def parse_ground_payload(payload: dict, known: list[str]) -> dict[str, list[BBox]]:
     """Boxes for labels the scan already found, keyed by the scan's own label.
 
     Anything the model names that is not on the known list is dropped, and that
@@ -514,30 +565,30 @@ def parse_ground_payload(payload: dict, known: list[str]) -> dict[str, BBox]:
     and routing would be a second unaudited detector wearing the first one's
     clothes.
 
-    Labels are matched with `labels_match` because the model rarely echoes one
-    verbatim — "Nike swoosh on the hoodie" is the same finding as "Nike hoodie
-    swoosh", and an exact-string check would silently return nothing.
+    A label can carry several boxes. One trademark in two places — Pizza Hut on
+    the delivery cap and again on the box — is one finding and one clearance,
+    but it is two rectangles, and a reviewer cannot check a placement they are
+    not shown. Keeping only the first was correct and incomplete.
 
-    A box around the whole frame is dropped as well, and for the same reason
-    the unknown labels are: it is not an answer to the question asked. The
-    model returns one reliably for people — {0, 0, 1, 1} — while placing a
-    wristwatch in the same frame to the pixel. Dropping it here rather than in
-    the player keeps grounding's contract intact: what comes back is what was
-    located.
+    A box around the whole frame is dropped, for the same reason the unknown
+    labels are: it is not an answer to the question asked. The model returns
+    one reliably for people — {0, 0, 1, 1} — while placing a wristwatch in the
+    same frame to the pixel. The guard applies per rectangle, so an unusable
+    box costs only itself and never the label's other sightings.
     """
-    out: dict[str, BBox] = {}
+    out: dict[str, list[BBox]] = {}
     for entry in payload.get("found") or []:
         if not isinstance(entry, dict):
             continue
         label = (entry.get("label") or "").strip()
         if not label:
             continue
-        match = next((k for k in known if labels_match(label, k)), None)
-        if match is None or match in out:
+        match = _best_known(label, known)
+        if match is None or len(out.get(match, ())) >= MAX_BOXES_PER_LABEL:
             continue
         box = parse_bbox(entry.get("bbox"))
         if locates(box):
-            out[match] = box
+            out.setdefault(match, []).append(box)
     return out
 
 

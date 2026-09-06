@@ -88,6 +88,18 @@ class LiveGeminiClient:
             lambda: _default_client_factory(project, location)
         )
         self._client = None
+        # Which model actually served a call on this instance. Remembered so a
+        # deterministic 404 is paid for once rather than per call.
+        self._serving_model: str | None = None
+        # The footage, read once. The scan passes and the auditor all send the
+        # same file; holding one Part means one read and one copy rather than
+        # three or four of a file that may be hundreds of megabytes.
+        self._video_parts: dict[str, object] = {}
+
+    def _video_part_cached(self, footage_uri: str):
+        if footage_uri not in self._video_parts:
+            self._video_parts[footage_uri] = _video_part(footage_uri)
+        return self._video_parts[footage_uri]
 
     def _client_or_create(self):
         if self._client is None:
@@ -126,11 +138,19 @@ class LiveGeminiClient:
         from_config = self._scan_config(schema)
 
         client = self._client_or_create()
-        models_to_try = [self.model, self.fallback_model]
+        # Whichever model answered last time, first. A model that 404s in a
+        # project 404s deterministically — `gemini-3-pro-preview` does exactly
+        # that here, which is why the fallback is load-bearing — so re-deriving
+        # it costs a wasted round trip on every call. That was invisible while
+        # the client was per-run and became 150 wasted calls once pre-grounding
+        # started measuring a clip's worth of frames.
+        models_to_try = [self._serving_model or self.model, self.fallback_model]
         last_error: Exception | None = None
-        for model in models_to_try:
+        for model in dict.fromkeys(models_to_try):
             try:
-                return self._call_with_retry(client, model, contents, from_config)
+                answer = self._call_with_retry(client, model, contents, from_config)
+                self._serving_model = model
+                return answer
             except Exception as exc:  # model-not-found falls through to fallback
                 if "not found" in str(exc).lower() or "404" in str(exc):
                     last_error = exc
@@ -242,7 +262,13 @@ class LiveGeminiClient:
         return await asyncio.to_thread(_run)
 
     async def _scan_with_prompt(self, footage_uri: str, prompt: str) -> ScanResult:
-        video = _video_part(footage_uri)
+        # In a thread, and memoized. `_video_part` reads the entire mp4 into
+        # memory, and this sat in the coroutine body — outside the `to_thread`
+        # below that carefully offloads the SDK call — so the read blocked the
+        # event loop while the call it fed did not. With concurrent passes plus
+        # the auditor that is three or four full reads of the same file per run,
+        # every one of them a stall and a second copy in memory.
+        video = await asyncio.to_thread(self._video_part_cached, footage_uri)
         base_contents = [video, prompt]
 
         def attempt(contents) -> tuple[ScanResult | None, str]:

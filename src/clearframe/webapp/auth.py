@@ -1,0 +1,241 @@
+"""Who is signed in, and what they are allowed to do.
+
+Before this, the role was a string the browser chose for itself. `X-ClearFrame-
+Role: legal` was checked on two of seventeen endpoints, and `scripts/smoke.sh`
+demonstrates the bypass as its happy path — it gets a 403 as `editor`, changes
+one header value, and records every decision. Meanwhile the endpoints that
+actually SPEND MONEY had no check at all: the upload that runs three Gemini
+video passes and up to twenty-five Parallel Task runs, the grounding calls, the
+freshness search, the monitors the dossier creates.
+
+Two design rules, both load-bearing:
+
+**Opt-in.** With `CLEARFRAME_AUTH` unset nothing here engages and the app
+behaves exactly as it always has. That is not timidity — it is what keeps a
+credential-free test suite and smoke script green, and keeps the public demo
+reachable by a judge who has no account and should not need one.
+
+**One seam.** `verify_token` is the only function that talks to Google, so
+every test runs with no network and no credentials by replacing it.
+
+The ID token rides in an HttpOnly cookie rather than an Authorization header,
+because three things the player depends on cannot send headers at all:
+`EventSource` for the pipeline stream, `<video src>` for the footage, and the
+`<a href>` that downloads the dossier. A scheme that only worked for `fetch`
+would lock the reviewer out of the video.
+
+Deliberately NOT a Firebase session cookie. `create_session_cookie` needs
+Identity Toolkit signing rights that may not be present under a user-account
+ADC, and discovering that days before a deadline is a bad trade. The ID token
+is verified in full on every request — signature, issuer, audience, expiry —
+and the client refreshes it. Session cookies are the hardening upgrade.
+"""
+
+import json
+import os
+
+from pydantic import BaseModel
+
+# The cookie the browser sends back on every request, including the ones that
+# cannot set headers.
+SESSION_COOKIE = "clearframe_session"
+
+# What an authenticated stranger gets. `editor` is the role that can look at
+# everything and decide nothing, which is the only safe default: being signed
+# in is not the same as being counsel.
+DEFAULT_ROLE = "editor"
+
+
+class AuthUser(BaseModel):
+    uid: str
+    email: str | None = None
+    name: str | None = None
+    role: str = DEFAULT_ROLE
+    # Did the provider confirm this address belongs to them? Google sign-in
+    # always has; email/password has not until the user clicks the link.
+    email_verified: bool = False
+
+    @property
+    def actor(self) -> str:
+        """What the audit trail records.
+
+        `Decision.reviewer` used to be the role word, so an E&O dossier said
+        that "legal" signed off a clearance decision. A job title cannot sign
+        anything. Email first because it is the identity a studio recognises.
+
+        **An unverified address says so.** Anyone can sign up with any email and
+        — on an open-roles deployment — call themselves `legal`, so a bare
+        address in an E&O audit trail would be provenance the system never
+        established. Recording `someone@example.com (unverified)` costs nothing
+        and stops the report claiming more than it knows; a Google sign-in, or
+        anyone who has clicked the link, reads clean.
+
+        The same reasoning as the `chosen` label on a self-selected role: the
+        problem is never that the fact is weak, it is presenting a weak fact as
+        a strong one.
+        """
+        if not self.email:
+            return self.uid
+        return self.email if self.email_verified else f"{self.email} (unverified)"
+
+
+def auth_enabled(env=None) -> bool:
+    env = os.environ if env is None else env
+    return (env.get("CLEARFRAME_AUTH") or "").strip().lower() == "firebase"
+
+
+def open_roles(env=None) -> bool:
+    """May a signed-in visitor choose which role to act in?
+
+    Granting a role by editing an allowlist is right for a production and
+    useless for a public demo. Someone opening the deployed URL cannot email
+    the author and wait to be made `legal`, and an app that shows them a
+    read-only view of every interesting control has not really been seen.
+
+    So selection is a MODE and never a default. Off — which is what you get
+    unless this is set — the role comes from the verified user and the header
+    is not evidence. On, anyone signed in may act in any role, and the UI has
+    to say so, because a self-selected role presented as governance is worse
+    than no governance at all.
+
+    Two things do not change when it is on: you still have to sign in, and the
+    decision is still recorded against the verified email of whoever pressed
+    the button. Choosing a role is not inventing a person.
+    """
+    env = os.environ if env is None else env
+    return (env.get("CLEARFRAME_OPEN_ROLES") or "").strip().lower() in {
+        "1", "true", "yes", "on",
+    }
+
+
+def firebase_web_config(env=None) -> dict:
+    """The public client config, served from env rather than committed.
+
+    These values are public by design — they identify the project, they do not
+    authorise anything. Kept out of the repo anyway because the GCP project id
+    is one of the things to redact before this goes public.
+    """
+    env = os.environ if env is None else env
+    return {
+        "apiKey": env.get("FIREBASE_API_KEY", ""),
+        "authDomain": env.get("FIREBASE_AUTH_DOMAIN", ""),
+        "projectId": env.get("FIREBASE_PROJECT_ID") or env.get("GOOGLE_CLOUD_PROJECT", ""),
+        "appId": env.get("FIREBASE_APP_ID", ""),
+    }
+
+
+def _role_map(env=None) -> dict[str, str]:
+    """email -> role, from `CLEARFRAME_ROLE_MAP` as JSON.
+
+    Custom claims are the better home for this, but setting one needs an admin
+    script and a deploy. An allowlist lets a production name its counsel in an
+    environment variable, which is enough to run a real review today.
+    """
+    env = os.environ if env is None else env
+    raw = env.get("CLEARFRAME_ROLE_MAP")
+    if not raw:
+        return {}
+    try:
+        parsed = json.loads(raw)
+    except ValueError:
+        return {}
+    if not isinstance(parsed, dict):
+        return {}
+    return {str(k).strip().lower(): str(v).strip().lower() for k, v in parsed.items()}
+
+
+def verify_token(raw: str) -> dict:
+    """Verify a Firebase ID token and return its claims. The only seam.
+
+    Imported lazily so `firebase-admin` stays an optional extra: the deployed
+    demo container installs base dependencies only and has no Google packages
+    in it at all.
+
+    Known and accepted: this checks the signature, issuer, audience and expiry
+    — not revocation. A user deleted or disabled in the Firebase console keeps
+    access until their token expires, up to an hour. Observed directly while
+    testing: a browser holding the cookie of an account deleted moments before
+    walked straight past the gate. `check_revoked=True` closes it and costs a
+    network round trip on EVERY request, which this middleware makes on every
+    call including the media and grounding ones. If that hour ever matters,
+    the fix is revocation checking plus a short-lived cache of the result, not
+    turning the flag on as it stands.
+    """
+    import firebase_admin
+    from firebase_admin import auth as fb_auth
+
+    if not firebase_admin._apps:
+        firebase_admin.initialize_app()
+    return fb_auth.verify_id_token(raw)
+
+
+def user_from_token(raw: str, env=None) -> AuthUser:
+    """Claims -> user. Raises whatever `verify_token` raises on a bad token."""
+    claims = verify_token(raw)
+    email = claims.get("email")
+    # Custom claim first (it travels with the account), then the allowlist,
+    # then the least-privileged default. Never the caller's own assertion.
+    role = (claims.get("role") or "").strip().lower()
+    if not role and email:
+        role = _role_map(env).get(email.strip().lower(), "")
+    return AuthUser(
+        uid=claims.get("uid") or claims.get("sub") or "",
+        email=email,
+        name=claims.get("name"),
+        role=role or DEFAULT_ROLE,
+        email_verified=bool(claims.get("email_verified")),
+    )
+
+
+def user_from_request(request, env=None) -> AuthUser | None:
+    """The signed-in user for this request, or None."""
+    raw = request.cookies.get(SESSION_COOKIE)
+    if not raw:
+        return None
+    try:
+        return user_from_token(raw, env)
+    except Exception:
+        # An expired or malformed token is not an error to report, it is simply
+        # not a session. The client refreshes and tries again.
+        return None
+
+
+async def user_from_token_async(raw: str, env=None) -> AuthUser | None:
+    """`user_from_token`, off the event loop, returning None on a bad token.
+
+    `verify_token` fetches Google's signing certificates when its cache is cold
+    and then verifies an RSA signature — network and CPU, both synchronous. It
+    was called from an `async def` middleware on every single request, so the
+    gate added to protect the expensive endpoints became a serialiser in front
+    of all of them: one slow certificate fetch stalls every request in flight on
+    a service deployed with one CPU and a concurrency of eighty.
+    """
+    import asyncio
+
+    try:
+        return await asyncio.to_thread(user_from_token, raw, env)
+    except Exception:
+        return None
+
+
+async def user_from_request_async(request, env=None) -> AuthUser | None:
+    """The signed-in user for this request, without holding the loop."""
+    raw = request.cookies.get(SESSION_COOKIE)
+    if not raw:
+        return None
+    return await user_from_token_async(raw, env)
+
+
+# Paths that must answer before anyone can sign in. A login page that requires
+# a login cannot be used, and `/api/meta` is how the client learns whether it
+# needs one at all. Webhooks are machine callers with their own secret.
+OPEN_PREFIXES = ("/api/meta", "/api/auth/", "/api/webhooks/")
+
+
+def is_open(path: str) -> bool:
+    return any(path.startswith(p) for p in OPEN_PREFIXES)
+
+
+def webhook_secret(env=None) -> str:
+    env = os.environ if env is None else env
+    return (env.get("CLEARFRAME_WEBHOOK_SECRET") or "").strip()

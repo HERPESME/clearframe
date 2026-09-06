@@ -48,9 +48,17 @@ check $? "pytest suite green (log: /tmp/clearframe-smoke-pytest.log)"
 echo "━━ 2. CLI demo pipeline"
 $PY -m clearframe run --demo --out "$OUT" --auto-approve > /tmp/clearframe-smoke-cli.log 2>&1
 check $? "CLI demo run exits 0"
-for f in dossier.html dossier.json markers.edl markers.csv cue_sheet.csv; do
+# Two formats of one document. The marker CSV, the EDL, the PRO cue sheet and
+# the raw JSON used to be written beside the report and offered as equal
+# filename links, so the deliverable was one file among five.
+for f in dossier.html dossier.docx; do
   [ -f "$OUT/$f" ]; check $? "artifact $f exists"
 done
+[ "$(ls -1 "$OUT"/*.csv "$OUT"/*.edl "$OUT"/dossier.json 2>/dev/null | wc -l)" -eq 0 ]
+check $? "no spreadsheet or JSON artifacts beside the report"
+grep -q "CONFIDENTIAL" "$OUT/dossier.html"; check $? "report carries a confidentiality legend"
+grep -q "Report reference" "$OUT/dossier.html"; check $? "report carries a document-control block"
+grep -q "@media print" "$OUT/dossier.html"; check $? "report is styled for print, not just screen"
 grep -q "Clearance Court" "$OUT/dossier.html"; check $? "dossier contains Clearance Court opinions"
 grep -q "Audit trail" "$OUT/dossier.html"; check $? "dossier contains audit trail"
 grep -q "Ringgold" "$OUT/dossier.html"; check $? "dossier cites real precedent"
@@ -79,8 +87,8 @@ for el in e1 e2 e3 e4 e5 e6 e7 e8; do
 done
 pass "8 legal decisions recorded"
 
-has "cue_sheet.csv" -X POST "$BASE/api/productions/demo/dossier"
-check $? "dossier generated with all artifacts"
+has "dossier.docx" -X POST "$BASE/api/productions/demo/dossier"
+check $? "dossier generated in both formats"
 has "Clearance Report" "$BASE/api/productions/demo/artifacts/dossier.html"
 check $? "artifact served over HTTP"
 
@@ -203,8 +211,8 @@ assert s['audio_matches'][0]['provenance'] == 'VERIFIED', s['audio_matches']
 "
 check $? "music identity promoted by fingerprint (description -> named work)"
 
-CUE=$(grep -c 'Blinding Lights — The Weeknd' "$OUT/cue_sheet.csv")
-[ "$CUE" = "1" ]; check $? "PRO cue sheet carries the fingerprinted title, not the description"
+grep -q 'Blinding Lights — The Weeknd' "$OUT/dossier.html"
+check $? "the report carries the fingerprinted title, not the description"
 
 curl -sf "$BASE/api/productions/demo" | $PY -c "
 import json, sys
@@ -337,7 +345,7 @@ check $? "live Parallel Search freshness pass ran on demand"
 
 grep -q "Territory exposure" "$OUT/dossier.html"; check $? "dossier reports territory exposure"
 grep -q "Identity verification" "$OUT/dossier.html"; check $? "dossier reports identity verification"
-grep -q "CONFLICTED" "$OUT/markers.csv"; check $? "NLE markers carry the identity verdict"
+grep -q "CONFLICTED" "$OUT/dossier.html"; check $? "report carries the identity verdict"
 
 echo "━━ 6. Rights ledger + upload surfaces"
 LEDGER=$(curl -sf "$BASE/api/licences" | $PY -c "import json,sys; print(len(json.load(sys.stdin)['licences']))")

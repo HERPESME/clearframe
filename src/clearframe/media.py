@@ -23,21 +23,17 @@ _DURATION = re.compile(r"Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)")
 _FPS = re.compile(r"(\d+(?:\.\d+)?)\s*fps")
 
 
-def probe_duration_s(path: str | Path) -> float:
-    """Seconds of footage, or 0.0 if the file cannot be probed.
+def _banner(path: Path) -> str:
+    """ffmpeg's stream summary for this file, or "" if it cannot be read.
 
-    Returning 0.0 rather than raising is deliberate: an unprobeable upload
-    degrades to the behaviour every upload had until now, instead of failing a
-    run over a number the pipeline can survive without.
+    ffmpeg with no output writes the summary to stderr and exits non-zero;
+    that is the expected path, not an error.
     """
-    path = Path(path)
     if not path.exists():
-        return 0.0
+        return ""
     try:
         import imageio_ffmpeg
 
-        # ffmpeg with no output writes the stream summary to stderr and exits
-        # non-zero; that is the expected path, not an error.
         result = subprocess.run(
             [imageio_ffmpeg.get_ffmpeg_exe(), "-nostdin", "-i", str(path)],
             capture_output=True,
@@ -46,52 +42,62 @@ def probe_duration_s(path: str | Path) -> float:
         )
     except (subprocess.TimeoutExpired, OSError, ImportError) as exc:
         log.warning("could not probe %s (%s)", path.name, exc)
-        return 0.0
+        return ""
+    return result.stderr or ""
 
-    match = _DURATION.search(result.stderr or "")
+
+def probe_media(path: str | Path) -> tuple[float, float]:
+    """Duration and frame rate, from ONE ffmpeg call. Zeroes if unprobeable.
+
+    Both numbers come off the same stderr banner, and asking for them
+    separately spawned two processes to parse identical output — twice, on the
+    event loop, on every upload.
+
+    Returning zeroes rather than raising is deliberate: an unprobeable upload
+    degrades to the behaviour every upload had before these existed, instead
+    of failing a run over numbers the pipeline can survive without.
+    """
+    path = Path(path)
+    banner = _banner(path)
+    if not banner:
+        return 0.0, 0.0
+
+    duration = 0.0
+    match = _DURATION.search(banner)
     if match is None:
         log.warning("no duration in ffmpeg output for %s", path.name)
-        return 0.0
-    hours, minutes, seconds = match.groups()
-    return round(int(hours) * 3600 + int(minutes) * 60 + float(seconds), 2)
+    else:
+        hours, minutes, seconds = match.groups()
+        duration = round(int(hours) * 3600 + int(minutes) * 60 + float(seconds), 2)
+
+    fps = 0.0
+    match = _FPS.search(banner)
+    if match is None:
+        log.warning("no frame rate in ffmpeg output for %s", path.name)
+    else:
+        rate = float(match.group(1))
+        # A rate outside this range is a parse accident, not a camera.
+        fps = rate if 1.0 <= rate <= 240.0 else 0.0
+
+    return duration, fps
+
+
+def probe_duration_s(path: str | Path) -> float:
+    """Seconds of footage, or 0.0 if the file cannot be probed."""
+    return probe_media(path)[0]
 
 
 def probe_fps(path: str | Path) -> float:
     """Frames per second, or 0.0 if the file cannot be probed.
 
     The upload form defaults fps to 24 and nothing corrected it, which is not
-    cosmetic either. `timeline.timing_is_reliable` decides whether an
-    appearance was ever photographed by comparing it against ONE FRAME, and a
-    frame is 1/fps. A 30fps clip judged at 24fps uses 42ms where the truth is
-    33ms, so the module whose whole claim is "physical tests only, no
-    threshold to defend" was defending a guessed one.
-
-    Same degradation contract as `probe_duration_s`: 0.0 lets the caller keep
-    whatever it had rather than failing a run over it.
+    cosmetic. `timeline.timing_is_reliable` decides whether an appearance was
+    ever photographed by comparing it against ONE FRAME, and a frame is 1/fps.
+    A 30fps clip judged at 24fps uses 42ms where the truth is 33ms, so the
+    module whose whole claim is "physical tests only, no threshold to defend"
+    was defending a guessed one.
     """
-    path = Path(path)
-    if not path.exists():
-        return 0.0
-    try:
-        import imageio_ffmpeg
-
-        result = subprocess.run(
-            [imageio_ffmpeg.get_ffmpeg_exe(), "-nostdin", "-i", str(path)],
-            capture_output=True,
-            text=True,
-            timeout=60,
-        )
-    except (subprocess.TimeoutExpired, OSError, ImportError) as exc:
-        log.warning("could not probe fps of %s (%s)", path.name, exc)
-        return 0.0
-
-    match = _FPS.search(result.stderr or "")
-    if match is None:
-        log.warning("no frame rate in ffmpeg output for %s", path.name)
-        return 0.0
-    fps = float(match.group(1))
-    # A rate outside this range is a parse accident, not a camera.
-    return fps if 1.0 <= fps <= 240.0 else 0.0
+    return probe_media(path)[1]
 
 
 def extract_frame(path: str | Path, at_s: float, width: int = 1280) -> bytes | None:

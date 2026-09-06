@@ -1,14 +1,20 @@
-"""Stage 6: assemble the reviewed dossier and write all export artifacts."""
+"""Stage 6: assemble the reviewed dossier and write the report.
+
+Two artifacts, and they are the same document in two formats: HTML to read in
+the browser, DOCX to file with an E&O application and mark up in Word.
+
+The EDL, the marker CSV, the PRO cue sheet and the raw JSON dump used to be
+written here too, and were offered to the user as five equal filename links —
+so the deliverable was one file among five, and three of them were spreadsheets.
+A clearance report is a document. It is now presented as one.
+"""
 
 from datetime import datetime, timezone
 from pathlib import Path
 
 from clearframe.dossier import build_dossier, pending_ids
-from clearframe.exporters.csv_markers import render_csv
-from clearframe.exporters.cue_sheet import render_cue_sheet
+from clearframe.exporters.dossier_docx import render_dossier_docx
 from clearframe.exporters.dossier_html import render_dossier_html
-from clearframe.exporters.edl import elements_to_markers, render_edl
-from clearframe.models import ClearanceCategory
 from clearframe.pipeline import PipelineContext
 
 
@@ -32,24 +38,8 @@ class DossierStage:
 
         generated_at = self.generated_at or datetime.now(timezone.utc).isoformat()
         dossier = build_dossier(ctx.state, generated_at=generated_at)
-        markers = elements_to_markers(
-            ctx.state.elements, ctx.state.risk, ctx.state.corroboration
-        )
-        fps = ctx.state.production.fps
 
         self.out_dir.mkdir(parents=True, exist_ok=True)
         (self.out_dir / "dossier.html").write_text(render_dossier_html(dossier))
-        (self.out_dir / "dossier.json").write_text(dossier.model_dump_json(indent=2))
-        (self.out_dir / "markers.edl").write_text(
-            render_edl(f"ClearFrame Risk Markers - {ctx.state.production.title}", markers, fps)
-        )
-        (self.out_dir / "markers.csv").write_text(render_csv(markers, fps))
-        if any(
-            el.category == ClearanceCategory.MUSIC_SYNC for el in ctx.state.elements
-        ):
-            (self.out_dir / "cue_sheet.csv").write_text(
-                render_cue_sheet(
-                    ctx.state.production, ctx.state.elements, ctx.state.research
-                )
-            )
+        render_dossier_docx(dossier, self.out_dir / "dossier.docx")
         ctx.state.stage_status["review"] = "complete"

@@ -23,9 +23,13 @@ import pytest
 
 from clearframe.media import extract_frame
 
-CLIP = pathlib.Path(
-    "/Users/aryansinghpokharia/Desktop/clearframe_google/out-live-ui/media/upload/footage.mp4"
-)
+# One of the repo's own public-domain clips, so this runs on a fresh clone
+# rather than only on the machine that happened to have an upload lying about.
+# It used to point at an absolute path into a developer's home directory, at a
+# copy of a third-party film — which meant these tests were silently skipped
+# for everyone else, and stopped running here the moment that footage was
+# removed. `scripts/fetch_test_clips.sh` restores these if they are absent.
+CLIP = pathlib.Path(__file__).resolve().parents[1] / "testdata" / "clips" / "ctvc_BAYER_512kb.mp4"
 
 
 def _has_ffmpeg() -> bool:
@@ -62,7 +66,8 @@ def test_a_real_frame_comes_back_as_jpeg_bytes():
 
 @needs_clip
 def test_different_timestamps_give_different_frames():
-    a, b = extract_frame(CLIP, 2.0), extract_frame(CLIP, 30.0)
+    # Both comfortably inside the clip: it is 30s long, so 30.0 is the end.
+    a, b = extract_frame(CLIP, 2.0), extract_frame(CLIP, 20.0)
     assert a and b and a != b
 
 

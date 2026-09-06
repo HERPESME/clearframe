@@ -3,9 +3,19 @@ import { api, ApiError, setRole } from "./api";
 import { ElementCard } from "./ElementCard";
 import { MissionControl } from "./MissionControl";
 import { Timeline } from "./Timeline";
-import { Uploader } from "./Uploader";
+import { Dashboard } from "./Dashboard";
+import { SignIn } from "./SignIn";
+import { type SessionUser } from "./auth";
+import { WhoAmI } from "./WhoAmI";
 import { VideoPlayer } from "./VideoPlayer";
-import type { Action, ProductionState, Risk, RiskBand, Role } from "./types";
+import type {
+  Action,
+  ProductionState,
+  ProductionSummary,
+  Risk,
+  RiskBand,
+  Role,
+} from "./types";
 
 const BANDS: RiskBand[] = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
 
@@ -20,15 +30,40 @@ export default function App() {
   const [checking, setChecking] = useState(false);
   const [freshNote, setFreshNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  // The upload form is the point of the home screen, so it is open by
-  // default rather than hidden behind a second click.
-  const [showUpload, setShowUpload] = useState(true);
   const [resuming, setResuming] = useState<string | null>(null);
+  // Restored a run that never finished. Distinct from "still analysing": there
+  // is no server-side task to wait for, so polling would never end — which is
+  // what used to happen, re-rendering this production every three seconds and
+  // overwriting the upload form the moment it was opened.
+  const [interrupted, setInterrupted] = useState(false);
+  // Authentication, when the deployment has it switched on. `null` while we do
+  // not yet know, so the app never flashes a sign-in screen at someone who is
+  // already signed in — or a review screen at someone who is not.
+  const [authOn, setAuthOn] = useState<boolean | null>(null);
+  // This deployment lets a visitor choose a role rather than be granted one.
+  // A demo has nobody to ask; it must be labelled, never assumed.
+  const [openRoles, setOpenRoles] = useState(false);
+  // Every analysis, not just the newest. The list was always fetched and all
+  // but `list[0]` discarded, so there was no way back to an earlier one.
+  const [productions, setProductions] = useState<ProductionSummary[]>([]);
+  const [user, setUser] = useState<SessionUser | null>(null);
+  // The boot listing below runs before anyone has signed in, so with the gate
+  // on it takes a 401 and comes back empty. Remember that, because a session
+  // arriving later is the moment it becomes answerable.
+  const bootListFailed = useRef(false);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
-    api.meta().then((m) => setMode(m.mode)).catch(() => {});
+    api
+      .meta()
+      .then((m) => {
+        setMode(m.mode);
+        setAuthOn(m.auth);
+        setOpenRoles(m.open_roles);
+        setUser(m.user);
+      })
+      .catch(() => setAuthOn(false));
     // ?autorun starts a fresh paced pipeline run on load — used for demo
     // recordings so Mission Control opens without a click.
     if (new URLSearchParams(window.location.search).has("autorun")) {
@@ -42,15 +77,46 @@ export default function App() {
     api
       .listProductions()
       .then(async (list) => {
-        if (list.length === 0) return;
+        setProductions(list);
+        // Only jump straight into a production that is STILL RUNNING — you
+        // want to watch that finish. Anything else and the dashboard is the
+        // right landing place, because dropping someone into whichever
+        // analysis happened to be newest is not navigation.
         const newest = list[0];
-        setState(await api.getProduction(newest.id));
-        if (newest.running) setResuming(newest.id);
+        if (newest?.running) {
+          setState(await api.getProduction(newest.id));
+          setResuming(newest.id);
+          setInterrupted(Boolean(newest.interrupted));
+        }
       })
-      .catch(() => setError("Could not reach the ClearFrame API. Is the server running?"))
+      .catch(() => {
+        bootListFailed.current = true;
+        setError("Could not reach the ClearFrame API. Is the server running?");
+      })
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Signing in is the moment the API starts answering, so it is the moment to
+  // ask again.
+  //
+  // The effect above runs once on mount, which with the gate on is strictly
+  // before there is a session — so it took a 401 and set an error blaming the
+  // server, and nothing ever re-fetched. The dashboard a new sign-in landed on
+  // was therefore always empty: their own productions invisible until they
+  // thought to reload the page, which is not a thing anyone thinks to do.
+  //
+  // Deliberately conditional on that failure rather than firing on every
+  // sign-in. A cookie that is already valid at page load is sent with the boot
+  // request like any other, so that listing succeeded and re-running it would
+  // only be a second request for an answer we hold.
+  useEffect(() => {
+    if (!user || !bootListFailed.current) return;
+    bootListFailed.current = false;
+    // The API was reachable all along; it declined to answer a stranger.
+    setError(null);
+    void api.listProductions().then(setProductions).catch(() => {});
+  }, [user]);
 
   // A restored run is still executing server-side. Poll until it finishes, so
   // a page refresh mid-analysis picks up where it left off instead of freezing
@@ -98,8 +164,15 @@ export default function App() {
   const newProduction = () => {
     setState(null);
     setMission(null);
-    setShowUpload(true);
     setError(null);
+    // Stop following the run you just left. The poll below calls `setState`
+    // unconditionally every three seconds, so while a production was still
+    // analysing this button did nothing you could see: the dashboard rendered
+    // and the next tick put you straight back in the one you were leaving.
+    // The analysis is a server-side task and continues either way; `enterReview`
+    // re-arms the poll if you open it again from the rail.
+    setResuming(null);
+    void api.listProductions().then(setProductions).catch(() => {});
   };
 
   const loadDemo = async () => {
@@ -122,8 +195,10 @@ export default function App() {
       // Handing over at the preliminary report means the run is still going.
       // Keep pulling so the cards fill in rather than freezing half-done.
       const list = await api.listProductions();
+      setProductions(list);
       const row = list.find((r) => r.id === pid);
       if (row?.running) setResuming(pid);
+      setInterrupted(Boolean(row?.interrupted));
     } catch {
       setError("Could not load the finished production.");
     }
@@ -182,7 +257,7 @@ export default function App() {
     }
   };
 
-  if (loading) {
+  if (loading || authOn === null) {
     return (
       <div className="hero">
         <div className="slate">Loading…</div>
@@ -190,47 +265,57 @@ export default function App() {
     );
   }
 
+  // The gate, above every other screen: a deployment with authentication on
+  // has nothing to show a stranger — not the findings, not the footage, and
+  // certainly not the upload form that starts a paid pipeline run.
+  if (authOn && !user) {
+    return (
+      <SignIn
+        onSignedIn={setUser}
+        openRoles={openRoles}
+        onPickRole={(r) => changeRole(r as Role)}
+      />
+    );
+  }
+
+  // Who you are, on every screen behind the gate. A run can take minutes and
+  // the dashboard is where signing in lands you, so those were exactly the two
+  // places the way out had to be and wasn't.
+  const account = (
+    <WhoAmI
+      user={user}
+      openRoles={openRoles}
+      chosenRole={role}
+      onSignedOut={() => setUser(null)}
+    />
+  );
+
   if (mission) {
     return (
-      <MissionControl productionId={mission} onComplete={() => enterReview(mission)} />
+      <>
+        {authOn && user && <div className="screen-account">{account}</div>}
+        <MissionControl productionId={mission} onComplete={() => enterReview(mission)} />
+      </>
     );
   }
 
   if (!state) {
     return (
-      <div className="hero">
-        <div className="slate">ClearFrame · automated clearance department</div>
-        {mode === "demo" && (
-          <div className="mode-chip" title="Replays recorded Gemini/Parallel responses through the identical pipeline code path — live mode swaps only the two API clients.">
-            DEMO MODE · recorded fixtures, identical code path
-          </div>
-        )}
-        <h1>
-          Every frame, <em>cleared.</em>
-        </h1>
-        <p>
-          Gemini watches the footage and finds everything that needs legal clearance.
-          Parallel researches who owns it. You make the call — with evidence attached.
-        </p>
-        <div className="hero-actions">
-          <button className="generate" onClick={loadDemo}>
-            Run the demo scene
-          </button>
-          <button className="secondary" onClick={() => setShowUpload((v) => !v)}>
-            {showUpload ? "Hide upload" : "Upload my own footage"}
-          </button>
-        </div>
-        {showUpload && (
-          <Uploader
-            onStarted={(pid) => {
-              setState(null);
-              setMission(pid);
-            }}
-            onLedger={() => {}}
-          />
-        )}
-        {error && <div className="error-banner">{error}</div>}
-      </div>
+      <>
+        {authOn && user && <div className="screen-account">{account}</div>}
+        <Dashboard
+          productions={productions}
+          demoMode={mode === "demo"}
+          onOpen={enterReview}
+          onDemo={loadDemo}
+          onStarted={(pid) => {
+            setState(null);
+            setMission(pid);
+          }}
+          onLedger={() => {}}
+        />
+        {error && <div className="error-banner dash-error">{error}</div>}
+      </>
     );
   }
 
@@ -317,9 +402,15 @@ export default function App() {
   const jumpTo = (id: string) => {
     setActiveId(id);
     const el = elements.find((e) => e.id === id);
-    if (el && videoRef.current && production.has_media) {
-      // land a beat before the element appears so the box is already on screen
-      videoRef.current.currentTime = Math.max(el.time_ranges[0].start_s - 0.25, 0);
+    const first = el?.time_ranges?.[0];
+    if (first && videoRef.current && production.has_media) {
+      // Land INSIDE the appearance, not a beat before it. Every box rule —
+      // here and in overlay.py — is start_s <= t <= end_s, so seeking to
+      // start_s - 0.25 put the playhead outside the range and correctly drew
+      // nothing: clicking a finding showed no box at all. And pause, because
+      // boxes are only drawn while paused.
+      videoRef.current.currentTime = Math.max(first.start_s + 0.15, 0);
+      videoRef.current.pause();
     }
     cardRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -359,23 +450,39 @@ export default function App() {
           findings
         </span>
         <span className="spacer" />
-        <nav className="roles" aria-label="Reviewer role">
-          {(["legal", "producer", "editor"] as Role[]).map((r) => (
-            <button
-              key={r}
-              className={role === r ? "active" : ""}
-              onClick={() => changeRole(r)}
-            >
-              {r}
-            </button>
-          ))}
-        </nav>
-        <span className="role-hint">
-          {role === "editor" ? "read-only" : "can record decisions"}
-        </span>
+        {authOn && user && !openRoles ? (
+          // A role you can prove. The switcher below is honest only when there
+          // is nobody to ask — with auth on and roles granted, the server
+          // decides and the client saying otherwise is the bypass that closed.
+          <WhoAmI user={user} openRoles={false} onSignedOut={() => setUser(null)} />
+        ) : (
+          <>
+            <nav className="roles" aria-label="Reviewer role">
+              {(["legal", "producer", "editor"] as Role[]).map((r) => (
+                <button
+                  key={r}
+                  className={role === r ? "active" : ""}
+                  onClick={() => changeRole(r)}
+                >
+                  {r}
+                </button>
+              ))}
+            </nav>
+            <span className="role-hint">
+              {role === "editor" ? "read-only" : "can record decisions"}
+            </span>
+            {openRoles && (
+              <WhoAmI
+                user={user}
+                openRoles
+                chosenRole={role}
+                onSignedOut={() => setUser(null)}
+              />
+            )}
+          </>
+        )}
         <button
-          className="roles"
-          style={{ padding: "5px 12px", background: "transparent", color: "var(--muted)" }}
+          className="topbtn"
           onClick={newProduction}
           title="Clear this production and upload another"
         >
@@ -383,8 +490,7 @@ export default function App() {
         </button>
         {isDemo && (
           <button
-            className="roles"
-            style={{ padding: "5px 12px", background: "transparent", color: "var(--muted)" }}
+            className="topbtn"
             onClick={loadDemo}
             title="Run the demo pipeline again from scratch"
           >
@@ -565,6 +671,13 @@ export default function App() {
             Refreshing or closing the tab will not stop it.
           </div>
         )}
+        {!resuming && interrupted && (
+          <div className="resuming-banner">
+            <strong>This analysis never finished.</strong> The server was restarted
+            while it was running, so the stages below are as far as it got. Nothing
+            is working on it now — upload the clip again for a complete report.
+          </div>
+        )}
         {claimed.length > 0 && (
           <div className="platform-banner">
             <strong>Platform enforcement — {claimed[0].platform}.</strong> Separate from
@@ -670,18 +783,31 @@ export default function App() {
           </>
         ) : (
           <>
-            <span className="pending-note">Dossier generated:</span>
+            <span className="pending-note">Clearance report ready</span>
+            <span className="spacer" />
+            {/* Two named actions, not five filenames. The report used to be
+                offered as `dossier.html  dossier.json  markers.edl
+                markers.csv  cue_sheet.csv` — the deliverable as one link among
+                five, three of them spreadsheets. */}
             <div className="artifacts">
-              {artifacts.map((name) => (
+              {artifacts.includes("dossier.html") && (
                 <a
-                  key={name}
-                  href={api.artifactUrl(production.id, name)}
+                  className="secondary"
+                  href={api.artifactUrl(production.id, "dossier.html")}
                   target="_blank"
                   rel="noreferrer"
                 >
-                  {name}
+                  View report
                 </a>
-              ))}
+              )}
+              {artifacts.includes("dossier.docx") && (
+                <a
+                  className="generate"
+                  href={api.artifactUrl(production.id, "dossier.docx")}
+                >
+                  Download (Word)
+                </a>
+              )}
             </div>
           </>
         )}

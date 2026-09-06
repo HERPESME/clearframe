@@ -8,7 +8,10 @@ ClearFrame automates the department: **Gemini** watches raw footage and detects 
 
 Built for the Google Cloud **Agentic Cinema** hackathon, **Parallel** partner track.
 
-**🌐 Live demo (Cloud Run, demo mode):** [clearframe-220710110855.us-central1.run.app](https://clearframe-220710110855.us-central1.run.app) · **MCP endpoint:** `https://clearframe-mcp-220710110855.us-central1.run.app/mcp` (streamable HTTP)
+**🌐 Live: [clearframe-q5k3kjzu4a-uc.a.run.app](https://clearframe-q5k3kjzu4a-uc.a.run.app)** — sign up with any email and **choose your role** (legal, producer or editor). Running **live**: real Gemini video analysis and real Parallel research, on your own footage.
+**MCP endpoint:** `https://clearframe-mcp-220710110855.us-central1.run.app/mcp` (streamable HTTP)
+
+> Roles are open on this deployment so a first-time visitor can exercise every control without waiting to be granted one. The UI labels a self-selected role `chosen`, and an email the provider has not verified is recorded as `(unverified)` in the audit trail — a self-selected role presented as governance would be worse than none.
 
 ![ClearFrame review UI](docs/images/review-ui.png)
 
@@ -256,16 +259,40 @@ See [docs/deploy.md](docs/deploy.md) for Cloud Run and Agent Engine deployment.
 
 ## Deployment (Cloud Run, scale-to-zero)
 
-One image, two services, `min-instances=0` — compute cost is $0 with no traffic. `cloudbuild.yaml` builds and deploys both on every push to `main` (Cloud Build CI/CD):
+One image, **three services**, `min-instances=0` — idle cost is $0.
+
+| Service | What | Shape |
+| --- | --- | --- |
+| `clearframe` | review webapp + API | 1 CPU · 512Mi · concurrency **80** · public |
+| `clearframe-worker` | runs the 13-stage analysis | 2 CPU · 4Gi · concurrency **1** · max 5 · **not public** |
+| `clearframe-mcp` | MCP server, streamable HTTP at `/mcp` | 1 CPU · 512Mi · public |
+
+**Why the split.** One analysis is three concurrent Gemini video passes plus Parallel research plus up to 150 grounding calls; on one service that competes with the requests drawing the review screen. And Cloud Run throttles CPU to near-zero once a response is sent, so the analysis has to happen **inside** the worker's request — a background task started after responding is frozen.
+
+**The cap is the queue.** A Cloud Tasks queue with `max-concurrent-dispatches=5` sits between them, and the worker takes one request per instance with at most five instances. Five analyses run at once; the sixth waits. Cloud Tasks is the waiting line, not a place code runs.
+
+**Storage.** Footage, state, events and dossiers live in Cloud Storage; a small per-production row and a per-user record live in Firestore. Nothing depends on the container's disk, which on Cloud Run is a per-instance tmpfs the worker cannot share. **Firebase Authentication is the user database** — no credentials are stored by this application, and there is no SQL database, because the rest is a handful of documents read by key.
 
 ```bash
-gcloud builds submit --config cloudbuild.yaml .   # manual deploy
+gcloud builds submit --config cloudbuild.yaml .   # build + deploy all three
+./scripts/deploy.sh staging                       # cloud storage, demo detectors, no spend
+./scripts/deploy.sh prod                          # cloud storage, live detectors
+./scripts/prod-probe.py                           # 25 security checks against the deployed URL
 ```
 
-| Service | What | Demo-mode state |
-| --- | --- | --- |
-| `clearframe` | review webapp + API | `/tmp/out` (ephemeral — resets at scale-to-zero, by design for demo) |
-| `clearframe-mcp` | MCP server, streamable HTTP at `/mcp`, stateless | same |
+### Measured on the live deployment (2026-09-06)
+
+A 42s clip uploaded through the deployed URL by a signed-in user, analysed by the worker, **538s end to end**:
+
+| | |
+| --- | --- |
+| scan (3 concurrent Gemini passes) | 123s |
+| **preliminary report readable** | **168s** |
+| research · freshness · risk · territory · coverage · remediation | 267s |
+| clearance court | 103s |
+| **result** | **10 findings · 3 cast credits · 39/39 appearances boxed** |
+
+Anchor-box grounding on a paused frame: **14.4s cold, 0.61s warm**. Dossier: 225KB HTML + JSON + EDL + CSV markers.
 
 Connect an MCP client to the deployed server:
 

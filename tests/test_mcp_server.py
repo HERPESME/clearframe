@@ -71,7 +71,7 @@ async def test_full_clearance_flow(server, tmp_path):
 
     dossier = _payload(await server.call_tool("generate_dossier", {"production_id": pid}))
     assert "dossier.html" in dossier["artifacts"]
-    assert (tmp_path / "dossier.html").exists()
+    assert (tmp_path / "artifacts" / pid / "dossier.html").exists()
 
     status = _payload(await server.call_tool("get_status", {"production_id": pid}))
     assert status["stage_status"]["review"] == "complete"

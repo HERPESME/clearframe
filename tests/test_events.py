@@ -75,3 +75,55 @@ def test_paced_demo_run_streams_events_over_sse(client):
 
 def test_events_without_run_404(client):
     assert client.get("/api/productions/demo/events").status_code == 404
+
+
+def test_a_queued_run_streams_immediately_rather_than_404ing(tmp_path, monkeypatch):
+    """The regression that made Mission Control sit at "Standing by" in prod.
+
+    The client opens its EventSource the instant the upload responds. In one
+    process that was safe: `create_production` created the event queue
+    synchronously before returning, so the endpoint could never 404 for a run
+    that had just started.
+
+    Moving the producer to a worker container broke that invariant. The run is
+    QUEUED when the upload responds — a different container, several seconds of
+    cold start away from writing its first event — so the stream 404'd, and
+    `MissionControl.tsx` closes on error and never retries. The analysis ran to
+    completion with the screen showing nothing.
+
+    Observed on the deployed site: one 404 on `/events`, and no second attempt.
+    """
+    from fastapi.testclient import TestClient
+
+    from clearframe.webapp.server import create_app
+
+    monkeypatch.setenv("CLEARFRAME_MODE", "live")
+    monkeypatch.setenv("GOOGLE_CLOUD_PROJECT", "a-project")
+    monkeypatch.setenv("PARALLEL_API_KEY", "a-key")
+
+    class _NeverRuns:
+        """A queue that accepts the job and does nothing — exactly the window
+        between the upload responding and the worker starting."""
+
+        async def enqueue(self, job):
+            return job.production_id
+
+    monkeypatch.setattr(
+        "clearframe.webapp.server.build_queue", lambda cfg, runner: _NeverRuns()
+    )
+    monkeypatch.setattr(
+        "clearframe.webapp.server.probe_media", lambda path: (10.0, 24.0)
+    )
+    client = TestClient(create_app(out_root=tmp_path))
+
+    resp = client.post(
+        "/api/productions",
+        files={"file": ("clip.mp4", b"\x00" * 2048, "video/mp4")},
+        data={"title": "Queued", "production_id": "queued1"},
+    )
+    assert resp.status_code == 200
+
+    with client.stream("GET", "/api/productions/queued1/events") as stream:
+        assert stream.status_code == 200, (
+            "the client would close the stream and never reopen it"
+        )

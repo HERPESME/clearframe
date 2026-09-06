@@ -166,6 +166,14 @@ class DetectedElement(BaseModel):
     # a mural on a building qualifies, the same image on a t-shirt does not.
     # "unknown" is the default and earns no band shift in either direction.
     siting: str = "unknown"  # public_permanent | portable_or_interior | unknown
+    # A graphic the production authored itself — subtitles, captions, a lower
+    # third, its own logo bug. Recorded as a finding so the dossier is complete,
+    # but never boxed and never grounded: a rectangle exists so a reviewer can
+    # find something they must act on, and there is nothing to act on here. A
+    # live run drew seventeen boxes on a film's own subtitles while the routing
+    # for the same element said "Own work — no third-party right implicated".
+    # Defaults False, so every existing state, fixture and test is unchanged.
+    own_content: bool = False
 
 
 class TriagedElement(DetectedElement):

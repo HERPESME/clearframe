@@ -42,6 +42,10 @@ export interface Element {
    * instead of a rectangle nobody can pause on.
    */
   timing_reliable?: boolean;
+  // A graphic the production authored itself — subtitles, captions, a lower
+  // third. Listed as a finding, never boxed: its route already says "No
+  // action. Recorded so the dossier is complete, not because it is a risk."
+  own_content?: boolean;
   timing_note?: string;
 }
 
@@ -66,6 +70,8 @@ export interface ProductionSummary {
   stage_status: Record<string, string>;
   updated_at: number;
   running: boolean;
+  /** Unfinished, and nothing is working on it — the run died with its process. */
+  interrupted?: boolean;
 }
 
 export interface PreviewFinding {

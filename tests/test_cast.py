@@ -207,3 +207,70 @@ def test_a_production_with_no_recognised_cast_says_nothing():
     from clearframe.cast import summarise
 
     assert summarise([]) is None
+
+
+# --- the same three actors, phrased the other way round -----------------------
+#
+# A second live run of the same scene wrote the attribution as a NOUN PHRASE
+# instead of a passive clause:
+#
+#     "Face of actor Bradley Cooper, playing the character Phil Wenneck."
+#
+# `_PLAYED_BY` looks for "played by <Name>", so it matched none of them. All
+# three actors came back as third-party RIGHT_OF_PUBLICITY findings routed to
+# deep research, and the run recorded ZERO cast credits — the exact outcome
+# this module exists to prevent, reached by a rephrasing.
+#
+# Same failure as the scan writing "replicating" while the tattoo check looked
+# for "replicated": a prose pattern is not a contract, and the vocabulary has
+# to cover how the model actually writes.
+
+
+@pytest.mark.parametrize("description,performer,part", [
+    ("Face of actor Bradley Cooper, playing the character Phil Wenneck.",
+     "Bradley Cooper", "Phil Wenneck"),
+    ("Face of actor Ed Helms, playing the character Stu Price. He has a large "
+     "tribal tattoo on the left side of his face.",
+     "Ed Helms", "Stu Price"),
+    ("Face of actor Zach Galifianakis, playing the character Alan Garner. "
+     "His head is shaved.",
+     "Zach Galifianakis", "Alan Garner"),
+])
+def test_an_actor_named_before_the_verb_is_still_cast(description, performer, part):
+    findings, cast = partition([el(performer, description)])
+
+    assert findings == []
+    assert [c.performer for c in cast] == [performer]
+    assert cast[0].character == part
+
+
+def test_the_character_is_taken_from_the_description_when_the_label_is_the_actor():
+    """The label was the performer's name, so the part had to come from prose.
+
+    Without this the credit reads "Bradley Cooper as Bradley Cooper", which is
+    worse than saying nothing: the guild obligation is against the part.
+    """
+    _findings, cast = partition([
+        el("Bradley Cooper", "Face of actor Bradley Cooper, playing the "
+                             "character Phil Wenneck.")
+    ])
+    assert cast[0].character == "Phil Wenneck"
+
+
+def test_an_actor_phrasing_without_a_full_name_is_not_evidence():
+    """"an actor" names nobody, and neither does one capitalised word."""
+    findings, cast = partition([
+        el("Man at bar", "Face of an actor, playing a bartender."),
+        el("Waiter", "Face of actor Bob, playing the character Waiter."),
+    ])
+    assert len(findings) == 2
+    assert cast == []
+
+
+def test_a_character_named_without_any_performer_stays_a_finding():
+    """A documentary subject has a name and has signed nothing."""
+    findings, cast = partition([
+        el("Stu Price", "A man in a bar, playing the character Stu Price."),
+    ])
+    assert len(findings) == 1
+    assert cast == []

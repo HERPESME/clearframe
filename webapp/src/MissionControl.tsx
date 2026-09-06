@@ -74,9 +74,41 @@ export function MissionControl({
     setAgents((prev) => prev.map((a) => (a.key === key ? { ...a, ...changes } : a)));
 
   useEffect(() => {
-    const source = new EventSource(api.eventsUrl(productionId));
-    sourceRef.current = source;
+    // Reconnect rather than give up.
+    //
+    // `onerror` used to close the stream for good, so ANY interruption froze
+    // the screen permanently with no error shown — a 404 in the seconds before
+    // the worker writes its first event, an API container recycling mid-run, a
+    // laptop lid closing. The analysis carried on server-side and the reviewer
+    // watched "Standing by" until they gave up.
+    //
+    // Replay is safe, which is what makes reconnecting the right answer: the
+    // server keeps the whole log and streams it from the top, and every handler
+    // below is a `patch(key, {...})` setter rather than an increment, so
+    // reprocessing events converges on the same screen.
+    let closed = false;
+    let attempts = 0;
+    let timer: number | undefined;
+    let source: EventSource;
 
+    const connect = () => {
+      if (closed) return;
+      source = new EventSource(api.eventsUrl(productionId));
+      sourceRef.current = source;
+      wire(source);
+    };
+
+    const retry = () => {
+      source?.close();
+      if (closed || attempts >= 40) return;
+      // Backoff to 5s: a cold worker is seconds away, a recycling container
+      // rather longer, and neither is helped by hammering.
+      const wait = Math.min(1000 * 2 ** Math.min(attempts, 3), 5000);
+      attempts += 1;
+      timer = window.setTimeout(connect, wait);
+    };
+
+    const wire = (source: EventSource) => {
     source.onmessage = (msg) => {
       const e: PipelineEvent = JSON.parse(msg.data);
       switch (e.type) {
@@ -278,13 +310,23 @@ export function MissionControl({
           break;
         case "run_complete":
           setFinished(true);
+          closed = true;
           source.close();
           break;
       }
+      // A message arriving means the connection is healthy again.
+      attempts = 0;
     };
-    source.onerror = () => source.close();
-    return () => source.close();
-  }, []);
+    source.onerror = () => retry();
+    };
+
+    connect();
+    return () => {
+      closed = true;
+      window.clearTimeout(timer);
+      sourceRef.current?.close();
+    };
+  }, [productionId]);
 
   return (
     <div className="mission">

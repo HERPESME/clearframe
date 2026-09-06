@@ -23,6 +23,7 @@ Two properties are load-bearing:
 """
 
 import asyncio
+import logging
 
 from clearframe.corroboration import blocks_research
 from clearframe.freshness import is_material
@@ -43,6 +44,8 @@ from clearframe.pipeline import PipelineContext
 from clearframe.planner import EST_COST, plan_research
 from clearframe.scoring import provisional_score
 from clearframe.routing import route_all, summarise_routes
+
+log = logging.getLogger("clearframe.research")
 
 # How to describe the work to a researcher. Rogers v. Grimaldi protects films
 # and not adverts, so a search framed around the wrong medium returns guidance
@@ -347,16 +350,34 @@ class ResearchStage:
         ctx.state.research = research
 
         # ---- FindAll: enumerate candidates where ownership stayed open ----
-        for el in elements:
+        #
+        # Fanned out, like every other paid rung. Each `find_all` is a run that
+        # is created and then polled to completion, so awaiting them one at a
+        # time added their durations together — minutes each, serialised after
+        # the SEARCH/DEEP gather had already finished, and invisible in the
+        # route summary's latency estimate.
+        def _wants_candidates(el) -> bool:
             r = routes[el.id]
-            if r.tier is ResearchTier.BLOCKED:
-                continue
-            wants = r.enumerate_candidates or research[el.id].status == "incomplete"
-            if not wants or el.category not in ENUMERABLE:
-                continue
+            if r.tier is ResearchTier.BLOCKED or el.category not in ENUMERABLE:
+                return False
             if research[el.id].owner:
+                return False
+            return r.enumerate_candidates or research[el.id].status == "incomplete"
+
+        open_ownership = [el for el in elements if _wants_candidates(el)]
+        enumerated = await asyncio.gather(
+            *(
+                ctx.parallel.find_all(el, ctx.state.production.title)
+                for el in open_ownership
+            ),
+            return_exceptions=True,
+        )
+        for el, candidates in zip(open_ownership, enumerated):
+            if isinstance(candidates, BaseException):
+                # Enumeration is a lead, never a finding. One failing lookup
+                # must not take the others — or the run — with it.
+                log.warning("candidate enumeration failed for %s: %s", el.id, candidates)
                 continue
-            candidates = await ctx.parallel.find_all(el, ctx.state.production.title)
             if candidates:
                 ctx.state.candidates[el.id] = candidates
                 ctx.emit(
