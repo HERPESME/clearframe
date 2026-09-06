@@ -259,3 +259,93 @@ def test_a_configured_secret_refuses_an_unsigned_webhook(tmp_path, monkeypatch):
                     headers={"X-ClearFrame-Signature": "s3cret"},
                     json={"monitor_id": "m1", "summary": "real"})
     assert signed.status_code == 404  # authorised, just no matching watch
+
+
+# --- open roles: a demo has nobody to ask ------------------------------------
+#
+# Granting a role by editing an allowlist is right for a production and wrong
+# for a public demo. A judge opening the deployed URL cannot email the author
+# and wait to be made `legal`, and an app that shows them a read-only view of
+# every interesting button has not been evaluated.
+#
+# So role SELECTION is a mode, not a default. Switched on, anyone may act in
+# any role and the UI says so plainly; switched off — which is the default —
+# the role comes from the verified user and the header is not evidence.
+#
+# What does NOT change in open mode is who the audit trail names. Selecting a
+# role is not the same as inventing a person: the decision is still recorded
+# against the verified email of whoever pressed the button.
+
+
+def test_roles_are_granted_not_chosen_by_default(tmp_path, monkeypatch):
+    monkeypatch.setenv("CLEARFRAME_AUTH", "firebase")
+    monkeypatch.delenv("CLEARFRAME_OPEN_ROLES", raising=False)
+    _state(tmp_path)
+    _signed_in(monkeypatch, email="stranger@example.com")
+    c = TestClient(create_app(out_root=tmp_path))
+    c.post("/api/auth/session", json={"idToken": "x"})
+
+    refused = c.post("/api/productions/p1/decisions",
+                     headers={"X-ClearFrame-Role": "legal"},
+                     json={"element_id": "e1", "action": "approve_risk"})
+    assert refused.status_code == 403
+
+
+def test_open_roles_lets_a_visitor_act_as_legal(tmp_path, monkeypatch):
+    """The demo case: explore the product without an invitation."""
+    monkeypatch.setenv("CLEARFRAME_AUTH", "firebase")
+    monkeypatch.setenv("CLEARFRAME_OPEN_ROLES", "1")
+    _state(tmp_path)
+    _signed_in(monkeypatch, email="judge@example.com")
+    c = TestClient(create_app(out_root=tmp_path))
+    c.post("/api/auth/session", json={"idToken": "x"})
+
+    ok = c.post("/api/productions/p1/decisions",
+                headers={"X-ClearFrame-Role": "legal"},
+                json={"element_id": "e1", "action": "approve_risk"})
+    assert ok.status_code == 200
+
+
+def test_open_roles_still_requires_signing_in(tmp_path, monkeypatch):
+    """Choosing a role is not a way past the door."""
+    monkeypatch.setenv("CLEARFRAME_AUTH", "firebase")
+    monkeypatch.setenv("CLEARFRAME_OPEN_ROLES", "1")
+    _state(tmp_path)
+    c = TestClient(create_app(out_root=tmp_path))
+
+    assert c.get("/api/productions").status_code == 401
+    anonymous = c.post("/api/productions/p1/decisions",
+                       headers={"X-ClearFrame-Role": "legal"},
+                       json={"element_id": "e1", "action": "approve_risk"})
+    assert anonymous.status_code == 401
+
+
+def test_an_open_role_decision_is_still_signed_by_a_real_person(tmp_path, monkeypatch):
+    """The property that survives the mode.
+
+    A chosen role is not an invented identity. Whoever pressed the button is
+    named in the dossier, which is what makes the audit trail worth having.
+    """
+    monkeypatch.setenv("CLEARFRAME_AUTH", "firebase")
+    monkeypatch.setenv("CLEARFRAME_OPEN_ROLES", "1")
+    _state(tmp_path)
+    _signed_in(monkeypatch, email="judge@example.com")
+    c = TestClient(create_app(out_root=tmp_path))
+    c.post("/api/auth/session", json={"idToken": "x"})
+    c.post("/api/productions/p1/decisions",
+           headers={"X-ClearFrame-Role": "legal"},
+           json={"element_id": "e1", "action": "approve_risk"})
+
+    state = json.loads((tmp_path / "state" / "p1.json").read_text())
+    assert state["decisions"]["e1"]["reviewer"] == "judge@example.com"
+    assert state["decisions"]["e1"]["role"] == "legal"
+
+
+def test_the_client_is_told_which_mode_it_is_in(tmp_path, monkeypatch):
+    """The UI has to say so, or a self-selected role reads as governance."""
+    monkeypatch.setenv("CLEARFRAME_AUTH", "firebase")
+    monkeypatch.setenv("CLEARFRAME_OPEN_ROLES", "1")
+    _state(tmp_path)
+    c = TestClient(create_app(out_root=tmp_path))
+
+    assert c.get("/api/meta").json()["open_roles"] is True

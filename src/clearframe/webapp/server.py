@@ -247,9 +247,16 @@ def create_app(out_root: Path) -> FastAPI:
         With auth on it comes from the verified user and the header stops being
         evidence — that header was the entire bypass. With auth off it is the
         header, unchanged, because demo mode has nobody to ask.
+
+        Open-roles mode is the third case: signed in, but free to choose. It
+        exists so a visitor to the deployed demo can exercise the controls
+        without waiting to be granted anything. The header is honoured there
+        BECAUSE the whole point is self-selection — there is nothing to bypass.
         """
         user = _current_user(request)
-        return user.role if user else header_role
+        if user is None:
+            return header_role
+        return header_role if auth.open_roles() else user.role
 
     def _actor_for(request, header_role: str) -> str:
         """What the audit trail records: a person if we know one."""
@@ -259,7 +266,11 @@ def create_app(out_root: Path) -> FastAPI:
     @app.get("/api/auth/config")
     def auth_config():
         """What the browser needs to start a sign-in, and whether to bother."""
-        return {"enabled": auth.auth_enabled(), "firebase": auth.firebase_web_config()}
+        return {
+            "enabled": auth.auth_enabled(),
+            "open_roles": auth.open_roles(),
+            "firebase": auth.firebase_web_config(),
+        }
 
     @app.get("/api/auth/me")
     def auth_me(request: Request):
@@ -309,6 +320,9 @@ def create_app(out_root: Path) -> FastAPI:
             "mode": "live" if os.environ.get("CLEARFRAME_MODE") == "live" else "demo",
             "version": clearframe.__version__,
             "auth": auth.auth_enabled(),
+            # The client must know, because a role the visitor picked has to
+            # be labelled as such rather than shown as an assignment.
+            "open_roles": auth.open_roles(),
             "user": user.model_dump() if user else None,
         }
 

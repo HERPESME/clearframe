@@ -59,6 +59,7 @@ export const api = {
       mode: "demo" | "live";
       version: string;
       auth: boolean;
+      open_roles: boolean;
       user: { uid: string; email: string | null; name: string | null; role: string } | null;
     }>("/api/meta"),
   listProductions: () => request<ProductionSummary[]>("/api/productions"),

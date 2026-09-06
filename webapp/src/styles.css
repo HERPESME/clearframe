@@ -1192,3 +1192,17 @@ button.secondary:disabled { opacity: .5; cursor: default; }
   text-transform: uppercase; padding: 2px 8px; border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--accent) 16%, transparent);
   color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); }
+.auth-roles { border: 1px solid var(--line); border-radius: var(--r-md);
+  padding: var(--s-3); margin-top: var(--s-3); }
+.auth-roles-label { font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: var(--s-2); }
+.auth-roles-pills { display: flex; gap: var(--s-2); }
+.auth-roles-pills button { flex: 1; background: transparent; color: var(--muted);
+  border: 1px solid var(--line); border-radius: var(--r-pill); padding: 6px 10px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .06em; }
+.auth-roles-pills button.on { background: color-mix(in srgb, var(--accent) 18%, transparent);
+  border-color: var(--accent); color: var(--accent); }
+.auth-roles-note { font-size: 11.5px; line-height: 1.5; color: var(--muted);
+  margin: var(--s-2) 0 0; }
+.whoami-role.open { background: color-mix(in srgb, var(--yellow) 16%, transparent);
+  color: var(--yellow); border-color: color-mix(in srgb, var(--yellow) 40%, transparent); }

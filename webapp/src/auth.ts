@@ -13,6 +13,8 @@
 
 export type AuthConfig = {
   enabled: boolean;
+  /** Whether a signed-in visitor may choose which role to act in. */
+  open_roles: boolean;
   firebase: {
     apiKey: string;
     authDomain: string;

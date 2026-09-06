@@ -18,8 +18,18 @@ import {
  * Whichever is used, the server verifies the token and decides the role; this
  * screen never asserts one.
  */
-export function SignIn({ onSignedIn }: { onSignedIn: (u: SessionUser) => void }) {
+export function SignIn({
+  onSignedIn,
+  openRoles = false,
+  onPickRole,
+}: {
+  onSignedIn: (u: SessionUser) => void;
+  /** This deployment lets a visitor choose how to explore. */
+  openRoles?: boolean;
+  onPickRole?: (role: string) => void;
+}) {
   const [mode, setMode] = useState<"login" | "signup">("login");
+  const [role, setRole] = useState("legal");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,7 +41,9 @@ export function SignIn({ onSignedIn }: { onSignedIn: (u: SessionUser) => void })
     setBusy(true);
     setError(null);
     try {
-      onSignedIn(await work());
+      const user = await work();
+      if (openRoles) onPickRole?.(role);
+      onSignedIn(user);
     } catch (e) {
       setError(e instanceof Error ? e.message : "That did not work.");
     } finally {
@@ -136,6 +148,32 @@ export function SignIn({ onSignedIn }: { onSignedIn: (u: SessionUser) => void })
             </button>
           </form>
 
+          {openRoles && (
+            <div className="auth-roles">
+              <div className="auth-roles-label">Explore as</div>
+              <div className="auth-roles-pills">
+                {["legal", "producer", "editor"].map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    className={role === r ? "on" : ""}
+                    onClick={() => {
+                      setRole(r);
+                      onPickRole?.(r);
+                    }}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+              <p className="auth-roles-note">
+                Open for this deployment so you can try every control. Whatever
+                you choose, the decision is recorded against your email — and a
+                production deployment grants roles instead.
+              </p>
+            </div>
+          )}
+
           <div className="auth-or">
             <span>or</span>
           </div>
@@ -150,8 +188,9 @@ export function SignIn({ onSignedIn }: { onSignedIn: (u: SessionUser) => void })
           </button>
 
           <p className="auth-note">
-            New accounts can read every finding and record no decisions. Ask
-            your clearance lead to be added as legal or producer.
+            {openRoles
+              ? "Pick a role above to explore with — you can switch it at any time once you are inside."
+              : "New accounts can read every finding and record no decisions. Ask your clearance lead to be added as legal or producer."}
           </p>
         </div>
 

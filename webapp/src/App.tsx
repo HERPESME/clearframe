@@ -35,6 +35,9 @@ export default function App() {
   // not yet know, so the app never flashes a sign-in screen at someone who is
   // already signed in — or a review screen at someone who is not.
   const [authOn, setAuthOn] = useState<boolean | null>(null);
+  // This deployment lets a visitor choose a role rather than be granted one.
+  // A demo has nobody to ask; it must be labelled, never assumed.
+  const [openRoles, setOpenRoles] = useState(false);
   const [user, setUser] = useState<SessionUser | null>(null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -45,6 +48,7 @@ export default function App() {
       .then((m) => {
         setMode(m.mode);
         setAuthOn(m.auth);
+        setOpenRoles(m.open_roles);
         setUser(m.user);
       })
       .catch(() => setAuthOn(false));
@@ -214,7 +218,13 @@ export default function App() {
   // has nothing to show a stranger — not the findings, not the footage, and
   // certainly not the upload form that starts a paid pipeline run.
   if (authOn && !user) {
-    return <SignIn onSignedIn={setUser} />;
+    return (
+      <SignIn
+        onSignedIn={setUser}
+        openRoles={openRoles}
+        onPickRole={(r) => changeRole(r as Role)}
+      />
+    );
   }
 
   if (mission) {
@@ -392,10 +402,10 @@ export default function App() {
           findings
         </span>
         <span className="spacer" />
-        {authOn && user ? (
+        {authOn && user && !openRoles ? (
           // A role you can prove. The switcher below is honest only when there
-          // is nobody to ask — with auth on, the server decides and the client
-          // saying otherwise is exactly the bypass that was closed.
+          // is nobody to ask — with auth on and roles granted, the server
+          // decides and the client saying otherwise is the bypass that closed.
           <div className="whoami" title={user.email ?? user.uid}>
             <span className="whoami-name">{user.name || user.email || user.uid}</span>
             <span className="whoami-role">{user.role}</span>
@@ -423,6 +433,26 @@ export default function App() {
             <span className="role-hint">
               {role === "editor" ? "read-only" : "can record decisions"}
             </span>
+            {openRoles && user && (
+              <div className="whoami" title={user.email ?? user.uid}>
+                <span
+                  className="whoami-role open"
+                  title="Roles are open on this deployment so anyone can try every control. Your decisions are still recorded against your email."
+                >
+                  chosen
+                </span>
+                <span className="whoami-name">
+                  {user.name || user.email || user.uid}
+                </span>
+                <button
+                  type="button"
+                  className="topbtn"
+                  onClick={() => void signOut().then(() => setUser(null))}
+                >
+                  sign out
+                </button>
+              </div>
+            )}
           </>
         )}
         <button

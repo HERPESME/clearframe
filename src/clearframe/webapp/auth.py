@@ -68,6 +68,30 @@ def auth_enabled(env=None) -> bool:
     return (env.get("CLEARFRAME_AUTH") or "").strip().lower() == "firebase"
 
 
+def open_roles(env=None) -> bool:
+    """May a signed-in visitor choose which role to act in?
+
+    Granting a role by editing an allowlist is right for a production and
+    useless for a public demo. Someone opening the deployed URL cannot email
+    the author and wait to be made `legal`, and an app that shows them a
+    read-only view of every interesting control has not really been seen.
+
+    So selection is a MODE and never a default. Off — which is what you get
+    unless this is set — the role comes from the verified user and the header
+    is not evidence. On, anyone signed in may act in any role, and the UI has
+    to say so, because a self-selected role presented as governance is worse
+    than no governance at all.
+
+    Two things do not change when it is on: you still have to sign in, and the
+    decision is still recorded against the verified email of whoever pressed
+    the button. Choosing a role is not inventing a person.
+    """
+    env = os.environ if env is None else env
+    return (env.get("CLEARFRAME_OPEN_ROLES") or "").strip().lower() in {
+        "1", "true", "yes", "on",
+    }
+
+
 def firebase_web_config(env=None) -> dict:
     """The public client config, served from env rather than committed.
 
@@ -110,6 +134,16 @@ def verify_token(raw: str) -> dict:
     Imported lazily so `firebase-admin` stays an optional extra: the deployed
     demo container installs base dependencies only and has no Google packages
     in it at all.
+
+    Known and accepted: this checks the signature, issuer, audience and expiry
+    — not revocation. A user deleted or disabled in the Firebase console keeps
+    access until their token expires, up to an hour. Observed directly while
+    testing: a browser holding the cookie of an account deleted moments before
+    walked straight past the gate. `check_revoked=True` closes it and costs a
+    network round trip on EVERY request, which this middleware makes on every
+    call including the media and grounding ones. If that hour ever matters,
+    the fix is revocation checking plus a short-lived cache of the result, not
+    turning the flag on as it stands.
     """
     import firebase_admin
     from firebase_admin import auth as fb_auth
