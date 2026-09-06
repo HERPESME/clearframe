@@ -23,6 +23,12 @@ from clearframe.storage.index import (
     LocalProductionIndex,
     ProductionIndex,
 )
+from clearframe.storage.users import (
+    FirestoreUserDirectory,
+    LocalUserDirectory,
+    UserDirectory,
+    UserRecord,
+)
 from clearframe.storage.queue import (
     AnalysisJob,
     CloudTasksJobQueue,
@@ -42,6 +48,8 @@ __all__ = [
     "LocalBlobStore",
     "LocalProductionIndex",
     "ProductionIndex",
+    "UserDirectory",
+    "UserRecord",
     "build_backends",
     "build_queue",
     "check_key",
@@ -51,6 +59,8 @@ __all__ = [
 class Backends(NamedTuple):
     blobs: BlobStore
     index: ProductionIndex
+    # Who has used this deployment. NOT credentials — Firebase owns those.
+    users: UserDirectory
     # The clearance record itself. Local mode keeps `LocalJsonStore` — the exact
     # object and the exact paths it has always written — because an existing
     # working directory must keep working and forty tests hand-write those files.
@@ -77,7 +87,12 @@ def build_backends(cfg: ClearFrameConfig, out_root: Path) -> Backends:
         # State in the bucket, not the container. `/tmp` on Cloud Run is a
         # per-instance tmpfs: it is gone a minute after the last request, and it
         # is not shared with the worker that is doing the analysis.
-        return Backends(blobs=blobs, index=index, store=BlobStateStore(blobs, index))
+        return Backends(
+            blobs=blobs,
+            index=index,
+            users=FirestoreUserDirectory(cfg.project),
+            store=BlobStateStore(blobs, index),
+        )
     from clearframe.store import LocalJsonStore
 
     return Backends(
@@ -86,6 +101,7 @@ def build_backends(cfg: ClearFrameConfig, out_root: Path) -> Backends:
         # globs `state/*.json` and would return index files as productions —
         # the same trap that made `licences.json` a reserved name there.
         index=LocalProductionIndex(out_root / "index", state_dir=out_root / "state"),
+        users=LocalUserDirectory(out_root / "users"),
         store=LocalJsonStore(out_root / "state"),
     )
 

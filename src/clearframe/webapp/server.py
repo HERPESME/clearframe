@@ -380,6 +380,22 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
             user = auth.user_from_token(raw)
         except Exception:
             raise HTTPException(status_code=401, detail="Could not verify that sign-in.")
+        # Record the person, not their credentials — Firebase owns those and a
+        # second copy of a password hash is the one thing nobody should keep.
+        # This is what the deployment itself knows: what they call themselves,
+        # what role they have been working as, when they first appeared.
+        # Firebase can say an account exists and nothing about what it did here.
+        try:
+            backends.users.seen(
+                user.uid,
+                email=user.email,
+                name=user.name,
+                email_verified=user.email_verified,
+                role=user.role,
+            )
+        except Exception:
+            # A directory write must never cost somebody their sign-in.
+            log.exception("could not record the sign-in for %s", user.uid)
         response = JSONResponse(user.model_dump())
         response.set_cookie(
             auth.SESSION_COOKIE,
