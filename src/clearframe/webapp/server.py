@@ -41,6 +41,13 @@ from clearframe.review import (
     refresh_freshness,
 )
 from clearframe.events import EventLog
+from clearframe.grounding import (
+    GroundStore,
+    build_client as grounding_build_client,
+    measure_frame,
+    plan_seconds,
+    warm,
+)
 from clearframe.runner import HEARTBEAT_EVERY_S, beat
 from clearframe.stages.dossier import ReviewPendingError
 from clearframe.storage import (
@@ -218,27 +225,12 @@ def _use_context(raw: str):
 def build_grounding_client(cfg):
     """The client that locates known labels on a still frame.
 
-    Separate from `build_context` because grounding is not a pipeline stage —
-    it answers an interactive question about one moment, long after the run
-    finished. Demo mode gets the fixture twin, so the identical parser and the
-    identical drawing code run with no credentials and no network.
+    Kept as a name here because it is the seam the endpoint tests patch, but the
+    implementation lives in `grounding` — the worker builds one too, and two
+    copies of "which model, and does demo mode get the fixture twin" is exactly
+    the kind of duplication that drifts.
     """
-    if cfg.mode == "live":
-        from clearframe.integrations.gemini_live import LiveGeminiClient
-
-        # The configured model, like every other caller (see pipeline.py). This
-        # used to fall through to the hard-coded default, so grounding ignored
-        # CLEARFRAME_GEMINI_MODEL and paid the 404-then-fallback round trip on
-        # a model the rest of the run had already given up on.
-        return LiveGeminiClient(cfg.project, cfg.location, model=cfg.gemini_model)
-
-    from pathlib import Path as _Path
-
-    from clearframe.integrations.gemini_client import FixtureGeminiClient
-
-    return FixtureGeminiClient(
-        _Path(__file__).resolve().parents[1] / "integrations" / "fixtures"
-    )
+    return grounding_build_client(cfg)
 
 
 def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
@@ -1037,16 +1029,30 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
             _grounding_clients[key] = build_grounding_client(cfg)
         return _grounding_clients[key]
 
+    def _ground_store(pid: str) -> GroundStore:
+        return GroundStore(backends.blobs, pid, _media_version(pid))
+
+    def _hit(at_s: float, boxes: dict) -> dict:
+        return {"at_s": at_s, "boxes": boxes, "grounded": True, "cached": True}
+
     async def _ground_second(pid: str, at_s: float, here: list) -> dict:
-        """One measurement per second per film, however many ask for it."""
+        """One measurement per second per film, however many ask for it.
+
+        Three tiers, and the middle one is what makes the feature work in the
+        deployed topology at all: **memory (11-14ms) -> the blob store (~30-50ms)
+        -> Gemini (8-14s)**. The worker measures during the run and writes to the
+        bucket; this is where the API reads that back. Without it the analysis
+        container's work was invisible to the one serving `/ground`, and with
+        `--max-instances=2` two API instances paid Gemini separately for the
+        same frame.
+
+        A blob MISS is not an answer. It falls through to measuring, never to
+        `grounded: false` — that distinction is the whole contract the player's
+        four-answer logic rests on.
+        """
         key = (pid, _media_version(pid), int(at_s))
         if key in _ground_cache:
-            return {
-                "at_s": at_s,
-                "boxes": _ground_cache[key],
-                "grounded": True,
-                "cached": True,
-            }
+            return _hit(at_s, _ground_cache[key])
         waiting = _ground_inflight.get(key)
         if waiting is not None:
             # Someone is already measuring this exact frame. Their answer is
@@ -1058,18 +1064,19 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
         _ground_inflight[key] = mine
         body = {"at_s": at_s, "boxes": {}, "grounded": False}
         try:
-            async with _ground_gate:
-                # Re-checked inside the gate: while this call queued, the
-                # answer may have arrived from a warm-up that got there first.
-                if key in _ground_cache:
-                    body = {
-                        "at_s": at_s,
-                        "boxes": _ground_cache[key],
-                        "grounded": True,
-                        "cached": True,
-                    }
-                else:
-                    body = await _measure_frame(pid, at_s, here, key)
+            stored = await asyncio.to_thread(_ground_store(pid).read, int(at_s))
+            if stored is not None:
+                _ground_cache[key] = stored
+                body = _hit(at_s, stored)
+            else:
+                async with _ground_gate:
+                    # Re-checked inside the gate: while this call queued, the
+                    # answer may have arrived from a warm-up that got there
+                    # first.
+                    if key in _ground_cache:
+                        body = _hit(at_s, _ground_cache[key])
+                    else:
+                        body = await _measure_frame(pid, at_s, here, key)
         finally:
             _ground_inflight.pop(key, None)
             if not mine.done():
@@ -1103,33 +1110,18 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
         if found is None:
             return {"at_s": at_s, "boxes": {}, "grounded": False}
 
-        # ffmpeg is a subprocess, and a subprocess call in an async handler
-        # blocks the event loop exactly as a synchronous SDK call does.
-        frame = await asyncio.to_thread(extract_frame, found[0], at_s)
-        if frame is None:
-            # Nobody looked at this frame. Saying "grounded" would tell the
-            # player to suppress every box on it.
-            return {"at_s": at_s, "boxes": {}, "grounded": False}
-
         cfg = ClearFrameConfig.from_env(os.environ)
-        try:
-            located = await _grounding_client(cfg).ground_frame(
-                # One entry per distinct label: asking twice about the same
-                # words invites the model to answer twice for one object.
-                frame, list(dict.fromkeys(el.label for el in here))
-            )
-        except Exception as exc:  # a refined box is a nicety, never a failure
-            log.warning("grounding failed for %s at %.2fs: %s", pid, at_s, exc)
+        boxes = await measure_frame(found[0], at_s, here, _grounding_client(cfg))
+        if boxes is None:
+            # Nobody looked at this frame, or the model refused. Saying
+            # "grounded" would tell the player to suppress every box on it.
             return {"at_s": at_s, "boxes": {}, "grounded": False}
 
-        # Keyed by element id, and a LIST: the client draws against its own
-        # state, a label is not a stable identifier, and one finding can be in
-        # two places in the same frame.
-        boxes = {
-            eid: [b.model_dump() for b in found]
-            for eid, found in bind_ground_boxes(here, located, at_s).items()
-        }
         _ground_cache[key] = boxes
+        # And where the other container can read it. A frame a reviewer paused
+        # on is measured exactly once for the whole deployment, not once per
+        # instance.
+        await asyncio.to_thread(_ground_store(pid).write, int(at_s), boxes)
         return {"at_s": at_s, "boxes": boxes, "grounded": True}
 
     # Productions whose boxes have already been warmed in this process, and
@@ -1143,113 +1135,74 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
     _pregrounded: set[tuple[str, str]] = set()
     _preground_progress: dict[str, dict] = {}
 
-    def _plan_seconds(state) -> list[int]:
-        """Which whole seconds to measure, most useful first.
-
-        Every whole second something is on screen, because a reviewer pauses
-        where they pause — not on the midpoint of an appearance. Midpoints
-        first so the moments most likely to be jumped to are warm earliest; a
-        clip long enough to exceed the cap gets its midpoints regardless.
-        """
-        midpoints, filler = set(), set()
-        for el in state.elements:
-            if not el.timing_reliable:
-                continue
-            for r in el.time_ranges:
-                midpoints.add(int((r.start_s + r.end_s) / 2))
-                filler.update(range(int(r.start_s), int(r.end_s) + 1))
-        return sorted(midpoints) + sorted(filler - midpoints)
-
     def _start_preground(pid: str, state) -> dict | None:
         """Seed the progress SYNCHRONOUSLY, then measure in the background.
 
-        The seeding is not tidiness. The player polls this endpoint from a
-        child effect, and React runs child effects before its parent's — so
-        the first GET goes out before the POST that starts the warm-up exists.
-        If progress only appeared once the task got a turn, that poll saw
-        "not running", latched off, and the reviewer watched an eight-second
-        model call with nothing on screen saying it was happening.
+        The seeding is not tidiness. The player polls this endpoint from a child
+        effect, and React runs child effects before its parent's — so the first
+        GET goes out before the POST that starts the warm-up exists. If progress
+        only appeared once the task got a turn, that poll saw "not running",
+        latched off, and the reviewer watched an eight-second model call with
+        nothing on screen saying it was happening.
+
+        The measuring itself is `grounding.warm`, shared with the worker, so the
+        two transports cannot drift on which seconds get measured or what the
+        cap means. What is NOT shared is the measurer: this one goes through
+        `_ground_second`, which owns the in-memory tier and the in-flight map, so
+        a reviewer pausing during the warm-up joins the call already in progress
+        instead of buying the same rectangles twice.
         """
-        ordered = _plan_seconds(state)
-        if not ordered:
+        if not plan_seconds(state):
             return None
-        seconds = ordered[:PREGROUND_MAX_FRAMES]
-        progress = {
-            "total": len(seconds),
-            "done": 0,
-            "running": True,
-            "skipped": max(0, len(ordered) - len(seconds)),
-        }
+        progress: dict = {"total": 0, "done": 0, "running": True, "skipped": 0}
         _preground_progress[pid] = progress
         _pregrounded.add((pid, _media_version(pid)))
-        if len(ordered) > len(seconds):
-            # Never a silent cap: a second that was not warmed still works, it
-            # is just slow, and the reviewer should not have to guess which.
-            log.info(
-                "pre-grounding %d of %d frame(s) for %s (capped at %d; the rest "
-                "are measured on demand)",
-                len(seconds), len(ordered), pid, PREGROUND_MAX_FRAMES,
-            )
-        else:
-            log.info("pre-grounding %d frame(s) for %s", len(seconds), pid)
-        asyncio.create_task(_preground(pid, state, seconds, progress))
+        asyncio.create_task(_preground(pid, state, progress))
         return progress
 
-    async def _preground(pid: str, state, seconds: list[int], progress: dict) -> None:
-        """Measure the moments that matter before anyone pauses on them.
-
-        Grounding a cold frame is a Gemini call on a still and takes about
-        eight seconds. On demand that is the whole interaction: pause, wait,
-        and meanwhile the only honest thing to draw is nothing, because the
-        scan's rectangle is a union across the whole appearance and is wrong
-        at any given instant.
-
-        The appearance timecodes are already known, so the wait is avoidable.
-        Every second something is on screen, measured in the background once
-        triage has fixed the boxes, makes the moments a reviewer actually
-        lands on warm before they get there. Failures are swallowed: a cold
-        second still works the old way, just slowly.
-
-        Concurrency, de-duplication and caching all belong to `_ground_second`
-        now. This used to hold its own semaphore, so two warm-ups running at
-        once ran at twice the intended rate, and it checked the cache outside
-        that gate, so a second could be measured twice.
-        """
+    async def _preground(pid: str, state, progress: dict) -> None:
+        """Measure the moments that matter before anyone pauses on them."""
         # Which film this warm-up is for. If the footage changes underneath it,
         # every remaining second belongs to a film nobody is looking at any
-        # more — and its answers would be cached against the new one's id.
+        # more — and its answers would be filed against the new one.
         version = _media_version(pid)
 
-        async def one(second: int) -> None:
+        async def measure(at_s: float, here: list):
             if _media_version(pid) != version:
-                return
-            at_s = float(second)
-            here = [
-                el for el in state.elements
-                if el.timing_reliable
-                and any(r.start_s <= at_s <= r.end_s for r in el.time_ranges)
-            ]
-            try:
-                if here:
-                    await _ground_second(pid, at_s, here)
-            except Exception as exc:  # a warm cache is a nicety, never a failure
-                log.warning("pre-grounding %s at %ss failed: %s", pid, second, exc)
-            finally:
-                progress["done"] += 1
+                return None
+            await _ground_second(pid, at_s, here)
+            # Already stored: `_ground_second` has to write the blob anyway,
+            # because a reviewer pausing on a cold frame must leave a
+            # measurement behind for everyone else.
+            return None
 
-        try:
-            await asyncio.gather(*(one(s) for s in seconds), return_exceptions=True)
-        finally:
-            progress["running"] = False
-        log.info("pre-grounding complete for %s (%d cached)", pid, len(_ground_cache))
+        await warm(
+            GroundStore(backends.blobs, pid, version),
+            state,
+            measure,
+            cap=PREGROUND_MAX_FRAMES,
+            progress=progress,
+        )
 
     @app.get("/api/productions/{pid}/preground")
-    def preground_progress(pid: str, request: Request):
-        """How much of this production has had its boxes measured."""
+    async def preground_progress(pid: str, request: Request):
+        """How much of this production has had its boxes measured.
+
+        This instance's own warm-up first, then whatever the WORKER published.
+        In the deployed topology the container measuring the boxes is not the
+        one being polled, so without the second lookup the client's
+        "measuring boxes N/M" reported nothing while the work was happening in
+        another container.
+        """
         _require_owner(request, pid)
-        return _preground_progress.get(
-            pid, {"total": 0, "done": 0, "running": False, "skipped": 0}
-        )
+        mine = _preground_progress.get(pid)
+        if mine is not None:
+            return mine
+        theirs = await asyncio.to_thread(_ground_store(pid).read_progress)
+        # `total: 0` means nobody has started. The client distinguishes that
+        # from finished (a total, not running) and latches its poll off only on
+        # the second, so the zero must not be mistaken for a completed run.
+        return theirs or {"total": 0, "done": 0, "running": False, "skipped": 0}
 
     @app.post("/api/productions/{pid}/preground")
     async def preground(pid: str, request: Request):
@@ -1267,6 +1220,14 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
             return {"status": "already-warming", **running}
         if (pid, _media_version(pid)) in _pregrounded:
             return {"status": "warm", **(running or {})}
+        # The worker warms during the run, so by the time the client opens the
+        # production the work is usually already done. Re-running it here would
+        # buy 150 frames a second time for rectangles the bucket already holds.
+        theirs = await asyncio.to_thread(_ground_store(pid).read_progress)
+        if theirs and not theirs.get("running") and theirs.get("total"):
+            return {"status": "warm", **theirs}
+        if theirs and theirs.get("running"):
+            return {"status": "already-warming", **theirs}
         _start_preground(pid, state)
         return {
             "status": "warming",

@@ -16,6 +16,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import logging
+import os
 from pathlib import Path
 
 from clearframe.config import ClearFrameConfig
@@ -154,6 +155,8 @@ async def run_analysis(
     ctx.store = store
     ctx.state = state  # resume from what is persisted, not from a fresh model
 
+    warming: list[asyncio.Task] = []
+
     def listen(event: dict) -> None:
         run_log.append(event)
         stage = event.get("stage")
@@ -163,6 +166,19 @@ async def run_analysis(
                 pid, stage, "complete" if kind == "stage_complete" else "running"
             )
             backends.index.heartbeat(pid)
+        # Warm the boxes at the EARLIEST moment they are final, which is triage.
+        #
+        # Triage fixes the element ids, labels, appearances and rectangles;
+        # everything after it changes what is KNOWN about a finding, never where
+        # or when it is on screen. Warming a 50s clip takes ~100s and the run
+        # still has ~370s of corroborate, research and court to go, so it hides
+        # entirely inside work that is waiting on the network anyway.
+        #
+        # This hook existed only in `create_production`'s closure, which runs
+        # under `InProcessJobQueue` and nowhere else — so on the deployed site
+        # nothing was ever warmed and every pause paid fourteen seconds.
+        if kind == "stage_complete" and stage == "triage" and not warming:
+            warming.append(asyncio.create_task(_warm_boxes(pid, cfg, backends, store)))
 
     ctx.listener = listen
     heart = asyncio.create_task(beat(backends.index, pid, HEARTBEAT_EVERY_S))
@@ -170,6 +186,12 @@ async def run_analysis(
         await Pipeline(build_demo_pipeline()).run(ctx)
         return "ran"
     finally:
+        # Awaited, not abandoned. Cloud Run throttles CPU to near-zero once a
+        # response is sent — the entire reason this container exists — so a task
+        # still running when `run_analysis` returns would be frozen mid-warm.
+        # That is the original background-task bug, one layer down.
+        if warming:
+            await asyncio.gather(*warming, return_exceptions=True)
         # Cancel first, and await the cancellation. A beat still in flight when
         # the lease is cleared would put it straight back, and a run that has
         # finished or crashed would then read as live until the window lapsed —
@@ -185,6 +207,57 @@ async def run_analysis(
 
 MEDIA_SUFFIXES = (".mp4", ".m4v", ".mov", ".webm")
 
+# How many frames one production may warm. Each is a model round trip on a still
+# — about eight seconds and a fraction of a cent — so a feature-length upload
+# must not try to measure every second of itself. Same name and same default as
+# the API's, because it is the same budget.
+PREGROUND_MAX_FRAMES = int(os.environ.get("CLEARFRAME_PREGROUND_MAX", "150"))
+
+
+async def _warm_boxes(pid: str, cfg: ClearFrameConfig, backends: Backends, store) -> None:
+    """Measure every second something is on screen, into the shared store.
+
+    Reloaded from the store rather than closed over: triage has just written it,
+    and the whole point is to measure what triage decided rather than what the
+    state looked like when the run began.
+
+    Never raises. It runs inside the analysis request, and a warm cache is a
+    nicety — failing a run that has already done everything the user asked for,
+    because a rectangle could not be measured, would be a poor trade.
+    """
+    from clearframe import grounding
+
+    try:
+        state = await asyncio.to_thread(store.load, pid)
+        media_key = _media_key(pid, backends)
+        if media_key is None:
+            return
+        footage = await asyncio.to_thread(backends.blobs.local_path, media_key)
+        if footage is None:
+            return
+        version = await asyncio.to_thread(backends.blobs.version, media_key) or ""
+        client = grounding.build_client(cfg)
+
+        async def measure(at_s: float, here: list):
+            return await grounding.measure_frame(footage, at_s, here, client)
+
+        await grounding.warm(
+            grounding.GroundStore(backends.blobs, pid, version),
+            state,
+            measure,
+            cap=PREGROUND_MAX_FRAMES,
+        )
+    except Exception:
+        log.warning("could not warm the boxes for %s", pid, exc_info=True)
+
+
+def _media_key(pid: str, backends: Backends) -> str | None:
+    for suffix in MEDIA_SUFFIXES:
+        key = f"media/{pid}/footage{suffix}"
+        if backends.blobs.exists(key):
+            return key
+    return None
+
 
 def _with_local_footage(state, pid: str, backends: Backends):
     """Point `footage_uri` at a file this container actually has.
@@ -194,13 +267,11 @@ def _with_local_footage(state, pid: str, backends: Backends):
     stored uri is only wrong when it was written by a different container, and
     the store is the thing that knows.
     """
-    for suffix in MEDIA_SUFFIXES:
-        key = f"media/{pid}/footage{suffix}"
-        if not backends.blobs.exists(key):
-            continue
+    key = _media_key(pid, backends)
+    if key is not None:
         local = backends.blobs.local_path(key)
         if local is None:
-            continue
+            return state
         if str(local) == state.production.footage_uri:
             return state
         log.info("resolved footage for %s to %s", pid, local)

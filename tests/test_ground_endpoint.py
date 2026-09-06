@@ -40,7 +40,7 @@ def _client(tmp_path, monkeypatch, calls):
     (media / "footage.mp4").write_bytes(b"\x00" * 2048)
 
     monkeypatch.setattr(
-        "clearframe.webapp.server.extract_frame",
+        "clearframe.grounding.extract_frame",
         lambda path, at_s, **kw: b"\xff\xd8frame",
     )
 
@@ -98,7 +98,7 @@ def test_an_unavailable_frame_is_not_an_error(tmp_path, monkeypatch):
     calls = []
     c = _client(tmp_path, monkeypatch, calls)
     monkeypatch.setattr(
-        "clearframe.webapp.server.extract_frame", lambda path, at_s, **kw: None
+        "clearframe.grounding.extract_frame", lambda path, at_s, **kw: None
     )
 
     r = c.get("/api/productions/p1/ground", params={"at_s": 12.0})
@@ -156,7 +156,7 @@ def test_an_unavailable_frame_is_not_reported_as_grounded(tmp_path, monkeypatch)
     calls = []
     c = _client(tmp_path, monkeypatch, calls)
     monkeypatch.setattr(
-        "clearframe.webapp.server.extract_frame", lambda path, at_s, **kw: None
+        "clearframe.grounding.extract_frame", lambda path, at_s, **kw: None
     )
     body = c.get("/api/productions/p1/ground", params={"at_s": 12.0}).json()
     assert body["grounded"] is False
@@ -328,7 +328,7 @@ def _client_with(tmp_path, monkeypatch, elements, grounder):
     media.mkdir(parents=True)
     (media / "footage.mp4").write_bytes(b"\x00" * 2048)
     monkeypatch.setattr(
-        "clearframe.webapp.server.extract_frame",
+        "clearframe.grounding.extract_frame",
         lambda path, at_s, **kw: b"\xff\xd8frame",
     )
     monkeypatch.setattr(
@@ -466,7 +466,7 @@ async def test_one_second_is_measured_once_however_many_ask_at_once(tmp_path, mo
     media.mkdir(parents=True)
     (media / "footage.mp4").write_bytes(b"\x00" * 2048)
     monkeypatch.setattr(
-        "clearframe.webapp.server.extract_frame",
+        "clearframe.grounding.extract_frame",
         lambda path, at_s, **kw: b"\xff\xd8frame",
     )
     monkeypatch.setattr(
