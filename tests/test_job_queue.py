@@ -12,10 +12,17 @@ run it when a slot frees rather than to tell someone their film was refused.
 """
 
 import asyncio
+from datetime import timedelta
+from pathlib import Path
 
 import pytest
 
-from clearframe.storage.queue import AnalysisJob, InProcessJobQueue
+from clearframe.storage.queue import (
+    DISPATCH_DEADLINE_S,
+    AnalysisJob,
+    CloudTasksJobQueue,
+    InProcessJobQueue,
+)
 
 pytestmark = pytest.mark.asyncio
 
@@ -130,3 +137,78 @@ async def test_the_job_carries_its_owner():
     await queue.drain()
 
     assert AnalysisJob(production_id="p1", owner_uid="alice").owner_uid == "alice"
+
+
+class _FakeTasksClient:
+    """Captures the request dict Cloud Tasks would have received."""
+
+    last_request: dict = {}
+
+    def create_task(self, parent, task):
+        _FakeTasksClient.last_request = task
+
+        class _Created:
+            name = f"{parent}/tasks/captured"
+
+        return _Created()
+
+
+def _capture_task_request(monkeypatch, job: AnalysisJob) -> dict:
+    """Build a task through the real code path with the SDK stubbed out."""
+    import sys
+    import types
+
+    tasks_v2 = types.SimpleNamespace(
+        CloudTasksClient=_FakeTasksClient,
+        HttpMethod=types.SimpleNamespace(POST="POST"),
+    )
+    google_cloud = types.ModuleType("google.cloud")
+    google_cloud.tasks_v2 = tasks_v2
+    monkeypatch.setitem(sys.modules, "google.cloud", google_cloud)
+    monkeypatch.setitem(sys.modules, "google.cloud.tasks_v2", tasks_v2)
+
+    queue = CloudTasksJobQueue(
+        queue_path="projects/p/locations/l/queues/q",
+        worker_url="https://worker.example",
+        service_account="sa@example.iam.gserviceaccount.com",
+    )
+    queue._create(job)  # noqa: SLF001 - the thing under test
+    return _FakeTasksClient.last_request
+
+
+async def test_a_task_states_how_long_it_may_run(monkeypatch):
+    """Cloud Tasks defaults an HTTP task to a 600s dispatch deadline.
+
+    The worker is deployed `--timeout=1800` on the belief that a task is held
+    for thirty minutes; 1800s is the maximum a deadline may be SET to, not the
+    default. Unset, a run over ten minutes has its ack connection severed and
+    the task redelivered while the first attempt is still going — and still
+    spending. A measured deployed run was 538s, which cleared the real limit by
+    about a minute.
+    """
+    request = _capture_task_request(monkeypatch, AnalysisJob(production_id="p1"))
+
+    assert "dispatch_deadline" in request, (
+        "no dispatch deadline means Cloud Tasks' 600s default, not the 1800s "
+        "the worker is deployed for"
+    )
+    # A timedelta rather than a protobuf Duration: proto-plus marshals it,
+    # and the credential-free suite has no `google.protobuf` to import.
+    assert request["dispatch_deadline"] == timedelta(seconds=DISPATCH_DEADLINE_S)
+
+
+async def test_the_deadline_matches_what_the_worker_is_deployed_with():
+    """Two numbers that have to agree, in two files that cannot see each other.
+
+    `cloudbuild.yaml` sets `--timeout` on the worker service; this sets how long
+    the queue will wait for that service. A deadline longer than the request
+    timeout would retry a task the worker had already given up on.
+    """
+    worker_timeout = 1800
+    assert DISPATCH_DEADLINE_S <= worker_timeout
+
+    build = (Path(__file__).resolve().parents[1] / "cloudbuild.yaml").read_text()
+    assert f"--timeout={worker_timeout}" in build, (
+        "the worker's deployed request timeout moved; the dispatch deadline "
+        "has to move with it"
+    )

@@ -40,6 +40,26 @@ log = logging.getLogger("clearframe.queue")
 # and deployed behaviour agree.
 DEFAULT_LIMIT = 5
 
+# How long Cloud Tasks will hold the ack connection open for one analysis.
+#
+# This has to be SET. Left unset, an HTTP task gets Cloud Tasks' default of
+# **600 seconds** — while the worker is deployed `--timeout=1800` on the belief
+# that a task is held for thirty minutes. 1800s is the maximum a deadline may be
+# raised to, not what you get for free, and the two numbers were never made to
+# agree.
+#
+# The failure is expensive rather than loud: at 600s the connection is severed,
+# Cloud Tasks calls the attempt failed and redelivers, and Cloud Run does not
+# cancel the handler that is already running. So the first attempt keeps burning
+# Gemini and Parallel calls while a second one starts on another instance. A
+# measured deployed run was 538s — under the real limit by about a minute, which
+# is why this has never been seen and would have shown up on the next longer
+# clip.
+#
+# 1800s is both the queue's maximum and the worker's request timeout, so the
+# task can never outlive the service it is waiting for.
+DISPATCH_DEADLINE_S = 1800
+
 
 class AnalysisJob(BaseModel):
     """Everything a worker needs to run one analysis.
@@ -182,6 +202,7 @@ class CloudTasksJobQueue:
 
     def _create(self, job: AnalysisJob) -> str:
         import json
+        from datetime import timedelta
 
         from google.cloud import tasks_v2
 
@@ -196,6 +217,10 @@ class CloudTasksJobQueue:
             # The task's own name makes the enqueue idempotent: a double-submit
             # of the same production collides rather than paying twice.
             "name": f"{self._queue}/tasks/{job.production_id}",
+            # A `timedelta` rather than a `duration_pb2.Duration`: proto-plus
+            # marshals it, and this way nothing here needs `google.protobuf`,
+            # which the credential-free base install does not have.
+            "dispatch_deadline": timedelta(seconds=DISPATCH_DEADLINE_S),
         }
         if self._sa:
             request["http_request"]["oidc_token"] = {
