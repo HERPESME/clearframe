@@ -45,3 +45,42 @@ def test_the_duration_drives_how_widely_audio_is_sampled():
     spread = sample_offsets(probe_duration_s(CLIP))
     assert len(spread) > 1
     assert spread[-1] > 0
+
+
+def test_one_ffmpeg_call_answers_both_questions(tmp_path, monkeypatch):
+    """Duration and frame rate come off the same stderr banner.
+
+    They were two `subprocess.run` calls parsing identical output, both made
+    synchronously on the event loop inside the upload handler. Two process
+    spawns and two loop stalls for one banner.
+    """
+    from clearframe import media
+
+    clip = tmp_path / "footage.mp4"
+    clip.write_bytes(b"\x00" * 32)
+    spawns = []
+
+    class Result:
+        stderr = (
+            "  Duration: 00:00:41.53, start: 0.000000, bitrate: 499 kb/s\n"
+            "  Stream #0:0: Video: h264, yuv420p, 1280x720 [SAR 1:1 DAR 16:9], "
+            "499 kb/s, 30 fps, 30 tbr, 15360 tbn\n"
+        )
+
+    def _run(cmd, **kw):
+        spawns.append(cmd)
+        return Result()
+
+    monkeypatch.setattr(media.subprocess, "run", _run)
+
+    duration, fps = media.probe_media(clip)
+
+    assert (duration, fps) == (41.53, 30.0)
+    assert len(spawns) == 1
+
+
+def test_an_unprobeable_file_degrades_to_zeroes(tmp_path):
+    """The contract both probes already had: the caller keeps what it had."""
+    from clearframe import media
+
+    assert media.probe_media(tmp_path / "nothing.mp4") == (0.0, 0.0)

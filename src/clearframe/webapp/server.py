@@ -16,7 +16,7 @@ from pydantic import BaseModel
 from clearframe.config import ClearFrameConfig, validate_live
 from clearframe.dossier import pending_ids
 from clearframe.licensing import assign_ids, parse_licence_csv, parse_licence_json
-from clearframe.media import extract_frame, probe_duration_s, probe_fps
+from clearframe.media import extract_frame, probe_media
 
 log = logging.getLogger("clearframe.webapp")
 from clearframe.models import Production
@@ -457,6 +457,11 @@ def create_app(out_root: Path) -> FastAPI:
                     )
                 out.write(chunk)
 
+        # One ffmpeg call for both numbers, in a thread. It was two spawns
+        # parsing the same banner, run synchronously inside an async handler —
+        # so every upload stalled the whole server for the length of them.
+        probed_duration, probed_fps = await asyncio.to_thread(probe_media, target)
+
         production = Production(
             id=pid,
             title=title,
@@ -466,12 +471,12 @@ def create_app(out_root: Path) -> FastAPI:
             # against a 42ms frame instead of a 33ms one — a physical test
             # running on a guessed constant. A caller who supplies a rate other
             # than the default is trusted; otherwise ffmpeg decides.
-            fps=(fps if fps != 24.0 else (probe_fps(target) or 24.0)),
+            fps=(fps if fps != 24.0 else (probed_fps or 24.0)),
             # Measure it. The form defaults to 0.0 and nothing used to correct
             # that, so a 49-second clip declared itself zero seconds long and
             # got a single audio fingerprint sample at the head. A caller who
             # supplies a duration is trusted; otherwise ffmpeg decides.
-            duration_s=duration_s or probe_duration_s(target),
+            duration_s=duration_s or probed_duration,
             release_territories=[t.strip().upper() for t in territories.split(",") if t.strip()]
             or ["US"],
             distribution=[d.strip().upper() for d in distribution.split(",") if d.strip()],
@@ -629,7 +634,11 @@ def create_app(out_root: Path) -> FastAPI:
 
     @app.get("/api/productions/{pid}/ground")
     async def ground_frame_at(pid: str, at_s: float = 0.0):
-        state = _load(pid)
+        # In a thread: reading and validating a state file is not free, and a
+        # sync handler would land in the threadpool anyway. Doing it inline in
+        # an `async def` stalled every other request for the length of it —
+        # the same mistake the ffmpeg and Gemini calls below already avoid.
+        state = await asyncio.to_thread(_load, pid)
 
         # Only ask about elements the analysis says are on screen here. A model
         # asked to place something that is not in the frame will sometimes
@@ -807,7 +816,7 @@ def create_app(out_root: Path) -> FastAPI:
         exceed `total` and whichever finished first reported the whole warm-up
         complete while measurement was still in flight.
         """
-        state = _load(pid)
+        state = await asyncio.to_thread(_load, pid)
         running = _preground_progress.get(pid)
         if running and running.get("running"):
             return {"status": "already-warming", **running}

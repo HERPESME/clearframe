@@ -32,7 +32,17 @@ class CourtStage:
                 )
             )
 
-        opinions = await asyncio.gather(*(ctx.court.try_case(c) for c in cases))
+        # Bounded. Each case is three Gemini calls — counsel, advocate, judge —
+        # so an unbounded gather over every contested finding put twenty cases
+        # times three calls in flight at once, competing with the background
+        # box measuring for the same quota.
+        gate = asyncio.Semaphore(4)
+
+        async def _try(case):
+            async with gate:
+                return await ctx.court.try_case(case)
+
+        opinions = await asyncio.gather(*(_try(c) for c in cases))
         for case, opinion in zip(cases, opinions):
             if opinion is None:
                 continue

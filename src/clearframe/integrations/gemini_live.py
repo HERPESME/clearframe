@@ -91,6 +91,15 @@ class LiveGeminiClient:
         # Which model actually served a call on this instance. Remembered so a
         # deterministic 404 is paid for once rather than per call.
         self._serving_model: str | None = None
+        # The footage, read once. The scan passes and the auditor all send the
+        # same file; holding one Part means one read and one copy rather than
+        # three or four of a file that may be hundreds of megabytes.
+        self._video_parts: dict[str, object] = {}
+
+    def _video_part_cached(self, footage_uri: str):
+        if footage_uri not in self._video_parts:
+            self._video_parts[footage_uri] = _video_part(footage_uri)
+        return self._video_parts[footage_uri]
 
     def _client_or_create(self):
         if self._client is None:
@@ -253,7 +262,13 @@ class LiveGeminiClient:
         return await asyncio.to_thread(_run)
 
     async def _scan_with_prompt(self, footage_uri: str, prompt: str) -> ScanResult:
-        video = _video_part(footage_uri)
+        # In a thread, and memoized. `_video_part` reads the entire mp4 into
+        # memory, and this sat in the coroutine body — outside the `to_thread`
+        # below that carefully offloads the SDK call — so the read blocked the
+        # event loop while the call it fed did not. With concurrent passes plus
+        # the auditor that is three or four full reads of the same file per run,
+        # every one of them a stall and a second copy in memory.
+        video = await asyncio.to_thread(self._video_part_cached, footage_uri)
         base_contents = [video, prompt]
 
         def attempt(contents) -> tuple[ScanResult | None, str]:
