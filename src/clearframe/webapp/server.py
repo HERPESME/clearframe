@@ -20,6 +20,7 @@ from clearframe.media import extract_frame, probe_duration_s, probe_fps
 
 log = logging.getLogger("clearframe.webapp")
 from clearframe.models import Production
+from clearframe.overlay import bind_ground_boxes
 from clearframe.pipeline import (
     ANALYSIS_STAGES,
     Pipeline,
@@ -576,18 +577,20 @@ def create_app(out_root: Path) -> FastAPI:
         cfg = ClearFrameConfig.from_env(os.environ)
         try:
             located = await build_grounding_client(cfg).ground_frame(
-                frame, [el.label for el in here]
+                # One entry per distinct label: asking twice about the same
+                # words invites the model to answer twice for one object.
+                frame, list(dict.fromkeys(el.label for el in here))
             )
         except Exception as exc:  # a refined box is a nicety, never a failure
             log.warning("grounding failed for %s at %.2fs: %s", pid, at_s, exc)
             return {"at_s": at_s, "boxes": {}, "grounded": False}
 
-        # Keyed by element id: the client draws against its own state, and a
-        # label is not a stable identifier.
+        # Keyed by element id, and a LIST: the client draws against its own
+        # state, a label is not a stable identifier, and one finding can be in
+        # two places in the same frame.
         boxes = {
-            el.id: located[el.label].model_dump()
-            for el in here
-            if el.label in located
+            eid: [b.model_dump() for b in found]
+            for eid, found in bind_ground_boxes(here, located, at_s).items()
         }
         _ground_cache[key] = boxes
         return {"at_s": at_s, "boxes": boxes, "grounded": True}

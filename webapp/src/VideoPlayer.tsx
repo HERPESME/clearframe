@@ -44,7 +44,7 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
   // "never grounded" is a gap — and conflating them threw away the only
   // judgement worth having.
   const [ground, setGround] = useState<
-    Record<string, { boxes: Record<string, BBox>; grounded: boolean }>
+    Record<string, { boxes: Record<string, BBox[]>; grounded: boolean }>
   >({});
   // Seconds whose grounding call is in flight. A frame being measured RIGHT
   // NOW is a fourth answer, distinct from the three below, and the one the
@@ -217,12 +217,14 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
   // `null` means grounding looked and this element is not in the frame; a box
   // means it located it. Conflating the first two is what drew "Ray-Ban
   // Aviator Sunglasses" across a bare forehead.
-  const groundedBox = (el: Element): BBox | null | undefined => {
+  // Plural, because one finding can be in two places in one frame: the same
+  // mark on a cap and again on a box is one clearance and two rectangles.
+  const groundedBoxes = (el: Element): BBox[] | null | undefined => {
     const frame = ground[String(Math.floor(now))];
     // No answer, or an answer that failed — both fall back to the scan.
     if (!frame || !frame.grounded) return undefined;
-    const g = frame.boxes[el.id];
-    return locates(g) ? g : null;
+    const found = (frame.boxes[el.id] ?? []).filter(locates);
+    return found.length ? found : null;
   };
 
   // What the video pass measured: ONE rectangle per time range, so a union of
@@ -241,15 +243,16 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
     return el.bbox;
   };
 
-  const boxAt = (el: Element): BBox | null => {
+  const boxesAt = (el: Element): BBox[] | null => {
     // Timecodes the scan cannot have measured place a box nowhere real.
     if (el.timing_reliable === false) return null;
-    const grounded = groundedBox(el);
+    const grounded = groundedBoxes(el);
     // Once a frame HAS been grounded its answer is the whole answer, including
     // "not in this frame". Falling back then would put the video pass's guess
     // back precisely where it was checked and rejected.
     if (grounded !== undefined) return grounded;
-    return scanBox(el);
+    const scan = scanBox(el);
+    return scan ? [scan] : null;
   };
 
   // The scan's box is showing because grounding has not answered yet. Drawing
@@ -257,7 +260,7 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
   // drawing this as though it were measured read as the app being wrong. So
   // it is drawn, and drawn as an approximation.
   const isApprox = (el: Element): boolean =>
-    el.timing_reliable !== false && groundedBox(el) === undefined;
+    el.timing_reliable !== false && groundedBoxes(el) === undefined;
 
   // Boxes are drawn only while paused, and that is an honesty decision rather
   // than a tidiness one. Gemini samples video at 1 frame per second and
@@ -267,19 +270,35 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
   // precision it does not have. Held still, next to the frame it approximates,
   // it is honest about being an approximation.
   const showBoxes = paused;
-  const visible = elements
-    .map((el) => ({ el, box: boxAt(el) }))
-    .filter((v): v is { el: Element; box: BBox } => v.box !== null)
-    .filter(() => showBoxes);
+  // One entry per RECTANGLE, not per finding: a mark in two places is drawn
+  // twice and labelled twice, because an unexplained rectangle reads as a
+  // detection the tool cannot account for. Skipped entirely during playback —
+  // it was being computed four times a second and thrown away.
+  const visible = showBoxes
+    ? elements.flatMap((el) =>
+        (boxesAt(el) ?? []).map((box, i) => ({ el, box, i })),
+      )
+    : [];
+  // Findings, not rectangles: "2 boxed" means two findings are placed.
+  const boxedCount = new Set(visible.map((v) => v.el.id)).size;
+  const approxCount = new Set(
+    visible.filter((v) => isApprox(v.el)).map((v) => v.el.id),
+  ).size;
 
   // On screen but we do not know where. Worth saying — silence would read as
   // "nothing here", and inventing a rectangle would be worse than both.
-  const unlocated = elements.filter(
-    (el) =>
-      el.timing_reliable !== false &&
-      boxAt(el) === null &&
-      el.time_ranges.some((r) => now >= r.start_s && now <= r.end_s),
-  );
+  // Excludes the grounded-and-absent case on purpose. "We looked at this
+  // frame and it is not in it" is a measurement, and listing it as "position
+  // unknown" would contradict the answer the same call just gave.
+  const unlocated = showBoxes
+    ? elements.filter(
+        (el) =>
+          el.timing_reliable !== false &&
+          groundedBoxes(el) === undefined &&
+          boxesAt(el) === null &&
+          el.time_ranges.some((r) => now >= r.start_s && now <= r.end_s),
+      )
+    : [];
 
   // Detected, but with timecodes it cannot have measured — so it is on screen
   // at no moment anyone can pause on. Listed for the whole clip rather than at
@@ -323,11 +342,11 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
             height: rect.width ? `${rect.height}px` : "100%",
           }}
         >
-          {visible.map(({ el, box: b }) => {
+          {visible.map(({ el, box: b, i }) => {
             const band = risk[el.id]?.band ?? "LOW";
             const active = activeId === el.id;
             return (
-              <g key={el.id} className="ov-g" onClick={() => onPick(el.id)}>
+              <g key={`${el.id}:${i}`} className="ov-g" onClick={() => onPick(el.id)}>
                 <rect
                   x={b.xmin}
                   y={b.ymin}
@@ -342,13 +361,13 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
             );
           })}
         </svg>
-        {visible.map(({ el, box: b }) => {
+        {visible.map(({ el, box: b, i }) => {
           const band = risk[el.id]?.band ?? "LOW";
           const cov = coverage?.[el.id]?.status;
           const verdict = corroboration?.[el.id]?.verdict;
           return (
             <button
-              key={el.id}
+              key={`${el.id}:${i}`}
               className={`ov-label ${band}`}
               style={
                 rect.width
@@ -381,12 +400,17 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
         {tc(now, fps)} ·{" "}
         {showBoxes ? (
           <>
-            {visible.length} boxed
-            {visible.filter((v) => isApprox(v.el)).length > 0 && (
+            {boxedCount} boxed
+            {visible.length > boxedCount && (
               <span className="ov-unlocated">
                 {" "}
-                ({visible.filter((v) => isApprox(v.el)).length} approximate until
-                this frame is measured)
+                ({visible.length} rectangles)
+              </span>
+            )}
+            {approxCount > 0 && (
+              <span className="ov-unlocated">
+                {" "}
+                ({approxCount} approximate until this frame is measured)
               </span>
             )}
           </>

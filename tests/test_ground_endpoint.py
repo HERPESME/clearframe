@@ -49,7 +49,7 @@ def _client(tmp_path, monkeypatch, calls):
             from clearframe.models import BBox
 
             calls.append(tuple(labels))
-            return {labels[0]: BBox(ymin=0.1, xmin=0.2, ymax=0.3, xmax=0.4)}
+            return {labels[0]: [BBox(ymin=0.1, xmin=0.2, ymax=0.3, xmax=0.4)]}
 
     monkeypatch.setattr(
         "clearframe.webapp.server.build_grounding_client", lambda cfg: Grounder()
@@ -65,7 +65,7 @@ def test_a_box_comes_back_for_a_known_element(tmp_path, monkeypatch):
 
     assert r.status_code == 200
     body = r.json()
-    assert body["boxes"]["e1"]["ymin"] == 0.1
+    assert body["boxes"]["e1"][0]["ymin"] == 0.1
     # Keyed by element id, not by label: the client draws against its own state.
     assert set(body["boxes"]) <= {"e1"}
 
@@ -307,3 +307,75 @@ def test_only_music_labels_change_after_triage():
     guard = source.index("if el.category is ClearanceCategory.MUSIC_SYNC:")
     assert guard < rewrite, "an element rename outside the MUSIC branch"
     assert source.count("ctx.state.elements[index] = el.model_copy(") == 1
+
+
+# --- one finding, two places; two findings, one label -------------------------
+
+
+def _client_with(tmp_path, monkeypatch, elements, grounder):
+    """A client whose state and grounder the caller chooses."""
+    monkeypatch.setenv("CLEARFRAME_MODE", "live")
+    monkeypatch.setenv("GOOGLE_CLOUD_PROJECT", "proj")
+    monkeypatch.setenv("PARALLEL_API_KEY", "key")
+    state = {
+        "production": {"id": "p1", "title": "t", "footage_uri": "c.mp4",
+                       "duration_s": 41.5, "fps": 24.0},
+        "elements": elements,
+    }
+    (tmp_path / "state").mkdir()
+    (tmp_path / "state" / "p1.json").write_text(json.dumps(state))
+    media = tmp_path / "media" / "p1"
+    media.mkdir(parents=True)
+    (media / "footage.mp4").write_bytes(b"\x00" * 2048)
+    monkeypatch.setattr(
+        "clearframe.webapp.server.extract_frame",
+        lambda path, at_s, **kw: b"\xff\xd8frame",
+    )
+    monkeypatch.setattr(
+        "clearframe.webapp.server.build_grounding_client", lambda cfg: grounder
+    )
+    return TestClient(create_app(out_root=tmp_path))
+
+
+def _element(eid, label, box=None):
+    rng = {"start_s": 10.0, "end_s": 14.0}
+    if box is not None:
+        rng["bbox"] = box
+    return {"id": eid, "label": label, "element_type": "LOGO", "description": "",
+            "category": "TRADEMARK", "time_ranges": [rng],
+            "prominence": {"screen_time_s": 4.0, "frame_coverage": 0.1,
+                           "centrality": 0.5, "plot_integral": False}}
+
+
+def test_a_mark_in_two_places_comes_back_as_two_boxes(tmp_path, monkeypatch):
+    """Pizza Hut on the cap and on the box is one finding, two rectangles."""
+    from clearframe.models import BBox
+
+    class Twice:
+        async def ground_frame(self, image, labels):
+            return {labels[0]: [BBox(ymin=0.1, xmin=0.1, ymax=0.2, xmax=0.2),
+                                BBox(ymin=0.7, xmin=0.7, ymax=0.8, xmax=0.8)]}
+
+    c = _client_with(tmp_path, monkeypatch, [_element("e1", "Pizza Hut")], Twice())
+    body = c.get("/api/productions/p1/ground", params={"at_s": 12.0}).json()
+
+    assert [b["xmin"] for b in body["boxes"]["e1"]] == [0.1, 0.7]
+
+
+def test_two_findings_sharing_a_label_never_share_a_rectangle(tmp_path, monkeypatch):
+    """Both used to be handed the SAME box and shown as two measurements."""
+    from clearframe.models import BBox
+
+    class Once:
+        async def ground_frame(self, image, labels):
+            assert labels == ["Nike"], "the same label must not be asked twice"
+            return {"Nike": [BBox(ymin=0.7, xmin=0.7, ymax=0.8, xmax=0.8)]}
+
+    elements = [
+        _element("e1", "Nike", {"ymin": 0.1, "xmin": 0.1, "ymax": 0.2, "xmax": 0.2}),
+        _element("e2", "Nike", {"ymin": 0.7, "xmin": 0.7, "ymax": 0.8, "xmax": 0.8}),
+    ]
+    c = _client_with(tmp_path, monkeypatch, elements, Once())
+    body = c.get("/api/productions/p1/ground", params={"at_s": 12.0}).json()
+
+    assert list(body["boxes"]) == ["e2"]

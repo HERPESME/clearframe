@@ -1,9 +1,8 @@
 """Rule-based clearance triage and cross-shot duplicate merging."""
 
 from clearframe.matching import labels_match, tokens
-from clearframe.overlay import locates
+from clearframe.overlay import boxes_overlap, iou, locates
 from clearframe.models import (
-    BBox,
     ClearanceCategory,
     DetectedElement,
     ElementType,
@@ -167,21 +166,6 @@ _WEAK_AGREEMENT = 0.3
 SAME_REGION_IOU = 0.3
 
 
-def _boxes_overlap(a: BBox, b: BBox) -> bool:
-    return a.xmin < b.xmax and b.xmin < a.xmax and a.ymin < b.ymax and b.ymin < a.ymax
-
-
-def _iou(a: BBox, b: BBox) -> float:
-    if not _boxes_overlap(a, b):
-        return 0.0
-    inter = (min(a.xmax, b.xmax) - max(a.xmin, b.xmin)) * (
-        min(a.ymax, b.ymax) - max(a.ymin, b.ymin)
-    )
-    area_a = (a.xmax - a.xmin) * (a.ymax - a.ymin)
-    area_b = (b.xmax - b.xmin) * (b.ymax - b.ymin)
-    return inter / (area_a + area_b - inter)
-
-
 def _colocated(a: DetectedElement, b: DetectedElement) -> bool:
     """On screen at the same moment AND in the same part of the frame.
 
@@ -215,8 +199,8 @@ def _colocated(a: DetectedElement, b: DetectedElement) -> bool:
     if unclocked:
         # The rectangle is the whole of the evidence, so it has to describe the
         # same region rather than merely touch one.
-        return any(_iou(r, q) >= SAME_REGION_IOU for r, q in pairs)
-    return any(_boxes_overlap(r, q) for r, q in pairs)
+        return any(iou(r, q) >= SAME_REGION_IOU for r, q in pairs)
+    return any(boxes_overlap(r, q) for r, q in pairs)
 
 
 def _same_finding(a: DetectedElement, b: DetectedElement) -> bool:

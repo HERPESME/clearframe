@@ -49,6 +49,75 @@ def locates(box: BBox | None) -> bool:
     return (box.xmax - box.xmin) * (box.ymax - box.ymin) < MAX_LOCATING_AREA
 
 
+def boxes_overlap(a: BBox, b: BBox) -> bool:
+    return a.xmin < b.xmax and b.xmin < a.xmax and a.ymin < b.ymax and b.ymin < a.ymax
+
+
+def iou(a: BBox, b: BBox) -> float:
+    """How much two rectangles agree, 0 to 1."""
+    if not boxes_overlap(a, b):
+        return 0.0
+    inter = (min(a.xmax, b.xmax) - max(a.xmin, b.xmin)) * (
+        min(a.ymax, b.ymax) - max(a.ymin, b.ymin)
+    )
+    area_a = (a.xmax - a.xmin) * (a.ymax - a.ymin)
+    area_b = (b.xmax - b.xmin) * (b.ymax - b.ymin)
+    return inter / (area_a + area_b - inter)
+
+
+def _centre_gap(a: BBox, b: BBox) -> float:
+    ax, ay = (a.xmin + a.xmax) / 2, (a.ymin + a.ymax) / 2
+    bx, by = (b.xmin + b.xmax) / 2, (b.ymin + b.ymax) / 2
+    return ((ax - bx) ** 2 + (ay - by) ** 2) ** 0.5
+
+
+def bind_ground_boxes(here, located: dict[str, list[BBox]], at_s: float):
+    """Attach measured rectangles to the findings that claimed their label.
+
+    Grounding answers per label; the player draws per finding. Where those are
+    one to one this is a rename. Where they are not, both directions used to be
+    settled by luck.
+
+    One finding, several rectangles: it takes all of them. Pizza Hut on the cap
+    and on the box is one trademark and one clearance, seen twice.
+
+    Several findings, one label: each takes at most one rectangle, paired to
+    whichever is nearest its own scan box, best agreement first. A finding with
+    no box of its own takes none — a shared rectangle would report a position
+    nobody measured for it, and showing two findings the same rectangle is how
+    they came to look independently confirmed.
+    """
+    claimants: dict[str, list] = {}
+    for el in here:
+        claimants.setdefault(el.label, []).append(el)
+
+    out: dict[str, list[BBox]] = {}
+    for label, boxes in located.items():
+        mine = claimants.get(label) or []
+        if not mine or not boxes:
+            continue
+        if len(mine) == 1:
+            out[mine[0].id] = list(boxes)
+            continue
+        scored = []
+        for el in mine:
+            guess = box_at(el, at_s)
+            if guess is None:
+                continue
+            for i, b in enumerate(boxes):
+                scored.append((iou(guess, b), -_centre_gap(guess, b), el.id, i))
+        scored.sort(reverse=True)
+        taken_el: set[str] = set()
+        taken_box: set[int] = set()
+        for _agreement, _gap, eid, i in scored:
+            if eid in taken_el or i in taken_box:
+                continue
+            taken_el.add(eid)
+            taken_box.add(i)
+            out[eid] = [boxes[i]]
+    return out
+
+
 def _containing(element: DetectedElement, at_s: float) -> TimeRange | None:
     return next(
         (r for r in element.time_ranges if r.start_s <= at_s <= r.end_s), None

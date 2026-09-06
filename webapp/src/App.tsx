@@ -317,9 +317,15 @@ export default function App() {
   const jumpTo = (id: string) => {
     setActiveId(id);
     const el = elements.find((e) => e.id === id);
-    if (el && videoRef.current && production.has_media) {
-      // land a beat before the element appears so the box is already on screen
-      videoRef.current.currentTime = Math.max(el.time_ranges[0].start_s - 0.25, 0);
+    const first = el?.time_ranges?.[0];
+    if (first && videoRef.current && production.has_media) {
+      // Land INSIDE the appearance, not a beat before it. Every box rule —
+      // here and in overlay.py — is start_s <= t <= end_s, so seeking to
+      // start_s - 0.25 put the playhead outside the range and correctly drew
+      // nothing: clicking a finding showed no box at all. And pause, because
+      // boxes are only drawn while paused.
+      videoRef.current.currentTime = Math.max(first.start_s + 0.15, 0);
+      videoRef.current.pause();
     }
     cardRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "start" });
   };

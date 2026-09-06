@@ -33,7 +33,7 @@ def test_boxes_come_back_keyed_by_label():
         known=["Nike hoodie swoosh", "Coca-Cola can"],
     )
     assert set(boxes) == {"Nike hoodie swoosh"}
-    assert boxes["Nike hoodie swoosh"].ymin == 0.1
+    assert [b.ymin for b in boxes["Nike hoodie swoosh"]] == [0.1]
 
 
 def test_a_label_the_scan_never_found_is_dropped():
@@ -101,3 +101,64 @@ def test_a_box_around_the_whole_frame_is_not_a_location():
     ]}
     out = parse_ground_payload(payload, ["Stu Price", "IWC Watch"])
     assert set(out) == {"IWC Watch"}
+
+
+# --- one finding can be in two places at once ---------------------------------
+#
+# The parser kept the first box per label and dropped the rest, so a mark on a
+# cap AND on a box in the same frame showed one rectangle. Correct but
+# incomplete: the reviewer cannot check a placement they are not shown.
+
+
+def test_a_label_measured_in_two_places_keeps_both_boxes():
+    boxes = parse_ground_payload(
+        {"found": [
+            {"label": "Pizza Hut", "bbox": {"ymin": 100, "xmin": 100,
+                                            "ymax": 200, "xmax": 200}},
+            {"label": "Pizza Hut", "bbox": {"ymin": 700, "xmin": 700,
+                                            "ymax": 800, "xmax": 800}},
+        ]},
+        known=["Pizza Hut"],
+    )
+    assert [b.xmin for b in boxes["Pizza Hut"]] == [0.1, 0.7]
+
+
+def test_an_exact_label_beats_a_fuzzy_one():
+    """Which finding a box belongs to used to depend on state order.
+
+    "Pizza Hut" fuzzy-matches "Pizza Hut Delivery Scooter" too, so the answer
+    went to whichever the state happened to list first.
+    """
+    boxes = parse_ground_payload(
+        {"found": [
+            {"label": "Pizza Hut", "bbox": {"ymin": 10, "xmin": 10,
+                                            "ymax": 90, "xmax": 90}},
+        ]},
+        known=["Pizza Hut Delivery Scooter", "Pizza Hut"],
+    )
+    assert set(boxes) == {"Pizza Hut"}
+
+
+def test_an_unusable_box_costs_only_itself_inside_a_list():
+    """The whole-frame guard applies per rectangle, not per label."""
+    boxes = parse_ground_payload(
+        {"found": [
+            {"label": "Pizza Hut", "bbox": {"ymin": 0, "xmin": 0,
+                                            "ymax": 1000, "xmax": 1000}},
+            {"label": "Pizza Hut", "bbox": {"ymin": 700, "xmin": 700,
+                                            "ymax": 800, "xmax": 800}},
+        ]},
+        known=["Pizza Hut"],
+    )
+    assert [b.xmin for b in boxes["Pizza Hut"]] == [0.7]
+
+
+def test_a_model_repeating_itself_cannot_flood_one_finding():
+    """Twenty rectangles for one label is a loop, not twenty locations."""
+    payload = {"found": [
+        {"label": "Pizza Hut",
+         "bbox": {"ymin": 10 * i, "xmin": 10, "ymax": 10 * i + 50, "xmax": 90}}
+        for i in range(1, 21)
+    ]}
+    boxes = parse_ground_payload(payload, known=["Pizza Hut"])
+    assert len(boxes["Pizza Hut"]) <= 8
