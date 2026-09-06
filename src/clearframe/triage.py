@@ -227,7 +227,83 @@ def _same_finding(a: DetectedElement, b: DetectedElement) -> bool:
         return labels_match(a.label, b.label, _WEAK_AGREEMENT) and _colocated(a, b)
     if ElementType.TEXT in (a.element_type, b.element_type):
         return labels_match(a.label, b.label, _NAMES_THE_SAME) and _overlaps(a, b)
+    return _one_object_typed_twice(a, b)
+
+
+# How much of the smaller rectangle must lie inside the larger one for the two
+# to be the same region. One live pair sits at 1.00 — the LOGO box entirely
+# inside the ARTWORK box — while their IoU is 0.207, under `SAME_REGION_IOU`,
+# because IoU punishes containment whenever the two extents differ in scale.
+# That is the wrong measure for a pair where one pass boxed the sticker and the
+# other boxed the sticker and its surround.
+CONTAINED = 0.9
+
+
+def _identical_label(a: DetectedElement, b: DetectedElement) -> bool:
+    """Not `labels_match` — the same words, exactly.
+
+    This is what lets a group cross the type boundary at all, so it has to be
+    stronger than the similarity test that boundary was protecting against. A
+    Nike swoosh on a shoe and a Nike mural on a wall are genuinely two things
+    and may both be labelled "Nike"; what they are not is one object that two
+    passes typed differently.
+    """
+    return " ".join(a.label.split()).casefold() == " ".join(b.label.split()).casefold()
+
+
+def _contained(a: DetectedElement, b: DetectedElement) -> bool:
+    """Is one sighting's rectangle wholly inside the other's, at some instant?
+
+    The same timing guard `_colocated` uses: a clock already disowned cannot
+    testify that two sightings are different, so a pair with a broken clock is
+    compared on place alone.
+    """
+    unclocked = not (a.timing_reliable and b.timing_reliable)
+    for r in a.time_ranges:
+        for q in b.time_ranges:
+            if not (unclocked or (r.start_s < q.end_s and q.start_s < r.end_s)):
+                continue
+            if not (locates(r.bbox) and locates(q.bbox)):
+                continue
+            overlap = _intersection_area(r.bbox, q.bbox)
+            smaller = min(_area(r.bbox), _area(q.bbox))
+            if smaller > 0 and overlap / smaller >= CONTAINED:
+                return True
     return False
+
+
+def _area(box) -> float:
+    return max(0.0, box.ymax - box.ymin) * max(0.0, box.xmax - box.xmin)
+
+
+def _intersection_area(a, b) -> float:
+    dy = min(a.ymax, b.ymax) - max(a.ymin, b.ymin)
+    dx = min(a.xmax, b.xmax) - max(a.xmin, b.xmin)
+    return max(0.0, dy) * max(0.0, dx)
+
+
+def _one_object_typed_twice(a: DetectedElement, b: DetectedElement) -> bool:
+    """One thing that two passes disagreed about the TYPE of.
+
+    A deployed run reported `Sticker on water heater` twice from the same scan:
+    id `5` typed LOGO — so TRADEMARK — with a 20ms appearance the physical test
+    rejected, and another typed ARTWORK — so COPYRIGHT_ART — with a usable
+    clock. Byte-identical labels, and `triage` never compared them, because
+    grouping requires one element type and only TEXT yields. The result is the
+    failure this codebase already knows is its most consequential: one object
+    carrying two owners, two routes and two risk bands.
+
+    Staying apart is right for SIMILAR labels, and `CLAUDE.md` records "LOGO vs
+    ARTWORK still stays two findings" as deliberate. It is wrong on an
+    identical one — but only with a second, independent signal, because
+    over-merging DELETES a finding and that is the failure this module is
+    written around. So place has to agree too: either the existing colocation
+    rule, or one rectangle wholly inside the other, which is what two passes
+    boxing the same sticker at different extents looks like.
+    """
+    if not _identical_label(a, b):
+        return False
+    return _colocated(a, b) or _contained(a, b)
 
 
 def _screen_time(group: list[DetectedElement], ranges: list[TimeRange]) -> float:
@@ -317,9 +393,24 @@ def _merge(group: list[DetectedElement]) -> DetectedElement:
         # A brand read as lettering is still the brand. TEXT is the fallback
         # type, so it never decides the category of a group that contains a
         # type naming an actual rights subject.
+        #
+        # And a broken clock does not outvote a working one here either. When a
+        # group crosses the type boundary — one object two passes typed
+        # differently — the sighting whose timecodes survive the physical test
+        # is the one there is reason to trust, and its type carries the
+        # category. That decides whether a sticker is cleared as a trademark or
+        # as an artwork, which is not a detail.
         "element_type": next(
-            (d.element_type for d in group if d.element_type is not ElementType.TEXT),
-            first.element_type,
+            (
+                d.element_type
+                for d in group
+                if d.element_type is not ElementType.TEXT and d.timing_reliable
+            ),
+            next(
+                (d.element_type for d in group
+                 if d.element_type is not ElementType.TEXT),
+                first.element_type,
+            ),
         ),
         # Prefer whichever pass actually reported these; a default is not an
         # observation, and the first pass is not authoritative over the second.
@@ -370,10 +461,20 @@ def triage(detections: list[DetectedElement]) -> list[TriagedElement]:
     the whole rule: a shared label, or the same rectangle at the same instant,
     or an all-but-identical label where one pass fell back to TEXT.
     """
+    # Compared against every member of a group, not just the first.
+    #
+    # `_same_finding(g[0], d)` made a group's identity whatever happened to
+    # arrive first, which is not a principled basis for anything — and it
+    # actively fought the cross-type rule. A live run has THREE sightings of one
+    # sticker: a LOGO with a broken clock, an ARTWORK, and `"Drink Beer" Sticker`
+    # which is the same ARTWORK described more fully. Matching on the first
+    # member, the LOGO joined and then the third was compared against the LOGO
+    # alone — different type, different words — so it split off, and adding a
+    # merge rule made the finding count go UP.
     groups: list[list[DetectedElement]] = []
     for d in detections:
         for g in groups:
-            if _same_finding(g[0], d):
+            if any(_same_finding(m, d) for m in g):
                 g.append(d)
                 break
         else:
