@@ -78,7 +78,7 @@ def test_a_live_upload_actually_builds_a_production(client, monkeypatch):
 
     started: dict = {}
 
-    def _capture(cfg, production, out_root):
+    def _capture(cfg, production, out_root, **kw):
         # build_context is synchronous. Capture the production, then hand back
         # a fixture-backed context so the request completes without touching a
         # real API — the point is to execute the construction, not the pipeline.
@@ -124,7 +124,7 @@ def test_a_supplied_duration_is_trusted_over_the_probe(client, monkeypatch):
     monkeypatch.setenv("PARALLEL_API_KEY", "key")
     started: dict = {}
 
-    def _capture(cfg, production, out_root):
+    def _capture(cfg, production, out_root, **kw):
         started["production"] = production
         from clearframe.pipeline import demo_context
 

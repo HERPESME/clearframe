@@ -13,6 +13,18 @@ from clearframe.models import ProductionState
 RESERVED_STATE_FILES = {"licences"}
 
 
+def is_reserved_state_file(stem: str) -> bool:
+    """Is this state-directory file something other than a production?
+
+    The directory holds the rights ledger beside the productions, and the ledger
+    is now per-owner — `licences-{uid}.json` — so a bare membership test against
+    the old set would start returning every user's ledger as a production id.
+    One predicate, used by both store implementations and the local index, so
+    the next thing kept in here cannot be missed at one of the three call sites.
+    """
+    return stem in RESERVED_STATE_FILES or stem.startswith("licences-")
+
+
 class LocalJsonStore:
     def __init__(self, root: Path):
         self.root = Path(root)
@@ -46,7 +58,7 @@ class LocalJsonStore:
         return sorted(
             path.stem
             for path in self.root.glob("*.json")
-            if path.stem not in RESERVED_STATE_FILES
+            if not is_reserved_state_file(path.stem)
         )
 
 
@@ -62,12 +74,25 @@ class LicenceStore:
     is a valid state (every finding reads UNKNOWN/NOT_COVERED) — the ledger is
     something a real clearance department already maintains and uploads, not
     something ClearFrame invents.
+
+    **Keyed by owner, because a ledger is the most consequential thing here.**
+    One global file meant one user's licences decided another user's coverage:
+    upload a grant for Nike and every other account's Nike finding reads COVERED,
+    with that conclusion written into their E&O dossier. And since the upload
+    defaults to `replace=True` and is gated on a role that an open-roles
+    deployment lets the client assert for itself, any visitor could wipe the
+    whole deployment's ledger — reopening gaps in everyone's next run.
+
+    `owner_uid=""` keeps the old global path byte-identical, which is what the
+    CLI, the MCP server and the demo seed still use: they have no signed-in user
+    and no other ledger to confuse theirs with.
     """
 
-    def __init__(self, root: Path):
+    def __init__(self, root: Path, owner_uid: str = ""):
         self.root = Path(root)
         self.root.mkdir(parents=True, exist_ok=True)
-        self.path = self.root / "licences.json"
+        safe = "".join(c for c in (owner_uid or "") if c.isalnum() or c in "-_")
+        self.path = self.root / (f"licences-{safe}.json" if safe else "licences.json")
 
     def load(self) -> list:
         from clearframe.models import LicenceGrant

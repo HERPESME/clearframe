@@ -657,6 +657,13 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
         # to attribute one to.
         if user is not None and production_id == "upload":
             pid = f"p-{secrets.token_hex(4)}"
+        # An id you were given back is yours to re-upload to; an id belonging to
+        # somebody else is not. Without this, naming another user's production
+        # overwrote their footage and state, wiped their event log, thumbnails
+        # and measured boxes, and reassigned `owner_uid` to the caller — because
+        # the index row is replaced wholesale below. 404 rather than 403, like
+        # every other ownership refusal here: a 403 would confirm the id exists.
+        _require_owner(request, pid)
         name = _safe_media_name(file.filename or "")
         media_dir = out_root / "media" / pid
         media_dir.mkdir(parents=True, exist_ok=True)
@@ -719,7 +726,13 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
         for stale in target.parent.glob("thumb-*.jpg"):
             stale.unlink(missing_ok=True)
 
-        ctx = build_context(cfg.model_copy(update={"mode": "live"}), production, out_root)
+        ctx = build_context(
+            cfg.model_copy(update={"mode": "live"}),
+            production,
+            out_root,
+            # Their licences decide their coverage, and nobody else's.
+            owner_uid=user.uid if user else "",
+        )
         ctx.store = store
         # Persist the production BEFORE handing the job over.
         #
@@ -1140,10 +1153,22 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
             "appearances": sum(len(el.time_ranges) for el in state.elements),
         }
 
+    def _ledger_for(request) -> LicenceStore:
+        """This caller's rights ledger.
+
+        One global file meant one account's licences decided another account's
+        coverage — upload a grant for Nike and every other user's Nike finding
+        read COVERED, with that conclusion written into their E&O dossier. With
+        auth off there is no caller to scope to and the global ledger is exactly
+        right, which is what the demo, the CLI and the smoke script use.
+        """
+        user = _current_user(request)
+        return LicenceStore(out_root / "state", owner_uid=user.uid if user else "")
+
     @app.get("/api/licences")
-    def list_licences():
-        """The rights ledger: clearances this deployment already holds."""
-        ledger = LicenceStore(out_root / "state")
+    def list_licences(request: Request):
+        """The rights ledger: clearances YOU already hold."""
+        ledger = _ledger_for(request)
         return {"licences": [lic.model_dump(mode="json") for lic in ledger.load()]}
 
     @app.post("/api/licences")
@@ -1175,7 +1200,7 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
         if not parsed:
             raise HTTPException(status_code=400, detail="No usable licence rows found.")
 
-        ledger = LicenceStore(out_root / "state")
+        ledger = _ledger_for(request)
         existing = [] if replace else ledger.load()
         by_id = {lic.id: lic for lic in existing}
         for lic in assign_ids(parsed, set(by_id)):
@@ -1250,6 +1275,11 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
         body: DecisionRequest,
         x_clearframe_role: str = Header(default="editor"),
     ):
+        # The one pid-route that never checked, and the one where it matters
+        # most: this writes a signature into somebody's E&O audit trail. It was
+        # missing from the parametrized ownership test too, which is exactly why
+        # nothing caught it.
+        _require_owner(request, pid)
         async with state_lock:
             try:
                 state = record_decision(

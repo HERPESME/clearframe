@@ -52,7 +52,7 @@ def ran(monkeypatch):
     monkeypatch.setattr("clearframe.runner.Pipeline", _FakePipeline)
     monkeypatch.setattr(
         "clearframe.runner.build_context",
-        lambda cfg, production, out_root: _ctx(production),
+        lambda cfg, production, out_root, **kw: _ctx(production),
     )
     return calls
 
@@ -126,7 +126,7 @@ def test_a_retry_resumes_rather_than_restarting(tmp_path, monkeypatch):
     monkeypatch.setattr("clearframe.runner.Pipeline", _RecordingPipeline)
     monkeypatch.setattr(
         "clearframe.runner.build_context",
-        lambda cfg, production, out_root: _ctx(production),
+        lambda cfg, production, out_root, **kw: _ctx(production),
     )
     client = TestClient(create_worker_app(out_root=tmp_path))
 

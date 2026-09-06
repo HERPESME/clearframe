@@ -188,13 +188,12 @@ class LocalProductionIndex:
     def _known_ids(self) -> set[str]:
         ids = {p.stem for p in self.root.glob("*.json")}
         if self.state_dir is not None and self.state_dir.exists():
-            from clearframe.store import RESERVED_STATE_FILES
+            from clearframe.store import is_reserved_state_file
 
             ids |= {
                 p.stem
                 for p in self.state_dir.glob("*.json")
-                if p.stem not in RESERVED_STATE_FILES
-                and not p.stem.startswith("licences-")
+                if not is_reserved_state_file(p.stem)
             }
         return ids
 

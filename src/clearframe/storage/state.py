@@ -21,7 +21,7 @@ import time
 from clearframe.models import ProductionState
 from clearframe.storage.blobs import BlobStore
 from clearframe.storage.index import IndexRow, ProductionIndex
-from clearframe.store import RESERVED_STATE_FILES
+from clearframe.store import is_reserved_state_file
 
 log = logging.getLogger("clearframe.storage.state")
 
@@ -85,7 +85,7 @@ class BlobStateStore:
         out = []
         for key in self._blobs.list("state/"):
             stem = key.removeprefix("state/").removesuffix(".json")
-            if stem in RESERVED_STATE_FILES or stem.startswith("licences-"):
+            if is_reserved_state_file(stem):
                 continue
             out.append(stem)
         return sorted(out)

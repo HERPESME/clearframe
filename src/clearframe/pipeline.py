@@ -116,8 +116,16 @@ def build_demo_pipeline(max_research: int | None = None) -> list[Stage]:
     ]
 
 
-def build_context(cfg, production: Production, out_root: Path) -> PipelineContext:
-    """Build a PipelineContext from a ClearFrameConfig (demo fixtures or live clients)."""
+def build_context(
+    cfg, production: Production, out_root: Path, *, owner_uid: str = ""
+) -> PipelineContext:
+    """Build a PipelineContext from a ClearFrameConfig (demo fixtures or live clients).
+
+    `owner_uid` selects whose rights ledger the coverage stage reads. Empty — the
+    default, and what the CLI, the MCP server and demo mode pass — means the
+    deployment-wide ledger, unchanged. A signed-in upload passes the uploader's
+    id so their licences decide their coverage and nobody else's.
+    """
     if cfg.mode == "live":
         from clearframe.integrations.gemini_live import LiveGeminiClient
         from clearframe.integrations.parallel_client import LiveParallelClient
@@ -157,7 +165,7 @@ def build_context(cfg, production: Production, out_root: Path) -> PipelineContex
         court=court,
         corroborator=corroborator,
         audio=audio,
-        licences=LicenceStore(Path(out_root) / "state").load(),
+        licences=LicenceStore(Path(out_root) / "state", owner_uid=owner_uid).load(),
     )
 
 

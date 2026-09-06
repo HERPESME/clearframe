@@ -23,7 +23,7 @@ def _client(tmp_path, monkeypatch):
     monkeypatch.setenv("GOOGLE_CLOUD_PROJECT", "proj")
     monkeypatch.setenv("PARALLEL_API_KEY", "key")
 
-    def _fixture_context(cfg, production, out_root):
+    def _fixture_context(cfg, production, out_root, **kw):
         """Store the footage and the production, without a live pipeline.
 
         The upload endpoint always starts a run; this test is about the bytes

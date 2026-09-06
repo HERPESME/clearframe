@@ -73,7 +73,15 @@ async def run_analysis(
         return "already-running"
 
     run_log = EventLog(backends.blobs, pid, flush_every_s=_flush_interval(cfg))
-    ctx = build_context(cfg.model_copy(update={"mode": "live"}), state.production, out_root)
+    # `job.owner_uid` has been on the wire since the queue was written and
+    # was dropped on the floor here. It selects whose rights ledger the
+    # coverage stage reads — the worker has no request to ask.
+    ctx = build_context(
+        cfg.model_copy(update={"mode": "live"}),
+        state.production,
+        out_root,
+        owner_uid=job.owner_uid or "",
+    )
     ctx.store = store
     ctx.state = state  # resume from what is persisted, not from a fresh model
 

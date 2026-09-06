@@ -47,7 +47,21 @@ PID_ROUTES = [
     ("POST", "/api/productions/{pid}/freshness"),
     ("POST", "/api/productions/{pid}/dossier"),
     ("GET", "/api/productions/{pid}/artifacts/dossier.html"),
+    # The one that was missing from this list, and therefore the one route with
+    # no ownership check at all — while being the route that writes a signature
+    # into somebody's E&O audit trail. A list is only a safety net for what is
+    # on it.
+    ("POST", "/api/productions/{pid}/decisions"),
 ]
+
+# Bodies for the routes that need one, so the parametrized cases above get past
+# request validation and actually reach the ownership check rather than 422ing
+# and looking like a pass.
+BODIES = {
+    "/api/productions/{pid}/decisions": {
+        "element_id": "e1", "action": "approve_risk", "note": "",
+    },
+}
 
 
 def _state(tmp_path, pid="p1"):
@@ -86,6 +100,20 @@ def gated(monkeypatch):
     monkeypatch.setenv("CLEARFRAME_AUTH", "firebase")
 
 
+@pytest.fixture
+def open_roles(monkeypatch, gated):
+    """The configuration the public deployment actually runs.
+
+    Anyone signed in may call themselves `legal`, which is the point — a judge
+    has nobody to ask for a grant. It is also the configuration in which a shared
+    resource is most dangerous, because the role gate in front of it is one the
+    caller sets for themselves. So the ledger tests below run HERE rather than in
+    the stricter default, on the principle that a guard should be tested under
+    the conditions that stress it.
+    """
+    monkeypatch.setenv("CLEARFRAME_OPEN_ROLES", "1")
+
+
 def _client(tmp_path):
     c = TestClient(create_app(out_root=tmp_path))
     c.cookies.set(auth.SESSION_COOKIE, "any-token")
@@ -103,7 +131,7 @@ def test_another_users_production_is_not_reachable(tmp_path, monkeypatch, gated,
     _as(monkeypatch, "bob-uid", "bob@studio.com")
     client = _client(tmp_path)
 
-    resp = client.request(method, path.format(pid="p1"))
+    resp = client.request(method, path.format(pid="p1"), json=BODIES.get(path))
 
     assert resp.status_code == 404, (
         f"{method} {path} let Bob reach Alice's production ({resp.status_code})"
@@ -136,7 +164,7 @@ def test_the_owner_is_not_locked_out_of_their_own(tmp_path, monkeypatch, gated,
     _as(monkeypatch, "alice-uid", "alice@studio.com")
     client = _client(tmp_path)
 
-    resp = client.request(method, path.format(pid="p1"))
+    resp = client.request(method, path.format(pid="p1"), json=BODIES.get(path))
 
     assert not _refused_as_unknown(resp), f"{method} {path} hid Alice's own production"
 
@@ -178,7 +206,7 @@ def test_with_auth_off_nothing_is_scoped(tmp_path, method, path):
     _owned_by(tmp_path, "alice-uid")
     client = TestClient(create_app(out_root=tmp_path))
 
-    resp = client.request(method, path.format(pid="p1"))
+    resp = client.request(method, path.format(pid="p1"), json=BODIES.get(path))
 
     assert not _refused_as_unknown(resp)
 
@@ -205,3 +233,94 @@ def test_a_production_written_before_ownership_existed_is_still_visible(
     rows = client.get("/api/productions").json()
 
     assert [r["id"] for r in rows] == ["legacy"]
+
+
+# --- the rights ledger ---------------------------------------------------------
+#
+# The most consequential shared thing in the deployment. One global
+# `licences.json` meant Alice's grant for Nike marked Bob's Nike finding COVERED,
+# and that conclusion went into Bob's E&O dossier. And because the upload
+# defaults to `replace=True` and is gated on a role that an open-roles deployment
+# lets the client assert for itself, any visitor could wipe the lot.
+
+_CSV = (
+    "rights_holder,work,scope,territories,media,starts,expires,reference,notes\n"
+    "Nike Inc,Swoosh,ALL,US,THEATRICAL,2020-01-01,2030-01-01,REF-1,\n"
+)
+
+
+def _upload_ledger(client, csv=_CSV):
+    return client.post(
+        "/api/licences",
+        files={"file": ("ledger.csv", csv.encode(), "text/csv")},
+        data={"replace": "true"},
+        headers={"X-ClearFrame-Role": "legal"},
+    )
+
+
+def test_one_users_licences_are_not_another_users(tmp_path, monkeypatch, open_roles):
+    """Being wrong in the COVERED direction is the one failure the ledger must
+    not have: it tells a producer they are cleared when they are not."""
+    _as(monkeypatch, "alice-uid", "alice@studio.com")
+    alice = _client(tmp_path)
+    assert _upload_ledger(alice).status_code == 200
+
+    _as(monkeypatch, "bob-uid", "bob@studio.com")
+    bob = _client(tmp_path)
+
+    assert bob.get("/api/licences").json()["licences"] == []
+
+
+def test_a_visitor_cannot_wipe_someone_elses_ledger(tmp_path, monkeypatch, open_roles):
+    """`replace=True` is the default, and with open roles anyone may call
+    themselves legal — so this has to be prevented by SCOPE, not by the role."""
+    _as(monkeypatch, "alice-uid", "alice@studio.com")
+    alice = _client(tmp_path)
+    _upload_ledger(alice)
+
+    _as(monkeypatch, "bob-uid", "bob@studio.com")
+    _upload_ledger(_client(tmp_path), csv=_CSV.replace("Nike Inc", "Adidas AG"))
+
+    _as(monkeypatch, "alice-uid", "alice@studio.com")
+    still = _client(tmp_path).get("/api/licences").json()["licences"]
+
+    assert len(still) == 1
+    assert still[0]["rights_holder"] == "Nike Inc"
+
+
+def test_with_auth_off_the_ledger_stays_global(tmp_path):
+    """The demo, the CLI and the smoke script all share one ledger and should:
+    there is no user to attribute one to."""
+    client = TestClient(create_app(out_root=tmp_path))
+    _upload_ledger(client)
+
+    assert len(client.get("/api/licences").json()["licences"]) == 1
+
+
+# --- taking a production by naming it ------------------------------------------
+
+
+def test_an_upload_cannot_claim_someone_elses_production(tmp_path, monkeypatch, gated):
+    """The id comes back to the client, so it is guessable by its owner and
+    quotable by anyone who saw it. Naming it on an upload used to overwrite the
+    footage and state, wipe the event log and thumbnails, and reassign the owner
+    — because the index row is replaced wholesale."""
+    _state(tmp_path)
+    _owned_by(tmp_path, "alice-uid")
+    _as(monkeypatch, "bob-uid", "bob@studio.com")
+    monkeypatch.setenv("CLEARFRAME_MODE", "live")
+    monkeypatch.setenv("GOOGLE_CLOUD_PROJECT", "a-project")
+    monkeypatch.setenv("PARALLEL_API_KEY", "a-key")
+    bob = _client(tmp_path)
+
+    resp = bob.post(
+        "/api/productions",
+        files={"file": ("clip.mp4", b"\x00" * 2048, "video/mp4")},
+        data={"title": "Mine now", "production_id": "p1"},
+    )
+
+    assert resp.status_code == 404
+    from clearframe.storage import build_backends as _bb
+    from clearframe.config import ClearFrameConfig as _cfg
+    row = _bb(_cfg.from_env({}), tmp_path).index.get("p1")
+    assert row.owner_uid == "alice-uid", "ownership was reassigned by an upload"
