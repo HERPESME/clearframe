@@ -8,6 +8,23 @@ from clearframe.timecode import seconds_to_tc
 
 BAND_HEX = {"CRITICAL": "#c0392b", "HIGH": "#e67e22", "MEDIUM": "#2980b9", "LOW": "#27ae60"}
 
+# autoescape=True, because `jinja2.Template` does not do it by default and every
+# interesting value in this report is written by a person.
+#
+# A decision note is free text a reviewer types. A production title and the
+# sponsor list come off the upload form. `Decision.reviewer` is an email address
+# and display name chosen at sign-up. All of them were going into the HTML raw,
+# and this document is served same-origin from
+# `/api/productions/{pid}/artifacts/dossier.html` — so a `<script>` in a note ran
+# against the signed-in session. The session cookie is HttpOnly and unreadable by
+# script, but same-origin fetch sends it anyway, so the script could do whatever
+# the signed-in user could; on a `legal` role that includes signing off findings.
+#
+# Nothing in this template relied on raw HTML — no `|safe`, no `Markup` — so
+# turning it on changes only the hostile cases and the honest punctuation ones
+# (a film really called "Fish & Chips" kept its ampersand unescaped before).
+# Anything that ever DOES need markup must now say `|safe` and be visible as an
+# exception, which is the point of the default being the other way round.
 _TEMPLATE = Template(
     """<!doctype html>
 <html lang="en">
@@ -331,7 +348,8 @@ without documentation. {{ d.summary.get('deep_research_runs', 0) }} finding(s) r
 {% endif %}
 </body>
 </html>
-"""
+""",
+    autoescape=True,
 )
 
 
