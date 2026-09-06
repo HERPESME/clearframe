@@ -14,6 +14,7 @@ and resumable.
 import asyncio
 import logging
 
+from clearframe.corroboration import leftover_hits, promote_hits
 from clearframe.integrations.gemini_client import build_scan_context
 from clearframe.models import DetectedElement, ExposureFinding, SourceWork, TimeRange
 from clearframe.pipeline import PipelineContext
@@ -327,6 +328,36 @@ class ScanStage:
         # reading these off `results[0]` threw away everything they saw beyond
         # their detections.
         work = best_source_work([r.source_work for r in results] + [audit.source_work])
+
+        # A catalogued mark every pass missed is a finding, not a discarded
+        # hit. Video Intelligence reads a closed vocabulary, so unlike the
+        # generative passes it cannot name a brand that does not exist — which
+        # makes a high-confidence hit that spoke to no finding the one piece of
+        # free recall in the system, already fetched and already paid for.
+        #
+        # Added HERE, before typing correction and triage, so it travels the
+        # identical path as everything else: merged, categorised, routed,
+        # banded. A finding that skipped that path would be a second unaudited
+        # detector, which is the objection grounding answers by refusing to
+        # detect at all.
+        catalogue_hits = _or_empty(hits, "logo corroboration")
+        promoted = promote_hits(
+            leftover_hits(merged, catalogue_hits), "Cloud Video Intelligence"
+        )
+        if promoted:
+            log.info(
+                "promoting %d catalogued mark(s) no scan pass reported: %s",
+                len(promoted), ", ".join(p.label for p in promoted),
+            )
+            ctx.emit(
+                {
+                    "type": "detector_found",
+                    "count": len(promoted),
+                    "labels": [p.label for p in promoted],
+                }
+            )
+            merged = merge_passes(merged, promoted)
+
         # Typing is corrected BEFORE triage, which is what turns an element
         # type into a clearance category — a real actor needs a release, not a
         # copyright licence.
@@ -362,7 +393,7 @@ class ScanStage:
         ctx.state.audio_checked = getattr(ctx.audio, "available", True)
         if not ctx.state.audio_checked:
             ctx.emit({"type": "fingerprint_unavailable"})
-        ctx.state.detector_hits = _or_empty(hits, "logo corroboration")
+        ctx.state.detector_hits = catalogue_hits
         # Record that the detector was ASKED. Without this, an empty prefetch
         # is indistinguishable from no prefetch and `corroborate` pays Video
         # Intelligence's full latency a second time for the same empty answer.
