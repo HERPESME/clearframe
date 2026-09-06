@@ -117,7 +117,12 @@ def build_demo_pipeline(max_research: int | None = None) -> list[Stage]:
 
 
 def build_context(
-    cfg, production: Production, out_root: Path, *, owner_uid: str = ""
+    cfg,
+    production: Production,
+    out_root: Path,
+    *,
+    owner_uid: str = "",
+    licences: list | None = None,
 ) -> PipelineContext:
     """Build a PipelineContext from a ClearFrameConfig (demo fixtures or live clients).
 
@@ -125,6 +130,14 @@ def build_context(
     default, and what the CLI, the MCP server and demo mode pass — means the
     deployment-wide ledger, unchanged. A signed-in upload passes the uploader's
     id so their licences decide their coverage and nobody else's.
+
+    `licences` lets a caller that has already opened the right ledger hand it
+    over. That caller is the worker, and it has to: `out_root` on Cloud Run is a
+    per-instance tmpfs, so reading the ledger from disk there opened an empty
+    file however many grants the user had uploaded through the API — and an
+    empty ledger reports every finding uncovered without ever looking wrong.
+    Left `None`, the local file is read exactly as before, which is what keeps
+    the CLI, the MCP server and demo mode untouched.
     """
     if cfg.mode == "live":
         from clearframe.integrations.gemini_live import LiveGeminiClient
@@ -165,7 +178,11 @@ def build_context(
         court=court,
         corroborator=corroborator,
         audio=audio,
-        licences=LicenceStore(Path(out_root) / "state", owner_uid=owner_uid).load(),
+        licences=(
+            licences
+            if licences is not None
+            else LicenceStore(Path(out_root) / "state", owner_uid=owner_uid).load()
+        ),
     )
 
 

@@ -50,7 +50,7 @@ from clearframe.storage import (
     build_backends,
     build_queue,
 )
-from clearframe.store import LicenceStore, LocalJsonStore
+from clearframe.store import LocalJsonStore
 from clearframe.timeline import timing_is_reliable
 
 # Browsers must be able to <video> it; keep the accepted set narrow.
@@ -784,6 +784,7 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
             out_root,
             # Their licences decide their coverage, and nobody else's.
             owner_uid=user.uid if user else "",
+            licences=backends.ledger(user.uid if user else "").load(),
         )
         ctx.store = store
         # Persist the production BEFORE handing the job over.
@@ -1230,7 +1231,7 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
             "appearances": sum(len(el.time_ranges) for el in state.elements),
         }
 
-    def _ledger_for(request) -> LicenceStore:
+    def _ledger_for(request):
         """This caller's rights ledger.
 
         One global file meant one account's licences decided another account's
@@ -1240,7 +1241,11 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
         right, which is what the demo, the CLI and the smoke script use.
         """
         user = _current_user(request)
-        return LicenceStore(out_root / "state", owner_uid=user.uid if user else "")
+        # Through the backends, not straight to disk. In the cloud profile the
+        # ledger lives in the bucket, because `out_root` here is the API
+        # container's own tmpfs and the worker that reads the ledger during
+        # `coverage` has never seen it.
+        return backends.ledger(user.uid if user else "")
 
     @app.get("/api/licences")
     def list_licences(request: Request):

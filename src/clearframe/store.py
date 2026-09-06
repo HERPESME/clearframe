@@ -25,6 +25,44 @@ def is_reserved_state_file(stem: str) -> bool:
     return stem in RESERVED_STATE_FILES or stem.startswith("licences-")
 
 
+def ledger_slug(owner_uid: str) -> str:
+    """The filename-safe part of a ledger's name, or "" for the shared one.
+
+    A uid arrives from a verified token, but it still ends up in a path — on
+    disk here and in a blob key in the cloud — so it is reduced to characters
+    that cannot mean anything to either. `""` is the deliberate shared shelf the
+    CLI, the MCP server and the demo seed use; they have no signed-in user and
+    no other ledger to confuse theirs with.
+    """
+    return "".join(c for c in (owner_uid or "") if c.isalnum() or c in "-_")
+
+
+def parse_ledger(raw: bytes | str) -> list:
+    """Grants out of stored JSON, tolerating one bad row.
+
+    Shared by the local store and the blob-backed one so a ledger written by
+    either reads identically in the other — which is the whole point, since the
+    API and the worker are different containers.
+    """
+    from clearframe.models import LicenceGrant
+
+    data = json.loads(raw)
+    entries = data.get("licences", data) if isinstance(data, dict) else data
+    out = []
+    for e in entries:
+        try:
+            out.append(LicenceGrant.model_validate(e))
+        except ValidationError:
+            continue  # a malformed row must not sink the whole ledger
+    return out
+
+
+def serialise_ledger(licences: list) -> str:
+    return json.dumps(
+        {"licences": [lic.model_dump(mode="json") for lic in licences]}, indent=2
+    )
+
+
 class LocalJsonStore:
     def __init__(self, root: Path):
         self.root = Path(root)
@@ -91,30 +129,19 @@ class LicenceStore:
     def __init__(self, root: Path, owner_uid: str = ""):
         self.root = Path(root)
         self.root.mkdir(parents=True, exist_ok=True)
-        safe = "".join(c for c in (owner_uid or "") if c.isalnum() or c in "-_")
+        safe = ledger_slug(owner_uid)
         self.path = self.root / (f"licences-{safe}.json" if safe else "licences.json")
 
     def load(self) -> list:
-        from clearframe.models import LicenceGrant
-
         if not self.path.exists():
             return []
-        raw = json.loads(self.path.read_text())
-        entries = raw.get("licences", raw) if isinstance(raw, dict) else raw
-        out = []
-        for e in entries:
-            try:
-                out.append(LicenceGrant.model_validate(e))
-            except ValidationError:
-                continue  # a malformed row must not sink the whole ledger
-        return out
+        return parse_ledger(self.path.read_text())
 
     def save(self, licences: list) -> None:
-        payload = {"licences": [lic.model_dump(mode="json") for lic in licences]}
         fd, tmp = tempfile.mkstemp(dir=self.root, suffix=".tmp")
         try:
             with os.fdopen(fd, "w") as f:
-                f.write(json.dumps(payload, indent=2))
+                f.write(serialise_ledger(licences))
             os.replace(tmp, self.path)
         except BaseException:
             if os.path.exists(tmp):

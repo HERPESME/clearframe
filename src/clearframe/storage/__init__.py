@@ -12,6 +12,7 @@ it takes a `Backends` and never asks where the bytes are.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 from typing import NamedTuple
 
@@ -65,6 +66,10 @@ class Backends(NamedTuple):
     # object and the exact paths it has always written — because an existing
     # working directory must keep working and forty tests hand-write those files.
     store: object
+    # One account's rights ledger, by uid. A factory rather than an instance
+    # because which ledger to open is a per-request question — the API asks on
+    # behalf of whoever is signed in, the worker on behalf of `job.owner_uid`.
+    ledger: Callable[[str], object] = lambda uid: None
 
 
 def build_backends(cfg: ClearFrameConfig, out_root: Path) -> Backends:
@@ -78,6 +83,7 @@ def build_backends(cfg: ClearFrameConfig, out_root: Path) -> Backends:
     out_root = Path(out_root)
     if cfg.profile == "cloud":
         from clearframe.storage.cloud import FirestoreProductionIndex, GcsBlobStore
+        from clearframe.storage.licences import BlobLicenceStore
         from clearframe.storage.state import BlobStateStore
 
         if not cfg.bucket:
@@ -92,8 +98,12 @@ def build_backends(cfg: ClearFrameConfig, out_root: Path) -> Backends:
             index=index,
             users=FirestoreUserDirectory(cfg.project),
             store=BlobStateStore(blobs, index),
+            # The ledger follows the media, the state and the events into the
+            # bucket. It was the one thing left reading the container's own
+            # filesystem, which the worker does not share with the API.
+            ledger=lambda uid, _b=blobs: BlobLicenceStore(_b, uid),
         )
-    from clearframe.store import LocalJsonStore
+    from clearframe.store import LicenceStore, LocalJsonStore
 
     return Backends(
         blobs=LocalBlobStore(out_root),
@@ -103,6 +113,10 @@ def build_backends(cfg: ClearFrameConfig, out_root: Path) -> Backends:
         index=LocalProductionIndex(out_root / "index", state_dir=out_root / "state"),
         users=LocalUserDirectory(out_root / "users"),
         store=LocalJsonStore(out_root / "state"),
+        # Deliberately the path that already exists on disk. One filesystem, so
+        # nothing here was ever broken, and a working directory written before
+        # any of this keeps working.
+        ledger=lambda uid, _r=out_root: LicenceStore(_r / "state", owner_uid=uid),
     )
 
 

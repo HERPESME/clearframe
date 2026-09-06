@@ -138,11 +138,18 @@ async def run_analysis(
     # `job.owner_uid` has been on the wire since the queue was written and
     # was dropped on the floor here. It selects whose rights ledger the
     # coverage stage reads — the worker has no request to ask.
+    #
+    # Opened through the backends rather than from `out_root`, because in the
+    # cloud profile `out_root` is this container's own tmpfs and the ledger was
+    # uploaded to the API's. Reading it from disk here found an empty file every
+    # time and reported every finding uncovered, which looks exactly like a
+    # production that genuinely holds no licences.
     ctx = build_context(
         cfg.model_copy(update={"mode": "live"}),
         state.production,
         out_root,
         owner_uid=job.owner_uid or "",
+        licences=backends.ledger(job.owner_uid or "").load(),
     )
     ctx.store = store
     ctx.state = state  # resume from what is persisted, not from a fresh model
