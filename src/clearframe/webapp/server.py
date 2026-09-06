@@ -69,13 +69,17 @@ MEDIA_TYPES = {
 }
 MAX_UPLOAD_BYTES = 512 * 1024 * 1024
 
-ARTIFACT_WHITELIST = (
-    "dossier.html",
-    "dossier.json",
-    "markers.edl",
-    "markers.csv",
-    "cue_sheet.csv",
-)
+# The report, in the two formats it is delivered in. This tuple is also what
+# the UI receives from `POST /dossier`, so it is the download surface as well as
+# the security check.
+ARTIFACT_WHITELIST = ("dossier.html", "dossier.docx")
+
+ARTIFACT_MEDIA_TYPES = {
+    "dossier.html": "text/html",
+    "dossier.docx": (
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ),
+}
 
 def _find_dist_dir() -> Path | None:
     """Locate the built SPA: env override, container/cwd layout, or repo layout."""
@@ -1477,8 +1481,16 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
         path = out_root / "artifacts" / pid / name
         if not path.exists():
             raise HTTPException(status_code=404, detail="Unknown artifact")
-        media = "text/html" if name.endswith(".html") else "text/plain"
-        return FileResponse(path, media_type=media)
+        # A lookup, not a ternary. The old rule was `text/html` for .html and
+        # `text/plain` for everything else, which would have handed a browser a
+        # .docx labelled as text and corrupted the download.
+        media = ARTIFACT_MEDIA_TYPES[name]
+        headers = {}
+        if not name.endswith(".html"):
+            # The report is meant to land in the reviewer's downloads with a
+            # name on it; the HTML is meant to open in a tab.
+            headers["Content-Disposition"] = f'attachment; filename="{name}"'
+        return FileResponse(path, media_type=media, headers=headers)
 
     if DIST_DIR is not None:
         app.mount("/", _ShellFiles(directory=DIST_DIR, html=True), name="ui")

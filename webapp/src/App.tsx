@@ -783,18 +783,31 @@ export default function App() {
           </>
         ) : (
           <>
-            <span className="pending-note">Dossier generated:</span>
+            <span className="pending-note">Clearance report ready</span>
+            <span className="spacer" />
+            {/* Two named actions, not five filenames. The report used to be
+                offered as `dossier.html  dossier.json  markers.edl
+                markers.csv  cue_sheet.csv` — the deliverable as one link among
+                five, three of them spreadsheets. */}
             <div className="artifacts">
-              {artifacts.map((name) => (
+              {artifacts.includes("dossier.html") && (
                 <a
-                  key={name}
-                  href={api.artifactUrl(production.id, name)}
+                  className="secondary"
+                  href={api.artifactUrl(production.id, "dossier.html")}
                   target="_blank"
                   rel="noreferrer"
                 >
-                  {name}
+                  View report
                 </a>
-              ))}
+              )}
+              {artifacts.includes("dossier.docx") && (
+                <a
+                  className="generate"
+                  href={api.artifactUrl(production.id, "dossier.docx")}
+                >
+                  Download (Word)
+                </a>
+              )}
             </div>
           </>
         )}

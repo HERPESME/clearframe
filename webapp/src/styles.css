@@ -564,12 +564,18 @@ button {
   cursor: not-allowed;
 }
 
+/* Two named actions rather than a row of monospace filenames. They are
+   anchors, not buttons, so they inherit the button styling explicitly. */
 .artifacts {
   display: flex;
-  gap: 14px;
+  gap: 10px;
   flex-wrap: wrap;
-  font-family: var(--mono);
-  font-size: 12px;
+  align-items: center;
+}
+
+.artifacts a {
+  text-decoration: none;
+  display: inline-block;
 }
 
 /* ---------- mission control ---------- */

@@ -16,6 +16,12 @@ dependencies = [
     # Ships a static ffmpeg binary, so audio extraction for fingerprinting
     # needs no system package on any platform (including Cloud Run).
     "imageio-ffmpeg>=0.5",
+    # The clearance report is delivered as HTML and Word, and the Word file is
+    # one of only two artifacts — an install that cannot produce it is broken,
+    # so this is a base dependency rather than an extra. Pure Python; its one
+    # compiled dependency (lxml) ships manylinux wheels, so the python:3.12-slim
+    # image still needs no apt-get line.
+    "python-docx>=1.1",
 ]
 
 [project.optional-dependencies]

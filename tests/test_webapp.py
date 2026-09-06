@@ -55,7 +55,11 @@ def test_full_review_flow_generates_artifacts(client):
     resp = client.post("/api/productions/demo/dossier")
     assert resp.status_code == 200
     artifacts = resp.json()["artifacts"]
-    assert "dossier.html" in artifacts and "cue_sheet.csv" in artifacts
+    assert artifacts == ["dossier.html", "dossier.docx"], (
+        "the report ships in two formats and nothing else — the marker CSV, "
+        "the PRO cue sheet and the raw JSON were being offered as equal "
+        "filename links beside the deliverable"
+    )
 
     html = client.get("/api/productions/demo/artifacts/dossier.html")
     assert html.status_code == 200 and "Clearance Report" in html.text

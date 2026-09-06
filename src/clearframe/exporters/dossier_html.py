@@ -4,6 +4,13 @@ from jinja2 import Template
 
 from clearframe.dossier import ClearanceDossier
 from clearframe.models import research_is_incomplete
+from clearframe.reportmeta import (
+    CONFIDENTIALITY,
+    control_rows,
+    reference,
+    signatories,
+    status,
+)
 from clearframe.timecode import seconds_to_tc
 
 BAND_HEX = {"CRITICAL": "#c0392b", "HIGH": "#e67e22", "MEDIUM": "#2980b9", "LOW": "#27ae60"}
@@ -48,6 +55,36 @@ _TEMPLATE = Template(
   .citation { font-size: 12px; margin: 4px 0 4px 12px; }
   .citation a { color: #2980b9; }
   pre.email { background: #f7f7f7; border: 1px solid #e0e0e0; padding: 10px; font-size: 11px; overflow-x: auto; white-space: pre-wrap; }
+
+  /* The cover. A clearance report is attached to an E&O application and read
+     months later by somebody who was not in the room, so it has to say on its
+     face which cut was reviewed, by whom, when and against which territories. */
+  .cover { border-bottom: 3px double #1a1a2e; padding-bottom: 26px; margin-bottom: 28px; }
+  .legend { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #8a6d1f; background: #fdf6e3; border: 1px solid #e0d5a8; padding: 8px 12px; margin-bottom: 26px; }
+  .doctitle { font-size: 13px; letter-spacing: .22em; text-transform: uppercase; color: #666; margin-bottom: 6px; }
+  .ref { font-family: Helvetica, Arial, sans-serif; font-size: 13px; color: #444; }
+  .status { font-style: italic; color: #444; margin: 4px 0 18px; }
+  table.control { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+  table.control td { border: 1px solid #ddd; padding: 6px 12px; vertical-align: top; }
+  table.control td:first-child { width: 210px; font-weight: bold; background: #fafafa; }
+  .signoff { font-size: 12.5px; margin-top: 16px; }
+  .signoff li { margin: 2px 0; }
+  h2.part { font-size: 15px; letter-spacing: .12em; text-transform: uppercase; color: #1a1a2e; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-top: 34px; }
+
+  /* Print. There was one `page-break-inside` rule in 365 lines and nothing
+     else, so "print to PDF" produced a screen layout on paper: no margins, no
+     page breaks, and every citation URL invisible because it lived in an href. */
+  @page { size: A4; margin: 18mm 16mm 20mm; }
+  @media print {
+    body { margin: 0; max-width: none; font-size: 10.5pt; }
+    a { color: inherit; text-decoration: none; }
+    .citation a[href]::after, .section a[href]::after { content: " (" attr(href) ")"; font-size: 9pt; color: #555; word-break: break-all; }
+    .cover { page-break-after: always; border-bottom: none; }
+    h2.part { page-break-before: always; }
+    .entry, table.control, table.summary { page-break-inside: avoid; }
+    h1, h2, h3, h4 { page-break-after: avoid; }
+    p, li { orphans: 3; widows: 3; }
+  }
   .decision { margin-top: 10px; font-size: 13px; padding: 8px 12px; background: #eef5ee; border: 1px solid #cfe3cf; }
   .decision.pending { background: #fbeeee; border-color: #e3cfcf; }
   .unscanned { background: #fbeeee; border: 1px solid #e3cfcf; padding: 10px 14px; font-size: 13px; margin-bottom: 24px; }
@@ -82,11 +119,26 @@ _TEMPLATE = Template(
 </style>
 </head>
 <body>
-<h1>Clearance Report — “{{ d.production.title }}”</h1>
-<div class="meta">Generated {{ d.generated_at }} · footage {{ d.production.footage_uri }} ·
-{{ '%.1f'|format(d.production.duration_s) }}s @ {{ d.production.fps|int }}fps · ClearFrame automated clearance pipeline</div>
-<div class="disclaimer">{{ d.disclaimer }}</div>
+<section class="cover">
+<div class="legend">{{ confidentiality }}</div>
+<div class="doctitle">Rights Clearance Report</div>
+<h1>“{{ d.production.title }}”</h1>
+<div class="ref">{{ reference }}</div>
+<div class="status">{{ status }}</div>
 
+<table class="control">
+{% for key, value in control %}<tr><td>{{ key }}</td><td>{{ value }}</td></tr>
+{% endfor %}</table>
+
+<div class="disclaimer"><strong>Basis and limitations.</strong> {{ d.disclaimer }}</div>
+
+{% if signatories %}
+<div class="signoff"><strong>Reviewed and signed off by</strong>
+<ul>{% for who in signatories %}<li>{{ who }}</li>{% endfor %}</ul></div>
+{% endif %}
+</section>
+
+<h2 class="part">1 · Summary of findings</h2>
 <table class="summary">
 <tr><th>CRITICAL</th><th>HIGH</th><th>MEDIUM</th><th>LOW</th><th>Incomplete research</th><th>Pending decisions</th>
 <th>Identity corroborated</th><th>Identity disputed</th><th>Live enforcement signals</th>
@@ -187,6 +239,7 @@ without documentation. {{ d.summary.get('deep_research_runs', 0) }} finding(s) r
 — these ranges were not analyzed and are NOT covered by this report.</div>
 {% endif %}
 
+<h2 class="part">2 · Schedule of findings</h2>
 {% for e in d.entries %}
 <div class="entry" style="border-left-color: {{ band_hex[e.risk.band.value] }}">
   <span class="label">{{ e.element.label }}</span>
@@ -338,7 +391,7 @@ without documentation. {{ d.summary.get('deep_research_runs', 0) }} finding(s) r
 {% endfor %}
 
 {% if audit %}
-<h3 style="font-size:15px; text-transform:uppercase; letter-spacing:1px;">Audit trail</h3>
+<h2 class="part">3 · Audit trail</h2>
 <table class="summary">
 <tr><th>When</th><th>Actor</th><th>Role</th><th>Event</th><th>Detail</th></tr>
 {% for a in audit %}
@@ -356,6 +409,14 @@ without documentation. {{ d.summary.get('deep_research_runs', 0) }} finding(s) r
 def render_dossier_html(d: ClearanceDossier) -> str:
     return _TEMPLATE.render(
         d=d,
+        # Computed in `reportmeta`, not here, so the Word rendering of the
+        # same report cannot disagree with this one about the reference
+        # number, the status or which cut was reviewed.
+        confidentiality=CONFIDENTIALITY,
+        reference=reference(d.production),
+        status=status(d),
+        control=control_rows(d),
+        signatories=signatories(d),
         band_hex=BAND_HEX,
         tc=lambda s: seconds_to_tc(s, fps=d.production.fps),
         incomplete=research_is_incomplete,

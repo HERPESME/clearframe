@@ -449,6 +449,211 @@
       "siting": "unknown"
     },
     {
+      "id": "e1-3",
+      "label": "Upbeat electronic music",
+      "element_type": "MUSIC",
+      "description": "Synth-driven pop track audible under the dialogue, rising to dominate the mix in the final beat of the scene.",
+      "time_ranges": [
+        {
+          "start_s": 12.0,
+          "end_s": 24.0,
+          "bbox": null
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 12.0,
+        "frame_coverage": 0.0,
+        "centrality": 1.0,
+        "plot_integral": true
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": null,
+      "timing_reliable": true,
+      "timing_note": "",
+      "siting": "unknown"
+    },
+    {
+      "id": "e2-3",
+      "label": "Coca-Cola can",
+      "element_type": "LOGO",
+      "description": "Red soda can with visible Coca-Cola script logo on the kitchen table.",
+      "time_ranges": [
+        {
+          "start_s": 5.0,
+          "end_s": 11.0,
+          "bbox": null
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 6.0,
+        "frame_coverage": 0.08,
+        "centrality": 0.6,
+        "plot_integral": false
+      },
+      "bbox": {
+        "ymin": 0.52,
+        "xmin": 0.41,
+        "ymax": 0.79,
+        "xmax": 0.55
+      },
+      "at_s": 6.0,
+      "depiction": "NEUTRAL",
+      "timing_reliable": true,
+      "timing_note": "",
+      "siting": "unknown"
+    },
+    {
+      "id": "e3-3",
+      "label": "Nike hoodie swoosh",
+      "element_type": "LOGO",
+      "description": "Swoosh logo on the lead actor's hoodie, visible in two scenes.",
+      "time_ranges": [
+        {
+          "start_s": 8.0,
+          "end_s": 18.0,
+          "bbox": null
+        },
+        {
+          "start_s": 40.0,
+          "end_s": 45.0,
+          "bbox": null
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 15.0,
+        "frame_coverage": 0.12,
+        "centrality": 0.7,
+        "plot_integral": false
+      },
+      "bbox": {
+        "ymin": 0.34,
+        "xmin": 0.3,
+        "ymax": 0.52,
+        "xmax": 0.46
+      },
+      "at_s": 10.0,
+      "depiction": "NEUTRAL",
+      "timing_reliable": true,
+      "timing_note": "",
+      "siting": "unknown"
+    },
+    {
+      "id": "e4-3",
+      "label": "Arctic Monkeys tour poster",
+      "element_type": "ARTWORK",
+      "description": "Framed 2023 tour poster on the bedroom wall behind the actors.",
+      "time_ranges": [
+        {
+          "start_s": 20.0,
+          "end_s": 25.0,
+          "bbox": null
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 5.0,
+        "frame_coverage": 0.2,
+        "centrality": 0.6,
+        "plot_integral": false
+      },
+      "bbox": {
+        "ymin": 0.12,
+        "xmin": 0.55,
+        "ymax": 0.48,
+        "xmax": 0.86
+      },
+      "at_s": 22.0,
+      "depiction": null,
+      "timing_reliable": true,
+      "timing_note": "",
+      "siting": "portable_or_interior"
+    },
+    {
+      "id": "e5-3",
+      "label": "Street mural (unknown artist)",
+      "element_type": "ARTWORK",
+      "description": "Large colorful mural forming the backdrop of the walking shot; artist signature not legible.",
+      "time_ranges": [
+        {
+          "start_s": 30.0,
+          "end_s": 36.0,
+          "bbox": null
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 6.0,
+        "frame_coverage": 0.3,
+        "centrality": 0.5,
+        "plot_integral": false
+      },
+      "bbox": {
+        "ymin": 0.05,
+        "xmin": 0.02,
+        "ymax": 0.92,
+        "xmax": 0.78
+      },
+      "at_s": 33.0,
+      "depiction": null,
+      "timing_reliable": true,
+      "timing_note": "",
+      "siting": "public_permanent"
+    },
+    {
+      "id": "e6-3",
+      "label": "Background passerby face",
+      "element_type": "FACE",
+      "description": "Unidentified pedestrian briefly visible and recognizable in the background, out of focus.",
+      "time_ranges": [
+        {
+          "start_s": 47.0,
+          "end_s": 48.2,
+          "bbox": null
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 1.2,
+        "frame_coverage": 0.03,
+        "centrality": 0.2,
+        "plot_integral": false
+      },
+      "bbox": null,
+      "at_s": null,
+      "depiction": "NEUTRAL",
+      "timing_reliable": true,
+      "timing_note": "",
+      "siting": "unknown"
+    },
+    {
+      "id": "e8-3",
+      "label": "Adidas three-stripe duffel bag",
+      "element_type": "LOGO",
+      "description": "Striped sports duffel on the bedroom floor; the mark is partly occluded by bedding.",
+      "time_ranges": [
+        {
+          "start_s": 26.0,
+          "end_s": 30.0,
+          "bbox": null
+        }
+      ],
+      "prominence": {
+        "screen_time_s": 4.0,
+        "frame_coverage": 0.09,
+        "centrality": 0.4,
+        "plot_integral": false
+      },
+      "bbox": {
+        "ymin": 0.61,
+        "xmin": 0.58,
+        "ymax": 0.8,
+        "xmax": 0.72
+      },
+      "at_s": 27.0,
+      "depiction": "NEUTRAL",
+      "timing_reliable": true,
+      "timing_note": "",
+      "siting": "unknown"
+    },
+    {
       "id": "e7",
       "label": "News broadcast on background TV",
       "element_type": "ARTWORK",
@@ -3225,5 +3430,7 @@
       }
     }
   ],
-  "cast": []
+  "cast": [],
+  "subsumed_ids": [],
+  "source_work_summary": null
 }
