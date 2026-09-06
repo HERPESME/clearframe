@@ -53,6 +53,13 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
   // guess grounding exists to replace — for the two-to-five seconds the call
   // takes. Long enough to pause, look, and screenshot a wrong box.
   const [pending, setPending] = useState<Record<string, true>>({});
+  // When a second's measurement last FAILED. A failure used to be written into
+  // `ground` as an answer, and the guard below then blocked that second for the
+  // life of the page — so one dropped request pinned a frame to the scan's
+  // approximate box permanently, even though the server caches no failure and
+  // a retry would have succeeded.
+  const [failedAt, setFailedAt] = useState<Record<string, number>>({});
+  const RETRY_MS = 15000;
   const [ok, setOk] = useState(true);
   // How far the background measuring has got. Shown because a reviewer pausing
   // during it must be able to tell a frame that is still being measured from a
@@ -72,7 +79,16 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
         const body = await (await fetch(`/api/productions/${pid}/preground`)).json();
         if (stopped) return;
         setWarm(body);
+        // Three states, not two. `running` polls fast. NOT running with a
+        // total is a finished warm-up, and the only one that stops.
+        //
+        // NOT running with no total means nobody has asked for the warm-up
+        // YET — and that is the normal case on mount, because React runs a
+        // child's effects before its parent's, so this GET goes out before
+        // App's POST exists. Stopping there latched the display off for good
+        // and "measuring boxes N/M" never appeared on the restore path.
         if (body.running) timer = window.setTimeout(poll, 2000);
+        else if (!body.total) timer = window.setTimeout(poll, 5000);
       } catch {
         /* the boxes still work, they are just slower */
       }
@@ -152,6 +168,7 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
     setOk(true);
     setGround({});
     setPending({});
+    setFailedAt({});
   }, [pid, mediaVersion]);
 
   // Ground only while paused. During playback a refined box would be stale
@@ -160,6 +177,8 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
     if (!paused) return;
     const second = String(Math.floor(now));
     if (ground[second] || pending[second]) return;
+    const failed = failedAt[second];
+    if (failed !== undefined && Date.now() - failed < RETRY_MS) return;
     // Deliberately NOT an effect-cleanup cancellation. `ground` is a dependency
     // and this effect writes to it, so cleanup fired every time ANY second's
     // answer arrived — cancelling the request in flight for the second the
@@ -174,16 +193,21 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
       .then((r) => (r.ok ? r.json() : { boxes: {}, grounded: false }))
       .then((body) => {
         if (mine !== clip.current) return;
+        if (body.grounded !== true) {
+          // Nobody looked at this frame, so the scan's box is still the best
+          // thing we have. Recorded as a failure rather than an answer, so it
+          // is retried instead of standing for the rest of the session.
+          setFailedAt((f) => ({ ...f, [second]: Date.now() }));
+          return;
+        }
         setGround((g) => ({
           ...g,
-          [second]: { boxes: body.boxes ?? {}, grounded: body.grounded === true },
+          [second]: { boxes: body.boxes ?? {}, grounded: true },
         }));
       })
       .catch(() => {
-        // Nobody looked at this frame, so the scan's box is still the best
-        // thing we have — which is the behaviour that existed before this.
         if (mine === clip.current) {
-          setGround((g) => ({ ...g, [second]: { boxes: {}, grounded: false } }));
+          setFailedAt((f) => ({ ...f, [second]: Date.now() }));
         }
       })
       .finally(() => {
@@ -192,7 +216,7 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, Props>(function VideoPla
           return rest;
         });
       });
-  }, [pid, paused, now, ground, pending]);
+  }, [pid, paused, now, ground, pending, failedAt]);
 
   if (!ok) return null;
 

@@ -88,6 +88,9 @@ class LiveGeminiClient:
             lambda: _default_client_factory(project, location)
         )
         self._client = None
+        # Which model actually served a call on this instance. Remembered so a
+        # deterministic 404 is paid for once rather than per call.
+        self._serving_model: str | None = None
 
     def _client_or_create(self):
         if self._client is None:
@@ -126,11 +129,19 @@ class LiveGeminiClient:
         from_config = self._scan_config(schema)
 
         client = self._client_or_create()
-        models_to_try = [self.model, self.fallback_model]
+        # Whichever model answered last time, first. A model that 404s in a
+        # project 404s deterministically — `gemini-3-pro-preview` does exactly
+        # that here, which is why the fallback is load-bearing — so re-deriving
+        # it costs a wasted round trip on every call. That was invisible while
+        # the client was per-run and became 150 wasted calls once pre-grounding
+        # started measuring a clip's worth of frames.
+        models_to_try = [self._serving_model or self.model, self.fallback_model]
         last_error: Exception | None = None
-        for model in models_to_try:
+        for model in dict.fromkeys(models_to_try):
             try:
-                return self._call_with_retry(client, model, contents, from_config)
+                answer = self._call_with_retry(client, model, contents, from_config)
+                self._serving_model = model
+                return answer
             except Exception as exc:  # model-not-found falls through to fallback
                 if "not found" in str(exc).lower() or "404" in str(exc):
                     last_error = exc

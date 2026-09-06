@@ -312,3 +312,40 @@ def test_grounding_does_not_block_the_event_loop():
         "blocked, so the server can answer nothing else while grounding"
     )
     assert "Acme soda can" in boxes
+
+
+def test_a_model_that_404s_is_only_discovered_once():
+    """`gemini-3-pro-preview` 404s in this project, deterministically.
+
+    The fallback to 2.5-pro is what actually serves every live run — so
+    re-deriving it costs a wasted round trip on every call. Invisible while
+    the client lived for one run; 150 wasted calls once pre-grounding started
+    measuring a clip's worth of frames.
+    """
+    from clearframe.integrations.gemini_live import LiveGeminiClient
+
+    tried: list[str] = []
+
+    class Models:
+        def generate_content(self, model, contents, config):
+            tried.append(model)
+            if model == "missing-model":
+                raise RuntimeError("404 NOT_FOUND: model not found")
+
+            class R:
+                text = "{}"
+
+            return R()
+
+    class Client:
+        models = Models()
+
+    client = LiveGeminiClient(
+        "proj", "us-central1", model="missing-model",
+        fallback_model="serving-model", client_factory=lambda: Client(),
+    )
+
+    client._generate(["one"])
+    client._generate(["two"])
+
+    assert tried == ["missing-model", "serving-model", "serving-model"]

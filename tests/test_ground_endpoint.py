@@ -379,3 +379,197 @@ def test_two_findings_sharing_a_label_never_share_a_rectangle(tmp_path, monkeypa
     body = c.get("/api/productions/p1/ground", params={"at_s": 12.0}).json()
 
     assert list(body["boxes"]) == ["e2"]
+
+
+# --- the lifecycle: one measurement per second, per FILM ----------------------
+#
+# Three defects with one shape, all of them "the server forgot which film it
+# was looking at, or how many people were asking".
+
+
+def test_a_second_upload_is_never_shown_the_first_film_s_boxes(tmp_path, monkeypatch):
+    """The stale-box bug, one layer below where media_version reached.
+
+    Every upload from the UI lands at the same production id, so the cache key
+    (pid, second) survives a change of footage. media_version busts the
+    browser's video cache and the client's own map — and then the very next
+    /ground returned the previous film's rectangles marked `grounded: true`,
+    i.e. presented as measured on this frame.
+    """
+    from clearframe.models import BBox
+
+    answers = [
+        [BBox(ymin=0.1, xmin=0.1, ymax=0.2, xmax=0.2)],
+        [BBox(ymin=0.8, xmin=0.8, ymax=0.9, xmax=0.9)],
+    ]
+    calls = []
+
+    class Sequential:
+        async def ground_frame(self, image, labels):
+            calls.append(labels)
+            return {labels[0]: answers[min(len(calls) - 1, 1)]}
+
+    c = _client_with(tmp_path, monkeypatch, [_element("e1", "Nike")], Sequential())
+
+    first = c.get("/api/productions/p1/ground", params={"at_s": 12.0}).json()
+    assert first["boxes"]["e1"][0]["ymin"] == 0.1
+
+    # A different film at the same id and the same moment.
+    import os
+    import time
+
+    footage = tmp_path / "media" / "p1" / "footage.mp4"
+    time.sleep(0.01)
+    footage.write_bytes(b"\x01" * 4096)
+    os.utime(footage, None)
+
+    second = c.get("/api/productions/p1/ground", params={"at_s": 12.0}).json()
+    assert len(calls) == 2, "the new footage was answered from the old film's cache"
+    assert second["boxes"]["e1"][0]["ymin"] == 0.8
+
+
+@pytest.mark.asyncio
+async def test_one_second_is_measured_once_however_many_ask_at_once(tmp_path, monkeypatch):
+    """The cache is checked before the gate, and nothing tracked flight.
+
+    Pre-grounding schedules every second up front, so all of them check the
+    cache before more than a handful have finished — and an on-demand pause
+    races them. The same second could be measured twice, each a paid call.
+    """
+    import asyncio as aio
+
+    import httpx
+    from clearframe.models import BBox
+
+    started = aio.Event()
+    release = aio.Event()
+    calls = []
+
+    class Slow:
+        async def ground_frame(self, image, labels):
+            calls.append(labels)
+            started.set()
+            await release.wait()
+            return {labels[0]: [BBox(ymin=0.1, xmin=0.1, ymax=0.2, xmax=0.2)]}
+
+    monkeypatch.setenv("CLEARFRAME_MODE", "live")
+    monkeypatch.setenv("GOOGLE_CLOUD_PROJECT", "proj")
+    monkeypatch.setenv("PARALLEL_API_KEY", "key")
+    state = {
+        "production": {"id": "p1", "title": "t", "footage_uri": "c.mp4",
+                       "duration_s": 41.5, "fps": 24.0},
+        "elements": [_element("e1", "Nike")],
+    }
+    (tmp_path / "state").mkdir()
+    (tmp_path / "state" / "p1.json").write_text(json.dumps(state))
+    media = tmp_path / "media" / "p1"
+    media.mkdir(parents=True)
+    (media / "footage.mp4").write_bytes(b"\x00" * 2048)
+    monkeypatch.setattr(
+        "clearframe.webapp.server.extract_frame",
+        lambda path, at_s, **kw: b"\xff\xd8frame",
+    )
+    monkeypatch.setattr(
+        "clearframe.webapp.server.build_grounding_client", lambda cfg: Slow()
+    )
+
+    app = create_app(out_root=tmp_path)
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://t") as ac:
+        one = aio.create_task(ac.get("/api/productions/p1/ground", params={"at_s": 12.0}))
+        await started.wait()
+        two = aio.create_task(ac.get("/api/productions/p1/ground", params={"at_s": 12.4}))
+        await aio.sleep(0.05)
+        release.set()
+        a, b = await one, await two
+
+    assert len(calls) == 1, "the same second was measured twice"
+    assert a.json()["boxes"]["e1"][0]["ymin"] == 0.1
+    assert b.json()["boxes"]["e1"][0]["ymin"] == 0.1
+
+
+def test_a_second_warm_up_never_stacks_on_a_running_one(tmp_path):
+    """Triage fires one, the SPA fires one on mount, a reload fires another.
+
+    Each ran with its own semaphore and all of them wrote to one progress
+    dict, so `done` could exceed `total` and the first to finish set
+    running:false while measurement was still in flight — stopping the
+    reviewer's progress display mid-warm.
+    """
+    from fastapi.testclient import TestClient
+
+    from clearframe.webapp.server import create_app
+
+    with TestClient(create_app(out_root=tmp_path)) as client:
+        state = client.post("/api/productions/demo").json()
+        pid = state["production"]["id"]
+        first = client.post(f"/api/productions/{pid}/preground").json()
+        second = client.post(f"/api/productions/{pid}/preground").json()
+
+        assert first["status"] == "warming"
+        assert second["status"] in {"already-warming", "warm"}
+        progress = client.get(f"/api/productions/{pid}/preground").json()
+        assert progress["done"] <= progress["total"]
+
+
+def test_progress_is_visible_the_moment_the_warm_up_is_asked_for(tmp_path):
+    """The client polls before it posts, so a task-tick delay latched it off.
+
+    React runs a child's effects before its parent's: the player's GET goes
+    out before App's POST exists. If the POST then seeded progress only once
+    its task got a turn, the poll saw {running: false} and stopped for good —
+    and "measuring boxes N/M" never appeared on the restore path.
+    """
+    from fastapi.testclient import TestClient
+
+    from clearframe.webapp.server import create_app
+
+    with TestClient(create_app(out_root=tmp_path)) as client:
+        state = client.post("/api/productions/demo").json()
+        pid = state["production"]["id"]
+        client.post(f"/api/productions/{pid}/preground")
+        progress = client.get(f"/api/productions/{pid}/preground").json()
+        assert progress["total"] >= 1
+
+
+def test_the_grounding_client_is_built_once_not_once_per_frame(tmp_path, monkeypatch):
+    """Building it re-resolves ADC and opens a new connection pool.
+
+    It is also where the model-fallback answer is remembered, so a warm-up of
+    150 frames was paying for a fresh client — and a fresh 404 — 150 times.
+    """
+    from clearframe.models import BBox
+
+    built = []
+
+    class Grounder:
+        async def ground_frame(self, image, labels):
+            return {labels[0]: [BBox(ymin=0.1, xmin=0.1, ymax=0.2, xmax=0.2)]}
+
+    def _build(cfg):
+        built.append(cfg.gemini_model)
+        return Grounder()
+
+    c = _client_with(tmp_path, monkeypatch, [_element("e1", "Nike")], Grounder())
+    monkeypatch.setattr("clearframe.webapp.server.build_grounding_client", _build)
+
+    for at_s in (10.5, 11.5, 12.5, 13.5):
+        c.get("/api/productions/p1/ground", params={"at_s": at_s})
+
+    assert len(built) == 1
+
+
+def test_grounding_uses_the_configured_model(tmp_path, monkeypatch):
+    """It ignored CLEARFRAME_GEMINI_MODEL, unlike every other caller."""
+    from clearframe.config import ClearFrameConfig
+    from clearframe.webapp.server import build_grounding_client
+
+    monkeypatch.setenv("CLEARFRAME_MODE", "live")
+    monkeypatch.setenv("GOOGLE_CLOUD_PROJECT", "proj")
+    monkeypatch.setenv("PARALLEL_API_KEY", "key")
+    monkeypatch.setenv("CLEARFRAME_GEMINI_MODEL", "gemini-2.5-pro")
+
+    cfg = ClearFrameConfig.from_env(dict(__import__("os").environ))
+    client = build_grounding_client(cfg)
+
+    assert client.model == "gemini-2.5-pro"
