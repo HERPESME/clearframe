@@ -44,11 +44,42 @@ from clearframe.models import CastCredit, ElementType, TriagedElement
 # both the part and the performer.
 _ATTRIBUTED = re.compile(r"^\s*(?P<part>[^()]+?)\s*\((?P<performer>[^()]+)\)\s*$")
 
-# "...played by actor Ed Helms." Two capitalised words minimum: a full name is
-# the evidence, and "played by an extra" names nobody.
+# A full name, capitalised, two words minimum. Reused by every attribution
+# below: the name IS the evidence, and "played by an extra" names nobody.
+#
+# A word may end in a full stop only when the stop is NOT followed by
+# whitespace — "J.R.R. Tolkien" keeps its initials, while "Ed Helms. He has a
+# tattoo" stops at Helms. Without that lookahead the name ran straight through
+# the end of the sentence and took the next word with it, so the character came
+# out as "Stu Price. He".
+_NAME_WORD = r"[A-Z][\w'’\-]*(?:\.(?!\s|$))?"
+_FULL_NAME = rf"{_NAME_WORD}(?:\s+{_NAME_WORD})+"
+
+# "...played by actor Ed Helms." The performer after the verb.
 _PLAYED_BY = re.compile(
     r"(?:played|portrayed|performed)\s+by\s+(?:the\s+)?(?:actor|actress)?\s*"
-    r"(?P<performer>[A-Z][\w'’.\-]+(?:\s+[A-Z][\w'’.\-]+)+)"
+    rf"(?P<performer>{_FULL_NAME})"
+)
+
+# "Face of actor Bradley Cooper, playing the character Phil Wenneck." The
+# performer BEFORE the verb, as a noun phrase.
+#
+# A second live run of the same scene phrased every attribution this way, so
+# `_PLAYED_BY` matched none of them: three actors came back as third-party
+# right-of-publicity findings routed to deep research, and the run recorded
+# zero cast credits. The module's whole purpose, defeated by a rephrasing.
+#
+# Same failure as the scan writing "replicating" while the tattoo check looked
+# for "replicated". A prose pattern is not a contract; the vocabulary has to
+# cover how the model actually writes.
+_ACTOR_NAMED = re.compile(rf"\b(?:actor|actress)\s+(?P<performer>{_FULL_NAME})")
+
+# "...playing the character Phil Wenneck" — the PART, when the label carried
+# the performer's name instead. Without it the credit reads "Bradley Cooper as
+# Bradley Cooper", and the guild obligation is owed against the part.
+_PLAYING_THE_PART = re.compile(
+    r"(?:playing|portraying|as)\s+(?:the\s+)?(?:character|role\s+of|part\s+of)\s+"
+    rf"(?P<part>{_FULL_NAME})"
 )
 
 # Words that make a parenthetical a stage direction rather than a name.
@@ -86,14 +117,24 @@ def performer_of(element: TriagedElement) -> tuple[str | None, str] | None:
             part = attributed.group("part").strip()
             return (part or None, performer)
 
-    played = _PLAYED_BY.search(element.description or "")
-    if played:
+    description = element.description or ""
+    # Either phrasing counts: the performer after the verb, or named as an
+    # actor before it. Both are the scan asserting who this is.
+    named = _PLAYED_BY.search(description) or _ACTOR_NAMED.search(description)
+    if named:
         # The name runs to the end of a sentence, and the character class has
         # to admit "." for initials, so the full stop comes along with it.
-        performer = played.group("performer").strip().rstrip(".,;:")
+        performer = named.group("performer").strip().rstrip(".,;:")
         if _looks_like_a_name(performer):
             label = (element.label or "").strip()
             part = label if label and label != performer else None
+            if part is None:
+                # The label was the performer, so the part is in the prose.
+                playing = _PLAYING_THE_PART.search(description)
+                if playing:
+                    candidate = playing.group("part").strip().rstrip(".,;:")
+                    if candidate != performer:
+                        part = candidate
             return (part, performer)
     return None
 
