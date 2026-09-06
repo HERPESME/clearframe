@@ -31,6 +31,15 @@ deploy = ["google-cloud-aiplatform[agent_engines,adk]>=1.101.0"]
 # packages at all, so this must not become the thing that puts grpcio in it.
 # `webapp/auth.py` imports it lazily and the app runs without it.
 auth = ["firebase-admin>=6.5.0"]
+# The cloud storage profile: a bucket for blobs, Firestore for the index, Cloud
+# Tasks for the queue. Optional for the same reason `auth` is — `pip install .`
+# and the 826-test suite must keep working with none of it present, which is
+# what `storage/cloud.py` importing every SDK inside a function body buys.
+gcp = [
+    "google-cloud-storage>=2.16",
+    "google-cloud-firestore>=2.16",
+    "google-cloud-tasks>=2.16",
+]
 dev = ["pytest>=8", "pytest-asyncio>=0.23"]
 
 [build-system]

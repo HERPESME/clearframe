@@ -51,32 +51,42 @@ __all__ = [
 class Backends(NamedTuple):
     blobs: BlobStore
     index: ProductionIndex
+    # The clearance record itself. Local mode keeps `LocalJsonStore` — the exact
+    # object and the exact paths it has always written — because an existing
+    # working directory must keep working and forty tests hand-write those files.
+    store: object
 
 
 def build_backends(cfg: ClearFrameConfig, out_root: Path) -> Backends:
-    """Blobs and the index for this profile.
+    """Blobs, the index and the state store for this profile.
 
     The local layout is deliberately the one that already exists on disk —
     `<out>/state/{pid}.json`, `<out>/media/{pid}/footage.mp4` — so a working
-    directory written before any of this keeps working, and the forty tests that
+    directory written before any of this keeps working, and the tests that
     hand-write those paths keep passing.
     """
     out_root = Path(out_root)
     if cfg.profile == "cloud":
-        from clearframe.storage.cloud import GcsBlobStore, FirestoreProductionIndex
+        from clearframe.storage.cloud import FirestoreProductionIndex, GcsBlobStore
+        from clearframe.storage.state import BlobStateStore
 
         if not cfg.bucket:
             raise ValueError("CLEARFRAME_PROFILE=cloud needs CLEARFRAME_BUCKET")
-        return Backends(
-            blobs=GcsBlobStore(cfg.bucket),
-            index=FirestoreProductionIndex(cfg.project),
-        )
+        blobs = GcsBlobStore(cfg.bucket)
+        index = FirestoreProductionIndex(cfg.project)
+        # State in the bucket, not the container. `/tmp` on Cloud Run is a
+        # per-instance tmpfs: it is gone a minute after the last request, and it
+        # is not shared with the worker that is doing the analysis.
+        return Backends(blobs=blobs, index=index, store=BlobStateStore(blobs, index))
+    from clearframe.store import LocalJsonStore
+
     return Backends(
         blobs=LocalBlobStore(out_root),
         # The index lives beside `state/`, never inside it: `production_ids()`
         # globs `state/*.json` and would return index files as productions —
         # the same trap that made `licences.json` a reserved name there.
         index=LocalProductionIndex(out_root / "index", state_dir=out_root / "state"),
+        store=LocalJsonStore(out_root / "state"),
     )
 
 

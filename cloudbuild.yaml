@@ -48,6 +48,7 @@ steps:
       # deliberately disabled client-side.
       - --timeout=900
       - --execution-environment=gen2
+      - --service-account=clearframe-api@$PROJECT_ID.iam.gserviceaccount.com
       - --update-env-vars=CLEARFRAME_MODE=demo
       - --command=python
       - --args=-m,clearframe,serve,--host,0.0.0.0,--port,8080,--out,/tmp/out
@@ -82,6 +83,7 @@ steps:
       # restarting and paying for the scan twice.
       - --timeout=1800
       - --execution-environment=gen2
+      - --service-account=clearframe-worker@$PROJECT_ID.iam.gserviceaccount.com
       - --update-env-vars=CLEARFRAME_MODE=demo
       - --command=python
       - --args=-m,clearframe,worker,--host,0.0.0.0,--port,8080,--out,/tmp/out

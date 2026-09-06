@@ -34,7 +34,6 @@ from fastapi.responses import JSONResponse
 from clearframe.config import ClearFrameConfig
 from clearframe.runner import run_analysis
 from clearframe.storage import AnalysisJob, build_backends
-from clearframe.store import LocalJsonStore
 from clearframe.worker import oidc
 
 log = logging.getLogger("clearframe.worker")
@@ -49,9 +48,12 @@ DEFAULT_MAX_CONCURRENT = 5
 def create_worker_app(out_root: Path, max_concurrent: int = DEFAULT_MAX_CONCURRENT):
     out_root = Path(out_root)
     app = FastAPI(title="ClearFrame Worker")
-    store = LocalJsonStore(out_root / "state")
     cfg = ClearFrameConfig.from_env(os.environ)
     backends = build_backends(cfg, out_root)
+    # The same store the API writes to. In the cloud profile that is the
+    # bucket; a local one would read an empty /tmp on a container that has
+    # never seen the upload.
+    store = backends.store
     gate = asyncio.Semaphore(max_concurrent)
 
     @app.get("/healthz")

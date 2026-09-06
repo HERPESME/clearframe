@@ -219,15 +219,15 @@ def build_grounding_client(cfg):
 
 def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
     out_root = Path(out_root)
-    store = LocalJsonStore(out_root / "state")
     app = FastAPI(title="ClearFrame Review")
-    # Blobs and the production index. Local by default, so an existing working
-    # directory keeps working and the credential-free suite is unaffected;
-    # `backends` is the injection point for tests that want to prove otherwise.
+    # Blobs, the production index and the state store. Local by default, so an
+    # existing working directory keeps working and the credential-free suite is
+    # unaffected; `backends` is the injection point for tests.
     backends = backends or build_backends(
         ClearFrameConfig.from_env(os.environ), out_root
     )
     index = backends.index
+    store = backends.store
     # Serializes every load-modify-save of production state; without it,
     # concurrent decision posts (threadpool) and dossier generation could
     # silently clobber each other's saves.
@@ -563,9 +563,10 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
         if pace_s > 0:
             # Mission Control mode: fresh paced run in the background, events
             # streamed over /events. Restarts the demo production from scratch.
-            state_path = store.root / "demo.json"
-            if state_path.exists():
-                state_path.unlink()
+            # Reaching through the store to a filesystem path is what a
+            # bucket cannot answer; deleting the blob is the same intent stated
+            # in terms the interface actually has.
+            backends.blobs.delete("state/demo.json")
             # A replay starts from nothing: the previous run's events must not
             # be prepended to this one, and the row has to exist before the
             # first heartbeat or there is nothing to beat against.
@@ -585,9 +586,7 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
         # anything forces a fresh one rather than silently returning the
         # previous configuration's numbers.
         if body is not None and body.declares_anything:
-            state_path = store.root / "demo.json"
-            if state_path.exists():
-                state_path.unlink()
+            backends.blobs.delete("state/demo.json")
 
         try:
             state = store.load("demo")
