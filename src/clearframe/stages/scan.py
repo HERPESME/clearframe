@@ -20,7 +20,7 @@ from clearframe.models import DetectedElement, ExposureFinding, SourceWork, Time
 from clearframe.pipeline import PipelineContext
 from clearframe.matching import labels_match
 from clearframe.sourcework import corrected_types
-from clearframe.timeline import timing_is_reliable
+from clearframe.timeline import clamp_to_footage, timing_is_reliable
 from clearframe.triage import union_spans
 
 log = logging.getLogger("clearframe.scan")
@@ -168,7 +168,14 @@ def _with_timing_verdict(
     the list and no box anywhere in the player.
 
     The finding is kept. Only its timing is disowned.
+
+    First, though, an end time that overshoots the last frame by a rounding
+    margin is pulled back onto it. A live run lost `Bangkok Hotel Room` — a
+    finding spanning the whole scene — because the scan said it ended at 41.60s
+    in a 41.50s clip, and disowning cost it its timeline and every rectangle it
+    had over a tenth of a second.
     """
+    detection = clamp_to_footage(detection, production.duration_s)
     ok, reason = timing_is_reliable(
         detection, production.duration_s, production.fps
     )

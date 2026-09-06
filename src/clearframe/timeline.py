@@ -44,6 +44,60 @@ def _frame_duration_s(fps: float) -> float:
     return 1.0 / (fps if fps > 0 else _DEFAULT_FPS)
 
 
+# How far past the last frame an end time may be and still be read as rounding.
+#
+# One second, and it rests on a single observation, which is stated rather than
+# hidden: a live run reported `Bangkok Hotel Room` ending at 41.60s in a 41.50s
+# clip. That finding spanned the whole scene, and disowning it cost it its place
+# on the timeline and every rectangle it had — over a tenth of a second.
+#
+# Clamping is deliberately NOT the unit repair this module refuses. Choosing
+# between minutes and fraction-of-clip means picking one of two answers that
+# both land inside the clip, and `overlay.py`'s rule is that a confidently wrong
+# answer is worse than none. Saying that an appearance running past the end of
+# the footage ends at the end of the footage is not a choice: the last frame is
+# the last frame. Beyond a second, though, the number is not a rounded one — it
+# is a different number — so it goes back to being disowned.
+CLAMP_TOLERANCE_S = 1.0
+
+
+def clamp_to_footage(element: DetectedElement, duration_s: float) -> DetectedElement:
+    """Pull an end time that overshoots the last frame back onto it.
+
+    Returns the element untouched when there is nothing to do, which is the
+    overwhelmingly common case. Never clamps a range that *begins* after the
+    last frame: the result would be `end_s <= start_s`, which is not an
+    appearance at all, and a range that starts outside the footage is a genuine
+    contradiction for `timing_is_reliable` to catch.
+    """
+    if duration_s <= _UNKNOWN_DURATION:
+        return element
+    ranges = element.time_ranges
+    if not ranges:
+        return element
+    if not any(
+        duration_s + _EPSILON_S < r.end_s <= duration_s + CLAMP_TOLERANCE_S
+        and r.start_s < duration_s - _EPSILON_S
+        for r in ranges
+    ):
+        return element
+    return element.model_copy(
+        update={
+            "time_ranges": [
+                r.model_copy(update={"end_s": duration_s})
+                if (
+                    duration_s + _EPSILON_S
+                    < r.end_s
+                    <= duration_s + CLAMP_TOLERANCE_S
+                    and r.start_s < duration_s - _EPSILON_S
+                )
+                else r
+                for r in ranges
+            ]
+        }
+    )
+
+
 def timing_is_reliable(
     element: DetectedElement, duration_s: float, fps: float
 ) -> tuple[bool, str]:

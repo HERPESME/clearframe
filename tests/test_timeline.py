@@ -16,8 +16,10 @@ codebase's rule is that a confidently wrong rectangle is worse than none.
 What we can do is prove the numbers are impossible and say so.
 """
 
+import pytest
+
 from clearframe.models import DetectedElement, ElementType, Prominence, TimeRange
-from clearframe.timeline import timing_is_reliable
+from clearframe.timeline import clamp_to_footage, timing_is_reliable
 
 
 def element(ranges: list[tuple[float, float]], screen_time_s: float = 10.0):
@@ -145,3 +147,79 @@ def test_an_old_state_is_corrected_when_it_is_read(tmp_path, monkeypatch):
 
     # And the finding itself survives — only its timing was disowned.
     assert len(body["elements"]) == 2
+
+
+def _spanning(end_s: float, start_s: float = 0.0, screen_time: float = 41.5):
+    """One appearance that runs to (or past) the end of a 41.5s clip."""
+    return DetectedElement(
+        id="1",
+        label="Bangkok Hotel Room",
+        element_type=ElementType.LOCATION,
+        description="the room the scene is set in",
+        time_ranges=[TimeRange(start_s=start_s, end_s=end_s)],
+        prominence=Prominence(
+            screen_time_s=screen_time, frame_coverage=0.9,
+            centrality=0.5, plot_integral=True,
+        ),
+    )
+
+
+def test_a_rounding_overshoot_past_the_last_frame_is_clamped_not_disowned():
+    """The finding a live run lost to a tenth of a second.
+
+    `Bangkok Hotel Room` was reported ending at **41.60s in a 41.50s clip** and
+    was disowned for it — losing its place on the timeline and every rectangle
+    it had. But the sub-frame test did not fire and its ranges reconcile against
+    its own screen time, so this is not a unit error: it is the model rounding
+    past the last frame.
+
+    Clamping is not the unit-guessing this module rightly refuses. Choosing
+    between minutes and fraction-of-clip would be picking one of two answers
+    that both land inside the clip; saying that an appearance running past the
+    end of the footage ends at the end of the footage is a physical fact. The
+    last frame is the last frame.
+    """
+    el = clamp_to_footage(_spanning(41.60), duration_s=41.5)
+
+    assert el.time_ranges[0].end_s == pytest.approx(41.5)
+    ok, _ = timing_is_reliable(el, 41.5, 30.0)
+    assert ok, "the finding still lost its timeline"
+
+
+def test_an_overshoot_too_large_to_be_rounding_is_left_to_be_disowned():
+    """A whole minute past the end of a 41.5s clip is a different number, not a
+    rounded one. Clamping it would invent an appearance nobody photographed —
+    and `overlay.py`'s rule is that a confidently wrong answer is worse than
+    none."""
+    el = clamp_to_footage(_spanning(101.5), duration_s=41.5)
+
+    assert el.time_ranges[0].end_s == 101.5, "a wild timecode was quietly repaired"
+    ok, _ = timing_is_reliable(el, 41.5, 30.0)
+    assert not ok
+
+
+def test_a_range_starting_past_the_end_is_never_clamped():
+    """Clamping the end of a range that begins after the last frame would
+    produce `end_s <= start_s`, which is not an appearance at all."""
+    el = clamp_to_footage(_spanning(41.7, start_s=41.6), duration_s=41.5)
+
+    assert el.time_ranges[0].start_s == 41.6 and el.time_ranges[0].end_s == 41.7
+    ok, _ = timing_is_reliable(el, 41.5, 30.0)
+    assert not ok
+
+
+def test_an_unknown_duration_clamps_nothing():
+    """`probe_duration_s` returns 0.0 rather than raising, and states written
+    before it existed carry 0.0 too. An unknown duration must never be evidence
+    against a finding."""
+    el = clamp_to_footage(_spanning(41.60), duration_s=0.0)
+
+    assert el.time_ranges[0].end_s == 41.60
+
+
+def test_timecodes_inside_the_clip_are_returned_untouched():
+    """The overwhelmingly common case must not allocate a new model or move a
+    single number."""
+    original = _spanning(41.0)
+
+    assert clamp_to_footage(original, duration_s=41.5) is original
