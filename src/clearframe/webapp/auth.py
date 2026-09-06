@@ -51,6 +51,9 @@ class AuthUser(BaseModel):
     email: str | None = None
     name: str | None = None
     role: str = DEFAULT_ROLE
+    # Did the provider confirm this address belongs to them? Google sign-in
+    # always has; email/password has not until the user clicks the link.
+    email_verified: bool = False
 
     @property
     def actor(self) -> str:
@@ -59,8 +62,21 @@ class AuthUser(BaseModel):
         `Decision.reviewer` used to be the role word, so an E&O dossier said
         that "legal" signed off a clearance decision. A job title cannot sign
         anything. Email first because it is the identity a studio recognises.
+
+        **An unverified address says so.** Anyone can sign up with any email and
+        — on an open-roles deployment — call themselves `legal`, so a bare
+        address in an E&O audit trail would be provenance the system never
+        established. Recording `someone@example.com (unverified)` costs nothing
+        and stops the report claiming more than it knows; a Google sign-in, or
+        anyone who has clicked the link, reads clean.
+
+        The same reasoning as the `chosen` label on a self-selected role: the
+        problem is never that the fact is weak, it is presenting a weak fact as
+        a strong one.
         """
-        return self.email or self.uid
+        if not self.email:
+            return self.uid
+        return self.email if self.email_verified else f"{self.email} (unverified)"
 
 
 def auth_enabled(env=None) -> bool:
@@ -167,6 +183,7 @@ def user_from_token(raw: str, env=None) -> AuthUser:
         email=email,
         name=claims.get("name"),
         role=role or DEFAULT_ROLE,
+        email_verified=bool(claims.get("email_verified")),
     )
 
 

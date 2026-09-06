@@ -48,8 +48,15 @@ def _state(tmp_path):
 
 
 def _signed_in(monkeypatch, email="reviewer@studio.com", claims=None):
-    """Stand in for Google. The only place the real SDK would be called."""
-    token = {"uid": "uid-1", "email": email, "name": "A Reviewer"}
+    """Stand in for Google. The only place the real SDK would be called.
+
+    Verified by default, because that is what these tests are about — a real
+    reviewer whose address the provider has confirmed. The unverified case is
+    its own behaviour and has its own tests below.
+    """
+    token = {
+        "uid": "uid-1", "email": email, "name": "A Reviewer", "email_verified": True,
+    }
     token.update(claims or {})
     monkeypatch.setattr(auth, "verify_token", lambda _raw: token)
 
@@ -349,3 +356,81 @@ def test_the_client_is_told_which_mode_it_is_in(tmp_path, monkeypatch):
     c = TestClient(create_app(out_root=tmp_path))
 
     assert c.get("/api/meta").json()["open_roles"] is True
+
+
+# --- an address nobody confirmed ----------------------------------------------
+#
+# Anyone can sign up with any email, and on an open-roles deployment call
+# themselves `legal` and sign off findings. A bare address in an E&O audit trail
+# would then be provenance the system never established — worse than recording
+# nothing, because it looks like proof. Both accounts on the live project today
+# are unverified email/password sign-ups.
+
+
+def test_an_unverified_address_is_recorded_as_unverified(tmp_path, monkeypatch):
+    monkeypatch.setenv("CLEARFRAME_AUTH", "firebase")
+    monkeypatch.setenv("CLEARFRAME_ROLE_MAP", '{"stranger@example.com": "legal"}')
+    _state(tmp_path)
+    _signed_in(monkeypatch, email="stranger@example.com",
+               claims={"email_verified": False})
+    c = TestClient(create_app(out_root=tmp_path))
+    c.post("/api/auth/session", json={"idToken": "x"})
+
+    ok = c.post("/api/productions/p1/decisions",
+                json={"element_id": "e1", "action": "approve_risk"})
+    assert ok.status_code == 200
+
+    state = json.loads((tmp_path / "state" / "p1.json").read_text())
+    assert state["decisions"]["e1"]["reviewer"] == "stranger@example.com (unverified)"
+
+
+def test_a_verified_address_is_recorded_plainly(tmp_path, monkeypatch):
+    """A Google sign-in, or anyone who clicked the link, reads clean — the
+    label has to mean something, so it cannot be on everybody."""
+    monkeypatch.setenv("CLEARFRAME_AUTH", "firebase")
+    monkeypatch.setenv("CLEARFRAME_ROLE_MAP", '{"counsel@studio.com": "legal"}')
+    _state(tmp_path)
+    _signed_in(monkeypatch, email="counsel@studio.com",
+               claims={"email_verified": True})
+    c = TestClient(create_app(out_root=tmp_path))
+    c.post("/api/auth/session", json={"idToken": "x"})
+    c.post("/api/productions/p1/decisions",
+           json={"element_id": "e1", "action": "approve_risk"})
+
+    state = json.loads((tmp_path / "state" / "p1.json").read_text())
+    assert state["decisions"]["e1"]["reviewer"] == "counsel@studio.com"
+
+
+def test_an_unverified_signer_is_not_blocked_from_signing(tmp_path, monkeypatch):
+    """Deliberate. Requiring verification would lock out a judge who signed up
+    two minutes ago and has not gone to find the link — which is most of them.
+    The decision is to record the weakness, not to refuse the work."""
+    monkeypatch.setenv("CLEARFRAME_AUTH", "firebase")
+    monkeypatch.setenv("CLEARFRAME_ROLE_MAP", '{"judge@example.com": "legal"}')
+    _state(tmp_path)
+    _signed_in(monkeypatch, email="judge@example.com",
+               claims={"email_verified": False})
+    c = TestClient(create_app(out_root=tmp_path))
+    c.post("/api/auth/session", json={"idToken": "x"})
+
+    resp = c.post("/api/productions/p1/decisions",
+                  json={"element_id": "e1", "action": "approve_risk"})
+
+    assert resp.status_code == 200
+
+
+def test_the_label_reaches_the_audit_log_too(tmp_path, monkeypatch):
+    """The dossier prints both; a caveat on one and not the other would be
+    worse than none, because the clean one would look authoritative."""
+    monkeypatch.setenv("CLEARFRAME_AUTH", "firebase")
+    monkeypatch.setenv("CLEARFRAME_ROLE_MAP", '{"stranger@example.com": "legal"}')
+    _state(tmp_path)
+    _signed_in(monkeypatch, email="stranger@example.com",
+               claims={"email_verified": False})
+    c = TestClient(create_app(out_root=tmp_path))
+    c.post("/api/auth/session", json={"idToken": "x"})
+    c.post("/api/productions/p1/decisions",
+           json={"element_id": "e1", "action": "approve_risk"})
+
+    state = json.loads((tmp_path / "state" / "p1.json").read_text())
+    assert any("(unverified)" in e["actor"] for e in state["audit_log"])
