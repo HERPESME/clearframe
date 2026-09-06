@@ -66,6 +66,8 @@ export interface ProductionSummary {
   stage_status: Record<string, string>;
   updated_at: number;
   running: boolean;
+  /** Unfinished, and nothing is working on it — the run died with its process. */
+  interrupted?: boolean;
 }
 
 export interface PreviewFinding {

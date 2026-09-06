@@ -24,6 +24,11 @@ export default function App() {
   // default rather than hidden behind a second click.
   const [showUpload, setShowUpload] = useState(true);
   const [resuming, setResuming] = useState<string | null>(null);
+  // Restored a run that never finished. Distinct from "still analysing": there
+  // is no server-side task to wait for, so polling would never end — which is
+  // what used to happen, re-rendering this production every three seconds and
+  // overwriting the upload form the moment it was opened.
+  const [interrupted, setInterrupted] = useState(false);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -46,6 +51,7 @@ export default function App() {
         const newest = list[0];
         setState(await api.getProduction(newest.id));
         if (newest.running) setResuming(newest.id);
+        setInterrupted(Boolean(newest.interrupted));
       })
       .catch(() => setError("Could not reach the ClearFrame API. Is the server running?"))
       .finally(() => setLoading(false));
@@ -569,6 +575,13 @@ export default function App() {
             <strong>Still analysing.</strong> This run is continuing on the server —
             the findings below are what has landed so far and will keep filling in.
             Refreshing or closing the tab will not stop it.
+          </div>
+        )}
+        {!resuming && interrupted && (
+          <div className="resuming-banner">
+            <strong>This analysis never finished.</strong> The server was restarted
+            while it was running, so the stages below are as far as it got. Nothing
+            is working on it now — upload the clip again for a complete report.
           </div>
         )}
         {claimed.length > 0 && (

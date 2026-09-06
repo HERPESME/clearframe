@@ -207,6 +207,11 @@ def create_app(out_root: Path) -> FastAPI:
     # silently clobber each other's saves.
     state_lock = asyncio.Lock()
     event_queues: dict[str, asyncio.Queue] = {}
+    # Productions with a pipeline task actually in flight in this process. A
+    # restart empties it, which is the point: nothing here survives the process
+    # that was doing the work, so neither should the claim that work is
+    # happening.
+    _live_runs: set[str] = set()
 
     def _load(pid: str):
         try:
@@ -323,7 +328,20 @@ def create_app(out_root: Path) -> FastAPI:
                     "title": state.production.title,
                     "stage_status": state.stage_status,
                     "updated_at": path.stat().st_mtime if path.exists() else 0.0,
-                    "running": not done,
+                    # Actually in flight IN THIS PROCESS, not merely unfinished.
+                    # This was `not done`, read from the persisted state alone,
+                    # so a run interrupted by a restart reported itself running
+                    # for ever — and the client, which restores the newest
+                    # running production on load, returned the reviewer to a
+                    # dead analysis every time and never showed them the upload
+                    # form. Exactly the refresh bug this endpoint was ordered to
+                    # fix, one level down: last time the client was handed the
+                    # wrong row, this time no row was right.
+                    "running": not done and pid in _live_runs,
+                    # Unfinished and nobody is working on it. Distinct from
+                    # complete, because silence here would read as a finished
+                    # analysis and the missing stages would never be noticed.
+                    "interrupted": not done and pid not in _live_runs,
                 }
             )
         return sorted(out, key=lambda r: r["updated_at"], reverse=True)
@@ -336,9 +354,11 @@ def create_app(out_root: Path) -> FastAPI:
         ctx.store = store
         ctx.listener = queue.put_nowait
         stages = [_PacedStage(s, pace_s) for s in build_demo_pipeline()]
+        _live_runs.add("demo")
         try:
             await Pipeline(stages).run(ctx)
         finally:
+            _live_runs.discard("demo")
             queue.put_nowait({"type": "run_complete"})
 
     @app.post("/api/productions/demo")
@@ -531,8 +551,10 @@ def create_app(out_root: Path) -> FastAPI:
             try:
                 await Pipeline(build_demo_pipeline()).run(ctx)
             finally:
+                _live_runs.discard(pid)
                 event_queues[pid].put_nowait({"type": "run_complete"})
 
+        _live_runs.add(pid)
         asyncio.create_task(_run())
         return {"production_id": pid, "status": "running", "media": name}
 
