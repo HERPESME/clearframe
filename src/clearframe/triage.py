@@ -24,20 +24,113 @@ CATEGORY_RULES: dict[ElementType, ClearanceCategory] = {
 }
 
 
-def _union(ranges: list[TimeRange]) -> list[TimeRange]:
-    """Overlapping sightings of one thing are one sighting.
+def union_spans(ranges: list[TimeRange]) -> list[TimeRange]:
+    """Overlapping intervals welded into the fewest that cover the same time.
 
-    Two independent scan passes both report the whole element, so the same
-    ten seconds arrives twice. Concatenating them made a 10s tattoo read as
-    20s, and prominence drives the risk score.
+    Boxless by intent: any rectangle on the input describes a narrower span
+    than the output range does, so carrying one out of here would misplace it.
+    Use it where the answer is a stretch of time and nothing else — unscanned
+    ranges, which never had a box in the first place.
     """
     out: list[TimeRange] = []
     for r in sorted(ranges, key=lambda r: (r.start_s, r.end_s)):
         if out and r.start_s <= out[-1].end_s:
             if r.end_s > out[-1].end_s:
-                # Keep the earlier box: it was measured, and a merged range
-                # spans more than either box was drawn for.
                 out[-1] = out[-1].model_copy(update={"end_s": r.end_s})
+            continue
+        out.append(r.model_copy(update={"bbox": None}))
+    return out
+
+
+# The shortest stretch worth reporting as an appearance of its own. Below this
+# a leftover is two passes disagreeing about where an appearance ended, not a
+# separate sighting: the live tattoo pair's real remainders are 0.1s and 0.2s
+# at shared boundaries, while its one genuine uncovered tail is 0.8s. Emitting
+# the small ones would also manufacture ranges shorter than a frame, which
+# `timeline.timing_is_reliable` then disowns — costing the element every box
+# it had. Re-check it against new footage before trusting it, like the three
+# merge thresholds above.
+MIN_SPLIT_S = 0.25
+
+
+def _gaps(span: TimeRange, covered: list[TimeRange]) -> list[tuple[float, float]]:
+    """The parts of `span` no kept range accounts for."""
+    out: list[tuple[float, float]] = []
+    cursor = span.start_s
+    for k in covered:
+        if k.end_s <= cursor or k.start_s >= span.end_s:
+            continue
+        if k.start_s > cursor:
+            out.append((cursor, k.start_s))
+        cursor = max(cursor, k.end_s)
+        if cursor >= span.end_s:
+            break
+    if cursor < span.end_s:
+        out.append((cursor, span.end_s))
+    return out
+
+
+def merge_appearances(ranges: list[TimeRange]) -> list[TimeRange]:
+    """Merge sightings without painting one shot's rectangle across another.
+
+    The scan is asked to split a moving element into shorter appearances, each
+    with the box for THAT appearance. Two passes then describe the same
+    seconds at different resolutions: one returns the split, the other one
+    coarse range with a single box that is a union of wherever the subject
+    travelled. Welding those together kept the coarse box and lost the split —
+    the same failure `overlay.py` refuses to draw, arriving through the merge.
+
+    So the finest measurement of any second wins. Candidates are taken shortest
+    first, each keeping only the seconds nothing better already covers; a range
+    that is entirely covered still donates its box to a survivor that has none,
+    because a union box over a wider span is the only measurement there is and
+    is honest on the narrower one. The output tiles the covered set exactly, so
+    `_screen_time` still measures the union and overlapping sightings still
+    count once.
+    """
+    ordered = sorted(
+        ranges, key=lambda r: (r.duration_s, r.bbox is None, r.start_s, r.end_s)
+    )
+    kept: list[TimeRange] = []
+
+    def _donate(r: TimeRange) -> None:
+        """A rectangle beats no rectangle on seconds both ranges describe."""
+        if r.bbox is None:
+            return
+        for i, k in enumerate(kept):
+            if k.bbox is None and k.start_s < r.end_s and r.start_s < k.end_s:
+                kept[i] = k.model_copy(update={"bbox": r.bbox})
+
+    for r in ordered:
+        gaps = _gaps(r, sorted(kept, key=lambda k: k.start_s))
+        _donate(r)
+        for start, end in gaps:
+            if end - start >= MIN_SPLIT_S:
+                kept.append(r.model_copy(update={"start_s": start, "end_s": end}))
+                continue
+            # Noise at a shared boundary. Widen whichever neighbour touches it
+            # rather than emitting a sub-frame range of its own.
+            before = [i for i, k in enumerate(kept) if k.end_s == start]
+            after = [i for i, k in enumerate(kept) if k.start_s == end]
+            if before:
+                kept[before[0]] = kept[before[0]].model_copy(update={"end_s": end})
+            elif after:
+                kept[after[0]] = kept[after[0]].model_copy(update={"start_s": start})
+            else:
+                kept.append(r.model_copy(update={"start_s": start, "end_s": end}))
+
+    kept.sort(key=lambda r: (r.start_s, r.end_s))
+    # Adjacent stretches join only when neither carries a rectangle — with no
+    # box to misplace, one range says the same thing as two.
+    out: list[TimeRange] = []
+    for r in kept:
+        if (
+            out
+            and out[-1].bbox is None
+            and r.bbox is None
+            and r.start_s <= out[-1].end_s
+        ):
+            out[-1] = out[-1].model_copy(update={"end_s": max(out[-1].end_s, r.end_s)})
             continue
         out.append(r)
     return out
@@ -224,7 +317,7 @@ def _merge(group: list[DetectedElement]) -> DetectedElement:
     # that HAD been measured correctly stopped drawing a box. Three findings
     # lost their boxes that way on one live re-run.
     timed = [d for d in group if d.timing_reliable] or group
-    ranges = _union([r for d in timed for r in d.time_ranges])
+    ranges = merge_appearances([r for d in timed for r in d.time_ranges])
     # Screen time comes from the ranges rather than from the sum of what each
     # pass claimed: an element cannot be on screen longer than the timecodes
     # saying where it is.
