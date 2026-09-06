@@ -1344,3 +1344,18 @@ button.secondary:disabled { opacity: .5; cursor: default; }
   margin: var(--s-2) 0 0; }
 .whoami-role.open { background: color-mix(in srgb, var(--yellow) 16%, transparent);
   color: var(--yellow); border-color: color-mix(in srgb, var(--yellow) 40%, transparent); }
+
+/* The account strip on the screens that have no topbar of their own — the
+   dashboard and Mission Control. Floated over the hero rather than pushing it
+   down, so the landing composition is unchanged and the way out is still one
+   glance away. */
+.screen-account { position: absolute; top: var(--s-4); right: var(--s-5);
+  z-index: 30; display: flex; align-items: center; gap: var(--s-2);
+  padding: 6px 8px; border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  border: 1px solid var(--line); backdrop-filter: blur(8px); }
+.screen-account .whoami-name { color: var(--fg); }
+@media (max-width: 640px) {
+  .screen-account { top: var(--s-3); right: var(--s-3); }
+  .screen-account .whoami-name { display: none; }
+}

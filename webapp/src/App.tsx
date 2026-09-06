@@ -5,7 +5,8 @@ import { MissionControl } from "./MissionControl";
 import { Timeline } from "./Timeline";
 import { Dashboard } from "./Dashboard";
 import { SignIn } from "./SignIn";
-import { signOut, type SessionUser } from "./auth";
+import { type SessionUser } from "./auth";
+import { WhoAmI } from "./WhoAmI";
 import { VideoPlayer } from "./VideoPlayer";
 import type {
   Action,
@@ -46,6 +47,10 @@ export default function App() {
   // but `list[0]` discarded, so there was no way back to an earlier one.
   const [productions, setProductions] = useState<ProductionSummary[]>([]);
   const [user, setUser] = useState<SessionUser | null>(null);
+  // The boot listing below runs before anyone has signed in, so with the gate
+  // on it takes a 401 and comes back empty. Remember that, because a session
+  // arriving later is the moment it becomes answerable.
+  const bootListFailed = useRef(false);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -84,10 +89,34 @@ export default function App() {
           setInterrupted(Boolean(newest.interrupted));
         }
       })
-      .catch(() => setError("Could not reach the ClearFrame API. Is the server running?"))
+      .catch(() => {
+        bootListFailed.current = true;
+        setError("Could not reach the ClearFrame API. Is the server running?");
+      })
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Signing in is the moment the API starts answering, so it is the moment to
+  // ask again.
+  //
+  // The effect above runs once on mount, which with the gate on is strictly
+  // before there is a session — so it took a 401 and set an error blaming the
+  // server, and nothing ever re-fetched. The dashboard a new sign-in landed on
+  // was therefore always empty: their own productions invisible until they
+  // thought to reload the page, which is not a thing anyone thinks to do.
+  //
+  // Deliberately conditional on that failure rather than firing on every
+  // sign-in. A cookie that is already valid at page load is sent with the boot
+  // request like any other, so that listing succeeded and re-running it would
+  // only be a second request for an answer we hold.
+  useEffect(() => {
+    if (!user || !bootListFailed.current) return;
+    bootListFailed.current = false;
+    // The API was reachable all along; it declined to answer a stranger.
+    setError(null);
+    void api.listProductions().then(setProductions).catch(() => {});
+  }, [user]);
 
   // A restored run is still executing server-side. Poll until it finishes, so
   // a page refresh mid-analysis picks up where it left off instead of freezing
@@ -136,6 +165,13 @@ export default function App() {
     setState(null);
     setMission(null);
     setError(null);
+    // Stop following the run you just left. The poll below calls `setState`
+    // unconditionally every three seconds, so while a production was still
+    // analysing this button did nothing you could see: the dashboard rendered
+    // and the next tick put you straight back in the one you were leaving.
+    // The analysis is a server-side task and continues either way; `enterReview`
+    // re-arms the poll if you open it again from the rail.
+    setResuming(null);
     void api.listProductions().then(setProductions).catch(() => {});
   };
 
@@ -242,15 +278,26 @@ export default function App() {
     );
   }
 
+  // Who you are, on every screen behind the gate. A run can take minutes and
+  // the dashboard is where signing in lands you, so those were exactly the two
+  // places the way out had to be and wasn't.
+  const account = (
+    <WhoAmI user={user} openRoles={openRoles} onSignedOut={() => setUser(null)} />
+  );
+
   if (mission) {
     return (
-      <MissionControl productionId={mission} onComplete={() => enterReview(mission)} />
+      <>
+        {authOn && user && <div className="screen-account">{account}</div>}
+        <MissionControl productionId={mission} onComplete={() => enterReview(mission)} />
+      </>
     );
   }
 
   if (!state) {
     return (
       <>
+        {authOn && user && <div className="screen-account">{account}</div>}
         <Dashboard
           productions={productions}
           demoMode={mode === "demo"}
@@ -402,17 +449,7 @@ export default function App() {
           // A role you can prove. The switcher below is honest only when there
           // is nobody to ask — with auth on and roles granted, the server
           // decides and the client saying otherwise is the bypass that closed.
-          <div className="whoami" title={user.email ?? user.uid}>
-            <span className="whoami-name">{user.name || user.email || user.uid}</span>
-            <span className="whoami-role">{user.role}</span>
-            <button
-              type="button"
-              className="topbtn"
-              onClick={() => void signOut().then(() => setUser(null))}
-            >
-              sign out
-            </button>
-          </div>
+          <WhoAmI user={user} openRoles={false} onSignedOut={() => setUser(null)} />
         ) : (
           <>
             <nav className="roles" aria-label="Reviewer role">
@@ -429,25 +466,8 @@ export default function App() {
             <span className="role-hint">
               {role === "editor" ? "read-only" : "can record decisions"}
             </span>
-            {openRoles && user && (
-              <div className="whoami" title={user.email ?? user.uid}>
-                <span
-                  className="whoami-role open"
-                  title="Roles are open on this deployment so anyone can try every control. Your decisions are still recorded against your email."
-                >
-                  chosen
-                </span>
-                <span className="whoami-name">
-                  {user.name || user.email || user.uid}
-                </span>
-                <button
-                  type="button"
-                  className="topbtn"
-                  onClick={() => void signOut().then(() => setUser(null))}
-                >
-                  sign out
-                </button>
-              </div>
+            {openRoles && (
+              <WhoAmI user={user} openRoles onSignedOut={() => setUser(null)} />
             )}
           </>
         )}
