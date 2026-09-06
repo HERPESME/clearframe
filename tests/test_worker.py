@@ -335,3 +335,51 @@ def test_footage_reaches_the_blob_store_not_just_the_container_disk(tmp_path, mo
     )
     assert len(blobs.get("media/handover/footage.mp4")) == 4096
     assert blobs.version("media/handover/footage.mp4")
+
+
+def test_the_worker_opens_footage_the_other_container_uploaded(tmp_path, monkeypatch):
+    """The bug a real cloud run found, and no local run could.
+
+    `footage_uri` is an absolute path written by whichever container took the
+    upload. In the cloud profile that is the API's own download cache —
+    `/tmp/clearframe-cache/<hash>.mp4` — on a filesystem the worker has never
+    seen. The bytes were in the bucket the whole time; what did not travel was
+    the path. Every live upload failed the scan with FileNotFoundError, and
+    Cloud Tasks retried it three times before giving up.
+
+    Locally the two paths coincide, which is exactly why this needed a
+    deployment to surface and needs a stored uri that is deliberately WRONG to
+    reproduce.
+    """
+    from clearframe.config import ClearFrameConfig
+    from clearframe.runner import _with_local_footage
+    from clearframe.storage import build_backends
+
+    backends = build_backends(ClearFrameConfig.from_env({}), tmp_path)
+    backends.blobs.put("media/p1/footage.mp4", b"\x00" * 32)
+
+    _production(tmp_path, pid="p1")
+    state = backends.store.load("p1")
+    state.production = state.production.model_copy(
+        update={"footage_uri": "/tmp/clearframe-cache/deadbeef.mp4"}
+    )
+
+    fixed = _with_local_footage(state, "p1", backends)
+
+    assert fixed.production.footage_uri != "/tmp/clearframe-cache/deadbeef.mp4"
+    from pathlib import Path as _P
+    assert _P(fixed.production.footage_uri).exists(), "the scan would find nothing"
+
+
+def test_a_production_with_no_stored_footage_is_left_alone(tmp_path):
+    """A demo production, or one the CLI made against a path that really is
+    local. Rewriting those would break the case that already worked."""
+    from clearframe.config import ClearFrameConfig
+    from clearframe.runner import _with_local_footage
+    from clearframe.storage import build_backends
+
+    backends = build_backends(ClearFrameConfig.from_env({}), tmp_path)
+    _production(tmp_path, pid="p1")
+    state = backends.store.load("p1")
+
+    assert _with_local_footage(state, "p1", backends).production.footage_uri == "c.mp4"

@@ -72,6 +72,21 @@ async def run_analysis(
         log.info("%s is already being analysed elsewhere; acking", pid)
         return "already-running"
 
+    # Put the footage where THIS container can open it.
+    #
+    # `footage_uri` is an absolute path written by whichever container took the
+    # upload, and in the cloud profile that is the API's own download cache —
+    # `/tmp/clearframe-cache/<hash>.mp4`, on a filesystem this process has never
+    # seen. The bytes are in the bucket the whole time; what does not travel is
+    # the path to them. So the worker resolves the footage through the store and
+    # rewrites the uri for the run.
+    #
+    # A path rather than a `gs://` uri because the consumers disagree: Gemini
+    # and Video Intelligence accept `gs://`, but ffmpeg takes an argv and audio
+    # fingerprinting refuses a `gs://` outright. One local file satisfies all
+    # three.
+    state = _with_local_footage(state, pid, backends)
+
     run_log = EventLog(backends.blobs, pid, flush_every_s=_flush_interval(cfg))
     # `job.owner_uid` has been on the wire since the queue was written and
     # was dropped on the floor here. It selects whose rights ledger the
@@ -104,6 +119,37 @@ async def run_analysis(
         backends.index.clear_heartbeat(pid)
         run_log.append({"type": "run_complete"})
         run_log.flush()
+
+
+MEDIA_SUFFIXES = (".mp4", ".m4v", ".mov", ".webm")
+
+
+def _with_local_footage(state, pid: str, backends: Backends):
+    """Point `footage_uri` at a file this container actually has.
+
+    Returns the state unchanged when there is no footage in the store — a demo
+    production, or one the CLI created against a path that really is local. The
+    stored uri is only wrong when it was written by a different container, and
+    the store is the thing that knows.
+    """
+    for suffix in MEDIA_SUFFIXES:
+        key = f"media/{pid}/footage{suffix}"
+        if not backends.blobs.exists(key):
+            continue
+        local = backends.blobs.local_path(key)
+        if local is None:
+            continue
+        if str(local) == state.production.footage_uri:
+            return state
+        log.info("resolved footage for %s to %s", pid, local)
+        return state.model_copy(
+            update={
+                "production": state.production.model_copy(
+                    update={"footage_uri": str(local)}
+                )
+            }
+        )
+    return state
 
 
 def _flush_interval(cfg: ClearFrameConfig) -> float:
