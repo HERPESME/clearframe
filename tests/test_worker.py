@@ -383,3 +383,137 @@ def test_a_production_with_no_stored_footage_is_left_alone(tmp_path):
     state = backends.store.load("p1")
 
     assert _with_local_footage(state, "p1", backends).production.footage_uri == "c.mp4"
+
+
+@pytest.mark.asyncio
+async def test_a_long_stage_keeps_beating_while_it_works(tmp_path, monkeypatch):
+    """A beat at stage boundaries is not a heartbeat, it is a stage counter.
+
+    `runner.listen` recorded a beat only on `stage_start`/`stage_complete`.
+    `scan` emits `scan_found`, `audit_found`, `fingerprint_*` and
+    `corroborator_hits`, none of which qualify — so a three-pass scan on real
+    footage produced exactly ONE beat and then silence for the whole stage. A
+    deployed run spent ~1270s in scan against a 900s staleness window, so
+    `is_running()` went false on a healthy run: the dashboard said not running,
+    the Mission Control stream cut itself off (`server.py`), and a Cloud Tasks
+    redelivery was free to start a second concurrent PAID analysis.
+
+    The fix is a beat on a timer, which is what `test_production_index`'s own
+    docstring has claimed all along — "the worker says 'still here' every few
+    seconds while it works". It never did.
+    """
+    import asyncio
+    import time
+
+    from clearframe import runner as runner_mod
+    from clearframe.storage import AnalysisJob, build_backends
+    from clearframe.config import ClearFrameConfig
+
+    monkeypatch.setattr(runner_mod, "HEARTBEAT_EVERY_S", 0.05)
+
+    beats: list[float] = []
+
+    class _SlowPipeline:
+        def __init__(self, stages):
+            pass
+
+        async def run(self, ctx):
+            # One stage, far longer than the beat interval and emitting no
+            # stage events at all — exactly the shape of `scan`.
+            await asyncio.sleep(0.4)
+            return ctx.state
+
+    monkeypatch.setattr(runner_mod, "Pipeline", _SlowPipeline)
+    monkeypatch.setattr(
+        runner_mod, "build_context",
+        lambda cfg, production, out_root, **kw: _ctx(production),
+    )
+
+    _production(tmp_path, pid="p1")
+    cfg = ClearFrameConfig.from_env({"CLEARFRAME_MODE": "demo"})
+    backends = build_backends(cfg, tmp_path)
+
+    real_heartbeat = backends.index.heartbeat
+
+    def _counting(pid: str) -> None:
+        # `time.monotonic`, not the loop clock: the beat is deliberately made
+        # from a thread so it cannot block the pipeline it is reporting on.
+        beats.append(time.monotonic())
+        real_heartbeat(pid)
+
+    monkeypatch.setattr(backends.index, "heartbeat", _counting)
+
+    await runner_mod.run_analysis(
+        AnalysisJob(production_id="p1"), cfg, tmp_path, backends, backends.store
+    )
+
+    assert len(beats) >= 4, (
+        f"a 0.4s stage at a 0.05s beat interval produced {len(beats)} beats; "
+        "a run is only 'running' for as long as it keeps saying so"
+    )
+
+
+@pytest.mark.asyncio
+async def test_the_beat_stops_when_the_run_does(tmp_path, monkeypatch):
+    """The timer must not outlive the analysis.
+
+    A beat left running would report a finished — or crashed — run as live
+    forever, which is worse than the bug it replaces: `is_running()` is what
+    stops a redelivery from paying twice.
+    """
+    import asyncio
+
+    from clearframe import runner as runner_mod
+    from clearframe.storage import AnalysisJob, build_backends
+    from clearframe.config import ClearFrameConfig
+
+    monkeypatch.setattr(runner_mod, "HEARTBEAT_EVERY_S", 0.02)
+
+    class _Boom:
+        def __init__(self, stages):
+            pass
+
+        async def run(self, ctx):
+            raise RuntimeError("the scan died")
+
+    monkeypatch.setattr(runner_mod, "Pipeline", _Boom)
+    monkeypatch.setattr(
+        runner_mod, "build_context",
+        lambda cfg, production, out_root, **kw: _ctx(production),
+    )
+
+    _production(tmp_path, pid="p1")
+    cfg = ClearFrameConfig.from_env({"CLEARFRAME_MODE": "demo"})
+    backends = build_backends(cfg, tmp_path)
+
+    with pytest.raises(RuntimeError):
+        await runner_mod.run_analysis(
+            AnalysisJob(production_id="p1"), cfg, tmp_path, backends, backends.store
+        )
+
+    before = backends.index.get("p1")
+    await asyncio.sleep(0.1)
+    after = backends.index.get("p1")
+
+    assert before.heartbeat_at is None, "a failed run must not still hold the lease"
+    assert after.heartbeat_at is None, "the timer outlived the run it was beating for"
+
+
+@pytest.mark.asyncio
+async def test_the_staleness_window_is_a_multiple_of_the_beat():
+    """Two constants in two modules that have to stay in proportion.
+
+    `HEARTBEAT_STALE_S` used to be a guess about how long a STAGE might take,
+    because that is what the beat rode on. Now it beats on a timer, so the only
+    honest basis for the window is how many beats may be missed. Four: enough to
+    ride out a transient index failure, short enough to spot an abandoned run in
+    minutes rather than a quarter of an hour.
+    """
+    from clearframe.runner import HEARTBEAT_EVERY_S
+    from clearframe.storage.index import HEARTBEAT_STALE_S
+
+    missed = HEARTBEAT_STALE_S / HEARTBEAT_EVERY_S
+    assert 3 <= missed <= 6, (
+        f"the window tolerates {missed:g} missed beats; under three is jumpy, "
+        "over six and an abandoned run holds its lease for no good reason"
+    )

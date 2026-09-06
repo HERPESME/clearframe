@@ -34,19 +34,23 @@ from pydantic import BaseModel, Field
 
 # How long silence is tolerated before a run is presumed dead.
 #
-# This has to clear the longest single STAGE, not the longest run, because the
-# beat rides on the save `Pipeline.run` already performs after each stage
-# (pipeline.py:74) rather than on a timer of its own. The measured worst case is
-# research at ~335s of a ~502s run, and a three-pass scan is minutes; 90s — the
-# first number tried here — would have marked a healthy run interrupted in the
-# middle of its most expensive stage, told the client to stop polling, and shown
-# a "this run died" banner over a run that was proceeding normally.
+# This used to be 900s, and it had to be: the beat rode on stage events, so the
+# window had to clear the longest single STAGE rather than the longest gap
+# between beats. A three-pass scan emits nothing that qualifies as a beat and
+# ran ~1270s on a deployed clip — past even that — so a healthy run reported
+# itself dead, the Mission Control stream cut itself off, and a Cloud Tasks
+# redelivery was free to start a second paid analysis.
 #
-# The cost of the generous window is the opposite error: a worker killed
-# mid-stage still reads as running until the lease lapses. That is the better
-# direction to be wrong in — a stalled spinner invites a refresh, whereas a
-# false "interrupted" invites paying for the whole analysis again.
-HEARTBEAT_STALE_S = 900.0
+# `runner.beat` now beats on a timer every `HEARTBEAT_EVERY_S`, independent of
+# what the pipeline is doing, so the window is a multiple of the beat interval
+# instead of a guess about stage duration. Four missed beats: enough to survive
+# a transient Firestore failure and a slow instance, short enough that an
+# abandoned run is spotted in two minutes rather than fifteen.
+#
+# The direction to be wrong in is unchanged — a stalled spinner invites a
+# refresh, a false "interrupted" invites paying for the whole analysis again —
+# which is why it is four beats and not two.
+HEARTBEAT_STALE_S = 120.0
 
 
 class IndexRow(BaseModel):

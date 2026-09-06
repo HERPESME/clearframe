@@ -1,6 +1,7 @@
 """Clearance review web app: API over production state with server-side role gating."""
 
 import asyncio
+import contextlib
 import hmac
 import json
 import logging
@@ -40,6 +41,7 @@ from clearframe.review import (
     refresh_freshness,
 )
 from clearframe.events import EventLog
+from clearframe.runner import HEARTBEAT_EVERY_S, beat
 from clearframe.stages.dossier import ReviewPendingError
 from clearframe.storage import (
     AnalysisJob,
@@ -847,10 +849,20 @@ def create_app(out_root: Path, backends: Backends | None = None) -> FastAPI:
         ctx.listener = _listen
 
         async def _run(job) -> None:
+            # The same beat the worker uses, for the same reason. This path had
+            # it worse: one heartbeat at the start and nothing again until the
+            # run ended, so a local analysis longer than the staleness window
+            # reported itself dead while it was still working.
             index.heartbeat(job.production_id)
+            heart = asyncio.create_task(
+                beat(index, job.production_id, HEARTBEAT_EVERY_S)
+            )
             try:
                 await Pipeline(build_demo_pipeline()).run(ctx)
             finally:
+                heart.cancel()
+                with contextlib.suppress(asyncio.CancelledError):
+                    await heart
                 index.clear_heartbeat(job.production_id)
                 run_log.append({"type": "run_complete"})
 

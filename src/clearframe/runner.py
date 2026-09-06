@@ -13,6 +13,8 @@ state at the start of the run gives both.
 
 from __future__ import annotations
 
+import asyncio
+import contextlib
 import logging
 from pathlib import Path
 
@@ -28,9 +30,42 @@ from clearframe.storage import AnalysisJob, Backends
 
 log = logging.getLogger("clearframe.runner")
 
+# How often a running analysis says it is still there.
+#
+# The beat used to ride on stage events, which made it a stage counter rather
+# than a heartbeat: `scan` emits `scan_found`, `audit_found`, `fingerprint_*`
+# and `corroborator_hits`, and not one of them is a `stage_start` or a
+# `stage_complete`. So a three-pass scan beat once and then went silent for its
+# whole duration — ~1270s on a deployed run, against a 900s staleness window.
+# `is_running()` therefore went false on a perfectly healthy run, which told the
+# dashboard nothing was happening, cut the Mission Control stream off, and left
+# a Cloud Tasks redelivery free to start a second concurrent PAID analysis.
+#
+# 30s is chosen against the write, not the read: one beat is a single small
+# merge into the index, so a 540s run costs eighteen of them.
+HEARTBEAT_EVERY_S = 30.0
+
 
 def already_finished(state) -> bool:
     return all(state.stage_status.get(s) == "complete" for s in ANALYSIS_STAGES)
+
+
+async def beat(index, pid: str, every_s: float) -> None:
+    """Say "still here" until cancelled.
+
+    In a thread because the cloud index is a Firestore round trip, and this
+    coroutine shares the worker's event loop with the pipeline it is reporting
+    on. A beat that blocked the loop would slow the very thing it is measuring.
+    """
+    while True:
+        await asyncio.sleep(every_s)
+        try:
+            await asyncio.to_thread(index.heartbeat, pid)
+        except Exception:
+            # Losing a beat is survivable — the next one is `every_s` away and
+            # the staleness window is several beats wide. Failing the analysis
+            # over it would not be.
+            log.warning("could not record a heartbeat for %s", pid, exc_info=True)
 
 
 async def run_analysis(
@@ -72,6 +107,18 @@ async def run_analysis(
         log.info("%s is already being analysed elsewhere; acking", pid)
         return "already-running"
 
+    # Claim it NOW, before anything slow.
+    #
+    # The check above and this write are two round trips, and everything that
+    # used to sit between them — resolving the footage, then `build_context`
+    # constructing four live SDK clients and reading the rights ledger — was
+    # time in which a second delivery could take the same lease and start a
+    # second paid run. Moving the claim up shrinks that window to the gap
+    # between two adjacent statements. It does not close it: only a
+    # transactional compare-and-set would, and Firestore can do that if this
+    # ever proves insufficient.
+    backends.index.heartbeat(pid)
+
     # Put the footage where THIS container can open it.
     #
     # `footage_uri` is an absolute path written by whichever container took the
@@ -111,11 +158,19 @@ async def run_analysis(
             backends.index.heartbeat(pid)
 
     ctx.listener = listen
-    backends.index.heartbeat(pid)
+    heart = asyncio.create_task(beat(backends.index, pid, HEARTBEAT_EVERY_S))
     try:
         await Pipeline(build_demo_pipeline()).run(ctx)
         return "ran"
     finally:
+        # Cancel first, and await the cancellation. A beat still in flight when
+        # the lease is cleared would put it straight back, and a run that has
+        # finished or crashed would then read as live until the window lapsed —
+        # which is worse than the bug this replaces, because `is_running()` is
+        # the only thing standing between a redelivery and paying twice.
+        heart.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await heart
         backends.index.clear_heartbeat(pid)
         run_log.append({"type": "run_complete"})
         run_log.flush()
