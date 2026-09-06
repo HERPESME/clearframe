@@ -15,13 +15,110 @@ import asyncio
 import logging
 
 from clearframe.integrations.gemini_client import build_scan_context
-from clearframe.models import DetectedElement
+from clearframe.models import DetectedElement, ExposureFinding, SourceWork, TimeRange
 from clearframe.pipeline import PipelineContext
 from clearframe.matching import labels_match
 from clearframe.sourcework import corrected_types
 from clearframe.timeline import timing_is_reliable
+from clearframe.triage import union_spans
 
 log = logging.getLogger("clearframe.scan")
+
+
+def fold_unscanned(results, audit) -> list[TimeRange]:
+    """What no pass could analyse, said once.
+
+    Concatenated, two passes reporting the same unmeasurable window reported
+    it twice — overstating the gap in the one column whose whole job is to be
+    honest about coverage.
+    """
+    ranges = [r for res in [*results, audit] for r in res.unscanned_ranges]
+    return union_spans(ranges)
+
+
+def _same_exposure(a: ExposureFinding, b: ExposureFinding) -> bool:
+    """Two passes describing one thing, rather than two things.
+
+    Deliberately conservative, and in the same direction as triage but for the
+    opposite reason. A duplicate exposure is a second warning about one child;
+    a wrongly merged one is a child nobody is warned about. So all three of
+    kind, time and wording have to agree — a second child in a later shot
+    stays a second finding even when described identically.
+    """
+    if a.kind is not b.kind:
+        return False
+    overlaps = any(
+        r.start_s < q.end_s and q.start_s < r.end_s
+        for r in a.time_ranges
+        for q in b.time_ranges
+    )
+    return overlaps and labels_match(a.description, b.description)
+
+
+def dedupe_exposures(found: list[ExposureFinding]) -> list[ExposureFinding]:
+    """One finding per thing on screen, however many passes saw it.
+
+    Exposures are the one class with no second detector anywhere — no
+    catalogue, no fingerprint, no corroborator — so every pass's contribution
+    is kept. That also means the same minor arrives once per pass, and both
+    passes number their exposures from 1, so ids collide exactly the way
+    detections do.
+    """
+    groups: list[list[ExposureFinding]] = []
+    for e in found:
+        for g in groups:
+            if _same_exposure(g[0], e):
+                g.append(e)
+                break
+        else:
+            groups.append([e])
+
+    out: list[ExposureFinding] = []
+    used: set[str] = set()
+    for group in groups:
+        first = group[0]
+        richest = max(group, key=lambda e: len(e.description or ""))
+        eid = first.id
+        n = 2
+        while eid in used:
+            eid = f"{first.id}-{n}"
+            n += 1
+        used.add(eid)
+        out.append(
+            first.model_copy(
+                update={
+                    "id": eid,
+                    "description": richest.description,
+                    "time_ranges": union_spans(
+                        [r for e in group for r in e.time_ranges]
+                    ),
+                    "bbox": next((e.bbox for e in group if e.bbox is not None), first.bbox),
+                }
+            )
+        )
+    return out
+
+
+# Confidence gates subsumption in `sourcework`, so it is what ranks a claim.
+_CONFIDENCE_ORDER = {"high": 3, "medium": 2, "low": 1}
+
+
+def best_source_work(candidates) -> SourceWork | None:
+    """The most confident identification, not the first pass's.
+
+    `sourcework` only subsumes findings on a high or medium confidence claim,
+    so a low-confidence guess from pass one shadowing a high-confidence
+    identification from pass two would quietly disable the mechanism — and,
+    through `corrected_types`, keep routing drawn characters as real people
+    who need releases. Ties keep pass order, so a run stays reproducible.
+    """
+    ranked = [w for w in candidates if w is not None]
+    if not ranked:
+        return None
+    return max(
+        enumerate(ranked),
+        key=lambda pair: (_CONFIDENCE_ORDER.get(pair[1].confidence, 0), -pair[0]),
+    )[1]
 
 
 
@@ -82,32 +179,70 @@ def _with_timing_verdict(
     )
 
 
-# How many independent Gemini passes to run before the auditor. Two, because a
-# single pass was measured at about 60% recall: three identical baseline runs
+# How many independent Gemini passes to run before the auditor. Three, because
+# a single pass was measured at about 60% recall: three identical baseline runs
 # over one 41.5s clip found 15 distinct things between them, a mean of 9.0
-# each, with only 3 present in all three and 7 in exactly one.
+# each, with only 3 present in all three and 7 in exactly one. Those three runs
+# ARE the evidence for three — between them they saw everything the measurement
+# found, where any one of them saw about nine of fifteen.
 #
 # Recall is this product's whole safety claim, and no video parameter improved
 # it — media_resolution is rejected by the model outright, and fps=2 was
 # strictly worse. Another pass is what works, and running it concurrently makes
 # it nearly free in wall clock, which matters because anything that costs
-# minutes eventually gets cut.
-SCAN_PASSES = 2
+# minutes eventually gets cut. In money it is about $0.02 per minute of footage
+# per pass, so a 45-second clip pays roughly a cent and a half for the third.
+SCAN_PASSES = 3
+
+
+def _configured_passes() -> int:
+    """Read at call time so a test — or an operator — can change it.
+
+    Env rather than a config field, following PREGROUND_MAX_FRAMES: the right
+    number depends on how much recall the run is worth paying for, which is an
+    operational choice rather than part of the analysis contract.
+    """
+    import os
+
+    raw = os.environ.get("CLEARFRAME_SCAN_PASSES")
+    if raw is None:
+        return SCAN_PASSES
+    try:
+        return max(1, int(raw))
+    except ValueError:
+        log.warning("ignoring unusable CLEARFRAME_SCAN_PASSES=%r", raw)
+        return SCAN_PASSES
 
 
 async def gather_detections(
-    gemini, footage_uri: str, duration_s: float, context: str, passes: int = SCAN_PASSES
+    gemini, footage_uri: str, duration_s: float, context: str, passes: int | None = None
 ):
     """Independent passes concurrently, then the auditor primed on their union.
 
     The auditor's job is to catch what was missed, so it should be told
-    everything already found — not just one pass's share of it. Returns the
-    merged detections and the ScanResult of the first pass, which carries the
-    document-level fields (source_work, unscanned_ranges, exposures).
+    everything already found — not just one pass's share of it.
+
+    Returns the merged detections, EVERY successful pass's result, and the
+    audit. All of them, because the document-level fields — exposures,
+    source_work, unscanned_ranges — used to be read off `results[0]` alone: the
+    extra passes contributed their findings and had everything else they saw
+    discarded, on the one class of finding with no second detector anywhere.
+
+    A pass that fails does not fail the run. The extra passes exist to raise
+    recall, so losing one should cost recall and nothing else — but the gather
+    had no `return_exceptions`, so one transient transport error took down a
+    scan the other passes had already completed. Only a total failure raises.
     """
-    results = await asyncio.gather(
-        *(gemini.scan(footage_uri, duration_s, context) for _ in range(max(1, passes)))
+    wanted = max(1, passes if passes is not None else _configured_passes())
+    settled = await asyncio.gather(
+        *(gemini.scan(footage_uri, duration_s, context) for _ in range(wanted)),
+        return_exceptions=True,
     )
+    results = [r for r in settled if not isinstance(r, BaseException)]
+    for failure in (r for r in settled if isinstance(r, BaseException)):
+        log.warning("a scan pass failed and was dropped: %s", failure)
+    if not results:
+        raise next(r for r in settled if isinstance(r, BaseException))
 
     seen: list[str] = []
     for r in results:
@@ -120,7 +255,7 @@ async def gather_detections(
     merged: list[DetectedElement] = []
     for r in [*results, audit]:
         merged = merge_passes(merged, r.detections) if merged else list(r.detections)
-    return merge_passes(merged, []), results[0], audit
+    return merge_passes(merged, []), results, audit
 
 class ScanStage:
     name = "scan"
@@ -135,15 +270,24 @@ class ScanStage:
         scan_context = build_scan_context(production, ctx.state.script_mentions)
 
         async def _watch():
-            merged, result, audit = await gather_detections(
+            merged, results, audit = await gather_detections(
                 ctx.gemini,
                 production.footage_uri,
                 production.duration_s,
                 scan_context,
             )
-            ctx.emit({"type": "scan_found", "count": len(result.detections)})
+            # What the SCAN found, not what one pass of it found. This reported
+            # `results[0]` while the merged set was already bigger, so Mission
+            # Control showed a single pass's count as the scan's.
+            ctx.emit(
+                {
+                    "type": "scan_found",
+                    "count": len(merged),
+                    "passes": len(results),
+                }
+            )
             ctx.emit({"type": "audit_found", "count": len(audit.detections)})
-            return merged, result, audit
+            return merged, results, audit
 
         async def _listen():
             if ctx.audio is None:
@@ -176,23 +320,32 @@ class ScanStage:
 
         if isinstance(watched, BaseException):
             raise watched  # the scan is load-bearing; the other two are not
-        merged, result, audit = watched
+        merged, results, audit = watched
 
+        # Every pass's document-level fields, not just the first one's. The
+        # extra passes exist because one sees about 60% of what is there, and
+        # reading these off `results[0]` threw away everything they saw beyond
+        # their detections.
+        work = best_source_work([r.source_work for r in results] + [audit.source_work])
         # Typing is corrected BEFORE triage, which is what turns an element
         # type into a clearance category — a real actor needs a release, not a
         # copyright licence.
-        work = result.source_work or audit.source_work
         ctx.state.detections = [
             _with_timing_verdict(d, production)
             for d in corrected_types(merged, work)
         ]
-        ctx.state.unscanned_ranges = result.unscanned_ranges + audit.unscanned_ranges
+        ctx.state.unscanned_ranges = fold_unscanned(results, audit)
         # Not clearance items. Nobody owns a delivery label with your address
-        # on it, which is exactly why no clearance tool looks for one.
-        ctx.state.exposures = result.exposures + audit.exposures
+        # on it, which is exactly why no clearance tool looks for one — and why
+        # this is the one class with no second detector to fall back on, so
+        # every pass's sightings are kept and merged rather than one pass's
+        # taken and the rest dropped.
+        ctx.state.exposures = dedupe_exposures(
+            [e for r in results for e in r.exposures] + list(audit.exposures)
+        )
         # If the footage IS an existing work, that one fact reframes most of
         # the findings below it.
-        ctx.state.source_work = result.source_work or audit.source_work
+        ctx.state.source_work = work
         if ctx.state.source_work:
             w = ctx.state.source_work
             ctx.emit(

@@ -109,3 +109,92 @@ async def test_one_pass_still_works():
     detections, _first, _audit = await gather_detections(g, "clip.mp4", 41.5, "", passes=1)
     assert g.scan_calls == 1
     assert {d.label for d in detections} == {"Calvin Klein", "Wristwatch", "National"}
+
+
+# --- how many passes, and what happens when one of them dies ------------------
+
+
+@pytest.mark.asyncio
+async def test_three_passes_by_default():
+    """Three, because three identical runs are what measured the 60%.
+
+    Between them those runs saw all 15 distinct findings; any one of them saw
+    about 9. Concurrent, so the wall clock is the slowest pass rather than the
+    sum, and about $0.02 per minute of footage for the extra one.
+    """
+    from clearframe.stages.scan import gather_detections
+
+    g = RecordingGemini()
+    await gather_detections(g, "clip.mp4", 41.5, "")
+    assert g.scan_calls == 3
+
+
+@pytest.mark.asyncio
+async def test_the_pass_count_is_configurable(monkeypatch):
+    from clearframe.stages.scan import gather_detections
+
+    monkeypatch.setenv("CLEARFRAME_SCAN_PASSES", "2")
+    g = RecordingGemini()
+    await gather_detections(g, "clip.mp4", 41.5, "")
+    assert g.scan_calls == 2
+
+
+@pytest.mark.asyncio
+async def test_an_unusable_pass_count_falls_back_rather_than_failing(monkeypatch):
+    from clearframe.stages.scan import gather_detections
+
+    monkeypatch.setenv("CLEARFRAME_SCAN_PASSES", "not a number")
+    g = RecordingGemini()
+    await gather_detections(g, "clip.mp4", 41.5, "")
+    assert g.scan_calls == 3
+
+
+@pytest.mark.asyncio
+async def test_one_failed_pass_costs_recall_and_nothing_else():
+    """The extra passes raise recall; losing one must only lower it.
+
+    `asyncio.gather` without return_exceptions meant a single transient
+    transport error took down a scan whose other passes had already finished —
+    an optimisation failing the run it was meant to improve.
+    """
+    from clearframe.integrations.gemini_client import ScanResult
+    from clearframe.stages.scan import gather_detections
+
+    class OneBadPass:
+        def __init__(self):
+            self.calls = 0
+
+        async def scan(self, uri, duration_s, context=""):
+            self.calls += 1
+            if self.calls == 2:
+                raise RuntimeError("connection reset by peer")
+            return ScanResult(detections=[det(str(self.calls), "Calvin Klein")],
+                              unscanned_ranges=[])
+
+        async def audit_scan(self, uri, duration_s, found_labels, context=""):
+            return ScanResult(detections=[], unscanned_ranges=[])
+
+    g = OneBadPass()
+    detections, results, _audit = await gather_detections(g, "clip.mp4", 41.5, "")
+
+    assert len(results) == 2, "the surviving passes should still be reported"
+    # Both survivors contribute; collapsing the duplicate is triage's job, not
+    # this function's, and their ids no longer collide.
+    assert [d.label for d in detections] == ["Calvin Klein", "Calvin Klein"]
+    assert len({d.id for d in detections}) == 2
+
+
+@pytest.mark.asyncio
+async def test_a_scan_with_no_surviving_pass_still_fails():
+    """The scan is load-bearing. Degrading to zero findings would be a lie."""
+    from clearframe.stages.scan import gather_detections
+
+    class AllBad:
+        async def scan(self, uri, duration_s, context=""):
+            raise RuntimeError("model unavailable")
+
+        async def audit_scan(self, uri, duration_s, found_labels, context=""):
+            raise AssertionError("the auditor must not run without a scan")
+
+    with pytest.raises(RuntimeError):
+        await gather_detections(AllBad(), "clip.mp4", 41.5, "")

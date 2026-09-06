@@ -184,14 +184,30 @@ SCRIPT_RESPONSE_SCHEMA: dict = {
     "required": ["mentions"],
 }
 
+# The auditor answers with the same schema as the scan, but "use the same JSON
+# format" was carrying all of the weight: none of the fields that decide how a
+# finding is GOVERNED were named here, and the schema makes them optional. So
+# the findings unique to this pass — the whole reason it runs — arrived with
+# siting "unknown" and no depiction, which silently disables freedom of
+# panorama and the adverse-depiction escalation for exactly them. A prompt is
+# not a contract, but an instruction that was never given cannot be followed.
 AUDIT_PROMPT_TEMPLATE = (
     "You are the studio's E&O clearance AUDITOR, reviewing another coordinator's "
     "work on this footage. The first pass found these elements: {found}. "
     "Watch the footage again and report ONLY clearable elements the first pass "
     "MISSED — background screens playing copyrighted content, reflections, "
     "quiet audio, partially visible artwork, signage, tattoos, or faces they "
-    "overlooked. Use the same JSON format. If nothing was missed, return an "
-    "empty elements list. Do not repeat elements already found."
+    "overlooked. Use the same JSON format, and fill it in completely for every "
+    "element you add: every time range it appears in, each with its own bbox "
+    "measured where the element sits during THAT appearance (named edges ymin, "
+    "xmin, ymax, xmax, 0-1000); siting for ARTWORK and LOCATION; depiction for "
+    "brands, businesses, places and people; and FACE only for a real person, "
+    "CHARACTER for a drawn or animated one. Also report any exposures the first "
+    "pass missed (minors, personal data, documents, screens, plates), any "
+    "unscanned_ranges you could not analyse, and source_work only if you "
+    "recognise the footage as an existing published work it did not name. "
+    "If nothing was missed, return an empty elements list. Do not repeat "
+    "elements already found."
 )
 
 SCAN_RESPONSE_SCHEMA: dict = {
