@@ -36,26 +36,16 @@ function humanSize(bytes: number): string {
 }
 
 /**
- * Upload footage to clear, and the rights ledger to clear it against.
+ * Upload footage to clear.
  *
- * Rewritten from a mono-typed form that read as a terminal: bare file inputs,
- * all-caps section numbers, and rows of unlabelled chips whose consequences
- * lived in `title` attributes nobody hovers. The fields and the API contract
- * are unchanged — what changed is that each choice now says what it does to
- * your risk, because these five inputs are the difference between a useful
- * report and a generic one.
- *
- * The ledger upload is the half most productions already have: a clearance
- * department keeps a licence register. Loading it means ClearFrame reports
- * "you're covered" instead of re-pricing rights the production already bought.
+ * Was one column a screen and a half tall — every choice stacked under the
+ * last, with the right half of the page empty. Now three cards across: the
+ * footage, the nature of the work, the release. The action bar underneath
+ * reads the choices back in plain words before the money is spent, because
+ * these five inputs are the difference between a useful report and a generic
+ * one. The fields and the API contract are unchanged.
  */
-export function Uploader({
-  onStarted,
-  onLedger,
-}: {
-  onStarted: (pid: string) => void;
-  onLedger: (n: number) => void;
-}) {
+export function Uploader({ onStarted }: { onStarted: (pid: string) => void }) {
   const [title, setTitle] = useState("Untitled Production");
   const [territories, setTerritories] = useState<string[]>(["US", "DE", "FR"]);
   const [distribution, setDistribution] = useState<string[]>(["THEATRICAL", "STREAMING"]);
@@ -64,12 +54,9 @@ export function Uploader({
   const [sponsors, setSponsors] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [ledgerNote, setLedgerNote] = useState<string | null>(null);
   const [clip, setClip] = useState<File | null>(null);
-  const [ledger, setLedger] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
   const clipRef = useRef<HTMLInputElement | null>(null);
-  const ledgerRef = useRef<HTMLInputElement | null>(null);
 
   const toggle = (list: string[], set: (v: string[]) => void, value: string) =>
     set(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
@@ -102,22 +89,6 @@ export function Uploader({
     }
   };
 
-  const submitLedger = async (file: File) => {
-    setError(null);
-    setLedger(file);
-    try {
-      const r = await api.uploadLicences(file, true);
-      setLedgerNote(`${r.stored} licences loaded from ${file.name}`);
-      onLedger(r.stored);
-    } catch (e) {
-      setError(
-        e instanceof ApiError && typeof e.detail === "string"
-          ? e.detail
-          : "Ledger upload failed.",
-      );
-    }
-  };
-
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragging(false);
@@ -128,26 +99,19 @@ export function Uploader({
     }
   };
 
+  const contextLabel = USE_CONTEXTS.find(([v]) => v === useContext)?.[1] ?? "";
+  const platformLabel = PLATFORMS.find(([v]) => v === platform)?.[1] ?? "";
+
   return (
-    <div className="up2">
-      <section className="up2-card">
-        <header className="up2-head">
-          <h2>Footage to clear</h2>
-          <p>Gemini watches every frame; you decide what to do about what it finds.</p>
+    <div className="up3">
+      <section className="up3-card">
+        <header className="up3-head">
+          <h2>The footage</h2>
+          <p>Three Gemini passes watch every frame.</p>
         </header>
 
-        <label className="up2-field">
-          <span>Production title</span>
-          <input
-            className="up2-input"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Untitled Production"
-          />
-        </label>
-
         <div
-          className={`dropzone ${dragging ? "over" : ""} ${clip ? "has-file" : ""}`}
+          className={`dropzone tall ${dragging ? "over" : ""} ${clip ? "has-file" : ""}`}
           onDragOver={(e) => {
             e.preventDefault();
             setDragging(true);
@@ -197,10 +161,27 @@ export function Uploader({
           )}
         </div>
 
+        <label className="up2-field">
+          <span>Production title</span>
+          <input
+            className="up2-input"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Untitled Production"
+          />
+        </label>
+      </section>
+
+      <section className="up3-card">
+        <header className="up3-head">
+          <h2>The work</h2>
+          <p>What it is decides which defences apply.</p>
+        </header>
+
         <div className="up2-field">
           <span>What kind of work is this?</span>
           <p className="up2-why">
-            The largest single input to trademark risk. Rogers v. Grimaldi
+            The largest single input to trademark risk — Rogers v. Grimaldi
             protects expressive works and not advertising.
           </p>
           <div className="up2-options">
@@ -217,6 +198,27 @@ export function Uploader({
             ))}
           </div>
         </div>
+
+        <label className="up2-field">
+          <span>Sponsors <em>optional</em></span>
+          <p className="up2-why">
+            Their marks count as authorised; a rival's mark in shot is flagged
+            as a contract exposure even where the depiction is lawful.
+          </p>
+          <input
+            className="up2-input"
+            value={sponsors}
+            onChange={(e) => setSponsors(e.target.value)}
+            placeholder="Brands paying for this — e.g. Coca-Cola, Nike"
+          />
+        </label>
+      </section>
+
+      <section className="up3-card">
+        <header className="up3-head">
+          <h2>The release</h2>
+          <p>Clearance is jurisdictional — where and how decide the bands.</p>
+        </header>
 
         <div className="up2-field">
           <span>Where will it be released?</span>
@@ -241,8 +243,8 @@ export function Uploader({
         <div className="up2-field">
           <span>In what media?</span>
           <p className="up2-why">
-            A licence you already hold covers a medium or it does not — the gap
-            that kept WKRP off home video for decades.
+            A licence covers a medium or it does not — the gap that kept WKRP
+            off home video for decades.
           </p>
           <div className="pill-row">
             {MEDIA.map((m) => (
@@ -262,7 +264,7 @@ export function Uploader({
           <span>Publishing to</span>
           <p className="up2-why">
             What the platform's matching will do, which is not what a court
-            would do — automated claims do not evaluate fair use.
+            would do.
           </p>
           <div className="up2-options">
             {PLATFORMS.map(([value, label, effect]) => (
@@ -278,41 +280,70 @@ export function Uploader({
             ))}
           </div>
         </div>
-
-        <label className="up2-field">
-          <span>Sponsors <em>optional</em></span>
-          <p className="up2-why">
-            Their marks count as authorised; a rival's mark in shot is flagged
-            as a contract exposure even where the depiction is lawful.
-          </p>
-          <input
-            className="up2-input"
-            value={sponsors}
-            onChange={(e) => setSponsors(e.target.value)}
-            placeholder="Brands paying for this — e.g. Coca-Cola, Nike"
-          />
-        </label>
-
-        {error && <div className="up2-error">{error}</div>}
-
-        <button className="up2-go" onClick={submitClip} disabled={busy || !clip}>
-          {busy ? "Uploading…" : "Scan this footage"}
-        </button>
       </section>
 
-      <section className="up2-card up2-ledger" id="ledger">
-        <header className="up2-head">
-          <h2>Rights you already hold <em>optional</em></h2>
-          <p>
-            Upload your clearance register and every finding is checked against
-            it — reported <b>covered</b>, or with the exact gap in territory,
-            term or media named. Without it, every identified holder reads as
-            unlicensed.
-          </p>
+      <footer className="up3-bar">
+        <div className="up3-summary">
+          {clip ? (
+            <>
+              <strong>{clip.name}</strong> · {contextLabel.toLowerCase()} ·
+              releasing in {territories.join(", ") || "no territory yet"} ·{" "}
+              {distribution.map((m) => m.replace("_", " ").toLowerCase()).join(" + ") ||
+                "no media yet"}
+              {platform !== "none" && <> · publishing to {platformLabel}</>}
+            </>
+          ) : (
+            <>Drop a clip on the left to begin — everything else has a sane default.</>
+          )}
+          {error && <div className="up2-error">{error}</div>}
+        </div>
+        <button className="up3-go" onClick={submitClip} disabled={busy || !clip}>
+          {busy ? "Uploading…" : "Scan this footage"}
+        </button>
+      </footer>
+    </div>
+  );
+}
+
+/**
+ * The rights ledger — the half most productions already have.
+ *
+ * A clearance department keeps a licence register. Loading it means
+ * ClearFrame reports "you're covered" instead of re-pricing rights the
+ * production already bought.
+ */
+export function LedgerPanel({ onLedger }: { onLedger: (n: number) => void }) {
+  const [error, setError] = useState<string | null>(null);
+  const [ledgerNote, setLedgerNote] = useState<string | null>(null);
+  const [ledger, setLedger] = useState<File | null>(null);
+  const ledgerRef = useRef<HTMLInputElement | null>(null);
+
+  const submitLedger = async (file: File) => {
+    setError(null);
+    setLedger(file);
+    try {
+      const r = await api.uploadLicences(file, true);
+      setLedgerNote(`${r.stored} licences loaded from ${file.name}`);
+      onLedger(r.stored);
+    } catch (e) {
+      setError(
+        e instanceof ApiError && typeof e.detail === "string"
+          ? e.detail
+          : "Ledger upload failed.",
+      );
+    }
+  };
+
+  return (
+    <div className="ledger2">
+      <section className="up3-card">
+        <header className="up3-head">
+          <h2>Load your clearance register</h2>
+          <p>CSV or JSON — the format your rights spreadsheet already has.</p>
         </header>
 
         <div
-          className={`dropzone small ${ledger ? "has-file" : ""}`}
+          className={`dropzone tall ${ledger ? "has-file" : ""}`}
           onClick={() => ledgerRef.current?.click()}
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => {
@@ -336,6 +367,12 @@ export function Uploader({
               if (f) void submitLedger(f);
             }}
           />
+          <svg className="dropzone-icon" viewBox="0 0 48 48" aria-hidden="true">
+            <path d="M14 6h14l8 8v28H14z" fill="none" stroke="currentColor"
+                  strokeWidth="2" strokeLinejoin="round" />
+            <path d="M28 6v8h8M20 24h12M20 30h12M20 36h8" fill="none"
+                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
           <div className="dropzone-name">
             {ledger ? ledger.name : "Drop a CSV or JSON ledger"}
           </div>
@@ -343,6 +380,7 @@ export function Uploader({
         </div>
 
         {ledgerNote && <div className="up2-ok">{ledgerNote}</div>}
+        {error && <div className="up2-error">{error}</div>}
 
         <details className="up2-details">
           <summary>Expected columns</summary>
@@ -351,6 +389,33 @@ export function Uploader({
             reference, notes
           </code>
         </details>
+      </section>
+
+      <section className="up3-card">
+        <header className="up3-head">
+          <h2>What it unlocks</h2>
+          <p>Every finding is checked against what you already hold.</p>
+        </header>
+        <ul className="ledger-points">
+          <li>
+            <strong>Covered</strong> — a matching grant is on file, so the
+            finding is reported licensed instead of re-priced.
+          </li>
+          <li>
+            <strong>The exact gap named</strong> — a licence that exists but
+            does not reach this use is reported with the missing territory,
+            term or medium, not a vague warning.
+          </li>
+          <li>
+            <strong>Music assembled, not assumed</strong> — a song is covered
+            only when sync and master are both held, in territory, in term and
+            in media. They arrive on two pieces of paper from two companies.
+          </li>
+        </ul>
+        <p className="ledger-note">
+          Without a ledger, every identified rights holder reads as unlicensed
+          — which is honest, just noisier than your production really is.
+        </p>
       </section>
     </div>
   );

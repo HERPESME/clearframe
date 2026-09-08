@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Uploader } from "./Uploader";
+import { Uploader, LedgerPanel } from "./Uploader";
 import type { ProductionSummary } from "./types";
 
 const STAGES = 13;
@@ -68,6 +68,40 @@ function Poster({ p }: { p: ProductionSummary }) {
   );
 }
 
+function PosterCard({ p, onOpen }: { p: ProductionSummary; onOpen: (pid: string) => void }) {
+  const done = stagesDone(p.stage_status);
+  return (
+    <button
+      type="button"
+      className="poster-card"
+      onClick={() => onOpen(p.id)}
+      title={`Open ${p.title}`}
+    >
+      <div className="poster-frame">
+        <Poster p={p} />
+        <div className="poster-shade" />
+        {p.running && <span className="poster-badge live">analysing</span>}
+        {p.interrupted && (
+          <span
+            className="poster-badge warn"
+            title="The server restarted mid-run; these are the stages it reached."
+          >
+            interrupted
+          </span>
+        )}
+        <div className="poster-meta">
+          <div className="poster-title">{p.title}</div>
+          <div className="poster-sub">
+            {done >= STAGES ? "complete" : `${done}/${STAGES} stages`}
+            {" · "}
+            {ago(p.updated_at)}
+          </div>
+        </div>
+      </div>
+    </button>
+  );
+}
+
 /* Sidebar icons — 20px, stroke-drawn, one concept each. */
 const ICONS = {
   overview: (
@@ -105,7 +139,9 @@ const ICONS = {
   ),
 };
 
-const NAV: { id: string; label: string; icon: keyof typeof ICONS }[] = [
+type View = "overview" | "library" | "new" | "ledger" | "how";
+
+const NAV: { id: View; label: string; icon: keyof typeof ICONS }[] = [
   { id: "overview", label: "Overview", icon: "overview" },
   { id: "library", label: "Your library", icon: "library" },
   { id: "new", label: "New analysis", icon: "scan" },
@@ -120,10 +156,18 @@ const BAND_LEGEND: [string, string][] = [
   ["LOW", "Incidental or protected. Recorded so the insurer sees you looked."],
 ];
 
+const EXPORTS: [string, string][] = [
+  ["E&O clearance dossier", "HTML and Word, with every citation — the document insurers ask for."],
+  ["EDL markers", "Every finding at its exact timecode, ready to drop into the edit."],
+  ["CSV marker list", "The same findings for a spreadsheet or an asset tracker."],
+  ["Music cue sheet", "Every cue with usage and timing, shaped for the PROs."],
+  ["Audit trail", "Append-only record of who decided what, and when."],
+];
+
 /**
  * The studio floor. Sign-in is the front of house; this is where the work
- * happens, laid out the way channel studios lay it out: rail of your own
- * work first, one clear way to start more, help one click down.
+ * happens — and it is laid out in pages, the way channel studios lay it out,
+ * because one endless column with a dead right half is not a layout.
  */
 export function Dashboard({
   productions,
@@ -142,21 +186,12 @@ export function Dashboard({
   demoMode: boolean;
   account?: React.ReactNode;
 }) {
-  const [section, setSection] = useState("overview");
+  const [view, setView] = useState<View>("overview");
   const hasDemo = productions.some((p) => p.id === "demo");
   const running = productions.filter((p) => p.running).length;
   const complete = productions.filter(
     (p) => stagesDone(p.stage_status) >= STAGES,
   ).length;
-
-  const goTo = (id: string) => {
-    setSection(id);
-    if (id === "overview") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
 
   return (
     <div className="studio">
@@ -164,13 +199,13 @@ export function Dashboard({
         <div className="brand studio-brand">
           CLEAR<b>FRAME</b>
         </div>
-        <nav className="studio-nav" aria-label="Dashboard sections">
+        <nav className="studio-nav" aria-label="Dashboard pages">
           {NAV.map((n) => (
             <button
               key={n.id}
               type="button"
-              className={section === n.id ? "on" : ""}
-              onClick={() => goTo(n.id)}
+              className={view === n.id ? "on" : ""}
+              onClick={() => setView(n.id)}
             >
               {ICONS[n.icon]}
               <span>{n.label}</span>
@@ -191,171 +226,257 @@ export function Dashboard({
       </aside>
 
       <div className="studio-main">
-        <header className="studio-hero" id="overview">
-          <div className="studio-hero-art" aria-hidden="true" />
-          <div className="studio-hero-copy">
-            <h1>
-              Every frame, <em>cleared.</em>
-            </h1>
-            <p>
-              Gemini watches the footage and finds everything that needs legal
-              clearance. Parallel researches who owns it. You make the call —
-              with evidence attached.
-            </p>
-            <div className="studio-hero-cta">
-              <button type="button" className="cta-main" onClick={() => goTo("new")}>
-                Scan new footage
-              </button>
-              <button type="button" className="cta-quiet" onClick={onDemo}>
-                {hasDemo ? "Re-run the demo scene" : "Watch the demo scene"}
-              </button>
-            </div>
-          </div>
-          <div className="studio-stats" aria-label="At a glance">
-            <div className="stat">
-              <span className="stat-n">{productions.length}</span>
-              <span className="stat-l">
-                {productions.length === 1 ? "production" : "productions"}
-              </span>
-            </div>
-            <div className="stat">
-              <span className={`stat-n ${running > 0 ? "hot" : ""}`}>{running}</span>
-              <span className="stat-l">analysing now</span>
-            </div>
-            <div className="stat">
-              <span className="stat-n">{complete}</span>
-              <span className="stat-l">complete</span>
-            </div>
-          </div>
-        </header>
+        {view === "overview" && (
+          <div className="studio-page" key="overview">
+            <header className="studio-hero">
+              <div className="studio-hero-art" aria-hidden="true" />
+              <div className="studio-hero-copy">
+                <h1>
+                  Every frame, <em>cleared.</em>
+                </h1>
+                <p>
+                  Gemini watches the footage and finds everything that needs
+                  legal clearance. Parallel researches who owns it. You make
+                  the call — with evidence attached.
+                </p>
+                <div className="studio-hero-cta">
+                  <button type="button" className="cta-main" onClick={() => setView("new")}>
+                    Scan new footage
+                  </button>
+                  <button type="button" className="cta-quiet" onClick={onDemo}>
+                    {hasDemo ? "Re-run the demo scene" : "Watch the demo scene"}
+                  </button>
+                </div>
+              </div>
+              <div className="studio-stats" aria-label="At a glance">
+                <div className="stat">
+                  <span className="stat-n">{productions.length}</span>
+                  <span className="stat-l">
+                    {productions.length === 1 ? "production" : "productions"}
+                  </span>
+                </div>
+                <div className="stat">
+                  <span className={`stat-n ${running > 0 ? "hot" : ""}`}>{running}</span>
+                  <span className="stat-l">analysing now</span>
+                </div>
+                <div className="stat">
+                  <span className="stat-n">{complete}</span>
+                  <span className="stat-l">complete</span>
+                </div>
+              </div>
+            </header>
 
-        <section className="dash-section" id="library">
-          <div className="dash-section-head">
-            <h2>Continue reviewing</h2>
-            <span className="dash-count">
-              {productions.length}{" "}
-              {productions.length === 1 ? "analysis" : "analyses"}
-            </span>
-          </div>
+            <div className="ov-grid">
+              <section className="ov-main">
+                <div className="dash-section-head">
+                  <h2>Continue reviewing</h2>
+                  <span className="dash-count">
+                    {productions.length}{" "}
+                    {productions.length === 1 ? "analysis" : "analyses"}
+                  </span>
+                  {productions.length > 3 && (
+                    <button
+                      type="button"
+                      className="see-all"
+                      onClick={() => setView("library")}
+                    >
+                      See the whole library
+                    </button>
+                  )}
+                </div>
 
-          {productions.length === 0 && !hasDemo ? (
-            <div className="rail-empty">
-              <p>
-                Nothing here yet. Scan your first clip below, or run the demo
-                scene to see a finished review.
-              </p>
-            </div>
-          ) : null}
-
-          <div className="rail">
-            {productions.map((p) => {
-              const done = stagesDone(p.stage_status);
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  className="poster-card"
-                  onClick={() => onOpen(p.id)}
-                  title={`Open ${p.title}`}
-                >
-                  <div className="poster-frame">
-                    <Poster p={p} />
-                    <div className="poster-shade" />
-                    {p.running && <span className="poster-badge live">analysing</span>}
-                    {p.interrupted && (
-                      <span
-                        className="poster-badge warn"
-                        title="The server restarted mid-run; these are the stages it reached."
-                      >
-                        interrupted
-                      </span>
-                    )}
-                    <div className="poster-meta">
-                      <div className="poster-title">{p.title}</div>
-                      <div className="poster-sub">
-                        {done >= STAGES ? "complete" : `${done}/${STAGES} stages`}
-                        {" · "}
-                        {ago(p.updated_at)}
+                <div className="rail">
+                  {productions.slice(0, 6).map((p) => (
+                    <PosterCard key={p.id} p={p} onOpen={onOpen} />
+                  ))}
+                  {!hasDemo && (
+                    <button type="button" className="poster-card ghost" onClick={onDemo}>
+                      <div className="poster-frame">
+                        <div className="poster-ghost">
+                          <span className="poster-ghost-plus">▸</span>
+                          <div className="poster-title">Run the demo scene</div>
+                          <div className="poster-sub">Recorded fixtures, no credentials</div>
+                        </div>
+                      </div>
+                    </button>
+                  )}
+                  <button type="button" className="poster-card ghost" onClick={() => setView("new")}>
+                    <div className="poster-frame">
+                      <div className="poster-ghost">
+                        <span className="poster-ghost-plus">+</span>
+                        <div className="poster-title">New analysis</div>
+                        <div className="poster-sub">Drop a clip, get a dossier</div>
                       </div>
                     </div>
-                  </div>
-                </button>
-              );
-            })}
-
-            {!hasDemo && (
-              <button type="button" className="poster-card ghost" onClick={onDemo}>
-                <div className="poster-frame">
-                  <div className="poster-ghost">
-                    <span className="poster-ghost-plus">▸</span>
-                    <div className="poster-title">Run the demo scene</div>
-                    <div className="poster-sub">Recorded fixtures, no credentials</div>
-                  </div>
+                  </button>
                 </div>
-              </button>
+              </section>
+
+              <aside className="ov-side">
+                <div className="qa-card glint">
+                  <h3>Quick actions</h3>
+                  <button type="button" className="qa-btn" onClick={() => setView("new")}>
+                    {ICONS.scan}
+                    <span>
+                      Scan new footage
+                      <em>Three passes, every frame</em>
+                    </span>
+                  </button>
+                  <button type="button" className="qa-btn" onClick={onDemo}>
+                    {ICONS.library}
+                    <span>
+                      {hasDemo ? "Re-run the demo scene" : "Run the demo scene"}
+                      <em>No credentials, recorded fixtures</em>
+                    </span>
+                  </button>
+                  <button type="button" className="qa-btn" onClick={() => setView("ledger")}>
+                    {ICONS.ledger}
+                    <span>
+                      Load your rights ledger
+                      <em>Report covered, not re-priced</em>
+                    </span>
+                  </button>
+                </div>
+
+                <div className="qa-card">
+                  <h3>How a clearance runs</h3>
+                  <ol className="how-mini">
+                    <li>Upload footage and name the release.</li>
+                    <li>Agents find, research and argue every element.</li>
+                    <li>You decide; the dossier and markers export.</li>
+                  </ol>
+                  <button type="button" className="qa-link" onClick={() => setView("how")}>
+                    Read the full guide
+                  </button>
+                </div>
+              </aside>
+            </div>
+          </div>
+        )}
+
+        {view === "library" && (
+          <div className="studio-page" key="library">
+            <div className="dash-section-head page-head">
+              <h2>Your library</h2>
+              <span className="dash-count">
+                {productions.length}{" "}
+                {productions.length === 1 ? "analysis" : "analyses"}
+              </span>
+            </div>
+            {productions.length === 0 ? (
+              <div className="rail-empty">
+                <p>
+                  Nothing here yet. Scan your first clip, or run the demo scene
+                  to see a finished review.
+                </p>
+                <div className="studio-hero-cta">
+                  <button type="button" className="cta-main" onClick={() => setView("new")}>
+                    Scan new footage
+                  </button>
+                  <button type="button" className="cta-quiet" onClick={onDemo}>
+                    Run the demo scene
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="lib-grid">
+                {productions.map((p) => (
+                  <PosterCard key={p.id} p={p} onOpen={onOpen} />
+                ))}
+              </div>
             )}
           </div>
-        </section>
+        )}
 
-        <section className="dash-section" id="new">
-          <div className="dash-section-head">
-            <h2>Clear something new</h2>
+        {view === "new" && (
+          <div className="studio-page" key="new">
+            <div className="dash-section-head page-head">
+              <h2>Clear something new</h2>
+              <span className="dash-count">
+                the five inputs that decide what a finding scores
+              </span>
+            </div>
+            <Uploader onStarted={onStarted} />
           </div>
-          <Uploader onStarted={onStarted} onLedger={onLedger} />
-        </section>
+        )}
 
-        <section className="dash-section" id="how">
-          <div className="dash-section-head">
-            <h2>How a clearance runs</h2>
+        {view === "ledger" && (
+          <div className="studio-page" key="ledger">
+            <div className="dash-section-head page-head">
+              <h2>Rights you already hold</h2>
+              <span className="dash-count">optional, and worth it</span>
+            </div>
+            <LedgerPanel onLedger={onLedger} />
           </div>
-          <ol className="how-steps">
-            <li>
-              <span className="how-n">1</span>
-              <div>
-                <h3>Upload</h3>
-                <p>
-                  Drop footage and say where it will be released. Three
-                  independent Gemini passes watch every frame — logos, artwork,
-                  tattoos, faces, music, signage.
-                </p>
-              </div>
-            </li>
-            <li>
-              <span className="how-n">2</span>
-              <div>
-                <h3>Watch the agents work</h3>
-                <p>
-                  Every finding is researched — who owns it, how litigious they
-                  are, what a licence costs — with source citations attached,
-                  and argued against real case law.
-                </p>
-              </div>
-            </li>
-            <li>
-              <span className="how-n">3</span>
-              <div>
-                <h3>Decide and export</h3>
-                <p>
-                  Approve, license, blur or escalate each finding. Export the
-                  E&amp;O dossier, EDL markers for the edit and the music cue
-                  sheet.
-                </p>
-              </div>
-            </li>
-          </ol>
+        )}
 
-          <div className="band-legend">
-            <h3>Reading the risk bands</h3>
-            <ul>
-              {BAND_LEGEND.map(([band, line]) => (
-                <li key={band}>
-                  <span className={`chip ${band}`}>{band}</span>
-                  <span>{line}</span>
-                </li>
-              ))}
-            </ul>
+        {view === "how" && (
+          <div className="studio-page" key="how">
+            <div className="dash-section-head page-head">
+              <h2>How a clearance runs</h2>
+            </div>
+            <ol className="how-steps">
+              <li>
+                <span className="how-n">1</span>
+                <div>
+                  <h3>Upload</h3>
+                  <p>
+                    Drop footage and say where it will be released. Three
+                    independent Gemini passes watch every frame — logos,
+                    artwork, tattoos, faces, music, signage.
+                  </p>
+                </div>
+              </li>
+              <li>
+                <span className="how-n">2</span>
+                <div>
+                  <h3>Watch the agents work</h3>
+                  <p>
+                    Every finding is researched — who owns it, how litigious
+                    they are, what a licence costs — with source citations
+                    attached, and argued against real case law.
+                  </p>
+                </div>
+              </li>
+              <li>
+                <span className="how-n">3</span>
+                <div>
+                  <h3>Decide and export</h3>
+                  <p>
+                    Approve, license, blur or escalate each finding. Export the
+                    E&amp;O dossier, EDL markers for the edit and the music cue
+                    sheet.
+                  </p>
+                </div>
+              </li>
+            </ol>
+
+            <div className="how-grid">
+              <div className="band-legend">
+                <h3>Reading the risk bands</h3>
+                <ul>
+                  {BAND_LEGEND.map(([band, line]) => (
+                    <li key={band}>
+                      <span className={`chip ${band}`}>{band}</span>
+                      <span>{line}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="band-legend">
+                <h3>What you walk away with</h3>
+                <ul className="exports-list">
+                  {EXPORTS.map(([name, line]) => (
+                    <li key={name}>
+                      <strong>{name}</strong>
+                      <span>{line}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
           </div>
-        </section>
+        )}
 
         <footer className="studio-foot">
           Content ID finds <em>your</em> IP in other people's video. ClearFrame
