@@ -590,20 +590,48 @@ button {
 
 /* ---------- mission control ---------- */
 .mission {
+  position: relative;
   max-width: 1100px;
   margin: 0 auto;
-  padding: 40px 28px 120px;
+  padding: 48px 28px 120px;
+}
+
+/* The projector, running while the department works. Fixed so it lights the
+   whole room, pointer-events none so it lights and does nothing else. */
+.mission-beam {
+  position: fixed; top: -14%; left: 50%; width: 60%; height: 70%;
+  transform: translateX(-50%); pointer-events: none;
+  background: linear-gradient(to bottom,
+    color-mix(in srgb, var(--marquee) 16%, transparent),
+    color-mix(in srgb, var(--marquee) 4%, transparent) 55%, transparent);
+  clip-path: polygon(46% 0, 54% 0, 100% 100%, 0 100%);
+  filter: blur(28px);
 }
 
 .mission-head {
+  position: relative;
   text-align: center;
   margin-bottom: 28px;
 }
 
+.mission-head .brand {
+  margin-bottom: var(--s-4);
+}
+
+.mission-head .slate {
+  display: block;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--marquee);
+  text-transform: uppercase;
+}
+
 .mission-head h2 {
-  font-family: var(--serif);
-  font-size: 28px;
-  font-weight: 600;
+  font-family: var(--display);
+  font-stretch: 114%;
+  font-size: 30px;
+  font-weight: 700;
   margin: 8px 0 0;
 }
 
@@ -616,15 +644,16 @@ button {
 .agent {
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--r-md);
   padding: 14px 16px;
   opacity: 0.55;
-  transition: opacity 200ms, border-color 200ms;
+  transition: opacity 200ms, border-color 200ms, box-shadow 200ms;
 }
 
 .agent.active {
   opacity: 1;
   border-color: var(--accent);
+  box-shadow: var(--glow);
 }
 
 .agent.done {

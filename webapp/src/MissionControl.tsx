@@ -330,7 +330,11 @@ export function MissionControl({
 
   return (
     <div className="mission">
+      <div className="mission-beam" aria-hidden="true" />
       <div className="mission-head">
+        <div className="brand">
+          CLEAR<b>FRAME</b>
+        </div>
         <span className="slate">Mission Control</span>
         <h2>The clearance department is working</h2>
       </div>
