@@ -302,7 +302,6 @@ export default function App() {
   if (!state) {
     return (
       <>
-        {authOn && user && <div className="screen-account">{account}</div>}
         <Dashboard
           productions={productions}
           demoMode={mode === "demo"}
@@ -313,6 +312,7 @@ export default function App() {
             setMission(pid);
           }}
           onLedger={() => {}}
+          account={authOn && user ? account : undefined}
         />
         {error && <div className="error-banner dash-error">{error}</div>}
       </>

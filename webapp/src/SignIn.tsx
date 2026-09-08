@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PosterWall } from "./PosterWall";
 import {
   signInWithGoogle,
   signInWithPassword,
@@ -7,11 +8,14 @@ import {
 } from "./auth";
 
 /**
- * The way in.
+ * The way in — the front of house.
  *
- * Split layout: the form on the left, the picture on the right, because this
- * is a tool for looking at film and the sign-in should say so before you are
- * inside it.
+ * A streaming service signs you in over its own library: a wall of posters
+ * dimmed behind one dark card. This screen borrows exactly that grammar,
+ * except every poster is drawn (see PosterWall.tsx for why a clearance
+ * product must not decorate itself with other people's one-sheets), and a
+ * projector beam falls across the wall from above, which is the one warm
+ * light in the app.
  *
  * Both halves of the promise are here — Google for a reviewer who just wants
  * in, email and password for a production that does not use Google accounts.
@@ -64,196 +68,166 @@ export function SignIn({
     );
   };
 
+  const swap = () => {
+    setMode(mode === "login" ? "signup" : "login");
+    setError(null);
+  };
+
   return (
     <div className="auth-screen">
-      <div className="auth-panel">
-        <div className="auth-form">
-          <div className="brand auth-brand">
-            CLEAR<b>FRAME</b>
-          </div>
-          <h1 className="auth-title">Welcome</h1>
-          <p className="auth-sub">
-            Every frame, cleared — before you ship.
-          </p>
+      {/* The house: posters, then the light that dims them, then the beam. */}
+      <div className="auth-house" aria-hidden="true">
+        <PosterWall />
+        <div className="auth-dim" />
+        <div className="auth-beam" />
+      </div>
 
-          <div className="auth-tabs" role="tablist">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mode === "login"}
-              className={mode === "login" ? "on" : ""}
-              onClick={() => setMode("login")}
-            >
-              LOGIN
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mode === "signup"}
-              className={mode === "signup" ? "on" : ""}
-              onClick={() => setMode("signup")}
-            >
-              SIGNUP
-            </button>
-          </div>
+      <div className="auth-marquee brand">
+        CLEAR<b>FRAME</b>
+      </div>
 
-          <form className="auth-fields" onSubmit={submit}>
-            {mode === "signup" && (
-              <input
-                className="auth-input"
-                placeholder="Your name"
-                value={name}
-                autoComplete="name"
-                onChange={(e) => setName(e.target.value)}
-              />
-            )}
+      <div className="auth-card">
+        <h1 className="auth-title">
+          {mode === "login" ? "Sign in" : "Create your account"}
+        </h1>
+        <p className="auth-sub">
+          Every frame of your footage, cleared before you ship.
+        </p>
+
+        <form className="auth-fields" onSubmit={submit}>
+          {mode === "signup" && (
             <input
               className="auth-input"
-              type="email"
-              required
-              placeholder="you@studio.com"
-              value={email}
-              autoComplete="email"
-              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Your name"
+              value={name}
+              autoComplete="name"
+              onChange={(e) => setName(e.target.value)}
             />
+          )}
+          <input
+            className="auth-input"
+            type="email"
+            required
+            placeholder="you@studio.com"
+            value={email}
+            autoComplete="email"
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            className="auth-input"
+            type="password"
+            required
+            minLength={6}
+            placeholder="Password"
+            value={password}
+            autoComplete={
+              mode === "login" ? "current-password" : "new-password"
+            }
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          {mode === "signup" && (
             <input
               className="auth-input"
               type="password"
               required
               minLength={6}
-              placeholder="Password"
-              value={password}
-              autoComplete={
-                mode === "login" ? "current-password" : "new-password"
-              }
-              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Confirm password"
+              value={confirm}
+              autoComplete="new-password"
+              onChange={(e) => setConfirm(e.target.value)}
             />
-            {mode === "signup" && (
-              <input
-                className="auth-input"
-                type="password"
-                required
-                minLength={6}
-                placeholder="Confirm password"
-                value={confirm}
-                autoComplete="new-password"
-                onChange={(e) => setConfirm(e.target.value)}
-              />
-            )}
-
-            {error && <div className="auth-error">{error}</div>}
-
-            <button className="auth-primary" type="submit" disabled={busy}>
-              {busy ? "…" : mode === "login" ? "Sign in" : "Create account"}
-            </button>
-          </form>
-
-          {openRoles && (
-            <div className="auth-roles">
-              <div className="auth-roles-label">Explore as</div>
-              <div className="auth-roles-pills">
-                {["legal", "producer", "editor"].map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    className={role === r ? "on" : ""}
-                    onClick={() => {
-                      setRole(r);
-                      onPickRole?.(r);
-                    }}
-                  >
-                    {r}
-                  </button>
-                ))}
-              </div>
-              <p className="auth-roles-note">
-                Open for this deployment so you can try every control. Whatever
-                you choose, the decision is recorded against your email — and a
-                production deployment grants roles instead.
-              </p>
-            </div>
           )}
 
-          <div className="auth-or">
-            <span>or</span>
-          </div>
+          {error && <div className="auth-error">{error}</div>}
 
-          <button
-            type="button"
-            className="auth-google"
-            disabled={busy}
-            onClick={() => void run(signInWithGoogle)}
-          >
-            Continue with Google
+          <button className="auth-primary" type="submit" disabled={busy}>
+            {busy ? "One moment…" : mode === "login" ? "Sign in" : "Create account"}
           </button>
+        </form>
 
-          <p className="auth-note">
-            {openRoles
-              ? "Pick a role above to explore with — you can switch it at any time once you are inside."
-              : "New accounts can read every finding and record no decisions. Ask your clearance lead to be added as legal or producer."}
-          </p>
+        <div className="auth-or">
+          <span>or</span>
         </div>
 
-        <div className="auth-art" aria-hidden="true">
-          {/* No stock photography in the repo, so the panel is drawn: a
-              frame being measured, which is what the product does. */}
-          <svg viewBox="0 0 400 520" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <linearGradient id="ag" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.55" />
-                <stop offset="55%" stopColor="var(--accent-2)" stopOpacity="0.30" />
-                <stop offset="100%" stopColor="var(--bg)" stopOpacity="0.95" />
-              </linearGradient>
-            </defs>
-            <rect width="400" height="520" fill="url(#ag)" />
-            {[...Array(13)].map((_, i) => (
-              <rect
-                key={i}
-                x={14}
-                y={12 + i * 40}
-                width={26}
-                height={26}
-                rx={4}
-                fill="var(--bg)"
-                opacity="0.55"
-              />
-            ))}
-            {[...Array(13)].map((_, i) => (
-              <rect
-                key={`r${i}`}
-                x={360}
-                y={12 + i * 40}
-                width={26}
-                height={26}
-                rx={4}
-                fill="var(--bg)"
-                opacity="0.55"
-              />
-            ))}
-            <rect
-              x={120}
-              y={150}
-              width={160}
-              height={110}
-              fill="none"
-              stroke="var(--ink)"
-              strokeWidth={2}
-              rx={3}
+        <button
+          type="button"
+          className="auth-google"
+          disabled={busy}
+          onClick={() => void run(signInWithGoogle)}
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M21.6 12.2c0-.7-.06-1.4-.18-2H12v3.9h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.7 3-4.3 3-7.4z"
+              opacity=".9"
             />
-            <rect
-              x={148}
-              y={300}
-              width={104}
-              height={64}
-              fill="none"
-              stroke="var(--accent-2)"
-              strokeWidth={2}
-              strokeDasharray="6 5"
-              rx={3}
+            <path
+              fill="currentColor"
+              d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22z"
+              opacity=".7"
+            />
+            <path
+              fill="currentColor"
+              d="M6.4 14a6 6 0 0 1 0-3.9V7.5H3.1a10 10 0 0 0 0 9z"
+              opacity=".5"
+            />
+            <path
+              fill="currentColor"
+              d="M12 6c1.5 0 2.8.5 3.8 1.5L18.7 5A10 10 0 0 0 3.1 7.5l3.3 2.6C7.2 7.8 9.4 6 12 6z"
+              opacity=".8"
             />
           </svg>
-        </div>
+          Continue with Google
+        </button>
+
+        {openRoles && (
+          <div className="auth-roles">
+            <div className="auth-roles-label">Explore as</div>
+            <div className="auth-roles-pills">
+              {["legal", "producer", "editor"].map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  className={role === r ? "on" : ""}
+                  onClick={() => {
+                    setRole(r);
+                    onPickRole?.(r);
+                  }}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+            <p className="auth-roles-note">
+              Roles are open on this deployment so you can try every control.
+              Decisions are still recorded against your email.
+            </p>
+          </div>
+        )}
+
+        <p className="auth-swap">
+          {mode === "login" ? (
+            <>
+              New to ClearFrame?{" "}
+              <button type="button" onClick={swap}>
+                Create an account
+              </button>
+            </>
+          ) : (
+            <>
+              Already have an account?{" "}
+              <button type="button" onClick={swap}>
+                Sign in
+              </button>
+            </>
+          )}
+        </p>
       </div>
+
+      <p className="auth-strapline">
+        Gemini watches the footage · Parallel researches the rights · you make
+        the call, with evidence attached
+      </p>
     </div>
   );
 }

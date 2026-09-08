@@ -300,7 +300,7 @@ export function Uploader({
         </button>
       </section>
 
-      <section className="up2-card up2-ledger">
+      <section className="up2-card up2-ledger" id="ledger">
         <header className="up2-head">
           <h2>Rights you already hold <em>optional</em></h2>
           <p>
