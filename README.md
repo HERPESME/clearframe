@@ -13,7 +13,13 @@ Built for the Google Cloud **Agentic Cinema** hackathon, **Parallel** partner tr
 
 > Roles are open on this deployment so a first-time visitor can exercise every control without waiting to be granted one. The UI labels a self-selected role `chosen`, and an email the provider has not verified is recorded as `(unverified)` in the audit trail — a self-selected role presented as governance would be worse than none.
 
-![ClearFrame review UI](docs/images/review-ui.png)
+![Cinematic sign-in](docs/images/signin.jpg)
+
+*The way in — a wall of drawn posters under a projector beam. Sign in, pick a role, and every control is yours to try.*
+
+![ClearFrame — the studio dashboard](docs/images/dashboard.png)
+
+*The dashboard: each production's poster is a real frame from its own footage — there is no stock art anywhere in the product.*
 
 
 ## Architecture
@@ -88,6 +94,10 @@ the risk score is pure, reproducible code, and a human signs every finding.
 **Outputs:** `dossier.html` / `dossier.docx` (E&O report with court opinions and
 an append-only audit trail), plus `markers.edl` (NLE), `markers.csv`, and
 `cue_sheet.csv` (ASCAP/BMI).
+
+![Reviewing findings on the risk timeline](docs/images/review.png)
+
+*The review screen: every finding on a risk-coloured timeline, each priced by what shipping it uncleared would cost — a human approves every call.*
 
 ### We don't guess at brands
 

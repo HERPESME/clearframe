@@ -26,3 +26,6 @@ gha-creds-*.json
 *.bak
 *.bak[0-9]
 *.bak-*
+
+# TypeScript incremental build cache
+*.tsbuildinfo
