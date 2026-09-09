@@ -2,8 +2,7 @@ __pycache__/
 webapp/node_modules/
 *.egg-info/
 .venv/
-out/
-out-live/
+out*/
 .pytest_cache/
 .env
 
