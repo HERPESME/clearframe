@@ -15,24 +15,79 @@ Built for the Google Cloud **Agentic Cinema** hackathon, **Parallel** partner tr
 
 ![ClearFrame review UI](docs/images/review-ui.png)
 
+
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph Client
+      B["Browser · React SPA"]
+      MC["MCP clients"]
+    end
+    subgraph GCP["Google Cloud"]
+      AUTH["Firebase Authentication"]
+      API["clearframe · API + review UI<br/>Cloud Run"]
+      Q["Cloud Tasks · max 5"]
+      W["clearframe-worker · 13-stage pipeline<br/>Cloud Run · private"]
+      MCP["clearframe-mcp<br/>Cloud Run"]
+      GCS["Cloud Storage<br/>footage · state · dossiers"]
+      FS["Firestore<br/>production + user index"]
+      SM["Secret Manager<br/>Parallel key"]
+      GEM["Vertex AI · Gemini<br/>video scan · grounding · court"]
+      VI["Video Intelligence<br/>logo corroboration"]
+    end
+    subgraph Partner
+      PAR["Parallel<br/>Task · Search · FindAll"]
+    end
+    B -->|sign in| AUTH
+    B -->|upload + review| API
+    MC --> MCP
+    API -->|enqueue| Q --> W
+    API --- GCS
+    API --- FS
+    API --- SM
+    W --> GEM
+    W --> VI
+    W --> PAR
+    W --- GCS
+    W --- FS
+    W --- SM
+```
+
+Two Cloud Run services split the work: a light public **API** draws the review
+screen, and a private **worker** runs the analysis — one job per instance, at
+most five at once, with **Cloud Tasks** as the waiting line. Footage, state and
+dossiers live in **Cloud Storage**; a per-production and per-user row live in
+**Firestore**; **Firebase Auth** is the only user database. Idle cost is `$0`.
+
 ## How it works — an agent team, not a prompt
 
+```mermaid
+flowchart TD
+    F["Raw footage (+ optional script)"] --> SCAN["Scene Scanner<br/>3x Gemini video passes"]
+    SCAN --> AUDIT["E&O Auditor<br/>2nd Gemini pass — catches misses"]
+    AUDIT --> TRIAGE["Triage<br/>dedupe + rules"]
+    TRIAGE --> CORR["Identity Corroborator<br/>logo catalogue + audio fingerprint"]
+    CORR --> DRIFT["Drift<br/>script vs screen"]
+    DRIFT --> PREV["Preliminary Report<br/>footage-derived, no research yet"]
+    PREV --> PLAN["Budget Planner<br/>escalation ladder"]
+    PLAN --> RES["Rights Researchers<br/>Parallel Task API — cited"]
+    RES --> FRESH["Live Signals<br/>Parallel Search"]
+    FRESH --> RISK["Risk Engine<br/>deterministic score — never an LLM"]
+    RISK --> TERR["Territory Analyst<br/>per-jurisdiction bands"]
+    TERR --> COV["Coverage<br/>checked against your rights ledger"]
+    COV --> REM["Remediation Drafter<br/>licence / blur / memo"]
+    REM --> COURT["Clearance Court<br/>Counsel vs Advocate vs Judge"]
+    COURT --> HUMAN{"Human review<br/>role-gated"}
+    HUMAN --> DOSSIER["E&O Dossier<br/>HTML + Word · EDL · cue sheet"]
 ```
-footage ─▶ SCENE SCANNER (Gemini video) ─▶ E&O AUDITOR (2nd Gemini pass: "what did they miss?")
-        ─▶ TRIAGE (rules + dedupe)
-        ─▶ IDENTITY CORROBORATOR (independent logo catalogue: do two detectors agree WHAT this is?)
-        ─▶ BUDGET PLANNER (allocates Parallel processor tiers + rationale)
-        ─▶ RIGHTS RESEARCHERS (Parallel Task API fan-out, citations + confidence)
-        ─▶ LIVE SIGNALS (Parallel Search: is this holder enforcing right now?)
-        ─▶ RISK ENGINE (deterministic, reproducible rubric)
-        ─▶ TERRITORY ANALYST (per-jurisdiction bands, freedom of panorama)
-        ─▶ REMEDIATION DRAFTER
-        ─▶ THE CLEARANCE COURT ⚖  (Studio Counsel vs Fair Use Advocate vs Judge)
-        ─▶ [human review — role-gated web app] ─▶ DOSSIER
 
-outputs: dossier.html (E&O-ready report w/ court opinions + audit trail) · dossier.json
-         markers.edl (Resolve) · markers.csv · cue_sheet.csv (ASCAP/BMI)
-```
+**Detectors observe; code decides.** Every model and detector only *reports* —
+the risk score is pure, reproducible code, and a human signs every finding.
+
+**Outputs:** `dossier.html` / `dossier.docx` (E&O report with court opinions and
+an append-only audit trail), plus `markers.edl` (NLE), `markers.csv`, and
+`cue_sheet.csv` (ASCAP/BMI).
 
 ### We don't guess at brands
 
